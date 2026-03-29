@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,8 @@ import {
   type MembershipPlan,
   type MembershipPlanId,
 } from '@/mock/membershipPlans';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const RANK: Record<MembershipPlanId, number> = {
   basic: 0,
@@ -37,6 +38,8 @@ function planNameKey(id: MembershipPlanId): string {
 }
 
 export default function MembershipPlansScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
@@ -154,7 +157,8 @@ export default function MembershipPlansScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.lg },
   intro: { lineHeight: 22 },
   billingRow: { flexDirection: 'row', gap: spacing.sm },
@@ -218,3 +222,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentMuted,
   },
 });
+
+}

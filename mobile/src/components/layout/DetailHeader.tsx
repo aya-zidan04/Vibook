@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, spacing } from '@/theme';
+import { spacing, useThemeColors } from '@/theme';
 
 type Props = {
   title?: string;
@@ -15,6 +15,7 @@ export function DetailHeader({ title, right }: Props) {
   const router = useRouter();
   const rtl = I18nManager.isRTL;
   const { t } = useTranslation();
+  const colors = useThemeColors();
 
   return (
     <View style={styles.row}>

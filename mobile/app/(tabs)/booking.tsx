@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -9,10 +10,13 @@ import { AppText } from '@/components/ui/AppText';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_BOOKINGS } from '@/mock';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 import { formatDateShort } from '@/utils/format';
 
 export default function BookingTabScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming');
@@ -90,6 +94,8 @@ function BookingCard({
   narrow?: boolean;
   onOpen: () => void;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const title = locale === 'ar' && booking.refTitleAr ? booking.refTitleAr : booking.refTitle;
@@ -129,6 +135,8 @@ function BookingCard({
 }
 
 function StatusPill({ status }: { status: (typeof MOCK_BOOKINGS)[0]['status'] }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const map = {
     upcoming: { labelKey: 'booking.statusUpcoming', c: colors.accent },
@@ -146,7 +154,8 @@ function StatusPill({ status }: { status: (typeof MOCK_BOOKINGS)[0]['status'] })
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md },
   title: { marginBottom: spacing.xs },
   sub: { marginBottom: spacing.lg, lineHeight: 22 },
@@ -191,3 +200,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
 });
+
+}

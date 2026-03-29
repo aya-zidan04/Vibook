@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -5,10 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, spacing } from '@/theme';
+import { spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 
 export default function ConfirmationScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const orderId = useBookingDraftStore((s) => s.lastOrderId);
   const { t } = useTranslation();
@@ -46,7 +50,8 @@ export default function ConfirmationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   inner: { flex: 1, paddingHorizontal: spacing.screen, justifyContent: 'center', gap: spacing.lg },
   iconWrap: { alignItems: 'center' },
@@ -64,3 +69,5 @@ const styles = StyleSheet.create({
   },
   second: { marginTop: spacing.sm },
 });
+
+}

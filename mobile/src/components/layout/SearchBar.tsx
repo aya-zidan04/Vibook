@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radii, shadows, spacing } from '@/theme';
+import { createShadows, radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
   placeholder?: string;
@@ -12,10 +14,14 @@ export function SearchBar({
   placeholder = 'Search events, dining, stays, flights…',
   onPress,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const sh = useMemo(() => createShadows(colors), [colors]);
+
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.wrap, shadows.sm, pressed && { opacity: 0.92 }]}
+      style={({ pressed }) => [styles.wrap, sh.sm, pressed && { opacity: 0.92 }]}
       accessibilityRole="button"
       accessibilityLabel="Search"
     >
@@ -28,17 +34,19 @@ export function SearchBar({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radii.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.lg,
-  },
-  ph: { flex: 1 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    wrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: radii.full,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 14,
+      paddingHorizontal: spacing.lg,
+    },
+    ph: { flex: 1 },
+  });
+}

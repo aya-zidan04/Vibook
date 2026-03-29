@@ -15,9 +15,12 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getCityName, getEventById, getOrganizerById, getTiersForEvent } from '@/mock/queries';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function EventDetailScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const setDraft = useBookingDraftStore((s) => s.setDraft);
@@ -203,6 +206,8 @@ export default function EventDetailScreen() {
 }
 
 function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.metaRow}>
       <Ionicons name={icon} size={18} color={colors.primary} />
@@ -218,7 +223,8 @@ function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; lab
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   root: { flex: 1, backgroundColor: colors.background },
   scroll: { flex: 1 },
@@ -286,3 +292,5 @@ const styles = StyleSheet.create({
   },
   cta: { flex: 1, maxWidth: 220 },
 });
+
+}

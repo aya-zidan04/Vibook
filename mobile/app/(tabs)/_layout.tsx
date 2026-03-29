@@ -1,12 +1,16 @@
+import { useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, shadows } from '@/theme';
+import { createShadows, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 /** Physical order: Explore (left) → Booking → Favorites → Me. Tab bar `direction: 'ltr'` keeps positions in Arabic. */
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createTabStyles(colors), [colors]);
 
   return (
     <Tabs
@@ -72,19 +76,22 @@ export default function TabsLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: colors.backgroundElevated,
-    paddingTop: 8,
-    ...shadows.tabBar,
-  },
-  tabLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.15,
-    marginTop: 2,
-  },
-  tabItem: {
-    paddingVertical: 4,
-  },
-});
+function createTabStyles(colors: ThemeColors) {
+  const sh = createShadows(colors);
+  return StyleSheet.create({
+    tabBar: {
+      backgroundColor: colors.backgroundElevated,
+      paddingTop: 8,
+      ...sh.tabBar,
+    },
+    tabLabel: {
+      fontSize: 11,
+      fontWeight: '600',
+      letterSpacing: 0.15,
+      marginTop: 2,
+    },
+    tabItem: {
+      paddingVertical: 4,
+    },
+  });
+}

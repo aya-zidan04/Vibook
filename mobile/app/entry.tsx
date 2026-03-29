@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ViewToken } from 'react-native';
 import {
   FlatList,
@@ -18,7 +18,8 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
-import { colors, fadePlum, radii, spacing } from '@/theme';
+import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const AUTO_MS = 4800;
 
@@ -42,6 +43,8 @@ const SLIDES = [
 ];
 
 export default function AppEntryScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { width, height } = useWindowDimensions();
   const { t } = useTranslation();
@@ -155,7 +158,12 @@ export default function AppEntryScreen() {
       </View>
 
       <LinearGradient
-        colors={[fadePlum(0.45), fadePlum(0.2), fadePlum(0.65), fadePlum(0.97)]}
+        colors={[
+          fadeFromBackground(colors, 0.45),
+          fadeFromBackground(colors, 0.2),
+          fadeFromBackground(colors, 0.65),
+          fadeFromBackground(colors, 0.97),
+        ]}
         locations={[0, 0.35, 0.72, 1]}
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
@@ -191,7 +199,8 @@ export default function AppEntryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
   carousel: { ...StyleSheet.absoluteFillObject },
   carouselList: { flex: 1 },
@@ -236,4 +245,5 @@ const styles = StyleSheet.create({
   },
   dotOn: { backgroundColor: colors.accent, width: 22 },
   dotOff: { backgroundColor: colors.textMuted, opacity: 0.45 },
-});
+  });
+}

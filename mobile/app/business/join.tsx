@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
@@ -6,9 +6,12 @@ import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function BusinessJoinScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const [company, setCompany] = useState('');
@@ -70,6 +73,8 @@ function LabeledField({
   keyboard?: 'default' | 'email-address' | 'phone-pad';
   multiline?: boolean;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.field}>
       <AppText variant="caption" color="textMuted">
@@ -89,7 +94,8 @@ function LabeledField({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
   field: { gap: 6 },
   input: {
@@ -109,3 +115,5 @@ const styles = StyleSheet.create({
   disclaimer: { lineHeight: 18 },
   backLink: { textAlign: 'center', marginTop: spacing.sm },
 });
+
+}

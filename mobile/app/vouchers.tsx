@@ -1,11 +1,15 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { MOCK_VOUCHERS } from '@/mock';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function VouchersScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Screen scroll contentStyle={styles.pad}>
       <DetailHeader title="Vouchers" />
@@ -28,7 +32,8 @@ export default function VouchersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md },
   card: {
     width: 220,
@@ -42,3 +47,5 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
 });
+
+}

@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/Badge';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_EVENTS, MOCK_FLIGHTS, MOCK_HOTELS, MOCK_RESTAURANTS } from '@/mock';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const RECENT = ['Jazz night Riyadh', 'Dubai weekend', 'Chef’s table'];
 const POPULAR = ['Concerts', 'Fine dining', 'Boutique hotels', 'Flights DXB'];
@@ -29,6 +30,8 @@ const SEGMENTS: { key: Segment; labelKey: string }[] = [
 ];
 
 export default function SearchScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
@@ -206,6 +209,8 @@ function ResultRow({
   badge?: ReactNode;
   onPress?: () => void;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Pressable style={styles.resultCard} onPress={onPress}>
       <Image source={{ uri: imageUrl }} style={styles.resultImg} contentFit="cover" />
@@ -227,7 +232,8 @@ function ResultRow({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md },
   title: { marginBottom: spacing.sm },
   flightLink: {
@@ -306,3 +312,5 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxxl,
   },
 });
+
+}

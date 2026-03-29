@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -11,7 +12,8 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getFlightById } from '@/mock/queries';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 function flightStopLabel(stops: number, t: (p: string) => string) {
   if (stops === 0) return t('flight.nonstop');
@@ -20,6 +22,8 @@ function flightStopLabel(stops: number, t: (p: string) => string) {
 }
 
 export default function FlightDetailScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const setDraft = useBookingDraftStore((s) => s.setDraft);
@@ -102,6 +106,8 @@ export default function FlightDetailScreen() {
 }
 
 function Meta({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: string }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.metaItem}>
       <Ionicons name={icon} size={16} color={colors.textMuted} />
@@ -125,7 +131,8 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
   hero: {
@@ -151,3 +158,5 @@ const styles = StyleSheet.create({
   bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   cta: { flex: 1, maxWidth: 200 },
 });
+
+}

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -8,7 +9,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_FLIGHTS } from '@/mock/flights';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const PLACEHOLDER =
   'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80&auto=format&fit=crop';
@@ -20,6 +22,8 @@ function flightStopLabel(stops: number, t: (p: string) => string) {
 }
 
 export default function FlightResultsScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
@@ -68,7 +72,8 @@ export default function FlightResultsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.md },
   empty: { marginTop: spacing.lg, lineHeight: 22 },
   list: { gap: spacing.md, marginBottom: spacing.xxxl },
@@ -85,3 +90,5 @@ const styles = StyleSheet.create({
   thumb: { width: 88, height: 72, borderRadius: radii.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: 4 },
 });
+
+}

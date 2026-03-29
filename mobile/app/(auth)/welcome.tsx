@@ -1,12 +1,16 @@
+import { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, spacing } from '@/theme';
+import { spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function WelcomeScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -25,7 +29,8 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   center: {
     flex: 1,
     justifyContent: 'center',
@@ -36,3 +41,5 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
 });
+
+}

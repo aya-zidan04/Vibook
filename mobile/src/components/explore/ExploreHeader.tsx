@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '@/theme';
+import { useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
   brandLabel: string;
@@ -22,6 +24,9 @@ export function ExploreHeader({
   a11yLanguageCurrency,
   a11ySearch,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.bar}>
       <View style={styles.left}>
@@ -58,47 +63,49 @@ export function ExploreHeader({
   );
 }
 
-const styles = StyleSheet.create({
-  bar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.background,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    flexShrink: 1,
-  },
-  wordmark: {
-    color: colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: -0.5,
-  },
-  regionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-  },
-  regionText: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '500',
-    textDecorationLine: 'underline',
-    textDecorationColor: colors.text,
-  },
-  right: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 20,
-  },
-  iconHit: {
-    padding: 4,
-  },
-  pressed: { opacity: 0.65 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    bar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.background,
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+    },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      flexShrink: 1,
+    },
+    wordmark: {
+      color: colors.text,
+      fontSize: 22,
+      fontWeight: '700',
+      letterSpacing: -0.5,
+    },
+    regionBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingVertical: 4,
+    },
+    regionText: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '500',
+      textDecorationLine: 'underline',
+      textDecorationColor: colors.text,
+    },
+    right: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 20,
+    },
+    iconHit: {
+      padding: 4,
+    },
+    pressed: { opacity: 0.65 },
+  });
+}

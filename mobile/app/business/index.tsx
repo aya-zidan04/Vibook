@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -7,11 +8,14 @@ import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const BENEFIT_ICONS = ['people-outline', 'trending-up-outline', 'megaphone-outline'] as const;
 
 export default function BusinessScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -65,7 +69,8 @@ export default function BusinessScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.lg },
   hero: {
     padding: spacing.xl,
@@ -94,3 +99,5 @@ const styles = StyleSheet.create({
   },
   note: { lineHeight: 18, textAlign: 'center', marginTop: spacing.sm },
 });
+
+}

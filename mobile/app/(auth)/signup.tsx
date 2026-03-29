@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +13,8 @@ import {
   isValidJordanLocalPhone,
   isValidSignupPassword,
 } from '@/utils/authValidation';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 function canSubmitSignup(
   first: string,
@@ -34,6 +35,8 @@ function canSubmitSignup(
 }
 
 export default function SignupScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const [firstName, setFirstName] = useState('');
@@ -199,7 +202,8 @@ export default function SignupScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   scroll: {
     paddingTop: spacing.sm,
     paddingBottom: spacing.xxxl,
@@ -288,3 +292,5 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
+
+}

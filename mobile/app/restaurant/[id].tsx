@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,7 +15,8 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getCityName, getRestaurantById } from '@/mock/queries';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
-import { colors, fadePlum, radii, spacing } from '@/theme';
+import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const BLURB_KEYS: Record<string, 'restaurant.blurbR1' | 'restaurant.blurbR2'> = {
   r1: 'restaurant.blurbR1',
@@ -25,6 +26,8 @@ const BLURB_KEYS: Record<string, 'restaurant.blurbR1' | 'restaurant.blurbR2'> = 
 const SLOTS = ['7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM', '9:00 PM'];
 
 export default function RestaurantDetailScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const setDraft = useBookingDraftStore((s) => s.setDraft);
@@ -68,7 +71,10 @@ export default function RestaurantDetailScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.hero}>
           <Image source={{ uri: r.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
-          <LinearGradient colors={[fadePlum(0.3), colors.background]} style={StyleSheet.absoluteFill} />
+          <LinearGradient
+            colors={[fadeFromBackground(colors, 0.3), colors.background]}
+            style={StyleSheet.absoluteFill}
+          />
           <DetailHeader />
         </View>
         <View style={styles.body}>
@@ -133,7 +139,8 @@ export default function RestaurantDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
   hero: { height: 240 },
@@ -165,4 +172,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   cta: { flex: 1, maxWidth: 220 },
-});
+  });
+}

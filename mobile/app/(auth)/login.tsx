@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,9 +9,12 @@ import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { canSubmitLogin } from '@/utils/authValidation';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function LoginScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -104,7 +107,8 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   scroll: {
     paddingTop: spacing.sm,
     paddingBottom: spacing.xxxl,
@@ -147,3 +151,5 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
+
+}

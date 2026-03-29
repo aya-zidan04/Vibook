@@ -1,6 +1,9 @@
+import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radii, spacing } from '@/theme';
+import { useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
+import { radii, spacing } from '@/theme';
 
 type BaseProps = {
   title: string;
@@ -11,6 +14,8 @@ type BaseProps = {
 };
 
 export function PrimaryButton({ title, onPress, disabled, loading, style }: BaseProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const off = disabled || loading;
   return (
     <Pressable
@@ -25,7 +30,7 @@ export function PrimaryButton({ title, onPress, disabled, loading, style }: Base
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={colors.text} />
+        <ActivityIndicator color={colors.textOnPrimary} />
       ) : (
         <AppText variant="bodyMedium" style={styles.primaryLabel}>
           {title}
@@ -41,6 +46,8 @@ export function SecondaryButton({
   disabled,
   style,
 }: Omit<BaseProps, 'loading'>) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Pressable
       accessibilityRole="button"
@@ -60,37 +67,39 @@ export function SecondaryButton({
   );
 }
 
-const styles = StyleSheet.create({
-  primary: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.xxl,
-    borderRadius: radii.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 52,
-  },
-  primaryPressed: {
-    opacity: 0.88,
-  },
-  primaryLabel: {
-    color: colors.text,
-    fontWeight: '600',
-  },
-  secondary: {
-    borderWidth: 1.5,
-    borderColor: colors.borderLight,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.xxl,
-    borderRadius: radii.full,
-    alignItems: 'center',
-    minHeight: 52,
-    backgroundColor: colors.surface,
-  },
-  secondaryPressed: {
-    backgroundColor: colors.surfaceHover,
-  },
-  disabled: {
-    opacity: 0.45,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    primary: {
+      backgroundColor: colors.primary,
+      paddingVertical: 14,
+      paddingHorizontal: spacing.xxl,
+      borderRadius: radii.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 52,
+    },
+    primaryPressed: {
+      opacity: 0.88,
+    },
+    primaryLabel: {
+      color: colors.textOnPrimary,
+      fontWeight: '600',
+    },
+    secondary: {
+      borderWidth: 1.5,
+      borderColor: colors.borderLight,
+      paddingVertical: 14,
+      paddingHorizontal: spacing.xxl,
+      borderRadius: radii.full,
+      alignItems: 'center',
+      minHeight: 52,
+      backgroundColor: colors.surface,
+    },
+    secondaryPressed: {
+      backgroundColor: colors.surfaceHover,
+    },
+    disabled: {
+      opacity: 0.45,
+    },
+  });
+}

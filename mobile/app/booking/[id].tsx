@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +10,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_BOOKINGS } from '@/mock';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 import { formatDateShort } from '@/utils/format';
 import { hrefForBookingRef } from '@/utils/bookingRoutes';
 
@@ -21,6 +23,8 @@ const STATUS_KEYS: Record<(typeof MOCK_BOOKINGS)[0]['status'], string> = {
 };
 
 export default function BookingDetailScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t, locale } = useTranslation();
@@ -88,6 +92,8 @@ function Row({
   label: string;
   value: string;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.row}>
       <Ionicons name={icon} size={22} color={colors.primary} />
@@ -103,7 +109,8 @@ function Row({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.sm },
   hero: { width: '100%', height: 200, borderRadius: radii.xl, marginTop: spacing.md },
   mt: { marginTop: spacing.md },
@@ -118,3 +125,5 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
 });
+
+}

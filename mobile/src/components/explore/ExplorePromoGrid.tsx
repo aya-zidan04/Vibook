@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/ui/AppText';
-import { colors, fadePlum, radii, spacing } from '@/theme';
+import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export type PromoTile = {
   id: string;
@@ -31,6 +33,9 @@ function Tile({
   height: number;
   variant?: 'default' | 'compact';
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => tileStyles(colors), [colors]);
+
   return (
     <Pressable
       onPress={tile.onPress}
@@ -43,7 +48,7 @@ function Tile({
     >
       <Image source={{ uri: tile.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
       <LinearGradient
-        colors={['transparent', fadePlum(0.88)]}
+        colors={['transparent', fadeFromBackground(colors, 0.88)]}
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.tileInner}>
@@ -63,7 +68,30 @@ function Tile({
   );
 }
 
+function tileStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    tile: {
+      borderRadius: radii.xl,
+      overflow: 'hidden',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    tileCompact: {},
+    tileInner: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      padding: spacing.md,
+      gap: 4,
+    },
+  });
+}
+
 export function ExplorePromoGrid({ large, stackTop, stackBottom, rowLeft, rowRight }: Props) {
+  const styles = useMemo(() => layoutStyles(), []);
+
   return (
     <View style={styles.wrap}>
       <View style={styles.row1}>
@@ -87,27 +115,13 @@ export function ExplorePromoGrid({ large, stackTop, stackBottom, rowLeft, rowRig
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { gap: spacing.md, marginBottom: spacing.xl },
-  row1: { flexDirection: 'row', gap: spacing.md, alignItems: 'stretch' },
-  largeCol: { flex: 1.15 },
-  stackCol: { flex: 1, gap: spacing.md, justifyContent: 'space-between' },
-  row2: { flexDirection: 'row', gap: spacing.md },
-  half: { flex: 1 },
-  tile: {
-    borderRadius: radii.xl,
-    overflow: 'hidden',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  tileCompact: {},
-  tileInner: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: spacing.md,
-    gap: 4,
-  },
-});
+function layoutStyles() {
+  return StyleSheet.create({
+    wrap: { gap: spacing.md, marginBottom: spacing.xl },
+    row1: { flexDirection: 'row', gap: spacing.md, alignItems: 'stretch' },
+    largeCol: { flex: 1.15 },
+    stackCol: { flex: 1, gap: spacing.md, justifyContent: 'space-between' },
+    row2: { flexDirection: 'row', gap: spacing.md },
+    half: { flex: 1 },
+  });
+}

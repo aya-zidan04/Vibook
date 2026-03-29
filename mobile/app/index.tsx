@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -6,7 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
-import { colors, spacing } from '@/theme';
+import { spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const SPLASH_MS = 2200;
 
@@ -16,6 +17,8 @@ const SPLASH_MS = 2200;
 export default function SplashScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [hydrated, setHydrated] = useState(() => useAppStore.persist.hasHydrated());
 
   useEffect(() => {
@@ -25,10 +28,8 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (!hydrated) return;
-    // Read fresh from store after rehydration (avoids stale closure vs persisted value).
     const done = useAppStore.getState().hasCompletedOnboarding;
     if (!done) {
-      // First launch / never completed entry: go straight to welcome (no extra splash wait).
       router.replace('/entry');
       return;
     }
@@ -57,32 +58,34 @@ export default function SplashScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xxl,
-  },
-  logoRing: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.primaryMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  brand: {
-    marginBottom: spacing.sm,
-  },
-  tag: {
-    textAlign: 'center',
-    marginBottom: spacing.xxl,
-  },
-  loader: {
-    marginTop: spacing.md,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.xxl,
+    },
+    logoRing: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: colors.primaryMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    brand: {
+      marginBottom: spacing.sm,
+    },
+    tag: {
+      textAlign: 'center',
+      marginBottom: spacing.xxl,
+    },
+    loader: {
+      marginTop: spacing.md,
+    },
+  });
+}

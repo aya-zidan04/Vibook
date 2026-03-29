@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -16,7 +17,8 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_EVENTS, MOCK_EXPERIENCES, MOCK_OFFERS, MOCK_PACKAGES } from '@/mock';
 import { getCityName } from '@/mock/queries';
 import { useLocaleStore } from '@/store/localeStore';
-import { colors, spacing } from '@/theme';
+import { spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const CATEGORIES: ExploreCategory[] = [
   { id: 'sports', emoji: '⚽', labelEn: 'Match day', labelAr: 'يوم المباراة' },
@@ -29,6 +31,8 @@ const CATEGORIES: ExploreCategory[] = [
 
 export default function ExploreScreen() {
   const router = useRouter();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
   const regionFromStore = useLocaleStore((s) => s.regionLabel);
   const regionLabel = locale === 'ar' ? t('explore.country') : regionFromStore;
@@ -197,17 +201,19 @@ export default function ExploreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  root: { flex: 1 },
-  scrollView: { flex: 1 },
-  scroll: { paddingBottom: spacing.xxxl },
-  sectionHead: {
-    paddingHorizontal: spacing.screen,
-    marginBottom: spacing.md,
-    gap: 4,
-  },
-  padH: { paddingHorizontal: spacing.screen },
-  horizontalPad: { paddingHorizontal: spacing.screen },
-  feed: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    root: { flex: 1 },
+    scrollView: { flex: 1 },
+    scroll: { paddingBottom: spacing.xxxl },
+    sectionHead: {
+      paddingHorizontal: spacing.screen,
+      marginBottom: spacing.md,
+      gap: 4,
+    },
+    padH: { paddingHorizontal: spacing.screen },
+    horizontalPad: { paddingHorizontal: spacing.screen },
+    feed: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm },
+  });
+}

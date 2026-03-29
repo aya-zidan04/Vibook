@@ -1,12 +1,16 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function PaymentMethodsScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
@@ -30,7 +34,8 @@ export default function PaymentMethodsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.lg },
   card: {
     flexDirection: 'row',
@@ -43,3 +48,5 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
 });
+
+}

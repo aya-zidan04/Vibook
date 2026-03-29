@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
@@ -5,9 +6,12 @@ import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function FiltersScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const CHIPS = ['filters.chipTonight', 'filters.chipBudget', 'filters.chipFamily', 'filters.chipOutdoor'] as const;
@@ -32,7 +36,8 @@ export default function FiltersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.lg },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: {
@@ -44,3 +49,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
 });
+
+}

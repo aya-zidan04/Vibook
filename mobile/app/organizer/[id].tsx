@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,9 +13,12 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_EVENTS } from '@/mock/events';
 import { getOrganizerById } from '@/mock/queries';
-import { colors, fadePlum, radii, spacing } from '@/theme';
+import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function OrganizerScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t } = useTranslation();
@@ -37,7 +41,10 @@ export default function OrganizerScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.cover}>
           <Image source={{ uri: org.coverUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
-          <LinearGradient colors={[fadePlum(0.2), colors.background]} style={StyleSheet.absoluteFill} />
+          <LinearGradient
+            colors={[fadeFromBackground(colors, 0.2), colors.background]}
+            style={StyleSheet.absoluteFill}
+          />
           <View style={styles.coverHeader}>
             <DetailHeader />
           </View>
@@ -92,7 +99,8 @@ export default function OrganizerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: spacing.xxxl },
   cover: { height: 200 },
@@ -115,4 +123,5 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   eventImg: { width: 80, height: 80, borderRadius: radii.md },
-});
+  });
+}

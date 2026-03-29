@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { SecondaryButton } from '@/components/ui/Button';
-import { colors, spacing } from '@/theme';
+import { spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
   title?: string;
@@ -15,6 +17,9 @@ export function ErrorState({
   message = 'Check your connection and try again.',
   onRetry,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(), []);
+
   return (
     <View style={styles.wrap}>
       <Ionicons name="cloud-offline-outline" size={40} color={colors.error} />
@@ -31,13 +36,15 @@ export function ErrorState({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    alignItems: 'center',
-    paddingVertical: spacing.xxxl,
-    paddingHorizontal: spacing.xxl,
-  },
-  title: { marginTop: spacing.md, textAlign: 'center' },
-  msg: { marginTop: spacing.sm, textAlign: 'center', lineHeight: 22 },
-  btn: { marginTop: spacing.lg, alignSelf: 'stretch' },
-});
+function createStyles() {
+  return StyleSheet.create({
+    wrap: {
+      alignItems: 'center',
+      paddingVertical: spacing.xxxl,
+      paddingHorizontal: spacing.xxl,
+    },
+    title: { marginTop: spacing.md, textAlign: 'center' },
+    msg: { marginTop: spacing.sm, textAlign: 'center', lineHeight: 22 },
+    btn: { marginTop: spacing.lg, alignSelf: 'stretch' },
+  });
+}

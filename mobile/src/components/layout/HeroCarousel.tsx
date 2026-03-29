@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/ui/AppText';
-import { colors, fadePlum, radii, spacing } from '@/theme';
+import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export type HeroSlide = {
   id: string;
@@ -33,6 +34,8 @@ const CARD_W = W - PAD * 2;
 export function HeroCarousel({ slides, onSlidePress }: Props) {
   const [index, setIndex] = useState(0);
   const listRef = useRef<FlatList>(null);
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = e.nativeEvent.contentOffset.x;
@@ -65,7 +68,7 @@ export function HeroCarousel({ slides, onSlidePress }: Props) {
           >
             <ImageBackground source={{ uri: item.imageUrl }} style={styles.image} imageStyle={styles.imageRadius}>
               <LinearGradient
-                colors={['transparent', fadePlum(0.95)]}
+                colors={['transparent', fadeFromBackground(colors, 0.95)]}
                 style={styles.gradient}
               >
                 <AppText variant="overline" color="accent" style={styles.kicker}>
@@ -91,41 +94,43 @@ export function HeroCarousel({ slides, onSlidePress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { marginBottom: spacing.lg },
-  listContent: {
-    paddingHorizontal: PAD,
-    paddingVertical: 2,
-  },
-  card: {
-    height: HEIGHT,
-    borderRadius: radii.xl,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  image: { flex: 1, justifyContent: 'flex-end' },
-  imageRadius: { borderRadius: radii.xl },
-  gradient: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  kicker: { marginBottom: spacing.xs, opacity: 0.95 },
-  sub: { marginTop: 6 },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: spacing.md,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.borderLight,
-  },
-  dotActive: {
-    width: 18,
-    backgroundColor: colors.primary,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    wrap: { marginBottom: spacing.lg },
+    listContent: {
+      paddingHorizontal: PAD,
+      paddingVertical: 2,
+    },
+    card: {
+      height: HEIGHT,
+      borderRadius: radii.xl,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    image: { flex: 1, justifyContent: 'flex-end' },
+    imageRadius: { borderRadius: radii.xl },
+    gradient: {
+      padding: spacing.lg,
+      paddingBottom: spacing.xl,
+    },
+    kicker: { marginBottom: spacing.xs, opacity: 0.95 },
+    sub: { marginTop: 6 },
+    dots: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 6,
+      marginTop: spacing.md,
+    },
+    dot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: colors.borderLight,
+    },
+    dotActive: {
+      width: 18,
+      backgroundColor: colors.primary,
+    },
+  });
+}

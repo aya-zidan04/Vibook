@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
@@ -7,12 +7,15 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_FLIGHTS } from '@/mock/flights';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const ORIGINS = Array.from(new Set(MOCK_FLIGHTS.map((f) => f.from)));
 const DESTS = Array.from(new Set(MOCK_FLIGHTS.map((f) => f.to)));
 
 export default function FlightSearchScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const [from, setFrom] = useState(MOCK_FLIGHTS[0]?.from ?? 'RUH');
@@ -62,7 +65,8 @@ export default function FlightSearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.md },
   intro: { lineHeight: 22, marginBottom: spacing.sm },
   row: { marginVertical: spacing.xs },
@@ -79,3 +83,5 @@ const styles = StyleSheet.create({
   mt: { marginTop: spacing.md },
   btn: { marginTop: spacing.xl },
 });
+
+}

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -10,7 +11,8 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { CURRENT_USER } from '@/mock';
 import { TIER_TO_PLAN_ID, getPlanById } from '@/mock/membershipPlans';
 import type { User } from '@/types';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 const TIER_LABEL_KEY: Record<User['membershipTier'], string> = {
   standard: 'membership.tierStandard',
@@ -19,6 +21,8 @@ const TIER_LABEL_KEY: Record<User['membershipTier'], string> = {
 };
 
 export default function MembershipScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const planId = TIER_TO_PLAN_ID[CURRENT_USER.membershipTier];
@@ -61,7 +65,8 @@ export default function MembershipScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.lg },
   hero: {
     padding: spacing.xl,
@@ -82,3 +87,5 @@ const styles = StyleSheet.create({
   perkRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   perkTxt: { flex: 1, lineHeight: 22 },
 });
+
+}

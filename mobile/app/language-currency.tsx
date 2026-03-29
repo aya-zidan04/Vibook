@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { I18nManager, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -6,7 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { AppLocale, DisplayCurrency } from '@/store/localeStore';
 import { useLocaleStore } from '@/store/localeStore';
-import { colors } from '@/theme';
+import { useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 type Tab = 'language' | 'currency';
 
@@ -14,6 +15,8 @@ const LANG_IDS: AppLocale[] = ['en', 'ar'];
 const CUR_IDS: DisplayCurrency[] = ['JOD', 'USD'];
 
 export default function LanguageCurrencyScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -87,6 +90,8 @@ function OptionCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Pressable
       onPress={onSelect}
@@ -111,7 +116,8 @@ function OptionCard({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   header: {
     paddingHorizontal: 8,
@@ -206,3 +212,5 @@ const styles = StyleSheet.create({
     borderColor: colors.beige,
   },
 });
+
+}

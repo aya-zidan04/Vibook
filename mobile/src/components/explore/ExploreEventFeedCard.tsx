@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -5,7 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import type { EventItem } from '@/types';
-import { colors, fadePlum, radii, spacing } from '@/theme';
+import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -22,6 +24,8 @@ export function ExploreEventFeedCard({
 }: Props) {
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const start = new Date(event.startAt);
   const dateStr =
     locale === 'ar'
@@ -34,7 +38,7 @@ export function ExploreEventFeedCard({
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.94 }]}>
       <View style={styles.thumbWrap}>
         <Image source={{ uri: event.imageUrl }} style={styles.thumb} contentFit="cover" />
-        <LinearGradient colors={['transparent', fadePlum(0.55)]} style={StyleSheet.absoluteFill} />
+        <LinearGradient colors={['transparent', fadeFromBackground(colors, 0.55)]} style={StyleSheet.absoluteFill} />
         {event.badge ? (
           <View style={styles.badge}>
             <Badge tone={event.badge} />
@@ -70,33 +74,35 @@ export function ExploreEventFeedCard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    borderRadius: radii.xl,
-    overflow: 'hidden',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.md,
-  },
-  thumbWrap: {
-    width: 120,
-    minHeight: 140,
-    position: 'relative',
-  },
-  thumb: { ...StyleSheet.absoluteFillObject },
-  badge: {
-    position: 'absolute',
-    top: spacing.sm,
-    end: spacing.md,
-  },
-  body: {
-    flex: 1,
-    padding: spacing.md,
-    gap: 6,
-    justifyContent: 'center',
-  },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      borderRadius: radii.xl,
+      overflow: 'hidden',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: spacing.md,
+    },
+    thumbWrap: {
+      width: 120,
+      minHeight: 140,
+      position: 'relative',
+    },
+    thumb: { ...StyleSheet.absoluteFillObject },
+    badge: {
+      position: 'absolute',
+      top: spacing.sm,
+      end: spacing.md,
+    },
+    body: {
+      flex: 1,
+      padding: spacing.md,
+      gap: 6,
+      justifyContent: 'center',
+    },
+    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
+  });
+}

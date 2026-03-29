@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { AppText } from '@/components/ui/AppText';
@@ -6,9 +7,12 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
 import { CURRENT_USER } from '@/mock';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function EditProfileScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
   const displayName = locale === 'ar' && CURRENT_USER.nameAr ? CURRENT_USER.nameAr : CURRENT_USER.name;
 
@@ -34,7 +38,8 @@ export default function EditProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.lg },
   row: { flexDirection: 'row', gap: spacing.lg, alignItems: 'center' },
   avatar: {
@@ -45,3 +50,5 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
 });
+
+}

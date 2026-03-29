@@ -1,7 +1,9 @@
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/theme';
+import { useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
+import { spacing } from '@/theme';
 
 type Props = {
   children: ReactNode;
@@ -16,6 +18,9 @@ export function Screen({
   contentStyle,
   edges = ['top', 'left', 'right'],
 }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   if (scroll) {
     return (
       <SafeAreaView style={styles.safe} edges={edges}>
@@ -37,18 +42,20 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  flex: { flex: 1 },
-  fill: {
-    flex: 1,
-    paddingHorizontal: spacing.screen,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.screen,
-    paddingBottom: spacing.xxxl,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    flex: { flex: 1 },
+    fill: {
+      flex: 1,
+      paddingHorizontal: spacing.screen,
+    },
+    scrollContent: {
+      paddingHorizontal: spacing.screen,
+      paddingBottom: spacing.xxxl,
+    },
+  });
+}

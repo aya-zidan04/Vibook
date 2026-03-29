@@ -1,11 +1,15 @@
+import { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function NotificationsScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const ITEMS = [
     { titleKey: 'notifications.n1Title', bodyKey: 'notifications.n1Body', timeKey: 'notifications.time1' },
@@ -32,7 +36,8 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.md },
   card: {
     padding: spacing.md,
@@ -43,3 +48,5 @@ const styles = StyleSheet.create({
     gap: 6,
   },
 });
+
+}

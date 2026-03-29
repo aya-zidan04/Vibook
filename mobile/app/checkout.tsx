@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -9,9 +10,12 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 export default function CheckoutScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const draft = useBookingDraftStore((s) => s.draft);
   const { t } = useTranslation();
@@ -87,6 +91,8 @@ export default function CheckoutScreen() {
 }
 
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.row}>
       <AppText variant="body" color="textSecondary">
@@ -99,7 +105,8 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   shell: { flex: 1, paddingHorizontal: spacing.screen },
   scroll: { flex: 1 },
@@ -128,3 +135,5 @@ const styles = StyleSheet.create({
   },
   half: { flex: 1 },
 });
+
+}

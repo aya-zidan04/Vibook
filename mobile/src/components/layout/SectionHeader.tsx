@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import { colors, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 type Props = {
   title: string;
@@ -17,7 +17,7 @@ export function SectionHeader({ title, subtitle, actionLabel, onActionPress }: P
           {title}
         </AppText>
         {subtitle ? (
-          <AppText variant="caption" color="textMuted" style={styles.sub}>
+          <AppText variant="caption" color="textSecondary" style={styles.sub}>
             {subtitle}
           </AppText>
         ) : null}
@@ -47,6 +47,5 @@ const styles = StyleSheet.create({
   },
   sub: {
     marginTop: 2,
-    color: colors.textSecondary,
   },
 });

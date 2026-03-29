@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
   label: string;
@@ -33,6 +35,9 @@ export function AuthTextField({
   leftSlot,
   textInputStyle,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.wrap}>
       <AppText variant="caption" color="text" style={styles.label}>
@@ -69,6 +74,7 @@ export function PasswordToggleIcon({
   visible: boolean;
   onToggle: () => void;
 }) {
+  const colors = useThemeColors();
   return (
     <Pressable onPress={onToggle} hitSlop={10} accessibilityRole="button">
       <Ionicons name={visible ? 'eye-off-outline' : 'eye-outline'} size={22} color={colors.textSecondary} />
@@ -76,27 +82,29 @@ export function PasswordToggleIcon({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { gap: spacing.xs, marginBottom: spacing.md },
-  label: { fontWeight: '600' },
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    minHeight: 52,
-  },
-  fieldRowPad: { paddingRight: spacing.sm },
-  input: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    color: colors.text,
-    fontSize: 16,
-  },
-  left: { paddingLeft: spacing.sm },
-  right: { paddingRight: spacing.sm },
-  helper: { lineHeight: 18, marginTop: 2 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    wrap: { gap: spacing.xs, marginBottom: spacing.md },
+    label: { fontWeight: '600' },
+    fieldRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      minHeight: 52,
+    },
+    fieldRowPad: { paddingRight: spacing.sm },
+    input: {
+      flex: 1,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      color: colors.text,
+      fontSize: 16,
+    },
+    left: { paddingLeft: spacing.sm },
+    right: { paddingRight: spacing.sm },
+    helper: { lineHeight: 18, marginTop: 2 },
+  });
+}

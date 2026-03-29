@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   Animated,
   Easing,
@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
 
 type BoxProps = {
   height: number;
@@ -22,6 +22,7 @@ type BoxProps = {
  */
 export function ShimmerBox({ height, width = '100%', borderRadius = radii.md, style }: BoxProps) {
   const opacity = useRef(new Animated.Value(0.35)).current;
+  const colors = useThemeColors();
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -70,10 +71,26 @@ export function ShimmerBox({ height, width = '100%', borderRadius = radii.md, st
 }
 
 export function ShimmerListRow() {
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        row: {
+          flexDirection: 'row',
+          gap: spacing.md,
+          marginBottom: spacing.lg,
+        },
+        col: {
+          flex: 1,
+          justifyContent: 'center',
+        },
+      }),
+    [],
+  );
+
   return (
-    <View style={rowStyles.row}>
+    <View style={styles.row}>
       <ShimmerBox height={72} width={72} borderRadius={radii.lg} />
-      <View style={rowStyles.col}>
+      <View style={styles.col}>
         <ShimmerBox height={14} width="75%" borderRadius={radii.xs} />
         <ShimmerBox height={12} width="50%" borderRadius={radii.xs} style={{ marginTop: spacing.sm }} />
         <ShimmerBox height={12} width="40%" borderRadius={radii.xs} style={{ marginTop: 6 }} />
@@ -81,15 +98,3 @@ export function ShimmerListRow() {
     </View>
   );
 }
-
-const rowStyles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  col: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-});
