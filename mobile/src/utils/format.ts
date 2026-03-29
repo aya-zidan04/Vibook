@@ -11,10 +11,10 @@ export function formatPrice(amount: number, currency: string): string {
   return `${sym}${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 }
 
-export function formatDateShort(iso: string): string {
+export function formatDateShort(iso: string, locale: 'en' | 'ar' = 'en'): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(locale === 'ar' ? 'ar-JO' : 'en-US', { month: 'short', day: 'numeric' });
   } catch {
     return iso;
   }

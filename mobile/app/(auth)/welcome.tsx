@@ -3,10 +3,12 @@ import { useRouter } from 'expo-router';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 import { colors, spacing } from '@/theme';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <Screen>
@@ -15,9 +17,9 @@ export default function WelcomeScreen() {
           Vibook
         </AppText>
         <AppText variant="body" color="textSecondary" style={styles.sub}>
-          Auth shell — Phase 2 wires forms & tokens here.
+          {t('welcome.subtitle')}
         </AppText>
-        <PrimaryButton title="Continue to app" onPress={() => router.replace('/(tabs)' as never)} />
+        <PrimaryButton title={t('welcome.continue')} onPress={() => router.replace('/(tabs)/explore' as never)} />
       </View>
     </Screen>
   );

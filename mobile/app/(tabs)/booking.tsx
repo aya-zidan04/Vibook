@@ -1,15 +1,20 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { AppText } from '@/components/ui/AppText';
+import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_BOOKINGS } from '@/mock';
 import { colors, radii, spacing } from '@/theme';
-import { formatDateShort, formatPrice } from '@/utils/format';
+import { formatDateShort } from '@/utils/format';
 
-export default function BookingsScreen() {
+export default function BookingTabScreen() {
+  const router = useRouter();
+  const { t } = useTranslation();
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming');
   const past = MOCK_BOOKINGS.filter((b) => b.status === 'past');
   const pending = MOCK_BOOKINGS.filter((b) => b.status === 'pending_payment');
@@ -17,38 +22,38 @@ export default function BookingsScreen() {
   return (
     <Screen scroll contentStyle={styles.pad}>
       <AppText variant="h1" color="text" style={styles.title}>
-        Bookings
+        {t('booking.title')}
       </AppText>
       <AppText variant="body" color="textSecondary" style={styles.sub}>
-        Upcoming tickets, past visits, and pending payments.
+        {t('booking.subtitle')}
       </AppText>
 
       {pending.length > 0 ? (
         <>
-          <SectionHeader title="Pending payment" />
+          <SectionHeader title={t('booking.pending')} />
           {pending.map((b) => (
-            <BookingCard key={b.id} booking={b} />
+            <BookingCard key={b.id} booking={b} onOpen={() => router.push(`/booking/${b.id}`)} />
           ))}
         </>
       ) : null}
 
-      <SectionHeader title="Upcoming" />
+      <SectionHeader title={t('booking.upcoming')} />
       {upcoming.length === 0 ? (
         <EmptyState
           icon="ticket-outline"
-          title="No upcoming bookings"
-          description="When you book an event or table, it will show up here."
-          actionLabel="Browse home"
-          onAction={() => {}}
+          title={t('booking.noUpcomingTitle')}
+          description={t('booking.noUpcomingDesc')}
+          actionLabel={t('booking.exploreCta')}
+          onAction={() => router.push('/(tabs)/explore')}
         />
       ) : (
-        upcoming.map((b) => <BookingCard key={b.id} booking={b} />)
+        upcoming.map((b) => <BookingCard key={b.id} booking={b} onOpen={() => router.push(`/booking/${b.id}`)} />)
       )}
 
-      <SectionHeader title="Past" />
+      <SectionHeader title={t('booking.past')} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {past.map((b) => (
-          <BookingCard key={b.id} booking={b} narrow />
+          <BookingCard key={b.id} booking={b} narrow onOpen={() => router.push(`/booking/${b.id}`)} />
         ))}
       </ScrollView>
 
@@ -56,19 +61,19 @@ export default function BookingsScreen() {
         <Pressable style={styles.actionBtn}>
           <Ionicons name="qr-code-outline" size={22} color={colors.accent} />
           <AppText variant="meta" color="textSecondary">
-            QR preview
+            {t('booking.qr')}
           </AppText>
         </Pressable>
         <Pressable style={styles.actionBtn}>
           <Ionicons name="calendar-outline" size={22} color={colors.accent} />
           <AppText variant="meta" color="textSecondary">
-            Calendar
+            {t('booking.calendar')}
           </AppText>
         </Pressable>
         <Pressable style={styles.actionBtn}>
           <Ionicons name="download-outline" size={22} color={colors.accent} />
           <AppText variant="meta" color="textSecondary">
-            Ticket
+            {t('booking.ticket')}
           </AppText>
         </Pressable>
       </View>
@@ -79,12 +84,17 @@ export default function BookingsScreen() {
 function BookingCard({
   booking,
   narrow,
+  onOpen,
 }: {
   booking: (typeof MOCK_BOOKINGS)[0];
   narrow?: boolean;
+  onOpen: () => void;
 }) {
+  const { t, locale } = useTranslation();
+  const { formatMoney } = useFormatMoney();
+
   return (
-    <View style={[styles.card, narrow && styles.cardNarrow]}>
+    <Pressable style={[styles.card, narrow && styles.cardNarrow]} onPress={onOpen}>
       <Image source={{ uri: booking.imageUrl }} style={styles.img} contentFit="cover" />
       <View style={styles.body}>
         <View style={styles.row}>
@@ -94,40 +104,41 @@ function BookingCard({
           <StatusPill status={booking.status} />
         </View>
         <AppText variant="caption" color="textMuted">
-          {formatDateShort(booking.startsAt)} · {booking.cityName}
+          {formatDateShort(booking.startsAt, locale)} · {booking.cityName}
         </AppText>
         {booking.totalPaid > 0 ? (
           <AppText variant="price" color="accent" style={styles.price}>
-            {formatPrice(booking.totalPaid, booking.currency)}
+            {formatMoney(booking.totalPaid, booking.currency)}
           </AppText>
         ) : (
           <AppText variant="meta" color="warning">
-            Payment due
+            {t('booking.paymentDue')}
           </AppText>
         )}
-        <Pressable style={styles.detailBtn}>
+        <View style={styles.detailBtn}>
           <AppText variant="meta" color="accent">
-            Details
+            {t('common.details')}
           </AppText>
           <Ionicons name="chevron-forward" size={16} color={colors.accent} />
-        </Pressable>
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 function StatusPill({ status }: { status: (typeof MOCK_BOOKINGS)[0]['status'] }) {
+  const { t } = useTranslation();
   const map = {
-    upcoming: { label: 'Upcoming', c: colors.accent },
-    past: { label: 'Past', c: colors.textMuted },
-    cancelled: { label: 'Cancelled', c: colors.error },
-    pending_payment: { label: 'Pending', c: colors.warning },
+    upcoming: { labelKey: 'booking.statusUpcoming', c: colors.accent },
+    past: { labelKey: 'booking.statusPast', c: colors.textMuted },
+    cancelled: { labelKey: 'booking.statusCancelled', c: colors.error },
+    pending_payment: { labelKey: 'booking.statusPending', c: colors.warning },
   };
   const m = map[status];
   return (
     <View style={[styles.pill, { borderColor: m.c }]}>
       <AppText variant="meta" style={{ color: m.c }}>
-        {m.label}
+        {t(m.labelKey)}
       </AppText>
     </View>
   );

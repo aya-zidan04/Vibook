@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
-import { colors, radii, shadows, spacing } from '@/theme';
+import { colors, fadePlum, radii, shadows, spacing } from '@/theme';
 import type { EventItem } from '@/types';
-import { formatDateShort, formatPrice } from '@/utils/format';
+import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useTranslation } from '@/i18n/useTranslation';
+import { formatDateShort } from '@/utils/format';
 
 type Props = {
   event: EventItem;
@@ -16,12 +19,20 @@ type Props = {
 };
 
 export function EventCard({ event, onPress, variant = 'compact' }: Props) {
+  const router = useRouter();
+  const { locale } = useTranslation();
+  const { formatMoney } = useFormatMoney();
   const [fav, setFav] = useState(false);
   const wide = variant === 'wide';
 
+  const handlePress = () => {
+    if (onPress) onPress();
+    else router.push(`/event/${event.id}`);
+  };
+
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       style={({ pressed }) => [
         styles.card,
         wide ? styles.wide : styles.compact,
@@ -32,7 +43,7 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
       <View style={[styles.imageWrap, wide && styles.imageWide]}>
         <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
         <LinearGradient
-          colors={['transparent', 'rgba(7,11,20,0.85)']}
+          colors={['transparent', fadePlum(0.85)]}
           style={styles.grad}
         />
         {event.badge ? (
@@ -53,11 +64,11 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
           {event.title}
         </AppText>
         <AppText variant="caption" color="textMuted" numberOfLines={1} style={styles.meta}>
-          {formatDateShort(event.startAt)} · {event.venueName}
+          {formatDateShort(event.startAt, locale)} · {event.venueName}
         </AppText>
         <View style={styles.row}>
           <AppText variant="price" color="accent">
-            {formatPrice(event.priceFrom, event.currency)}
+            {formatMoney(event.priceFrom, event.currency)}
           </AppText>
           <View style={styles.rating}>
             <Ionicons name="star" size={14} color={colors.warning} />

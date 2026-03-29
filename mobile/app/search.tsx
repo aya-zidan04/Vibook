@@ -1,6 +1,7 @@
 import { type ReactNode, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
 import { SearchBar } from '@/components/layout/SearchBar';
@@ -8,9 +9,10 @@ import { SectionHeader } from '@/components/layout/SectionHeader';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
+import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_EVENTS, MOCK_FLIGHTS, MOCK_HOTELS, MOCK_RESTAURANTS } from '@/mock';
 import { colors, radii, spacing } from '@/theme';
-import { formatPrice } from '@/utils/format';
 
 const RECENT = ['Jazz night Riyadh', 'Dubai weekend', 'Chef’s table'];
 const POPULAR = ['Concerts', 'Fine dining', 'Boutique hotels', 'Flights DXB'];
@@ -18,7 +20,18 @@ const TAGS = ['Family', 'Romantic', 'Last minute', 'Luxury', 'Outdoor'];
 
 type Segment = 'all' | 'events' | 'restaurants' | 'hotels' | 'flights';
 
+const SEGMENTS: { key: Segment; labelKey: string }[] = [
+  { key: 'all', labelKey: 'search.all' },
+  { key: 'events', labelKey: 'search.events' },
+  { key: 'restaurants', labelKey: 'search.dining' },
+  { key: 'hotels', labelKey: 'search.stays' },
+  { key: 'flights', labelKey: 'search.flights' },
+];
+
 export default function SearchScreen() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { formatMoney } = useFormatMoney();
   const [q, setQ] = useState('');
   const [seg, setSeg] = useState<Segment>('all');
 
@@ -46,27 +59,26 @@ export default function SearchScreen() {
   return (
     <Screen scroll contentStyle={styles.pad}>
       <AppText variant="h1" color="text" style={styles.title}>
-        Search
+        {t('search.title')}
       </AppText>
-      <SearchBar placeholder="Places, events, flights, restaurants…" onPress={() => setQ('')} />
+      <Pressable style={styles.flightLink} onPress={() => router.push('/flight/search')}>
+        <Ionicons name="airplane-outline" size={18} color={colors.accent} />
+        <AppText variant="bodyMedium" color="accent">
+          {t('search.flightSearch')}
+        </AppText>
+        <Ionicons name="chevron-forward" size={18} color={colors.accent} />
+      </Pressable>
+      <SearchBar placeholder={t('search.placeholder')} onPress={() => setQ('')} />
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.seg}>
-        {(
-          [
-            ['all', 'All'],
-            ['events', 'Events'],
-            ['restaurants', 'Dining'],
-            ['hotels', 'Stays'],
-            ['flights', 'Flights'],
-          ] as const
-        ).map(([key, label]) => (
+        {SEGMENTS.map(({ key, labelKey }) => (
           <Pressable
             key={key}
             onPress={() => setSeg(key)}
             style={[styles.segBtn, seg === key && styles.segOn]}
           >
             <AppText variant="meta" color={seg === key ? 'text' : 'textMuted'}>
-              {label}
+              {t(labelKey)}
             </AppText>
           </Pressable>
         ))}
@@ -74,31 +86,31 @@ export default function SearchScreen() {
 
       {!q.length ? (
         <>
-          <SectionHeader title="Recent searches" />
-          {RECENT.map((t) => (
-            <Pressable key={t} style={styles.recentRow} onPress={() => setQ(t)}>
+          <SectionHeader title={t('search.recent')} />
+          {RECENT.map((recent) => (
+            <Pressable key={recent} style={styles.recentRow} onPress={() => setQ(recent)}>
               <Ionicons name="time-outline" size={18} color={colors.textMuted} />
               <AppText variant="body" color="textSecondary">
-                {t}
+                {recent}
               </AppText>
             </Pressable>
           ))}
-          <SectionHeader title="Popular now" />
+          <SectionHeader title={t('search.popular')} />
           <View style={styles.tags}>
-            {POPULAR.map((t) => (
-              <Pressable key={t} style={styles.tag} onPress={() => setQ(t)}>
+            {POPULAR.map((p) => (
+              <Pressable key={p} style={styles.tag} onPress={() => setQ(p)}>
                 <AppText variant="caption" color="accent">
-                  {t}
+                  {p}
                 </AppText>
               </Pressable>
             ))}
           </View>
-          <SectionHeader title="Suggested tags" />
+          <SectionHeader title={t('search.tags')} />
           <View style={styles.tags}>
-            {TAGS.map((t) => (
-              <Pressable key={t} style={styles.tag} onPress={() => setQ(t)}>
+            {TAGS.map((tag) => (
+              <Pressable key={tag} style={styles.tag} onPress={() => setQ(tag)}>
                 <AppText variant="caption" color="textSecondary">
-                  #{t}
+                  #{tag}
                 </AppText>
               </Pressable>
             ))}
@@ -108,13 +120,13 @@ export default function SearchScreen() {
 
       {q.length > 0 ? (
         <>
-          <SectionHeader title="Results" subtitle={`Query: “${q}”`} />
+          <SectionHeader title={t('search.results')} subtitle={`${t('search.query')}: “${q}”`} />
           {empty ? (
             <EmptyState
               icon="search-outline"
-              title="No matches"
-              description="Try another keyword or clear filters in Phase 3."
-              actionLabel="Clear"
+              title={t('search.noMatches')}
+              description={t('search.noMatchesDesc')}
+              actionLabel={t('search.clear')}
               onAction={() => setQ('')}
             />
           ) : (
@@ -126,8 +138,9 @@ export default function SearchScreen() {
                     imageUrl={e.imageUrl}
                     title={e.title}
                     meta={e.venueName}
-                    price={formatPrice(e.priceFrom, e.currency)}
+                    price={formatMoney(e.priceFrom, e.currency)}
                     badge={e.badge ? <Badge tone={e.badge} /> : undefined}
+                    onPress={() => router.push(`/event/${e.id}`)}
                   />
                 ))}
               {(seg === 'all' || seg === 'restaurants') &&
@@ -136,8 +149,9 @@ export default function SearchScreen() {
                     key={r.id}
                     imageUrl={r.imageUrl}
                     title={r.name}
-                    meta="Restaurant"
+                    meta={t('search.restaurantMeta')}
                     price={`${r.priceLevel}/4`}
+                    onPress={() => router.push(`/restaurant/${r.id}`)}
                   />
                 ))}
               {(seg === 'all' || seg === 'hotels') &&
@@ -146,8 +160,9 @@ export default function SearchScreen() {
                     key={h.id}
                     imageUrl={h.imageUrl}
                     title={h.name}
-                    meta={`${h.stars}★ hotel`}
-                    price={formatPrice(h.priceFrom, h.currency)}
+                    meta={`${h.stars}★ ${t('search.hotelSuffix')}`}
+                    price={formatMoney(h.priceFrom, h.currency)}
+                    onPress={() => router.push(`/stay/${h.id}`)}
                   />
                 ))}
               {(seg === 'all' || seg === 'flights') &&
@@ -157,7 +172,8 @@ export default function SearchScreen() {
                     imageUrl="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=200&q=80"
                     title={`${fl.from} → ${fl.to}`}
                     meta={fl.airline}
-                    price={formatPrice(fl.price, fl.currency)}
+                    price={formatMoney(fl.price, fl.currency)}
+                    onPress={() => router.push(`/flight/${fl.id}`)}
                   />
                 ))}
             </View>
@@ -165,10 +181,10 @@ export default function SearchScreen() {
         </>
       ) : null}
 
-      <Pressable style={styles.filterFab}>
+      <Pressable style={styles.filterFab} onPress={() => router.push('/filters')}>
         <Ionicons name="options" size={22} color={colors.text} />
         <AppText variant="meta" color="text">
-          Filters
+          {t('common.filters')}
         </AppText>
       </Pressable>
     </Screen>
@@ -181,15 +197,17 @@ function ResultRow({
   meta,
   price,
   badge,
+  onPress,
 }: {
   imageUrl: string;
   title: string;
   meta: string;
   price: string;
   badge?: ReactNode;
+  onPress?: () => void;
 }) {
   return (
-    <View style={styles.resultCard}>
+    <Pressable style={styles.resultCard} onPress={onPress}>
       <Image source={{ uri: imageUrl }} style={styles.resultImg} contentFit="cover" />
       <View style={styles.resultBody}>
         <View style={styles.resultTop}>
@@ -205,13 +223,20 @@ function ResultRow({
           {price}
         </AppText>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   pad: { paddingTop: spacing.md },
-  title: { marginBottom: spacing.md },
+  title: { marginBottom: spacing.sm },
+  flightLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+    paddingVertical: spacing.sm,
+  },
   seg: { marginVertical: spacing.md },
   segBtn: {
     paddingHorizontal: spacing.lg,

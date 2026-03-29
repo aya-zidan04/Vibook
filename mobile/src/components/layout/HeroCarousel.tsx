@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/ui/AppText';
-import { colors, radii, spacing } from '@/theme';
+import { colors, fadePlum, radii, spacing } from '@/theme';
 
 export type HeroSlide = {
   id: string;
@@ -65,7 +65,7 @@ export function HeroCarousel({ slides, onSlidePress }: Props) {
           >
             <ImageBackground source={{ uri: item.imageUrl }} style={styles.image} imageStyle={styles.imageRadius}>
               <LinearGradient
-                colors={['transparent', 'rgba(7,11,20,0.95)']}
+                colors={['transparent', fadePlum(0.95)]}
                 style={styles.gradient}
               >
                 <AppText variant="overline" color="accent" style={styles.kicker}>

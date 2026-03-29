@@ -15,8 +15,8 @@ const TONES: Record<BadgeTone, { bg: string; fg: keyof typeof colors }> = {
   popular: { bg: colors.secondaryMuted, fg: 'secondary' },
   limited: { bg: colors.accentMuted, fg: 'accent' },
   new: { bg: colors.primaryMuted, fg: 'primary' },
-  soldFast: { bg: 'rgba(248, 113, 113, 0.2)', fg: 'error' },
-  exclusive: { bg: 'rgba(167, 139, 250, 0.25)', fg: 'primary' },
+  soldFast: { bg: 'rgba(163, 90, 64, 0.22)', fg: 'error' },
+  exclusive: { bg: 'rgba(185, 114, 76, 0.28)', fg: 'primary' },
 };
 
 type Props = {

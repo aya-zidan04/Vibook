@@ -1,0 +1,288 @@
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { AppText } from '@/components/ui/AppText';
+import { Badge } from '@/components/ui/Badge';
+import { PrimaryButton } from '@/components/ui/Button';
+import { DetailHeader } from '@/components/layout/DetailHeader';
+import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
+import { Screen } from '@/components/layout/Screen';
+import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useTranslation } from '@/i18n/useTranslation';
+import { getCityName, getEventById, getOrganizerById, getTiersForEvent } from '@/mock/queries';
+import { useBookingDraftStore } from '@/store/bookingDraftStore';
+import { colors, radii, spacing } from '@/theme';
+
+export default function EventDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const setDraft = useBookingDraftStore((s) => s.setDraft);
+  const { t, locale } = useTranslation();
+  const { formatMoney } = useFormatMoney();
+
+  const event = id ? getEventById(id) : undefined;
+  const organizer = event ? getOrganizerById(event.organizerId) : undefined;
+  const tiers = event ? getTiersForEvent(event.id) : [];
+  const [tierId, setTierId] = useState(tiers[0]?.id ?? '');
+  const [qty, setQty] = useState(1);
+
+  const selectedTier = useMemo(() => tiers.find((te) => te.id === tierId), [tiers, tierId]);
+
+  const lineTotal = selectedTier ? selectedTier.price * qty : (event?.priceFrom ?? 0) * qty;
+  const currency = event?.currency ?? 'SAR';
+  const fees = Math.round(lineTotal * 0.05);
+
+  if (!event) {
+    return (
+      <Screen>
+        <DetailHeader title={t('event.notFoundTitle')} />
+        <AppText variant="body" color="textSecondary">
+          {t('event.notFound')}
+        </AppText>
+        <PrimaryButton title={t('event.goBack')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
+      </Screen>
+    );
+  }
+
+  const dateLocale = locale === 'ar' ? 'ar-JO' : 'en-US';
+  const dateStr = new Date(event.startAt).toLocaleString(dateLocale, { dateStyle: 'medium', timeStyle: 'short' });
+
+  const onBook = () => {
+    setDraft({
+      vertical: 'event',
+      refId: event.id,
+      title: event.title,
+      imageUrl: event.imageUrl,
+      currency,
+      unitPrice: selectedTier?.price ?? event.priceFrom,
+      quantity: qty,
+      fees,
+      tierName: selectedTier?.name ?? t('event.tierGeneral'),
+      metaLine: `${formatMoney(lineTotal, currency)} ${t('event.plusFees')}`,
+    });
+    router.push('/checkout');
+  };
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <View style={styles.root}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.hero}>
+            <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+            <LinearGradient colors={['transparent', colors.background]} style={StyleSheet.absoluteFill} />
+            <View style={styles.heroHeader}>
+              <DetailHeader
+                right={
+                  <Pressable hitSlop={8}>
+                    <Ionicons name="share-outline" size={22} color={colors.text} />
+                  </Pressable>
+                }
+              />
+            </View>
+          </View>
+
+          <View style={styles.body}>
+            {event.badge ? <Badge tone={event.badge} /> : null}
+            <AppText variant="h1" color="text" style={styles.title}>
+              {event.title}
+            </AppText>
+            <View style={styles.row}>
+              <Ionicons name="star" size={16} color={colors.warning} />
+              <AppText variant="bodyMedium" color="textSecondary">
+                {event.rating.toFixed(1)} · {event.reviewCount} {t('event.reviewsWord')}
+              </AppText>
+            </View>
+
+            <View style={styles.card}>
+              <Row icon="calendar-outline" label={t('event.date')} value={dateStr} />
+              <Row icon="location-outline" label={t('event.venue')} value={`${event.venueName}, ${getCityName(event.cityId)}`} />
+              <Row icon="navigate-outline" label={t('event.address')} value={event.address} />
+            </View>
+
+            {organizer ? (
+              <Pressable style={styles.org} onPress={() => router.push(`/organizer/${organizer.id}`)}>
+                <Image source={{ uri: organizer.logoUrl }} style={styles.orgLogo} />
+                <View style={{ flex: 1 }}>
+                  <AppText variant="h3" color="text">
+                    {organizer.name}
+                  </AppText>
+                  <AppText variant="caption" color="textMuted">
+                    {t('event.organizer')} · {organizer.verified ? t('organizer.verified') : t('event.host')}
+                  </AppText>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </Pressable>
+            ) : null}
+
+            <AppText variant="h3" color="text" style={styles.sectionTitle}>
+              {t('event.about')}
+            </AppText>
+            <AppText variant="body" color="textSecondary" style={styles.desc}>
+              {event.description}
+            </AppText>
+
+            <AppText variant="h3" color="text" style={styles.sectionTitle}>
+              {tiers.length ? t('event.tickets') : t('event.admission')}
+            </AppText>
+            {tiers.length ? (
+              tiers.map((tier) => (
+                <Pressable
+                  key={tier.id}
+                  onPress={() => setTierId(tier.id)}
+                  style={[styles.tier, tierId === tier.id && styles.tierOn]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyMedium" color="text">
+                      {tier.name}
+                    </AppText>
+                    <AppText variant="caption" color="textMuted">
+                      {tier.benefits.join(' · ')}
+                    </AppText>
+                  </View>
+                  <AppText variant="price" color="accent">
+                    {formatMoney(tier.price, tier.currency)}
+                  </AppText>
+                </Pressable>
+              ))
+            ) : (
+              <AppText variant="body" color="textSecondary">
+                {t('common.from')} {formatMoney(event.priceFrom, currency)}
+              </AppText>
+            )}
+
+            <View style={styles.qtyRow}>
+              <AppText variant="bodyMedium" color="text">
+                {t('event.quantity')}
+              </AppText>
+              <View style={styles.qtyBtns}>
+                <Pressable style={styles.qtyBtn} onPress={() => setQty((q) => Math.max(1, q - 1))}>
+                  <AppText variant="h3">−</AppText>
+                </Pressable>
+                <AppText variant="h3" color="text">
+                  {qty}
+                </AppText>
+                <Pressable style={styles.qtyBtn} onPress={() => setQty((q) => q + 1)}>
+                  <AppText variant="h3">+</AppText>
+                </Pressable>
+              </View>
+            </View>
+
+            <AppText variant="h3" color="text" style={styles.sectionTitle}>
+              {t('event.similar')}
+            </AppText>
+            <AppText variant="caption" color="textMuted">
+              {t('event.similarHint')} {getCityName(event.cityId)}.
+            </AppText>
+          </View>
+        </ScrollView>
+
+        <StickyBottomBar>
+          <View style={styles.bottomRow}>
+            <View>
+              <AppText variant="caption" color="textMuted">
+                {t('event.total')}
+              </AppText>
+              <AppText variant="price" color="text">
+                {formatMoney(lineTotal + fees, currency)}
+              </AppText>
+            </View>
+            <PrimaryButton title={t('event.bookNow')} onPress={onBook} style={styles.cta} />
+          </View>
+        </StickyBottomBar>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
+  return (
+    <View style={styles.metaRow}>
+      <Ionicons name={icon} size={18} color={colors.primary} />
+      <View style={{ flex: 1 }}>
+        <AppText variant="caption" color="textMuted">
+          {label}
+        </AppText>
+        <AppText variant="bodyMedium" color="text">
+          {value}
+        </AppText>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
+  root: { flex: 1, backgroundColor: colors.background },
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: 120 },
+  hero: { height: 280 },
+  heroHeader: { paddingHorizontal: spacing.screen, paddingTop: spacing.md },
+  body: { paddingHorizontal: spacing.screen, paddingTop: spacing.lg, gap: spacing.sm },
+  title: { marginTop: spacing.xs },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.xl,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.md,
+  },
+  metaRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
+  org: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  orgLogo: { width: 48, height: 48, borderRadius: 24 },
+  desc: { lineHeight: 24 },
+  sectionTitle: { marginTop: spacing.md },
+  tier: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.sm,
+    gap: spacing.md,
+  },
+  tierOn: { borderColor: colors.primary, backgroundColor: colors.primaryMuted },
+  qtyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: spacing.md,
+  },
+  qtyBtns: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  qtyBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  cta: { flex: 1, maxWidth: 220 },
+});

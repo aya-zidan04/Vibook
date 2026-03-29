@@ -1,161 +1,210 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { Screen } from '@/components/layout/Screen';
-import { SectionHeader } from '@/components/layout/SectionHeader';
-import { CategoryChip } from '@/components/ui/CategoryChip';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
-import { MOCK_CATEGORIES, MOCK_CITIES, MOCK_EVENTS, MOCK_PACKAGES } from '@/mock';
-import { colors, radii, spacing } from '@/theme';
+import {
+  ExploreCategoryStrip,
+  ExploreEventFeedCard,
+  ExploreHeader,
+  ExploreHeroCarousel,
+  ExplorePromoGrid,
+  type ExploreCategory,
+  type HeroSlideItem,
+  type PromoTile,
+} from '@/components/explore';
+import { useTranslation } from '@/i18n/useTranslation';
+import { MOCK_EVENTS, MOCK_EXPERIENCES, MOCK_OFFERS, MOCK_PACKAGES } from '@/mock';
+import { getCityName } from '@/mock/queries';
+import { useLocaleStore } from '@/store/localeStore';
+import { colors, spacing } from '@/theme';
 
-const THEMES = [
-  'Concerts',
-  'Sports',
-  'Dining',
-  'Family',
-  'Nightlife',
-  'Wellness',
-  'Travel',
-  'Premium',
-  'Workshops',
-  'Art & culture',
+const CATEGORIES: ExploreCategory[] = [
+  { id: 'sports', emoji: '⚽', labelEn: 'Match day', labelAr: 'يوم المباراة' },
+  { id: 'dining', emoji: '🍽️', labelEn: 'Fine dining', labelAr: 'مطاعم فاخرة' },
+  { id: 'hotels', emoji: '🏨', labelEn: 'Stays', labelAr: 'إقامة' },
+  { id: 'concerts', emoji: '🎤', labelEn: 'Live shows', labelAr: 'حفلات مباشرة' },
+  { id: 'theater', emoji: '🎭', labelEn: 'Theatre', labelAr: 'مسرح' },
+  { id: 'shopping', emoji: '🛍️', labelEn: 'Retail therapy', labelAr: 'تسوّق' },
 ];
 
 export default function ExploreScreen() {
+  const router = useRouter();
+  const { t, locale } = useTranslation();
+  const regionFromStore = useLocaleStore((s) => s.regionLabel);
+  const regionLabel = locale === 'ar' ? t('explore.country') : regionFromStore;
+
+  const heroSlides: HeroSlideItem[] = [
+    {
+      id: 'h1',
+      imageUrl: MOCK_OFFERS[0].imageUrl,
+      title: MOCK_OFFERS[0].title,
+      subtitle: MOCK_OFFERS[0].subtitle,
+      eyebrow: t('explore.featured'),
+      onPress: () => router.push('/restaurant/r1'),
+    },
+    {
+      id: 'h2',
+      imageUrl: MOCK_EVENTS[0].imageUrl,
+      title: MOCK_EVENTS[0].title,
+      subtitle: MOCK_EVENTS[0].venueName,
+      eyebrow: t('explore.event'),
+      onPress: () => router.push(`/event/${MOCK_EVENTS[0].id}`),
+    },
+    {
+      id: 'h3',
+      imageUrl: MOCK_EXPERIENCES[1]?.imageUrl ?? MOCK_EXPERIENCES[0].imageUrl,
+      title: MOCK_EXPERIENCES[1]?.title ?? MOCK_EXPERIENCES[0].title,
+      subtitle: `${MOCK_EXPERIENCES[1]?.durationHours ?? MOCK_EXPERIENCES[0].durationHours}h · ${t('explore.experience')}`,
+      eyebrow: t('explore.experience'),
+      onPress: () => router.push(`/experience/${MOCK_EXPERIENCES[1]?.id ?? MOCK_EXPERIENCES[0].id}`),
+    },
+    {
+      id: 'h4',
+      imageUrl: MOCK_OFFERS[1].imageUrl,
+      title: MOCK_OFFERS[1].title,
+      subtitle: MOCK_OFFERS[1].subtitle,
+      eyebrow: t('explore.offer'),
+      onPress: () => router.push('/flight/search'),
+    },
+  ];
+
+  const promoLarge: PromoTile = {
+    id: 'p-large',
+    imageUrl: MOCK_EVENTS[0].imageUrl,
+    title: MOCK_EVENTS[0].title,
+    subtitle: MOCK_EVENTS[0].description.slice(0, 72) + '…',
+    kind: 'event',
+    kindLabel: t('explore.event'),
+    onPress: () => router.push(`/event/${MOCK_EVENTS[0].id}`),
+  };
+
+  const promoStackTop: PromoTile = {
+    id: 'p-st1',
+    imageUrl: MOCK_OFFERS[0].imageUrl,
+    title: MOCK_OFFERS[0].title,
+    subtitle: MOCK_OFFERS[0].subtitle,
+    kind: 'offer',
+    kindLabel: t('explore.offer'),
+    onPress: () => router.push('/package/p1'),
+  };
+
+  const promoStackBottom: PromoTile = {
+    id: 'p-st2',
+    imageUrl: MOCK_EXPERIENCES[0].imageUrl,
+    title: MOCK_EXPERIENCES[0].title,
+    subtitle: `${MOCK_EXPERIENCES[0].durationHours}h`,
+    kind: 'experience',
+    kindLabel: t('explore.experience'),
+    onPress: () => router.push(`/experience/${MOCK_EXPERIENCES[0].id}`),
+  };
+
+  const promoRowLeft: PromoTile = {
+    id: 'p-r1',
+    imageUrl: MOCK_PACKAGES[0].imageUrl,
+    title: MOCK_PACKAGES[0].title,
+    subtitle: `${MOCK_PACKAGES[0].nights} nights`,
+    kind: 'event',
+    kindLabel: t('explore.featured'),
+    onPress: () => router.push(`/package/${MOCK_PACKAGES[0].id}`),
+  };
+
+  const promoRowRight: PromoTile = {
+    id: 'p-r2',
+    imageUrl: MOCK_EVENTS[1].imageUrl,
+    title: MOCK_EVENTS[1].title,
+    subtitle: MOCK_EVENTS[1].venueName,
+    kind: 'event',
+    kindLabel: t('explore.event'),
+    onPress: () => router.push(`/event/${MOCK_EVENTS[1].id}`),
+  };
+
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <LinearGradient colors={[colors.primaryMuted, 'transparent']} style={styles.hero}>
-        <AppText variant="overline" color="accent">
-          Discover
-        </AppText>
-        <AppText variant="display" color="text" style={styles.heroTitle}>
-          Curated for your city
-        </AppText>
-        <AppText variant="body" color="textSecondary">
-          Editorial picks, hidden gems, and premium venues — updated weekly.
-        </AppText>
-      </LinearGradient>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <View style={styles.root}>
+        <ExploreHeader
+          regionLabel={regionLabel}
+          onSearch={() => router.push('/search')}
+          onLanguageCurrency={() => router.push('/language-currency')}
+        />
 
-      <SectionHeader title="Browse by theme" subtitle="Tap to filter (UI only in Phase 1)" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.row}>
-        {THEMES.map((t, i) => (
-          <CategoryChip key={t} label={t} selected={i === 0} icon="sparkles-outline" />
-        ))}
-      </ScrollView>
-
-      <SectionHeader title="Category grid" actionLabel="All cities" />
-      <View style={styles.grid}>
-        {MOCK_CATEGORIES.map((c) => (
-          <View key={c.id} style={styles.gridItem}>
-            <Ionicons name="ellipse" size={8} color={colors.primary} />
-            <AppText variant="meta" color="text" numberOfLines={2} style={styles.gridLabel}>
-              {c.labelEn}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scroll}
+          style={styles.scrollView}
+        >
+          <View style={styles.sectionHead}>
+            <AppText variant="overline" color="accent">
+              {t('explore.heroEyebrow')}
+            </AppText>
+            <AppText variant="h1" color="text">
+              {t('explore.heroTitle')}
             </AppText>
           </View>
-        ))}
-      </View>
 
-      <SectionHeader title="Trending destinations" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {MOCK_CITIES.map((city) => (
-          <View key={city.id} style={styles.cityCard}>
-            <Image
-              source={{
-                uri: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&q=80',
-              }}
-              style={styles.cityImg}
-              contentFit="cover"
+          <ExploreHeroCarousel slides={heroSlides} />
+
+          <View style={styles.sectionHead}>
+            <AppText variant="h2" color="text">
+              {t('explore.promoTitle')}
+            </AppText>
+            <AppText variant="caption" color="textMuted">
+              {t('explore.promoSubtitle')}
+            </AppText>
+          </View>
+
+          <View style={styles.horizontalPad}>
+            <ExplorePromoGrid
+              large={promoLarge}
+              stackTop={promoStackTop}
+              stackBottom={promoStackBottom}
+              rowLeft={promoRowLeft}
+              rowRight={promoRowRight}
             />
-            <LinearGradient colors={['transparent', colors.background]} style={styles.cityGrad} />
-            <AppText variant="h3" color="text" style={styles.cityText}>
-              {city.nameEn}
-            </AppText>
           </View>
-        ))}
-      </ScrollView>
 
-      <SectionHeader title="Weekend picks" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {MOCK_EVENTS.map((e) => (
-          <View key={e.id} style={styles.pick}>
-            <Image source={{ uri: e.imageUrl }} style={styles.pickImg} contentFit="cover" />
-            <AppText variant="bodyMedium" color="text" numberOfLines={2}>
-              {e.title}
+          <View style={[styles.sectionHead, styles.padH]}>
+            <AppText variant="h2" color="text">
+              {t('explore.categoriesTitle')}
             </AppText>
           </View>
-        ))}
-      </ScrollView>
+          <ExploreCategoryStrip categories={CATEGORIES} locale={locale} onPress={() => router.push('/search')} />
 
-      <SectionHeader title="Premium venues" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {MOCK_PACKAGES.map((p) => (
-          <View key={p.id} style={styles.pick}>
-            <Image source={{ uri: p.imageUrl }} style={styles.pickImg} contentFit="cover" />
-            <AppText variant="bodyMedium" color="text" numberOfLines={2}>
-              {p.title}
+          <View style={[styles.sectionHead, styles.padH]}>
+            <AppText variant="h2" color="text">
+              {t('explore.eventsTitle')}
+            </AppText>
+            <AppText variant="caption" color="textMuted">
+              {t('explore.eventsSubtitle')}
             </AppText>
           </View>
-        ))}
-      </ScrollView>
-    </Screen>
+
+          <View style={styles.feed}>
+            {MOCK_EVENTS.map((e) => (
+              <ExploreEventFeedCard
+                key={e.id}
+                event={e}
+                cityName={getCityName(e.cityId)}
+                onPress={() => router.push(`/event/${e.id}`)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  pad: { paddingTop: spacing.md },
-  hero: {
-    borderRadius: radii.xxl,
-    padding: spacing.xl,
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+  safe: { flex: 1, backgroundColor: colors.background },
+  root: { flex: 1 },
+  scrollView: { flex: 1 },
+  scroll: { paddingBottom: spacing.xxxl },
+  sectionHead: {
+    paddingHorizontal: spacing.screen,
+    marginBottom: spacing.md,
+    gap: 4,
   },
-  heroTitle: { marginVertical: spacing.sm },
-  row: { marginBottom: spacing.lg },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  gridItem: {
-    width: '31%',
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 8,
-    minHeight: 88,
-    justifyContent: 'space-between',
-  },
-  gridLabel: { flex: 1 },
-  cityCard: {
-    width: 140,
-    height: 180,
-    marginRight: spacing.md,
-    borderRadius: radii.xl,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cityImg: { ...StyleSheet.absoluteFillObject },
-  cityGrad: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    padding: spacing.sm,
-  },
-  cityText: {},
-  pick: {
-    width: 200,
-    marginRight: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radii.xl,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingBottom: spacing.sm,
-  },
-  pickImg: { height: 120, width: '100%' },
+  padH: { paddingHorizontal: spacing.screen },
+  horizontalPad: { paddingHorizontal: spacing.screen },
+  feed: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm },
 });

@@ -1,29 +1,75 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
+import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useTranslation } from '@/i18n/useTranslation';
 import { CURRENT_USER, MOCK_BOOKINGS, MOCK_VOUCHERS } from '@/mock';
+import { useAppStore } from '@/store/appStore';
 import { colors, radii, spacing } from '@/theme';
-import { formatPrice } from '@/utils/format';
 
-const MENU: { key: string; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'wallet', label: 'Wallet & credits', icon: 'wallet-outline' },
-  { key: 'vouchers', label: 'Vouchers', icon: 'pricetag-outline' },
-  { key: 'favorites', label: 'Favorites', icon: 'heart-outline' },
-  { key: 'bookings', label: 'All bookings', icon: 'ticket-outline' },
-  { key: 'payment', label: 'Payment methods', icon: 'card-outline' },
-  { key: 'notifications', label: 'Notifications', icon: 'notifications-outline' },
-  { key: 'language', label: 'Language & region', icon: 'language-outline' },
-  { key: 'help', label: 'Help center', icon: 'help-circle-outline' },
-  { key: 'settings', label: 'Settings', icon: 'settings-outline' },
+const MENU: { key: string; labelKey: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: 'wallet', labelKey: 'me.menuWallet', icon: 'wallet-outline' },
+  { key: 'vouchers', labelKey: 'me.menuVouchers', icon: 'pricetag-outline' },
+  { key: 'favorites', labelKey: 'me.menuFavorites', icon: 'heart-outline' },
+  { key: 'bookings', labelKey: 'me.menuBookings', icon: 'ticket-outline' },
+  { key: 'payment', labelKey: 'me.menuPayment', icon: 'card-outline' },
+  { key: 'notifications', labelKey: 'me.menuNotif', icon: 'notifications-outline' },
+  { key: 'language', labelKey: 'me.menuLanguage', icon: 'language-outline' },
+  { key: 'help', labelKey: 'me.menuHelp', icon: 'help-circle-outline' },
+  { key: 'settings', labelKey: 'me.menuSettings', icon: 'settings-outline' },
 ];
 
-export default function ProfileScreen() {
+export default function MeScreen() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { formatMoney } = useFormatMoney();
+  const logout = useAppStore((s) => s.logout);
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming').length;
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/entry');
+  };
+
+  const openMenu = (key: string) => {
+    switch (key) {
+      case 'wallet':
+        router.push('/wallet');
+        break;
+      case 'vouchers':
+        router.push('/vouchers');
+        break;
+      case 'favorites':
+        router.push('/(tabs)/favorites');
+        break;
+      case 'bookings':
+        router.push('/(tabs)/booking');
+        break;
+      case 'payment':
+        router.push('/payment-methods');
+        break;
+      case 'notifications':
+        router.push('/notifications');
+        break;
+      case 'language':
+        router.push('/language-currency');
+        break;
+      case 'help':
+        router.push('/help');
+        break;
+      case 'settings':
+        router.push('/settings');
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <Screen scroll contentStyle={styles.pad}>
@@ -44,20 +90,20 @@ export default function ProfileScreen() {
             </AppText>
           </View>
         </View>
-        <PrimaryButton title="Edit profile" onPress={() => {}} style={styles.edit} />
+        <PrimaryButton title={t('me.editProfile')} onPress={() => router.push('/edit-profile')} style={styles.edit} />
       </LinearGradient>
 
       <View style={styles.stats}>
-        <StatItem label="Bookings" value={String(MOCK_BOOKINGS.length)} icon="calendar-outline" />
-        <StatItem label="Upcoming" value={String(upcoming)} icon="time-outline" />
+        <StatItem label={t('me.bookings')} value={String(MOCK_BOOKINGS.length)} icon="calendar-outline" />
+        <StatItem label={t('me.upcoming')} value={String(upcoming)} icon="time-outline" />
         <StatItem
-          label="Wallet"
-          value={formatPrice(CURRENT_USER.walletBalance, 'SAR')}
+          label={t('me.wallet')}
+          value={formatMoney(CURRENT_USER.walletBalance, 'SAR')}
           icon="wallet-outline"
         />
       </View>
 
-      <SectionHeader title="Your vouchers" />
+      <SectionHeader title={t('me.vouchersTitle')} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {MOCK_VOUCHERS.map((v) => (
           <View key={v.id} style={styles.voucher}>
@@ -68,37 +114,42 @@ export default function ProfileScreen() {
               {v.title}
             </AppText>
             <AppText variant="caption" color="textMuted">
-              Exp. {v.expiresAt.slice(0, 10)}
+              {t('me.expires')} {v.expiresAt.slice(0, 10)}
             </AppText>
           </View>
         ))}
       </ScrollView>
 
-      <SectionHeader title="Account" />
+      <SectionHeader title={t('me.account')} />
       <View style={styles.menu}>
         {MENU.map((item) => (
-          <Pressable key={item.key} style={styles.menuRow}>
+          <Pressable key={item.key} style={styles.menuRow} onPress={() => openMenu(item.key)}>
             <View style={styles.menuIcon}>
               <Ionicons name={item.icon} size={20} color={colors.primary} />
             </View>
             <AppText variant="bodyMedium" color="text" style={styles.menuLabel}>
-              {item.label}
+              {t(item.labelKey)}
             </AppText>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </Pressable>
         ))}
-        <Pressable style={[styles.menuRow, styles.logout]}>
+        <Pressable
+          style={[styles.menuRow, styles.logout]}
+          onPress={handleLogout}
+          accessibilityRole="button"
+          accessibilityLabel={t('me.logout')}
+        >
           <View style={styles.menuIcon}>
             <Ionicons name="log-out-outline" size={20} color={colors.error} />
           </View>
           <AppText variant="bodyMedium" style={{ color: colors.error }}>
-            Log out
+            {t('me.logout')}
           </AppText>
         </Pressable>
       </View>
 
       <AppText variant="meta" color="textMuted" style={styles.version}>
-        Vibook · v1.0.0 · Phase 1
+        {t('common.version')}
       </AppText>
     </Screen>
   );

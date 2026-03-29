@@ -1,58 +1,90 @@
+import { Platform, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '@/i18n/useTranslation';
 import { colors, shadows } from '@/theme';
 
+/** Physical order: Explore (left) → Booking → Favorites → Me. Tab bar `direction: 'ltr'` keeps positions in Arabic. */
 export default function TabsLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
+      initialRouteName="explore"
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          paddingTop: 6,
-          height: 64,
-          ...shadows.tabBar,
-        },
-        tabBarActiveTintColor: colors.primary,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            paddingBottom: Platform.OS === 'ios' ? 22 : 12,
+            height: Platform.OS === 'ios' ? 88 : 68,
+            direction: 'ltr',
+          },
+        ],
+        tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarItemStyle: styles.tabItem,
+        tabBarShowLabel: true,
       }}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, size }) => <Ionicons name="compass" size={size} color={color} />,
+          title: t('tabs.explore'),
+          tabBarAccessibilityLabel: t('tabs.explore'),
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="booking"
         options={{
-          title: 'Search',
-          tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
+          title: t('tabs.booking'),
+          tabBarAccessibilityLabel: t('tabs.booking'),
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="bookings"
+        name="favorites"
         options={{
-          title: 'Bookings',
-          tabBarIcon: ({ color, size }) => <Ionicons name="ticket" size={size} color={color} />,
+          title: t('tabs.favorites'),
+          tabBarAccessibilityLabel: t('tabs.favorites'),
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="me"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          title: t('tabs.me'),
+          tabBarAccessibilityLabel: t('tabs.me'),
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: colors.backgroundElevated,
+    paddingTop: 8,
+    ...shadows.tabBar,
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.15,
+    marginTop: 2,
+  },
+  tabItem: {
+    paddingVertical: 4,
+  },
+});

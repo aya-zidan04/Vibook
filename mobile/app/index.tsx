@@ -10,11 +10,10 @@ import { colors, spacing } from '@/theme';
 const SPLASH_MS = 2200;
 
 /**
- * First screen on cold start: brand splash, then onboarding (first install) or main tabs.
+ * First screen on cold start: brand splash, then entry (welcome carousel) or main tabs.
  */
 export default function SplashScreen() {
   const router = useRouter();
-  const hasCompletedOnboarding = useAppStore((s) => s.hasCompletedOnboarding);
   const [hydrated, setHydrated] = useState(() => useAppStore.persist.hasHydrated());
 
   useEffect(() => {
@@ -24,15 +23,18 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (!hydrated) return;
+    // Read fresh from store after rehydration (avoids stale closure vs persisted value).
+    const done = useAppStore.getState().hasCompletedOnboarding;
+    if (!done) {
+      // First launch / never completed entry: go straight to welcome (no extra splash wait).
+      router.replace('/entry');
+      return;
+    }
     const id = setTimeout(() => {
-      if (hasCompletedOnboarding) {
-        router.replace('/(tabs)');
-      } else {
-        router.replace('/onboarding');
-      }
+      router.replace('/(tabs)/explore');
     }, SPLASH_MS);
     return () => clearTimeout(id);
-  }, [hydrated, router, hasCompletedOnboarding]);
+  }, [hydrated, router]);
 
   return (
     <LinearGradient

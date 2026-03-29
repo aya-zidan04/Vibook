@@ -152,6 +152,8 @@ export type Booking = {
   id: ID;
   userId: ID;
   type: 'event' | 'restaurant' | 'hotel' | 'flight' | 'experience' | 'package';
+  /** Target entity id for deep links (optional for legacy mocks). */
+  refId?: ID;
   refTitle: string;
   imageUrl: string;
   status: BookingStatus;
