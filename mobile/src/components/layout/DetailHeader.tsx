@@ -3,6 +3,7 @@ import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { useTranslation } from '@/i18n/useTranslation';
 import { colors, spacing } from '@/theme';
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
 export function DetailHeader({ title, right }: Props) {
   const router = useRouter();
   const rtl = I18nManager.isRTL;
+  const { t } = useTranslation();
 
   return (
     <View style={styles.row}>
@@ -20,7 +22,7 @@ export function DetailHeader({ title, right }: Props) {
         onPress={() => router.back()}
         hitSlop={12}
         accessibilityRole="button"
-        accessibilityLabel="Go back"
+        accessibilityLabel={t('common.a11yGoBack')}
       >
         <Ionicons name={rtl ? 'chevron-forward' : 'chevron-back'} size={28} color={colors.text} />
       </Pressable>

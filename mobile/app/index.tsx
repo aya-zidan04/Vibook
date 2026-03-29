@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { colors, spacing } from '@/theme';
 
@@ -14,6 +15,7 @@ const SPLASH_MS = 2200;
  */
 export default function SplashScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [hydrated, setHydrated] = useState(() => useAppStore.persist.hasHydrated());
 
   useEffect(() => {
@@ -45,10 +47,10 @@ export default function SplashScreen() {
         <Ionicons name="ticket" size={44} color={colors.primary} />
       </View>
       <AppText variant="display" color="text" style={styles.brand}>
-        Vibook
+        {t('common.brandDisplay')}
       </AppText>
       <AppText variant="body" color="textMuted" style={styles.tag}>
-        Events, dining, stays & more
+        {t('common.splashTagline')}
       </AppText>
       <ActivityIndicator color={colors.primary} size="large" style={styles.loader} />
     </LinearGradient>

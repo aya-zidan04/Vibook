@@ -92,6 +92,8 @@ function BookingCard({
 }) {
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const title = locale === 'ar' && booking.refTitleAr ? booking.refTitleAr : booking.refTitle;
+  const cityLine = locale === 'ar' && booking.cityNameAr ? booking.cityNameAr : booking.cityName;
 
   return (
     <Pressable style={[styles.card, narrow && styles.cardNarrow]} onPress={onOpen}>
@@ -99,12 +101,12 @@ function BookingCard({
       <View style={styles.body}>
         <View style={styles.row}>
           <AppText variant="h3" color="text" numberOfLines={2} style={{ flex: 1 }}>
-            {booking.refTitle}
+            {title}
           </AppText>
           <StatusPill status={booking.status} />
         </View>
         <AppText variant="caption" color="textMuted">
-          {formatDateShort(booking.startsAt, locale)} · {booking.cityName}
+          {formatDateShort(booking.startsAt, locale)} · {cityLine}
         </AppText>
         {booking.totalPaid > 0 ? (
           <AppText variant="price" color="accent" style={styles.price}>

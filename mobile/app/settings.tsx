@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { DetailHeader } from '@/components/layout/DetailHeader';
@@ -8,6 +9,7 @@ import { colors, radii, spacing } from '@/theme';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const ROWS = [
     { icon: 'moon-outline' as const, labelKey: 'settings.appearance', valueKey: 'settings.appearanceVal' },
     { icon: 'globe-outline' as const, labelKey: 'settings.region', valueKey: 'settings.regionVal' },
@@ -17,6 +19,20 @@ export default function SettingsScreen() {
   return (
     <Screen scroll contentStyle={styles.pad}>
       <DetailHeader title={t('settings.title')} />
+      <Pressable style={styles.businessRow} onPress={() => router.push('/business')}>
+        <View style={styles.icon}>
+          <Ionicons name="business-outline" size={20} color={colors.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <AppText variant="bodyMedium" color="text">
+            {t('settings.businessForPartners')}
+          </AppText>
+          <AppText variant="caption" color="textMuted">
+            {t('settings.businessSubtitle')}
+          </AppText>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
       {ROWS.map((r) => (
         <Pressable key={r.labelKey} style={styles.row}>
           <View style={styles.icon}>
@@ -40,6 +56,17 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   pad: { paddingTop: spacing.md, gap: spacing.sm },
+  businessRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.backgroundElevated,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginBottom: spacing.sm,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

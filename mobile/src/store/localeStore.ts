@@ -21,7 +21,11 @@ export const useLocaleStore = create<LocaleState>()(
       locale: 'en',
       currency: 'USD',
       regionLabel: 'Jordan',
-      setLocale: (locale) => set({ locale }),
+      setLocale: (locale) =>
+        set((s) => ({
+          locale,
+          ...(locale === 'ar' ? { currency: 'JOD' as DisplayCurrency } : {}),
+        })),
       setCurrency: (currency) => set({ currency }),
       setRegionLabel: (regionLabel) => set({ regionLabel }),
     }),
@@ -33,6 +37,11 @@ export const useLocaleStore = create<LocaleState>()(
         currency: s.currency,
         regionLabel: s.regionLabel,
       }),
+      onRehydrateStorage: () => (rehydrated) => {
+        if (rehydrated?.locale === 'ar' && rehydrated.currency !== 'JOD') {
+          useLocaleStore.setState({ currency: 'JOD' });
+        }
+      },
     },
   ),
 );

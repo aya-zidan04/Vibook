@@ -28,7 +28,7 @@ export default function RestaurantDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const setDraft = useBookingDraftStore((s) => s.setDraft);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const r = id ? getRestaurantById(id) : undefined;
   const [guests, setGuests] = useState(2);
@@ -45,7 +45,7 @@ export default function RestaurantDetailScreen() {
   }
 
   const fee = 40 * guests;
-  const city = getCityName(r.cityId);
+  const city = getCityName(r.cityId, locale);
   const blurbKey = r.id in BLURB_KEYS ? BLURB_KEYS[r.id] : null;
 
   const book = () => {

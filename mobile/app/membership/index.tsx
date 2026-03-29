@@ -1,0 +1,84 @@
+import { StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { AppText } from '@/components/ui/AppText';
+import { PrimaryButton } from '@/components/ui/Button';
+import { DetailHeader } from '@/components/layout/DetailHeader';
+import { Screen } from '@/components/layout/Screen';
+import { useTranslation } from '@/i18n/useTranslation';
+import { CURRENT_USER } from '@/mock';
+import { TIER_TO_PLAN_ID, getPlanById } from '@/mock/membershipPlans';
+import type { User } from '@/types';
+import { colors, radii, spacing } from '@/theme';
+
+const TIER_LABEL_KEY: Record<User['membershipTier'], string> = {
+  standard: 'membership.tierStandard',
+  gold: 'membership.tierGold',
+  platinum: 'membership.tierPlatinum',
+};
+
+export default function MembershipScreen() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const planId = TIER_TO_PLAN_ID[CURRENT_USER.membershipTier];
+  const plan = getPlanById(planId);
+
+  return (
+    <Screen scroll contentStyle={styles.pad}>
+      <DetailHeader title={t('membership.title')} />
+      <LinearGradient colors={[colors.primaryMuted, 'transparent']} style={styles.hero}>
+        <Ionicons name="diamond-outline" size={36} color={colors.accent} style={styles.heroIcon} />
+        <AppText variant="overline" color="accent">
+          {t('membership.currentLabel')}
+        </AppText>
+        <AppText variant="h1" color="text">
+          {t(TIER_LABEL_KEY[CURRENT_USER.membershipTier])}
+        </AppText>
+        <AppText variant="body" color="textSecondary">
+          {t('membership.subtitle')}
+        </AppText>
+      </LinearGradient>
+
+      {plan ? (
+        <View style={styles.perks}>
+          <AppText variant="h3" color="text">
+            {t('membership.perksIntro')}
+          </AppText>
+          {plan.benefitKeys.map((key) => (
+            <View key={key} style={styles.perkRow}>
+              <Ionicons name="checkmark-circle" size={20} color={colors.accent} />
+              <AppText variant="body" color="textSecondary" style={styles.perkTxt}>
+                {t(key)}
+              </AppText>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      <PrimaryButton title={t('membership.compareCta')} onPress={() => router.push('/membership/plans')} />
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  pad: { paddingTop: spacing.md, gap: spacing.lg },
+  hero: {
+    padding: spacing.xl,
+    borderRadius: radii.xxl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.sm,
+  },
+  heroIcon: { marginBottom: spacing.xs },
+  perks: {
+    padding: spacing.lg,
+    borderRadius: radii.xl,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.md,
+  },
+  perkRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  perkTxt: { flex: 1, lineHeight: 22 },
+});

@@ -20,7 +20,7 @@ export default function StayDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const setDraft = useBookingDraftStore((s) => s.setDraft);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const h = id ? getHotelById(id) : undefined;
   const [nights] = useState(2);
@@ -48,7 +48,7 @@ export default function StayDetailScreen() {
       unitPrice: h.priceFrom,
       quantity: nights,
       fees,
-      metaLine: `${nights} ${t('stay.nights')} · ${getCityName(h.cityId)}`,
+      metaLine: `${nights} ${t('stay.nights')} · ${getCityName(h.cityId, locale)}`,
     });
     router.push('/checkout');
   };
@@ -76,10 +76,12 @@ export default function StayDetailScreen() {
             {t('stay.amenities')}
           </AppText>
           <View style={styles.chips}>
-            {['Wi‑Fi', 'Pool', 'Spa', 'Gym'].map((a) => (
-              <View key={a} style={styles.chip}>
+            {(
+              ['stay.amenityWifi', 'stay.amenityPool', 'stay.amenitySpa', 'stay.amenityGym'] as const
+            ).map((key) => (
+              <View key={key} style={styles.chip}>
                 <AppText variant="caption" color="textSecondary">
-                  {a}
+                  {t(key)}
                 </AppText>
               </View>
             ))}

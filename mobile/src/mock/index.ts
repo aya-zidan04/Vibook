@@ -14,3 +14,4 @@ export * from './notifications';
 export * from './vouchers';
 export * from './reviews';
 export * from './ticketTiers';
+export * from './membershipPlans';

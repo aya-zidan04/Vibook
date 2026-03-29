@@ -7,6 +7,8 @@ export const MOCK_BOOKINGS: Booking[] = [
     type: 'event',
     refId: 'e1',
     refTitle: 'Aurora Sound Festival',
+    refTitleAr: 'مهرجان Aurora الصوتي',
+    cityNameAr: 'الرياض',
     imageUrl:
       'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80&auto=format&fit=crop',
     status: 'upcoming',
@@ -35,6 +37,8 @@ export const MOCK_BOOKINGS: Booking[] = [
     type: 'hotel',
     refId: 'h1',
     refTitle: 'Velvet Sky Hotel',
+    refTitleAr: 'فندق Velvet Sky',
+    cityNameAr: 'دبي',
     imageUrl:
       'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80&auto=format&fit=crop',
     status: 'pending_payment',

@@ -3,18 +3,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/theme';
 
 type Props = {
+  brandLabel: string;
   regionLabel: string;
   onSearch: () => void;
   onLanguageCurrency: () => void;
   onRegionPress?: () => void;
+  a11yLanguageCurrency: string;
+  a11ySearch: string;
 };
 
 /** Top bar uses app background; with `direction: 'rtl'`, row starts from the right. */
-export function ExploreHeader({ regionLabel, onSearch, onLanguageCurrency, onRegionPress }: Props) {
+export function ExploreHeader({
+  brandLabel,
+  regionLabel,
+  onSearch,
+  onLanguageCurrency,
+  onRegionPress,
+  a11yLanguageCurrency,
+  a11ySearch,
+}: Props) {
   return (
     <View style={styles.bar}>
       <View style={styles.left}>
-        <Text style={styles.wordmark}>Vibook</Text>
+        <Text style={styles.wordmark}>{brandLabel}</Text>
         <Pressable
           onPress={onRegionPress}
           style={({ pressed }) => [styles.regionBtn, pressed && styles.pressed]}
@@ -29,7 +40,7 @@ export function ExploreHeader({ regionLabel, onSearch, onLanguageCurrency, onReg
         <Pressable
           onPress={onLanguageCurrency}
           style={({ pressed }) => [styles.iconHit, pressed && styles.pressed]}
-          accessibilityLabel="Language and currency"
+          accessibilityLabel={a11yLanguageCurrency}
           hitSlop={12}
         >
           <Ionicons name="globe-outline" size={24} color={colors.text} />
@@ -37,7 +48,7 @@ export function ExploreHeader({ regionLabel, onSearch, onLanguageCurrency, onReg
         <Pressable
           onPress={onSearch}
           style={({ pressed }) => [styles.iconHit, pressed && styles.pressed]}
-          accessibilityLabel="Search"
+          accessibilityLabel={a11ySearch}
           hitSlop={12}
         >
           <Ionicons name="search-outline" size={24} color={colors.text} />

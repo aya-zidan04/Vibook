@@ -103,7 +103,7 @@ export default function EventDetailScreen() {
 
             <View style={styles.card}>
               <Row icon="calendar-outline" label={t('event.date')} value={dateStr} />
-              <Row icon="location-outline" label={t('event.venue')} value={`${event.venueName}, ${getCityName(event.cityId)}`} />
+              <Row icon="location-outline" label={t('event.venue')} value={`${event.venueName}, ${getCityName(event.cityId, locale)}`} />
               <Row icon="navigate-outline" label={t('event.address')} value={event.address} />
             </View>
 
@@ -179,7 +179,7 @@ export default function EventDetailScreen() {
               {t('event.similar')}
             </AppText>
             <AppText variant="caption" color="textMuted">
-              {t('event.similarHint')} {getCityName(event.cityId)}.
+              {t('event.similarHint')} {getCityName(event.cityId, locale)}.
             </AppText>
           </View>
         </ScrollView>

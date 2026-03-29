@@ -18,6 +18,7 @@ const MENU: { key: string; labelKey: string; icon: keyof typeof Ionicons.glyphMa
   { key: 'vouchers', labelKey: 'me.menuVouchers', icon: 'pricetag-outline' },
   { key: 'favorites', labelKey: 'me.menuFavorites', icon: 'heart-outline' },
   { key: 'bookings', labelKey: 'me.menuBookings', icon: 'ticket-outline' },
+  { key: 'membership', labelKey: 'me.menuMembership', icon: 'diamond-outline' },
   { key: 'payment', labelKey: 'me.menuPayment', icon: 'card-outline' },
   { key: 'notifications', labelKey: 'me.menuNotif', icon: 'notifications-outline' },
   { key: 'language', labelKey: 'me.menuLanguage', icon: 'language-outline' },
@@ -27,8 +28,9 @@ const MENU: { key: string; labelKey: string; icon: keyof typeof Ionicons.glyphMa
 
 export default function MeScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale, currency } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const displayName = locale === 'ar' && CURRENT_USER.nameAr ? CURRENT_USER.nameAr : CURRENT_USER.name;
   const logout = useAppStore((s) => s.logout);
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming').length;
 
@@ -50,6 +52,9 @@ export default function MeScreen() {
         break;
       case 'bookings':
         router.push('/(tabs)/booking');
+        break;
+      case 'membership':
+        router.push('/membership');
         break;
       case 'payment':
         router.push('/payment-methods');
@@ -98,7 +103,7 @@ export default function MeScreen() {
         <StatItem label={t('me.upcoming')} value={String(upcoming)} icon="time-outline" />
         <StatItem
           label={t('me.wallet')}
-          value={formatMoney(CURRENT_USER.walletBalance, 'SAR')}
+          value={formatMoney(CURRENT_USER.walletBalance, currency)}
           icon="wallet-outline"
         />
       </View>
@@ -111,7 +116,7 @@ export default function MeScreen() {
               {v.code}
             </AppText>
             <AppText variant="h3" color="text" numberOfLines={2}>
-              {v.title}
+              {locale === 'ar' && v.titleAr ? v.titleAr : v.title}
             </AppText>
             <AppText variant="caption" color="textMuted">
               {t('me.expires')} {v.expiresAt.slice(0, 10)}

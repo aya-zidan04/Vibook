@@ -45,8 +45,10 @@ export function getOrganizerById(id: string): Organizer | undefined {
   return MOCK_ORGANIZERS.find((o) => o.id === id);
 }
 
-export function getCityName(cityId: string): string {
-  return MOCK_CITIES.find((c) => c.id === cityId)?.nameEn ?? '';
+export function getCityName(cityId: string, locale: 'en' | 'ar' = 'en'): string {
+  const c = MOCK_CITIES.find((x) => x.id === cityId);
+  if (!c) return '';
+  return locale === 'ar' ? c.nameAr : c.nameEn;
 }
 
 export function getTiersForEvent(eventId: string) {

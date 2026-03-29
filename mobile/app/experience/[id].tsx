@@ -20,7 +20,7 @@ export default function ExperienceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const setDraft = useBookingDraftStore((s) => s.setDraft);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const x = id ? getExperienceById(id) : undefined;
   const [qty, setQty] = useState(2);
@@ -48,7 +48,7 @@ export default function ExperienceDetailScreen() {
       unitPrice: x.priceFrom,
       quantity: qty,
       fees,
-      metaLine: `${x.durationHours}h · ${getCityName(x.cityId)}`,
+      metaLine: `${x.durationHours} ${t('experience.hours')} · ${getCityName(x.cityId, locale)}`,
     });
     router.push('/checkout');
   };
@@ -64,7 +64,7 @@ export default function ExperienceDetailScreen() {
             {x.title}
           </AppText>
           <AppText variant="body" color="textSecondary">
-            {x.durationHours} {t('experience.hours')} · {getCityName(x.cityId)}
+            {x.durationHours} {t('experience.hours')} · {getCityName(x.cityId, locale)}
           </AppText>
           <View style={styles.row}>
             <Ionicons name="star" size={16} color={colors.warning} />

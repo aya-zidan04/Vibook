@@ -4,6 +4,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u1',
     name: 'Layla Al-Harbi',
+    nameAr: 'ليلى الحربي',
     email: 'layla.h@email.com',
     phone: '+966501112233',
     avatarUrl:

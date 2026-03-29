@@ -38,15 +38,18 @@ export default function BookingDetailScreen() {
     );
   }
 
+  const refTitle = locale === 'ar' && booking.refTitleAr ? booking.refTitleAr : booking.refTitle;
+  const cityLine = locale === 'ar' && booking.cityNameAr ? booking.cityNameAr : booking.cityName;
+
   return (
     <Screen scroll contentStyle={styles.pad}>
       <DetailHeader title={t('bookingDetail.title')} />
       <Image source={{ uri: booking.imageUrl }} style={styles.hero} contentFit="cover" />
       <AppText variant="h1" color="text" style={styles.mt}>
-        {booking.refTitle}
+        {refTitle}
       </AppText>
       <AppText variant="body" color="textSecondary">
-        {formatDateShort(booking.startsAt, locale)} · {booking.cityName}
+        {formatDateShort(booking.startsAt, locale)} · {cityLine}
       </AppText>
       <AppText variant="meta" color="textMuted" style={styles.mt}>
         {t('bookingDetail.status')}: {t(STATUS_KEYS[booking.status])}

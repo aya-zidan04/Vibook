@@ -5,6 +5,8 @@ export type BadgeTone = 'popular' | 'limited' | 'new' | 'soldFast' | 'exclusive'
 export type User = {
   id: ID;
   name: string;
+  /** Arabic display name for profile when locale is `ar`. */
+  nameAr?: string;
   email: string;
   phone: string;
   avatarUrl: string;
@@ -155,10 +157,12 @@ export type Booking = {
   /** Target entity id for deep links (optional for legacy mocks). */
   refId?: ID;
   refTitle: string;
+  refTitleAr?: string;
   imageUrl: string;
   status: BookingStatus;
   startsAt: string;
   cityName: string;
+  cityNameAr?: string;
   totalPaid: number;
   currency: string;
 };
@@ -176,6 +180,7 @@ export type Voucher = {
   id: ID;
   code: string;
   title: string;
+  titleAr?: string;
   discountValue: number;
   discountType: 'percent' | 'fixed';
   expiresAt: string;

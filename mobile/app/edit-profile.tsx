@@ -9,7 +9,8 @@ import { CURRENT_USER } from '@/mock';
 import { colors, radii, spacing } from '@/theme';
 
 export default function EditProfileScreen() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const displayName = locale === 'ar' && CURRENT_USER.nameAr ? CURRENT_USER.nameAr : CURRENT_USER.name;
 
   return (
     <Screen scroll contentStyle={styles.pad}>
@@ -18,7 +19,7 @@ export default function EditProfileScreen() {
         <Image source={{ uri: CURRENT_USER.avatarUrl }} style={styles.avatar} />
         <View style={{ flex: 1 }}>
           <AppText variant="h3" color="text">
-            {CURRENT_USER.name}
+            {displayName}
           </AppText>
           <AppText variant="caption" color="textMuted">
             {CURRENT_USER.email}

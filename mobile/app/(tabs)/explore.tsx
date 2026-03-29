@@ -54,7 +54,7 @@ export default function ExploreScreen() {
       id: 'h3',
       imageUrl: MOCK_EXPERIENCES[1]?.imageUrl ?? MOCK_EXPERIENCES[0].imageUrl,
       title: MOCK_EXPERIENCES[1]?.title ?? MOCK_EXPERIENCES[0].title,
-      subtitle: `${MOCK_EXPERIENCES[1]?.durationHours ?? MOCK_EXPERIENCES[0].durationHours}h · ${t('explore.experience')}`,
+      subtitle: `${MOCK_EXPERIENCES[1]?.durationHours ?? MOCK_EXPERIENCES[0].durationHours} ${t('experience.hours')} · ${t('explore.experience')}`,
       eyebrow: t('explore.experience'),
       onPress: () => router.push(`/experience/${MOCK_EXPERIENCES[1]?.id ?? MOCK_EXPERIENCES[0].id}`),
     },
@@ -92,7 +92,7 @@ export default function ExploreScreen() {
     id: 'p-st2',
     imageUrl: MOCK_EXPERIENCES[0].imageUrl,
     title: MOCK_EXPERIENCES[0].title,
-    subtitle: `${MOCK_EXPERIENCES[0].durationHours}h`,
+    subtitle: `${MOCK_EXPERIENCES[0].durationHours} ${t('experience.hours')}`,
     kind: 'experience',
     kindLabel: t('explore.experience'),
     onPress: () => router.push(`/experience/${MOCK_EXPERIENCES[0].id}`),
@@ -122,9 +122,12 @@ export default function ExploreScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.root}>
         <ExploreHeader
+          brandLabel={t('common.brandDisplay')}
           regionLabel={regionLabel}
           onSearch={() => router.push('/search')}
           onLanguageCurrency={() => router.push('/language-currency')}
+          a11yLanguageCurrency={t('explore.a11yLanguageCurrency')}
+          a11ySearch={t('common.search')}
         />
 
         <ScrollView
@@ -183,7 +186,7 @@ export default function ExploreScreen() {
               <ExploreEventFeedCard
                 key={e.id}
                 event={e}
-                cityName={getCityName(e.cityId)}
+                cityName={getCityName(e.cityId, locale)}
                 onPress={() => router.push(`/event/${e.id}`)}
               />
             ))}
