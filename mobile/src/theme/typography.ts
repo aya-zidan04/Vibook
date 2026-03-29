@@ -1,77 +1,79 @@
 import { Platform, TextStyle } from 'react-native';
 
-const fontFamily = Platform.select({
+const system = Platform.select({
   ios: 'System',
   android: 'sans-serif',
   default: 'System',
 });
 
 export const typography = {
-  hero: {
-    fontFamily,
-    fontSize: 30,
-    fontWeight: '700' as TextStyle['fontWeight'],
-    letterSpacing: -0.6,
-    lineHeight: 38,
+  display: {
+    fontFamily: system,
+    fontSize: 34,
+    fontWeight: '800' as TextStyle['fontWeight'],
+    letterSpacing: -1,
+    lineHeight: 40,
   },
-  title: {
-    fontFamily,
-    fontSize: 24,
+  h1: {
+    fontFamily: system,
+    fontSize: 26,
     fontWeight: '700' as TextStyle['fontWeight'],
-    letterSpacing: -0.4,
-    lineHeight: 30,
+    letterSpacing: -0.5,
+    lineHeight: 32,
   },
-  cardTitle: {
-    fontFamily,
+  h2: {
+    fontFamily: system,
+    fontSize: 20,
+    fontWeight: '700' as TextStyle['fontWeight'],
+    letterSpacing: -0.3,
+    lineHeight: 26,
+  },
+  h3: {
+    fontFamily: system,
     fontSize: 17,
-    fontWeight: '700' as TextStyle['fontWeight'],
+    fontWeight: '600' as TextStyle['fontWeight'],
     letterSpacing: -0.2,
     lineHeight: 22,
   },
-  subtitle: {
-    fontFamily,
-    fontSize: 16,
-    fontWeight: '600' as TextStyle['fontWeight'],
-    lineHeight: 22,
-  },
   body: {
-    fontFamily,
+    fontFamily: system,
     fontSize: 16,
     fontWeight: '400' as TextStyle['fontWeight'],
     lineHeight: 24,
   },
   bodyMedium: {
-    fontFamily,
+    fontFamily: system,
     fontSize: 15,
     fontWeight: '500' as TextStyle['fontWeight'],
     lineHeight: 22,
   },
   caption: {
-    fontFamily,
+    fontFamily: system,
     fontSize: 13,
     fontWeight: '400' as TextStyle['fontWeight'],
     lineHeight: 18,
   },
+  meta: {
+    fontFamily: system,
+    fontSize: 12,
+    fontWeight: '500' as TextStyle['fontWeight'],
+    lineHeight: 16,
+    letterSpacing: 0.2,
+  },
   overline: {
-    fontFamily,
+    fontFamily: system,
     fontSize: 11,
     fontWeight: '600' as TextStyle['fontWeight'],
-    letterSpacing: 0.8,
+    letterSpacing: 1,
     lineHeight: 14,
-    textTransform: 'uppercase' as const,
-  },
-  label: {
-    fontFamily,
-    fontSize: 12,
-    fontWeight: '600' as TextStyle['fontWeight'],
-    letterSpacing: 0.35,
-    lineHeight: 16,
   },
   price: {
-    fontFamily,
-    fontSize: 16,
+    fontFamily: system,
+    fontSize: 17,
     fontWeight: '700' as TextStyle['fontWeight'],
-    letterSpacing: -0.2,
-    lineHeight: 20,
+    letterSpacing: -0.3,
+    lineHeight: 22,
   },
 } as const;
+
+export type TypographyVariant = keyof typeof typography;

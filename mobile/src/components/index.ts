@@ -1,8 +1,16 @@
+/** Public component API — prefer importing from here in screens. */
 export { AppText } from './ui/AppText';
-export { Screen } from './ui/Screen';
-export { PrimaryButton } from './ui/PrimaryButton';
-export { SecondaryButton } from './ui/SecondaryButton';
-export { SectionHeader } from './ui/SectionHeader';
-export { EventCard } from './ui/EventCard';
-export { SearchBar } from './ui/SearchBar';
-export { CategoryPill } from './ui/CategoryPill';
+export { PrimaryButton, SecondaryButton } from './ui/Button';
+export { CategoryChip } from './ui/CategoryChip';
+export { Badge } from './ui/Badge';
+export { Screen } from './layout/Screen';
+export { AppHeader } from './layout/AppHeader';
+export { SearchBar } from './layout/SearchBar';
+export { SectionHeader } from './layout/SectionHeader';
+export { HeroCarousel } from './layout/HeroCarousel';
+export type { HeroSlide } from './layout/HeroCarousel';
+export { StickyBottomBar } from './layout/StickyBottomBar';
+export { EmptyState } from './feedback/EmptyState';
+export { ErrorState } from './feedback/ErrorState';
+export { ShimmerBox, ShimmerListRow } from './feedback/ShimmerLoader';
+export { EventCard } from './cards/EventCard';

@@ -4,35 +4,31 @@ import { colors } from './colors';
 const ios = (
   opacity: number,
   radius: number,
-  offsetY: number,
+  y: number,
   elevation: number,
+  color?: string,
 ): ViewStyle =>
   Platform.select({
     ios: {
-      shadowColor: colors.text,
-      shadowOffset: { width: 0, height: offsetY },
+      shadowColor: color ?? colors.text,
+      shadowOffset: { width: 0, height: y },
       shadowOpacity: opacity,
       shadowRadius: radius,
     },
-    android: {
-      elevation,
-    },
-    default: {
-      elevation,
-    },
+    android: { elevation },
+    default: { elevation },
   }) ?? { elevation };
 
 export const shadows = {
-  /** Cards, search bar */
-  sm: ios(0.06, 12, 4, 2),
-  /** Featured / elevated cards */
-  md: ios(0.08, 16, 8, 4),
-  /** Modals, sticky footers */
-  lg: ios(0.1, 20, 12, 8),
-  /** Tab bar separation */
+  sm: ios(0.12, 10, 4, 3),
+  md: ios(0.18, 16, 8, 6, colors.glowPrimary),
+  lg: ios(0.22, 24, 12, 10),
+  glow: {
+    ...ios(0.35, 20, 0, 8, colors.primary),
+  },
   tabBar: {
-    ...ios(0.06, 10, -4, 6),
+    ...ios(0.25, 12, -4, 12),
     borderTopWidth: Platform.OS === 'ios' ? 0.5 : 0,
-    borderTopColor: colors.borderLight,
+    borderTopColor: colors.border,
   },
 } as const;
