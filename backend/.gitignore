@@ -1,0 +1,12 @@
+# Maven
+target/
+
+# Logs
+*.log
+
+# OS / IDE (project-specific defaults live under .idea/.gitignore)
+.DS_Store
+
+# JVM
+hs_err_pid*
+replay_pid*
