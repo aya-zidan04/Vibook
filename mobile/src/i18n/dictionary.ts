@@ -26,6 +26,12 @@ export const translations = {
       splashTagline: 'Events, dining, stays & more',
       a11yGoBack: 'Go back',
     },
+    rating: {
+      yourRating: 'Your rating',
+      hint: 'Tap the stars to rate. Saved on this device only.',
+      clear: 'Clear my rating',
+      ofFive: 'out of 5 stars',
+    },
     badge: {
       popular: 'Popular',
       limited: 'Limited',
@@ -63,6 +69,8 @@ export const translations = {
       experience: 'Experience',
       event: 'Event',
       a11yLanguageCurrency: 'Language and currency',
+      greetingHi: 'Hi,',
+      greetingGuest: 'Discover events, dining & stays near you',
     },
     search: {
       title: 'Search',
@@ -298,7 +306,12 @@ export const translations = {
     },
     editProfile: {
       title: 'Edit profile',
-      note: 'Profile editing is static in Phase 1. Hook this form to your API later.',
+      note: 'Changes are saved on this device for now. Connect to your API when ready.',
+      name: 'Full name',
+      nameAr: 'Name (Arabic)',
+      phone: 'Phone',
+      emailNote: 'Email is managed from your account provider.',
+      saved: 'Profile updated',
     },
     paymentMethods: {
       title: 'Payment methods',
@@ -487,6 +500,12 @@ export const translations = {
       splashTagline: 'فعاليات، مطاعم، إقامات وأكثر',
       a11yGoBack: 'رجوع',
     },
+    rating: {
+      yourRating: 'تقييمك',
+      hint: 'اضغط النجوم للتقييم. يُحفظ على هذا الجهاز فقط.',
+      clear: 'إزالة تقييمي',
+      ofFive: 'من 5 نجوم',
+    },
     badge: {
       popular: 'شائع',
       limited: 'محدود',
@@ -524,6 +543,8 @@ export const translations = {
       experience: 'تجربة',
       event: 'فعالية',
       a11yLanguageCurrency: 'اللغة والعملة',
+      greetingHi: 'مرحباً،',
+      greetingGuest: 'اكتشف الفعاليات والمطاعم والإقامات من حولك',
     },
     search: {
       title: 'بحث',
@@ -759,7 +780,12 @@ export const translations = {
     },
     editProfile: {
       title: 'تعديل الملف',
-      note: 'التعديل ثابت في المرحلة 1. اربط النموذج بـ API لاحقاً.',
+      note: 'التغييرات تُحفظ على هذا الجهاز حالياً. اربط بواجهة API عند الجاهزية.',
+      name: 'الاسم الكامل',
+      nameAr: 'الاسم (عربي)',
+      phone: 'الهاتف',
+      emailNote: 'البريد يُدار من مزوّد الحساب.',
+      saved: 'تم تحديث الملف',
     },
     paymentMethods: {
       title: 'طرق الدفع',

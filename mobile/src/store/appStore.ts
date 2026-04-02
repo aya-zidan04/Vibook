@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
+import { useUserProfileStore } from '@/store/userProfileStore';
 
 type AppState = {
   selectedCityId: string;
@@ -34,6 +35,7 @@ export const useAppStore = create<AppState>()(
       logout: () => {
         useBookingDraftStore.getState().setDraft(null);
         useBookingDraftStore.getState().setLastOrderId(null);
+        useUserProfileStore.getState().reset();
         set({
           isAuthenticated: false,
           hasCompletedOnboarding: false,

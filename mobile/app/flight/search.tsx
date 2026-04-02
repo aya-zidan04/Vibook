@@ -6,7 +6,7 @@ import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_FLIGHTS } from '@/mock/flights';
+import { MOCK_FLIGHTS } from '@/services/mock';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 

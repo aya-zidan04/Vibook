@@ -13,9 +13,16 @@ import {
   type HeroSlideItem,
   type PromoTile,
 } from '@/components/explore';
+import { useMockUser } from '@/hooks/useMockUser';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_EVENTS, MOCK_EXPERIENCES, MOCK_OFFERS, MOCK_PACKAGES } from '@/mock';
-import { getCityName } from '@/mock/queries';
+import {
+  MOCK_EVENTS,
+  MOCK_EXPERIENCES,
+  MOCK_OFFERS,
+  MOCK_PACKAGES,
+  getCityName,
+} from '@/services/mock';
+import { useAppStore } from '@/store/appStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -33,6 +40,11 @@ export default function ExploreScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const { firstName } = useMockUser();
+  const greetingLine = isAuthenticated
+    ? `${t('explore.greetingHi')} ${firstName}`
+    : t('explore.greetingGuest');
   const heroSlides: HeroSlideItem[] = [
     {
       id: 'h1',
@@ -127,6 +139,7 @@ export default function ExploreScreen() {
           onLanguageCurrency={() => router.push('/language-currency')}
           a11yLanguageCurrency={t('explore.a11yLanguageCurrency')}
           a11ySearch={t('common.search')}
+          greetingLine={greetingLine}
         />
 
         <ScrollView

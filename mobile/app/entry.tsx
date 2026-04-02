@@ -12,7 +12,6 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
@@ -22,6 +21,8 @@ import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 const AUTO_MS = 4800;
+
+const BRAND_LOGO = require('../assets/icon.png');
 
 const SLIDES = [
   {
@@ -171,9 +172,7 @@ export default function AppEntryScreen() {
 
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
         <View style={styles.top}>
-          <View style={styles.logoRing}>
-            <Ionicons name="ticket" size={36} color={colors.primary} />
-          </View>
+          <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
           <AppText variant="display" color="text" style={styles.brand}>
             Vibook
           </AppText>
@@ -213,16 +212,10 @@ function createStyles(colors: ThemeColors) {
     paddingHorizontal: spacing.screen,
     paddingTop: spacing.md,
   },
-  logoRing: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: colors.primaryMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
+  brandLogo: {
+    width: 104,
+    height: 104,
     marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   brand: { marginBottom: spacing.sm },
   tagline: { textAlign: 'center', lineHeight: 24, maxWidth: 320 },

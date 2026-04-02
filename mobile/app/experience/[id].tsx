@@ -6,13 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
+import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getCityName, getExperienceById } from '@/mock/queries';
+import { getCityName, getExperienceById } from '@/services/mock';
 import { formatDecimalForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { spacing, useThemeColors } from '@/theme';
@@ -76,6 +77,7 @@ export default function ExperienceDetailScreen() {
               {formatDecimalForLocale(x.rating, locale, 2)} {t('experience.ratingLabel')}
             </AppText>
           </View>
+          <UserRatingBlock vertical="experience" refId={x.id} />
           <AppText variant="body" color="textSecondary" style={styles.desc}>
             {t('experience.body')}
           </AppText>

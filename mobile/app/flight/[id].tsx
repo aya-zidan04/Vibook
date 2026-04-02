@@ -4,13 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getFlightById } from '@/mock/queries';
+import { getFlightById } from '@/services/mock';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -77,6 +78,9 @@ export default function FlightDetailScreen() {
             <Meta icon="airplane-outline" text={f.cabin} />
           </View>
         </View>
+        <View style={styles.ratingPad}>
+          <UserRatingBlock vertical="flight" refId={f.id} />
+        </View>
         <View style={styles.card}>
           <Row
             label={t('flight.departs')}
@@ -135,6 +139,7 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 120 },
+  ratingPad: { paddingHorizontal: spacing.screen },
   hero: {
     paddingHorizontal: spacing.screen,
     paddingBottom: spacing.xl,

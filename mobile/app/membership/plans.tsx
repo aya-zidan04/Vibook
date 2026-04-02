@@ -8,13 +8,13 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CURRENT_USER } from '@/mock';
+import { useMockUser } from '@/hooks/useMockUser';
 import {
   MEMBERSHIP_PLANS,
   TIER_TO_PLAN_ID,
   type MembershipPlan,
   type MembershipPlanId,
-} from '@/mock/membershipPlans';
+} from '@/services/mock';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -44,8 +44,9 @@ export default function MembershipPlansScreen() {
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const [yearly, setYearly] = useState(false);
+  const { user } = useMockUser();
 
-  const currentId = TIER_TO_PLAN_ID[CURRENT_USER.membershipTier];
+  const currentId = TIER_TO_PLAN_ID[user.membershipTier];
   const currentRank = RANK[currentId];
 
   const onPlanAction = (plan: MembershipPlan) => {

@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
-import { I18nManager, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { useTranslation } from '@/i18n/useTranslation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -37,6 +38,7 @@ export function AuthTextField({
 }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { isRTL } = useTranslation();
 
   return (
     <View style={styles.wrap}>
@@ -57,8 +59,8 @@ export function AuthTextField({
           style={[
             styles.input,
             {
-              textAlign: I18nManager.isRTL ? 'right' : 'left',
-              writingDirection: (I18nManager.isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
+              textAlign: isRTL ? 'right' : 'left',
+              writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
             },
             textInputStyle,
           ]}

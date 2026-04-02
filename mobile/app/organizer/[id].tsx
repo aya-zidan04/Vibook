@@ -6,15 +6,15 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
+import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_EVENTS } from '@/mock/events';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
-import { getOrganizerById } from '@/mock/queries';
+import { MOCK_EVENTS, getOrganizerById } from '@/services/mock';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -73,6 +73,7 @@ export default function OrganizerScreen() {
               </View>
             </View>
           </View>
+          <UserRatingBlock vertical="organizer" refId={org.id} />
           <AppText variant="body" color="textSecondary" style={styles.about}>
             {org.about}
           </AppText>

@@ -8,8 +8,8 @@ import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CURRENT_USER } from '@/mock';
-import { TIER_TO_PLAN_ID, getPlanById } from '@/mock/membershipPlans';
+import { useMockUser } from '@/hooks/useMockUser';
+import { TIER_TO_PLAN_ID, getPlanById } from '@/services/mock';
 import type { User } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -25,7 +25,8 @@ export default function MembershipScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
-  const planId = TIER_TO_PLAN_ID[CURRENT_USER.membershipTier];
+  const { user } = useMockUser();
+  const planId = TIER_TO_PLAN_ID[user.membershipTier];
   const plan = getPlanById(planId);
 
   return (
@@ -37,7 +38,7 @@ export default function MembershipScreen() {
           {t('membership.currentLabel')}
         </AppText>
         <AppText variant="h1" color="text">
-          {t(TIER_LABEL_KEY[CURRENT_USER.membershipTier])}
+          {t(TIER_LABEL_KEY[user.membershipTier])}
         </AppText>
         <AppText variant="body" color="textSecondary">
           {t('membership.subtitle')}

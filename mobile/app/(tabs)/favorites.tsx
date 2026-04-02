@@ -4,7 +4,7 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_EVENTS } from '@/mock/events';
+import { MOCK_EVENTS } from '@/services/mock';
 import { spacing } from '@/theme';
 import { EventCard } from '@/components';
 

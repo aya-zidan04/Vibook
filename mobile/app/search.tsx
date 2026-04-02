@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_EVENTS, MOCK_FLIGHTS, MOCK_HOTELS, MOCK_RESTAURANTS } from '@/mock';
+import { MOCK_EVENTS, MOCK_FLIGHTS, MOCK_HOTELS, MOCK_RESTAURANTS } from '@/services/mock';
 import { radii, spacing, useThemeColors } from '@/theme';
 import { ltrNavigationChrome } from '@/utils/navigationChrome';
 import { chevronForwardTrailing } from '@/utils/rtl';
@@ -94,7 +94,7 @@ export default function SearchScreen() {
       </Pressable>
       <SearchBar placeholder={t('search.placeholder')} onPress={() => setQ('')} />
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.seg}>
+      <View style={styles.segWrap}>
         {SEGMENTS.map(({ key, labelKey }) => (
           <Pressable
             key={key}
@@ -106,7 +106,7 @@ export default function SearchScreen() {
             </AppText>
           </Pressable>
         ))}
-      </ScrollView>
+      </View>
 
       {!q.length ? (
         <>
@@ -270,7 +270,12 @@ function createStyles(colors: ThemeColors) {
     marginBottom: spacing.md,
     paddingVertical: spacing.sm,
   },
-  seg: { marginVertical: spacing.md },
+  segWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginVertical: spacing.md,
+  },
   segBtn: {
     paddingHorizontal: spacing.lg,
     paddingVertical: 10,
@@ -278,7 +283,6 @@ function createStyles(colors: ThemeColors) {
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    marginEnd: spacing.sm,
   },
   segOn: {
     borderColor: colors.primary,

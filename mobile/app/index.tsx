@@ -2,14 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
+import { Image } from 'expo-image';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 const SPLASH_MS = 2200;
+const BRAND_LOGO = require('../assets/icon.png');
 
 /**
  * First screen on cold start: brand splash, then entry (welcome carousel) or main tabs.
@@ -44,9 +45,7 @@ export default function SplashScreen() {
       colors={[colors.background, colors.backgroundElevated, colors.background]}
       style={styles.root}
     >
-      <View style={styles.logoRing}>
-        <Ionicons name="ticket" size={44} color={colors.primary} />
-      </View>
+      <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
       <AppText variant="display" color="text" style={styles.brand}>
         {t('common.brandDisplay')}
       </AppText>
@@ -66,16 +65,10 @@ function createStyles(colors: ThemeColors) {
       justifyContent: 'center',
       paddingHorizontal: spacing.xxl,
     },
-    logoRing: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: colors.primaryMuted,
-      alignItems: 'center',
-      justifyContent: 'center',
+    brandLogo: {
+      width: 112,
+      height: 112,
       marginBottom: spacing.lg,
-      borderWidth: 1,
-      borderColor: colors.border,
     },
     brand: {
       marginBottom: spacing.sm,

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -12,7 +12,8 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CURRENT_USER, MOCK_BOOKINGS, MOCK_VOUCHERS } from '@/mock';
+import { useMockUser } from '@/hooks/useMockUser';
+import { MOCK_BOOKINGS, MOCK_VOUCHERS } from '@/services/mock';
 import { useAppStore } from '@/store/appStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -28,7 +29,6 @@ const MENU_ACCOUNT: { key: string; labelKey: string; icon: keyof typeof Ionicons
   { key: 'language', labelKey: 'me.menuLanguage', icon: 'language-outline' },
   { key: 'help', labelKey: 'me.menuHelp', icon: 'help-circle-outline' },
   { key: 'settings', labelKey: 'me.menuSettings', icon: 'settings-outline' },
-  { key: 'business', labelKey: 'settings.businessForPartners', icon: 'business-outline' },
 ];
 
 export default function MeScreen() {
@@ -37,7 +37,8 @@ export default function MeScreen() {
   const { formatMoney } = useFormatMoney();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const displayName = locale === 'ar' && CURRENT_USER.nameAr ? CURRENT_USER.nameAr : CURRENT_USER.name;
+  const { user } = useMockUser();
+  const displayName = locale === 'ar' && user.nameAr ? user.nameAr : user.name;
   const logout = useAppStore((s) => s.logout);
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming').length;
 
@@ -75,9 +76,6 @@ export default function MeScreen() {
       case 'help':
         router.push('/help');
         break;
-      case 'business':
-        router.push('/business');
-        break;
       case 'settings':
         router.push('/settings');
         break;
@@ -89,7 +87,7 @@ export default function MeScreen() {
   return (
     <Screen scroll contentStyle={styles.pad}>
       <LinearGradient colors={[colors.primaryMuted, 'transparent']} style={styles.header}>
-        <Image source={{ uri: CURRENT_USER.avatarUrl }} style={styles.avatar} contentFit="cover" />
+        <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
         <View style={styles.headerText}>
           <AppText variant="h1" color="text">
             {displayName}
@@ -97,11 +95,14 @@ export default function MeScreen() {
           <View style={styles.badgeRow}>
             <View style={styles.tier}>
               <AppText variant="meta" color="accent">
-                {CURRENT_USER.membershipTier.toUpperCase()}
+                {user.membershipTier.toUpperCase()}
               </AppText>
             </View>
             <AppText variant="caption" color="textSecondary">
-              {CURRENT_USER.email}
+              {user.email}
+            </AppText>
+            <AppText variant="caption" color="textMuted">
+              {user.phone}
             </AppText>
           </View>
         </View>
@@ -125,7 +126,7 @@ export default function MeScreen() {
         />
         <StatItem
           label={t('me.wallet')}
-          value={formatMoney(CURRENT_USER.walletBalance, currency)}
+          value={formatMoney(user.walletBalance, currency)}
           icon="wallet-outline"
           colors={colors}
           boxStyle={styles.stat}
@@ -133,7 +134,7 @@ export default function MeScreen() {
       </View>
 
       <SectionHeader title={t('me.vouchersTitle')} />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={styles.voucherList}>
         {MOCK_VOUCHERS.map((v) => (
           <View key={v.id} style={styles.voucher}>
             <AppText variant="meta" color="accent">
@@ -147,14 +148,35 @@ export default function MeScreen() {
             </AppText>
           </View>
         ))}
-      </ScrollView>
+      </View>
+
+      <SectionHeader title={t('settings.businessForPartners')} />
+      <Pressable
+        style={({ pressed }) => [styles.businessCard, pressed && styles.businessCardPressed]}
+        onPress={() => router.push('/business')}
+        accessibilityRole="button"
+        accessibilityLabel={t('settings.businessForPartners')}
+      >
+        <View style={styles.businessIcon}>
+          <Ionicons name="business-outline" size={22} color={colors.primary} />
+        </View>
+        <View style={styles.businessText}>
+          <AppText variant="bodyMedium" color="text">
+            {t('settings.businessForPartners')}
+          </AppText>
+          <AppText variant="caption" color="textMuted" numberOfLines={2}>
+            {t('settings.businessSubtitle')}
+          </AppText>
+        </View>
+        <Ionicons name={chevronForwardTrailing()} size={20} color={colors.textMuted} />
+      </Pressable>
 
       <SectionHeader title={t('me.account')} />
       <View style={styles.menu}>
         {MENU_ACCOUNT.map((item, index) => (
           <Pressable
             key={item.key}
-            style={[styles.menuRow, index === MENU_ACCOUNT.length - 1 && styles.menuRowLastInGroup]}
+            style={[styles.menuRow, index < MENU_ACCOUNT.length - 1 && styles.menuRowDivider]}
             onPress={() => openMenu(item.key)}
             accessibilityRole="button"
             accessibilityLabel={t(item.labelKey)}
@@ -265,17 +287,40 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       gap: 4,
     },
+    voucherList: {
+      gap: spacing.md,
+      marginBottom: spacing.xl,
+    },
     voucher: {
-      width: 200,
-      marginEnd: spacing.md,
+      width: '100%',
       padding: spacing.md,
       backgroundColor: colors.surface,
       borderRadius: radii.xl,
       borderWidth: 1,
       borderColor: colors.border,
       gap: 6,
-      marginBottom: spacing.lg,
     },
+    businessCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      padding: spacing.lg,
+      marginBottom: spacing.xl,
+      backgroundColor: colors.surface,
+      borderRadius: radii.xl,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    businessCardPressed: { opacity: 0.9 },
+    businessIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: radii.lg,
+      backgroundColor: colors.primaryMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    businessText: { flex: 1, gap: 4 },
     menu: {
       backgroundColor: colors.surface,
       borderRadius: radii.xl,
@@ -289,12 +334,11 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       paddingVertical: 14,
       paddingHorizontal: spacing.md,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.border,
       gap: spacing.md,
     },
-    menuRowLastInGroup: {
-      borderBottomWidth: 0,
+    menuRowDivider: {
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
     logoutGap: {
       height: spacing.xl,

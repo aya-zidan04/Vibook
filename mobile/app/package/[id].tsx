@@ -5,13 +5,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
+import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getPackageById } from '@/mock/queries';
+import { getPackageById } from '@/services/mock';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -68,6 +69,7 @@ export default function PackageDetailScreen() {
           <AppText variant="body" color="textSecondary">
             {p.nights} {t('stay.nights')} · {t('package.bundleMeta')}
           </AppText>
+          <UserRatingBlock vertical="package" refId={p.id} />
           <AppText variant="body" color="textSecondary" style={styles.desc}>
             {t('package.body')}
           </AppText>

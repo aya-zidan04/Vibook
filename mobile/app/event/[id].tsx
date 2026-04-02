@@ -7,13 +7,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
+import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getCityName, getEventById, getOrganizerById, getTiersForEvent } from '@/mock/queries';
+import { getCityName, getEventById, getOrganizerById, getTiersForEvent } from '@/services/mock';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
@@ -106,6 +107,8 @@ export default function EventDetailScreen() {
                 {t('event.reviewsWord')}
               </AppText>
             </View>
+
+            <UserRatingBlock vertical="event" refId={event.id} />
 
             <View style={styles.card}>
               <Row icon="calendar-outline" label={t('event.date')} value={dateStr} />

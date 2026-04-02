@@ -5,7 +5,7 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CURRENT_USER } from '@/mock';
+import { useMockUser } from '@/hooks/useMockUser';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -14,6 +14,7 @@ export default function WalletScreen() {
   const { formatMoney } = useFormatMoney();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { user } = useMockUser();
 
   return (
     <Screen scroll contentStyle={styles.pad}>
@@ -23,7 +24,7 @@ export default function WalletScreen() {
           {t('wallet.balance')}
         </AppText>
         <AppText variant="display" color="text">
-          {formatMoney(CURRENT_USER.walletBalance, currency)}
+          {formatMoney(user.walletBalance, currency)}
         </AppText>
       </View>
       <AppText variant="body" color="textSecondary">
