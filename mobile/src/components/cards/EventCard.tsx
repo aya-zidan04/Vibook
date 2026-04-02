@@ -11,7 +11,7 @@ import type { ThemeColors } from '@/theme/palettes';
 import type { EventItem } from '@/types';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { formatDateShort } from '@/utils/format';
+import { formatDateShort, formatDecimalForLocale } from '@/utils/format';
 
 type Props = {
   event: EventItem;
@@ -77,7 +77,7 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
           <View style={styles.rating}>
             <Ionicons name="star" size={14} color={colors.warning} />
             <AppText variant="meta" color="textSecondary">
-              {event.rating.toFixed(1)}
+              {formatDecimalForLocale(event.rating, locale, 1)}
             </AppText>
           </View>
         </View>
@@ -97,7 +97,7 @@ function createStyles(colors: ThemeColors, wide: boolean) {
     },
     wide: {
       width: 280,
-      marginRight: spacing.md,
+      marginEnd: spacing.md,
     },
     compact: {
       width: '100%',
@@ -114,12 +114,12 @@ function createStyles(colors: ThemeColors, wide: boolean) {
     badgePos: {
       position: 'absolute',
       top: spacing.sm,
-      left: spacing.sm,
+      start: spacing.sm,
     },
     fav: {
       position: 'absolute',
       top: spacing.sm,
-      right: spacing.sm,
+      end: spacing.sm,
       width: 36,
       height: 36,
       borderRadius: 18,

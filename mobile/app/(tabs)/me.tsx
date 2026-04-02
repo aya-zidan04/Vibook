@@ -9,6 +9,8 @@ import { SectionHeader } from '@/components/layout/SectionHeader';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { formatIntForLocale } from '@/utils/format';
+import { chevronForwardTrailing } from '@/utils/rtl';
 import { useTranslation } from '@/i18n/useTranslation';
 import { CURRENT_USER, MOCK_BOOKINGS, MOCK_VOUCHERS } from '@/mock';
 import { useAppStore } from '@/store/appStore';
@@ -109,14 +111,14 @@ export default function MeScreen() {
       <View style={styles.stats}>
         <StatItem
           label={t('me.bookings')}
-          value={String(MOCK_BOOKINGS.length)}
+          value={formatIntForLocale(MOCK_BOOKINGS.length, locale)}
           icon="calendar-outline"
           colors={colors}
           boxStyle={styles.stat}
         />
         <StatItem
           label={t('me.upcoming')}
-          value={String(upcoming)}
+          value={formatIntForLocale(upcoming, locale)}
           icon="time-outline"
           colors={colors}
           boxStyle={styles.stat}
@@ -163,7 +165,7 @@ export default function MeScreen() {
             <AppText variant="bodyMedium" color="text" style={styles.menuLabel}>
               {t(item.labelKey)}
             </AppText>
-            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
           </Pressable>
         ))}
       </View>
@@ -265,7 +267,7 @@ function createStyles(colors: ThemeColors) {
     },
     voucher: {
       width: 200,
-      marginRight: spacing.md,
+      marginEnd: spacing.md,
       padding: spacing.md,
       backgroundColor: colors.surface,
       borderRadius: radii.xl,

@@ -37,7 +37,7 @@ function createStyles(colors: ThemeColors) {
   pad: { paddingTop: spacing.md },
   card: {
     width: 220,
-    marginRight: spacing.md,
+    marginEnd: spacing.md,
     padding: spacing.lg,
     backgroundColor: colors.surface,
     borderRadius: radii.xl,

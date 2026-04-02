@@ -2,6 +2,8 @@ import { type ReactNode, useEffect } from 'react';
 import { I18nManager, Platform, StyleSheet, View } from 'react-native';
 import { useLocaleStore } from '@/store/localeStore';
 
+I18nManager.allowRTL(true);
+
 type Props = { children: ReactNode };
 
 /**

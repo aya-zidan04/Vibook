@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
+import { ltrNavigationChrome } from '@/utils/navigationChrome';
 import { spacing, useThemeColors } from '@/theme';
 
 type Props = {
@@ -13,19 +14,18 @@ type Props = {
 
 export function DetailHeader({ title, right }: Props) {
   const router = useRouter();
-  const rtl = I18nManager.isRTL;
   const { t } = useTranslation();
   const colors = useThemeColors();
 
   return (
-    <View style={styles.row}>
+    <View style={[ltrNavigationChrome, styles.row]}>
       <Pressable
         onPress={() => router.back()}
         hitSlop={12}
         accessibilityRole="button"
         accessibilityLabel={t('common.a11yGoBack')}
       >
-        <Ionicons name={rtl ? 'chevron-forward' : 'chevron-back'} size={28} color={colors.text} />
+        <Ionicons name="chevron-back" size={28} color={colors.text} />
       </Pressable>
       {title ? (
         <AppText variant="h3" color="text" numberOfLines={1} style={styles.title}>

@@ -12,6 +12,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_EVENTS } from '@/mock/events';
+import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
+import { chevronForwardTrailing } from '@/utils/rtl';
 import { getOrganizerById } from '@/mock/queries';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -21,7 +23,7 @@ export default function OrganizerScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const org = id ? getOrganizerById(id) : undefined;
   const events = org ? MOCK_EVENTS.filter((e) => e.organizerId === org.id) : [];
@@ -59,7 +61,8 @@ export default function OrganizerScreen() {
               <View style={styles.row}>
                 <Ionicons name="star" size={16} color={colors.warning} />
                 <AppText variant="bodyMedium" color="textSecondary">
-                  {org.rating.toFixed(1)} · {org.reviewCount.toLocaleString()} {t('event.reviewsWord')}
+                  {formatDecimalForLocale(org.rating, locale, 1)} · {formatIntForLocale(org.reviewCount, locale)}{' '}
+                  {t('event.reviewsWord')}
                 </AppText>
                 {org.verified ? (
                   <AppText variant="meta" color="accent">
@@ -90,7 +93,7 @@ export default function OrganizerScreen() {
                   {t('common.from')} {formatMoney(e.priceFrom, e.currency)}
                 </AppText>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
             </Pressable>
           ))}
         </View>

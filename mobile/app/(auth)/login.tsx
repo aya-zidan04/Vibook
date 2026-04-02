@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,12 +9,10 @@ import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { canSubmitLogin } from '@/utils/authValidation';
-import { radii, spacing, useThemeColors } from '@/theme';
-import type { ThemeColors } from '@/theme/palettes';
+import { ltrNavigationChrome } from '@/utils/navigationChrome';
+import { colors, radii, spacing } from '@/theme';
 
 export default function LoginScreen() {
-  const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -55,11 +53,13 @@ export default function LoginScreen() {
 
   return (
     <Screen scroll edges={['top', 'right', 'left', 'bottom']} contentStyle={styles.scroll}>
-      <View style={styles.grabber} accessibilityLabel="Sheet handle" />
+      <View style={ltrNavigationChrome}>
+        <View style={styles.grabber} accessibilityLabel="Sheet handle" />
 
-      <Pressable onPress={close} style={styles.closeRow} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
-        <Ionicons name="close" size={28} color={colors.text} />
-      </Pressable>
+        <Pressable onPress={close} style={styles.closeRow} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
+          <Ionicons name="close" size={28} color={colors.text} />
+        </Pressable>
+      </View>
 
       <AppText variant="h1" color="text" style={styles.title}>
         {t('auth.loginToBrand')}
@@ -107,8 +107,7 @@ export default function LoginScreen() {
   );
 }
 
-function createStyles(colors: ThemeColors) {
-  return StyleSheet.create({
+const styles = StyleSheet.create({
   scroll: {
     paddingTop: spacing.sm,
     paddingBottom: spacing.xxxl,
@@ -151,5 +150,3 @@ function createStyles(colors: ThemeColors) {
     textDecorationLine: 'underline',
   },
 });
-
-}

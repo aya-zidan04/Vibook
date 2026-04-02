@@ -14,6 +14,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getCityName, getEventById, getOrganizerById, getTiersForEvent } from '@/mock/queries';
+import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
+import { chevronForwardTrailing } from '@/utils/rtl';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -100,7 +102,8 @@ export default function EventDetailScreen() {
             <View style={styles.row}>
               <Ionicons name="star" size={16} color={colors.warning} />
               <AppText variant="bodyMedium" color="textSecondary">
-                {event.rating.toFixed(1)} · {event.reviewCount} {t('event.reviewsWord')}
+                {formatDecimalForLocale(event.rating, locale, 1)} · {formatIntForLocale(event.reviewCount, locale)}{' '}
+                {t('event.reviewsWord')}
               </AppText>
             </View>
 
@@ -121,7 +124,7 @@ export default function EventDetailScreen() {
                     {t('event.organizer')} · {organizer.verified ? t('organizer.verified') : t('event.host')}
                   </AppText>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
               </Pressable>
             ) : null}
 

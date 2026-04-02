@@ -13,6 +13,7 @@ import { MOCK_BOOKINGS } from '@/mock';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { formatDateShort } from '@/utils/format';
+import { chevronForwardTrailing } from '@/utils/rtl';
 
 export default function BookingTabScreen() {
   const colors = useThemeColors();
@@ -127,7 +128,7 @@ function BookingCard({
           <AppText variant="meta" color="accent">
             {t('common.details')}
           </AppText>
-          <Ionicons name="chevron-forward" size={16} color={colors.accent} />
+          <Ionicons name={chevronForwardTrailing()} size={16} color={colors.accent} />
         </View>
       </View>
     </Pressable>
@@ -170,7 +171,7 @@ function createStyles(colors: ThemeColors) {
   },
   cardNarrow: {
     width: 300,
-    marginRight: spacing.md,
+    marginEnd: spacing.md,
   },
   img: { width: 104, height: 120 },
   body: { flex: 1, padding: spacing.md, gap: 6 },

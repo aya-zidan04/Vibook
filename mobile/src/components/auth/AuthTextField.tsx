@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { I18nManager, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { radii, spacing, useThemeColors } from '@/theme';
@@ -54,7 +54,14 @@ export function AuthTextField({
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoCorrect={autoCorrect}
-          style={[styles.input, textInputStyle]}
+          style={[
+            styles.input,
+            {
+              textAlign: I18nManager.isRTL ? 'right' : 'left',
+              writingDirection: (I18nManager.isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
+            },
+            textInputStyle,
+          ]}
         />
         {rightSlot ? <View style={styles.right}>{rightSlot}</View> : null}
       </View>
@@ -95,7 +102,7 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.border,
       minHeight: 52,
     },
-    fieldRowPad: { paddingRight: spacing.sm },
+    fieldRowPad: { paddingEnd: spacing.sm },
     input: {
       flex: 1,
       paddingHorizontal: spacing.md,
@@ -103,8 +110,8 @@ function createStyles(colors: ThemeColors) {
       color: colors.text,
       fontSize: 16,
     },
-    left: { paddingLeft: spacing.sm },
-    right: { paddingRight: spacing.sm },
+    left: { paddingStart: spacing.sm },
+    right: { paddingEnd: spacing.sm },
     helper: { lineHeight: 18, marginTop: 2 },
   });
 }

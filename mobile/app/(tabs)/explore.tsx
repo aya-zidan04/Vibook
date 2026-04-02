@@ -16,17 +16,16 @@ import {
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_EVENTS, MOCK_EXPERIENCES, MOCK_OFFERS, MOCK_PACKAGES } from '@/mock';
 import { getCityName } from '@/mock/queries';
-import { useLocaleStore } from '@/store/localeStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 const CATEGORIES: ExploreCategory[] = [
-  { id: 'sports', emoji: '⚽', labelEn: 'Match day', labelAr: 'يوم المباراة' },
-  { id: 'dining', emoji: '🍽️', labelEn: 'Fine dining', labelAr: 'مطاعم فاخرة' },
-  { id: 'hotels', emoji: '🏨', labelEn: 'Stays', labelAr: 'إقامة' },
-  { id: 'concerts', emoji: '🎤', labelEn: 'Live shows', labelAr: 'حفلات مباشرة' },
-  { id: 'theater', emoji: '🎭', labelEn: 'Theatre', labelAr: 'مسرح' },
-  { id: 'shopping', emoji: '🛍️', labelEn: 'Retail therapy', labelAr: 'تسوّق' },
+  { id: 'sports', icon: 'football-outline', labelEn: 'Match day', labelAr: 'يوم المباراة' },
+  { id: 'dining', icon: 'restaurant-outline', labelEn: 'Fine dining', labelAr: 'مطاعم فاخرة' },
+  { id: 'hotels', icon: 'bed-outline', labelEn: 'Stays', labelAr: 'إقامة' },
+  { id: 'concerts', icon: 'mic-outline', labelEn: 'Live shows', labelAr: 'حفلات مباشرة' },
+  { id: 'theater', icon: 'color-palette-outline', labelEn: 'Theatre', labelAr: 'مسرح' },
+  { id: 'shopping', icon: 'bag-handle-outline', labelEn: 'Retail therapy', labelAr: 'تسوّق' },
 ];
 
 export default function ExploreScreen() {
@@ -34,9 +33,6 @@ export default function ExploreScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
-  const regionFromStore = useLocaleStore((s) => s.regionLabel);
-  const regionLabel = locale === 'ar' ? t('explore.country') : regionFromStore;
-
   const heroSlides: HeroSlideItem[] = [
     {
       id: 'h1',
@@ -127,7 +123,6 @@ export default function ExploreScreen() {
       <View style={styles.root}>
         <ExploreHeader
           brandLabel={t('common.brandDisplay')}
-          regionLabel={regionLabel}
           onSearch={() => router.push('/search')}
           onLanguageCurrency={() => router.push('/language-currency')}
           a11yLanguageCurrency={t('explore.a11yLanguageCurrency')}
@@ -140,7 +135,7 @@ export default function ExploreScreen() {
           style={styles.scrollView}
         >
           <View style={styles.sectionHead}>
-            <AppText variant="overline" color="accent">
+            <AppText variant="overline" color="accent" style={styles.heroEyebrow}>
               {t('explore.heroEyebrow')}
             </AppText>
             <AppText variant="h1" color="text">
@@ -203,6 +198,11 @@ export default function ExploreScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    heroEyebrow: {
+      fontSize: 14,
+      lineHeight: 18,
+      letterSpacing: 1.1,
+    },
     safe: { flex: 1, backgroundColor: colors.background },
     root: { flex: 1 },
     scrollView: { flex: 1 },

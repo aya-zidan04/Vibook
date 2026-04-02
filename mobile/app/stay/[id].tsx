@@ -13,6 +13,7 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getCityName, getHotelById } from '@/mock/queries';
+import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -67,12 +68,12 @@ export default function StayDetailScreen() {
             {h.name}
           </AppText>
           <AppText variant="body" color="textSecondary">
-            {getCityName(h.cityId)} · {h.stars}★
+            {getCityName(h.cityId, locale)} · {formatIntForLocale(h.stars, locale)}★
           </AppText>
           <View style={styles.row}>
             <Ionicons name="star" size={16} color={colors.warning} />
             <AppText variant="bodyMedium" color="textSecondary">
-              {h.rating.toFixed(1)} {t('stay.guestRating')}
+              {formatDecimalForLocale(h.rating, locale, 1)} {t('stay.guestRating')}
             </AppText>
           </View>
           <AppText variant="h3" color="text" style={styles.mt}>

@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     marginBottom: spacing.md,
-    paddingRight: 2,
+    paddingEnd: 2,
   },
   titles: {
     flex: 1,

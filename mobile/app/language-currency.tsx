@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { I18nManager, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import type { AppLocale, DisplayCurrency } from '@/store/localeStore';
 import { useLocaleStore } from '@/store/localeStore';
 import { useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import { ltrNavigationChrome } from '@/utils/navigationChrome';
 
 type Tab = 'language' | 'currency';
 
@@ -19,32 +20,45 @@ export default function LanguageCurrencyScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { t, isRTL } = useTranslation();
   const locale = useLocaleStore((s) => s.locale);
   const currency = useLocaleStore((s) => s.currency);
   const setLocale = useLocaleStore((s) => s.setLocale);
   const setCurrency = useLocaleStore((s) => s.setCurrency);
   const [tab, setTab] = useState<Tab>('language');
-  const rtl = I18nManager.isRTL;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
-          <Ionicons name={rtl ? 'chevron-forward' : 'chevron-back'} size={28} color={colors.text} />
-        </Pressable>
-        <Text style={styles.pageTitle}>{t('languageCurrency.pageTitle')}</Text>
+        <View style={ltrNavigationChrome}>
+          <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
+            <Ionicons name="chevron-back" size={28} color={colors.text} />
+          </Pressable>
+          <Text style={[styles.pageTitle, isRTL && styles.pageTitleAr]}>{t('languageCurrency.pageTitle')}</Text>
+        </View>
       </View>
 
-      <View style={styles.tabs}>
+      <View style={[styles.tabs, isRTL && styles.tabsAr]}>
         <Pressable onPress={() => setTab('language')} style={styles.tabBtn}>
-          <Text style={[styles.tabLabel, tab === 'language' ? styles.tabActive : styles.tabInactive]}>
+          <Text
+            style={[
+              styles.tabLabel,
+              isRTL && styles.tabLabelAr,
+              tab === 'language' ? styles.tabActive : styles.tabInactive,
+            ]}
+          >
             {t('languageCurrency.tabLanguage')}
           </Text>
           {tab === 'language' ? <View style={styles.tabUnderline} /> : <View style={styles.tabUnderlineHidden} />}
         </Pressable>
         <Pressable onPress={() => setTab('currency')} style={styles.tabBtn}>
-          <Text style={[styles.tabLabel, tab === 'currency' ? styles.tabActive : styles.tabInactive]}>
+          <Text
+            style={[
+              styles.tabLabel,
+              isRTL && styles.tabLabelAr,
+              tab === 'currency' ? styles.tabActive : styles.tabInactive,
+            ]}
+          >
             {t('languageCurrency.tabCurrency')}
           </Text>
           {tab === 'currency' ? <View style={styles.tabUnderline} /> : <View style={styles.tabUnderlineHidden} />}
@@ -92,18 +106,20 @@ function OptionCard({
 }) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { isRTL } = useTranslation();
   return (
     <Pressable
       onPress={onSelect}
       style={({ pressed }) => [
         styles.card,
+        isRTL && styles.cardAr,
         selected ? styles.cardSelected : styles.cardIdle,
         pressed && { opacity: 0.92 },
       ]}
     >
-      <View>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardSub}>{subtitle}</Text>
+      <View style={isRTL ? styles.cardTextAr : undefined}>
+        <Text style={[styles.cardTitle, isRTL && styles.cardTitleAr]}>{title}</Text>
+        <Text style={[styles.cardSub, isRTL && styles.cardSubAr]}>{subtitle}</Text>
       </View>
       {selected ? (
         <View style={styles.checkBubble}>
@@ -135,11 +151,20 @@ function createStyles(colors: ThemeColors) {
     paddingHorizontal: 12,
     letterSpacing: -0.3,
   },
+  pageTitleAr: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
   tabs: {
     flexDirection: 'row',
+    alignSelf: 'stretch',
+    width: '100%',
     paddingHorizontal: 20,
     marginTop: 24,
     gap: 28,
+  },
+  tabsAr: {
+    direction: 'rtl',
   },
   tabBtn: {
     paddingBottom: 10,
@@ -148,6 +173,10 @@ function createStyles(colors: ThemeColors) {
   tabLabel: {
     fontSize: 17,
     fontWeight: '600',
+  },
+  tabLabelAr: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
   },
   tabActive: { color: colors.text },
   tabInactive: { color: colors.textMuted },
@@ -176,6 +205,20 @@ function createStyles(colors: ThemeColors) {
     paddingHorizontal: 18,
     borderRadius: 14,
     borderWidth: 1,
+  },
+  cardAr: {
+    flexDirection: 'row-reverse',
+  },
+  cardTextAr: {
+    alignItems: 'flex-end',
+  },
+  cardTitleAr: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
+  cardSubAr: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
   },
   cardSelected: {
     backgroundColor: colors.surfaceMuted,

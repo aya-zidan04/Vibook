@@ -55,7 +55,7 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      marginRight: spacing.sm,
+      marginEnd: spacing.sm,
     },
     chipOn: {
       backgroundColor: colors.primaryMuted,

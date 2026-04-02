@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
+import { chevronForwardTrailing } from '@/utils/rtl';
 import { useThemeStore } from '@/store/themeStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -33,19 +34,7 @@ export default function SettingsScreen() {
         <AppText variant="meta" color="textMuted">
           {appearanceLabel}
         </AppText>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </Pressable>
-      <Pressable style={styles.row}>
-        <View style={styles.icon}>
-          <Ionicons name="globe-outline" size={20} color={colors.primary} />
-        </View>
-        <AppText variant="bodyMedium" color="text" style={{ flex: 1 }}>
-          {t('settings.region')}
-        </AppText>
-        <AppText variant="meta" color="textMuted">
-          {t('settings.regionVal')}
-        </AppText>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
       </Pressable>
       <Pressable style={styles.row}>
         <View style={styles.icon}>
@@ -57,7 +46,7 @@ export default function SettingsScreen() {
         <AppText variant="meta" color="textMuted">
           {t('settings.pushVal')}
         </AppText>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
       </Pressable>
       <AppText variant="caption" color="textMuted" style={styles.note}>
         {t('settings.note')}

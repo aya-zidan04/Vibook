@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField, PasswordToggleIcon } from '@/components/auth/AuthTextField';
@@ -13,6 +13,7 @@ import {
   isValidJordanLocalPhone,
   isValidSignupPassword,
 } from '@/utils/authValidation';
+import { ltrNavigationChrome } from '@/utils/navigationChrome';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -71,21 +72,19 @@ export default function SignupScreen() {
 
   return (
     <Screen scroll edges={['top', 'right', 'left', 'bottom']} contentStyle={styles.scroll}>
-      <View style={styles.grabber} />
+      <View style={ltrNavigationChrome}>
+        <View style={styles.grabber} />
 
-      <Pressable
-        onPress={() => router.back()}
-        style={styles.backRow}
-        hitSlop={12}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-      >
-        <Ionicons
-          name={I18nManager.isRTL ? 'chevron-forward' : 'chevron-back'}
-          size={28}
-          color={colors.text}
-        />
-      </Pressable>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backRow}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+        >
+          <Ionicons name="chevron-back" size={28} color={colors.text} />
+        </Pressable>
+      </View>
 
       <AppText variant="h1" color="text" style={styles.title}>
         {t('auth.signupTitle')}
@@ -248,8 +247,9 @@ function createStyles(colors: ThemeColors) {
     backgroundColor: colors.border,
   },
   phoneInput: {
-    // Keep numerals LTR in RTL layouts
+    // Keep phone numerals LTR inside the field in RTL layouts
     textAlign: 'left',
+    writingDirection: 'ltr',
   },
   termsRow: {
     flexDirection: 'row',

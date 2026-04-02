@@ -29,8 +29,20 @@ export function ExploreEventFeedCard({
   const start = new Date(event.startAt);
   const dateStr =
     locale === 'ar'
-      ? start.toLocaleString('ar-JO', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-      : start.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      ? start.toLocaleString('ar-JO', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          numberingSystem: 'arab',
+        })
+      : start.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          numberingSystem: 'latn',
+        });
 
   const price = formatMoney(event.priceFrom, event.currency);
 

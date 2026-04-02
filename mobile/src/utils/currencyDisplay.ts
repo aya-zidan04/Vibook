@@ -17,6 +17,13 @@ export function convertToDisplay(amount: number, sourceCurrency: string, display
   return Math.max(0, Math.round(jod));
 }
 
+function formatDigits(n: number, locale: AppLocale): string {
+  if (locale === 'ar') {
+    return new Intl.NumberFormat('ar-JO', { numberingSystem: 'arab', maximumFractionDigits: 0 }).format(n);
+  }
+  return new Intl.NumberFormat('en-US', { numberingSystem: 'latn', maximumFractionDigits: 0 }).format(n);
+}
+
 export function formatDisplayMoney(
   amount: number,
   sourceCurrency: string,
@@ -24,8 +31,9 @@ export function formatDisplayMoney(
   locale: AppLocale,
 ): string {
   const n = convertToDisplay(amount, sourceCurrency, display);
+  const d = formatDigits(n, locale);
   if (display === 'USD') {
-    return locale === 'ar' ? `$${n.toLocaleString('ar-JO')}` : `$${n.toLocaleString('en-US')}`;
+    return locale === 'ar' ? `\u200e$\u200f${d}` : `$${d}`;
   }
-  return locale === 'ar' ? `${n.toLocaleString('ar-JO')} د.أ` : `JOD ${n.toLocaleString('en-US')}`;
+  return locale === 'ar' ? `\u200e${d}\u00a0د.أ` : `JOD ${d}`;
 }

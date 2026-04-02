@@ -6,7 +6,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { createShadows, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
-/** Physical order: Explore (left) → Booking → Favorites → Me. Tab bar `direction: 'ltr'` keeps positions in Arabic. */
+/** Tab bar stays LTR so Explore → Booking → Favorites → Me always read left-to-right, even when app UI is Arabic (RTL). */
 export default function TabsLayout() {
   const { t } = useTranslation();
   const colors = useThemeColors();

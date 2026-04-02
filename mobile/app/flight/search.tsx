@@ -77,7 +77,7 @@ function createStyles(colors: ThemeColors) {
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    marginRight: spacing.sm,
+    marginEnd: spacing.sm,
   },
   chipOn: { borderColor: colors.primary, backgroundColor: colors.primaryMuted },
   mt: { marginTop: spacing.md },

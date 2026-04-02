@@ -13,6 +13,8 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_EVENTS, MOCK_FLIGHTS, MOCK_HOTELS, MOCK_RESTAURANTS } from '@/mock';
 import { radii, spacing, useThemeColors } from '@/theme';
+import { ltrNavigationChrome } from '@/utils/navigationChrome';
+import { chevronForwardTrailing } from '@/utils/rtl';
 import type { ThemeColors } from '@/theme/palettes';
 
 const RECENT = ['Jazz night Riyadh', 'Dubai weekend', 'Chef’s table'];
@@ -59,17 +61,36 @@ export default function SearchScreen() {
     q.length > 0 &&
     results.ev.length + results.r.length + results.h.length + results.f.length === 0;
 
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/explore');
+    }
+  };
+
   return (
     <Screen scroll contentStyle={styles.pad}>
-      <AppText variant="h1" color="text" style={styles.title}>
-        {t('search.title')}
-      </AppText>
+      <View style={ltrNavigationChrome}>
+        <Pressable
+          onPress={goBack}
+          hitSlop={12}
+          style={styles.back}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.a11yGoBack')}
+        >
+          <Ionicons name="chevron-back" size={28} color={colors.text} />
+        </Pressable>
+        <AppText variant="h1" color="text" style={styles.title}>
+          {t('search.title')}
+        </AppText>
+      </View>
       <Pressable style={styles.flightLink} onPress={() => router.push('/flight/search')}>
         <Ionicons name="airplane-outline" size={18} color={colors.accent} />
         <AppText variant="bodyMedium" color="accent">
           {t('search.flightSearch')}
         </AppText>
-        <Ionicons name="chevron-forward" size={18} color={colors.accent} />
+        <Ionicons name={chevronForwardTrailing()} size={18} color={colors.accent} />
       </Pressable>
       <SearchBar placeholder={t('search.placeholder')} onPress={() => setQ('')} />
 
@@ -235,6 +256,12 @@ function ResultRow({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
   pad: { paddingTop: spacing.md },
+  back: {
+    padding: 8,
+    alignSelf: 'flex-start',
+    marginStart: -8,
+    marginBottom: 4,
+  },
   title: { marginBottom: spacing.sm },
   flightLink: {
     flexDirection: 'row',
@@ -251,7 +278,7 @@ function createStyles(colors: ThemeColors) {
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    marginRight: spacing.sm,
+    marginEnd: spacing.sm,
   },
   segOn: {
     borderColor: colors.primary,

@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { normalizeGovernorateLabel } from '@/constants/jordanGovernorates';
 
 export type AppLocale = 'en' | 'ar';
 export type DisplayCurrency = 'USD' | 'JOD';
@@ -20,7 +21,7 @@ export const useLocaleStore = create<LocaleState>()(
     (set) => ({
       locale: 'en',
       currency: 'USD',
-      regionLabel: 'Jordan',
+      regionLabel: 'Amman',
       setLocale: (locale) =>
         set((s) => ({
           locale,
@@ -40,6 +41,12 @@ export const useLocaleStore = create<LocaleState>()(
       onRehydrateStorage: () => (rehydrated) => {
         if (rehydrated?.locale === 'ar' && rehydrated.currency !== 'JOD') {
           useLocaleStore.setState({ currency: 'JOD' });
+        }
+        if (rehydrated?.regionLabel) {
+          const next = normalizeGovernorateLabel(rehydrated.regionLabel);
+          if (next !== rehydrated.regionLabel) {
+            useLocaleStore.setState({ regionLabel: next });
+          }
         }
       },
     },

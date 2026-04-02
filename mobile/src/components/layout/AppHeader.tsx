@@ -65,7 +65,7 @@ function createStyles(colors: ThemeColors) {
       justifyContent: 'space-between',
       marginBottom: spacing.lg,
     },
-    left: { flex: 1, marginRight: spacing.md },
+    left: { flex: 1, marginEnd: spacing.md },
     cityRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -87,7 +87,7 @@ function createStyles(colors: ThemeColors) {
     dot: {
       position: 'absolute',
       top: 10,
-      right: 10,
+      end: 10,
       width: 8,
       height: 8,
       borderRadius: 4,

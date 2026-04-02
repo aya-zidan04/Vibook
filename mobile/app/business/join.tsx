@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Alert, StyleSheet, TextInput, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
@@ -12,7 +11,6 @@ import type { ThemeColors } from '@/theme/palettes';
 export default function BusinessJoinScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const router = useRouter();
   const { t } = useTranslation();
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
@@ -48,12 +46,6 @@ export default function BusinessJoinScreen() {
       <AppText variant="caption" color="textMuted" style={styles.disclaimer}>
         {t('businessJoin.disclaimer')}
       </AppText>
-
-      <Pressable onPress={() => router.back()} style={styles.backLink} hitSlop={12}>
-        <AppText variant="meta" color="accent">
-          {t('common.back')}
-        </AppText>
-      </Pressable>
     </Screen>
   );
 }
@@ -75,6 +67,7 @@ function LabeledField({
 }) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { isRTL } = useTranslation();
   return (
     <View style={styles.field}>
       <AppText variant="caption" color="textMuted">
@@ -88,7 +81,12 @@ function LabeledField({
         keyboardType={keyboard ?? 'default'}
         multiline={multiline}
         numberOfLines={multiline ? 4 : 1}
-        style={[styles.input, multiline && styles.inputMulti]}
+        textAlign={isRTL ? 'right' : 'left'}
+        style={[
+          styles.input,
+          multiline && styles.inputMulti,
+          { writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr' },
+        ]}
       />
     </View>
   );
@@ -113,7 +111,6 @@ function createStyles(colors: ThemeColors) {
     textAlignVertical: 'top',
   },
   disclaimer: { lineHeight: 18 },
-  backLink: { textAlign: 'center', marginTop: spacing.sm },
 });
 
 }

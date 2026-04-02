@@ -62,7 +62,7 @@ export function HeroCarousel({ slides, onSlidePress }: Props) {
             onPress={() => onSlidePress?.(item.id)}
             style={({ pressed }) => [
               styles.card,
-              { width: CARD_W, marginRight: spacing.md },
+              { width: CARD_W, marginEnd: spacing.md },
               pressed && { opacity: 0.94 },
             ]}
           >

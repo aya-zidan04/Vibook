@@ -14,6 +14,7 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { getCityName, getRestaurantById } from '@/mock/queries';
+import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -88,7 +89,8 @@ export default function RestaurantDetailScreen() {
           <View style={styles.row}>
             <Ionicons name="star" size={16} color={colors.warning} />
             <AppText variant="bodyMedium" color="textSecondary">
-              {r.rating.toFixed(1)} ({r.reviewCount}+ {t('restaurant.reviewsPlus')})
+              {formatDecimalForLocale(r.rating, locale, 1)} ({formatIntForLocale(r.reviewCount, locale)}+{' '}
+              {t('restaurant.reviewsPlus')})
             </AppText>
           </View>
           <AppText variant="body" color="textSecondary" style={styles.desc}>
@@ -156,7 +158,7 @@ function createStyles(colors: ThemeColors) {
     borderRadius: radii.full,
     borderWidth: 1,
     borderColor: colors.border,
-    marginRight: spacing.sm,
+    marginEnd: spacing.sm,
     backgroundColor: colors.surface,
   },
   slotOn: { borderColor: colors.primary, backgroundColor: colors.primaryMuted },

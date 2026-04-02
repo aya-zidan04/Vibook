@@ -1,4 +1,5 @@
 import { Text, TextProps } from 'react-native';
+import { useLocaleStore } from '@/store/localeStore';
 import { useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { typography, type TypographyVariant } from '@/theme/typography';
@@ -18,10 +19,13 @@ function resolveTextColor(colors: ThemeColors, color: keyof ThemeColors | string
 
 export function AppText({ variant = 'body', color = 'text', style, children, ...rest }: Props) {
   const colors = useThemeColors();
+  const locale = useLocaleStore((s) => s.locale);
   const resolved = resolveTextColor(colors, color);
 
+  const writingDirection = locale === 'ar' ? 'rtl' : 'ltr';
+
   return (
-    <Text style={[typography[variant], { color: resolved }, style]} {...rest}>
+    <Text style={[typography[variant], { color: resolved, writingDirection }, style]} {...rest}>
       {children}
     </Text>
   );
