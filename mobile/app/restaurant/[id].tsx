@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,9 +14,12 @@ import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getCityName, getRestaurantById } from '@/services/mock';
+import { useRestaurantPdp } from '@/hooks/useCatalogPdp';
+import { getCityName } from '@/services/mock';
+import { parseCatalogNumericId } from '@/services/catalog/mapCatalog';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
+import { useLocaleStore } from '@/store/localeStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -35,9 +38,24 @@ export default function RestaurantDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const r = id ? getRestaurantById(id) : undefined;
+  const checkoutCurrency = useLocaleStore((s) => s.currency);
+  const { restaurant: r, loading } = useRestaurantPdp(id);
   const [guests, setGuests] = useState(2);
   const [slot, setSlot] = useState(SLOTS[2]);
+
+  if (loading) {
+    return (
+      <Screen>
+        <DetailHeader title={t('restaurant.title')} />
+        <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+            {t('common.loading')}
+          </AppText>
+        </View>
+      </Screen>
+    );
+  }
 
   if (!r) {
     return (
@@ -51,7 +69,10 @@ export default function RestaurantDetailScreen() {
 
   const fee = 40 * guests;
   const city = getCityName(r.cityId, locale);
-  const blurbKey = r.id in BLURB_KEYS ? BLURB_KEYS[r.id] : null;
+  const blurbKey =
+    id && parseCatalogNumericId(id) == null && r.id in BLURB_KEYS
+      ? BLURB_KEYS[r.id as keyof typeof BLURB_KEYS]
+      : null;
 
   const book = () => {
     setDraft({
@@ -59,10 +80,13 @@ export default function RestaurantDetailScreen() {
       refId: r.id,
       title: r.name,
       imageUrl: r.imageUrl,
-      currency: 'SAR',
+      currency: checkoutCurrency,
       unitPrice: fee,
       quantity: 1,
       fees: 15,
+      startsAt: new Date(Date.now() + 2 * 86400000).toISOString(),
+      cityName: getCityName(r.cityId, 'en'),
+      cityNameAr: getCityName(r.cityId, 'ar'),
       metaLine: `${slot} · ${guests} ${t('restaurant.guestsLabel')}`,
     });
     router.push('/checkout');
@@ -133,7 +157,7 @@ export default function RestaurantDetailScreen() {
               {t('restaurant.holdFee')}
             </AppText>
             <AppText variant="price" color="text">
-              {formatMoney(fee + 15, 'SAR')}
+              {formatMoney(fee + 15, checkoutCurrency)}
             </AppText>
           </View>
           <PrimaryButton title={t('restaurant.reserve')} onPress={book} style={styles.cta} />

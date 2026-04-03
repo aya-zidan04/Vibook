@@ -1,13 +1,11 @@
+/** Legacy helper; prefer {@link useFormatMoney} / `formatDisplayMoney` for UI. JOD/USD aligned with backend. */
 export function formatPrice(amount: number, currency: string, locale: 'en' | 'ar' = 'en'): string {
-  if (amount === 0 && currency === 'AED') return 'Free';
   const sym =
-    currency === 'SAR'
-      ? 'SAR '
-      : currency === 'AED'
-        ? 'AED '
-        : currency === 'USD'
-          ? '$'
-          : `${currency} `;
+    currency === 'JOD'
+      ? 'JOD '
+      : currency === 'USD'
+        ? '$'
+        : `${currency} `;
   const digits =
     locale === 'ar'
       ? amount.toLocaleString('ar-JO', { maximumFractionDigits: 0, numberingSystem: 'arab' })

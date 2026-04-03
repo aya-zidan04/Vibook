@@ -4,11 +4,18 @@ export type BookingDraft = {
   vertical: 'event' | 'restaurant' | 'stay' | 'flight' | 'experience' | 'package';
   refId: string;
   title: string;
+  /** Arabic listing title when known (optional for API create). */
+  refTitleAr?: string;
   imageUrl: string;
   currency: string;
   unitPrice: number;
   quantity: number;
   fees: number;
+  /** ISO 8601 start time for the booking (events, flights, etc.). */
+  startsAt?: string;
+  /** Display / API city (English). */
+  cityName?: string;
+  cityNameAr?: string;
   tierName?: string;
   metaLine?: string;
 };

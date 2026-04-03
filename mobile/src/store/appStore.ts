@@ -1,7 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { clearTokens } from '@/services/auth/tokenStorage';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
+import { useFavoritesStore } from '@/store/favoritesStore';
+import { useSessionStore } from '@/store/sessionStore';
 import { useUserProfileStore } from '@/store/userProfileStore';
 
 type AppState = {
@@ -33,9 +36,12 @@ export const useAppStore = create<AppState>()(
       isGuest: true,
       setGuest: (v) => set({ isGuest: v }),
       logout: () => {
+        void clearTokens();
+        useSessionStore.getState().setServerUser(null);
         useBookingDraftStore.getState().setDraft(null);
         useBookingDraftStore.getState().setLastOrderId(null);
         useUserProfileStore.getState().reset();
+        useFavoritesStore.getState().reset();
         set({
           isAuthenticated: false,
           hasCompletedOnboarding: false,

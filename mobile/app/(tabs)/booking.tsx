@@ -1,15 +1,21 @@
-import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { AppText } from '@/components/ui/AppText';
+import { PrimaryButton } from '@/components/ui/Button';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useIntegrationMode } from '@/hooks/useIntegrationMode';
 import { useTranslation } from '@/i18n/useTranslation';
+import { bookingsApi } from '@/services/api/bookingsApi';
+import { ApiRequestError } from '@/services/api/http';
 import { MOCK_BOOKINGS } from '@/services/mock';
+import type { Booking } from '@/types';
+import { bookingResponseDtoToBooking } from '@/utils/bookingApiMap';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { formatDateShort } from '@/utils/format';
@@ -20,6 +26,195 @@ export default function BookingTabScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
+  const { api, authenticated, liveAccount } = useIntegrationMode();
+  const [remoteBookings, setRemoteBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadRemote = useCallback(async () => {
+    if (!liveAccount) return;
+    setLoadError(null);
+    setLoading(true);
+    try {
+      const { bookings: rows } = await bookingsApi.listMine();
+      setRemoteBookings(rows.map(bookingResponseDtoToBooking));
+    } catch (e) {
+      const msg =
+        e instanceof ApiRequestError ? e.message : t('booking.loadError');
+      setLoadError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, [liveAccount, t]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadRemote();
+    }, [loadRemote]),
+  );
+
+  useEffect(() => {
+    if (!liveAccount) {
+      setRemoteBookings([]);
+      setLoadError(null);
+      setLoading(false);
+    }
+  }, [liveAccount]);
+
+  if (api && !authenticated) {
+    return (
+      <Screen scroll contentStyle={styles.pad}>
+        <AppText variant="h1" color="text" style={styles.title}>
+          {t('booking.title')}
+        </AppText>
+        <EmptyState
+          icon="ticket-outline"
+          title={t('booking.signInTitle')}
+          description={t('booking.signInDesc')}
+          actionLabel={t('entry.loginSignup')}
+          onAction={() => router.push('/(auth)/login')}
+        />
+      </Screen>
+    );
+  }
+
+  if (liveAccount) {
+    if (loading && remoteBookings.length === 0) {
+      return (
+        <Screen scroll contentStyle={styles.pad}>
+          <AppText variant="h1" color="text" style={styles.title}>
+            {t('booking.title')}
+          </AppText>
+          <AppText variant="body" color="textSecondary" style={styles.sub}>
+            {t('booking.subtitleLive')}
+          </AppText>
+          <View style={styles.center}>
+            <ActivityIndicator color={colors.primary} size="large" />
+            <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+              {t('common.loading')}
+            </AppText>
+          </View>
+        </Screen>
+      );
+    }
+
+    if (loadError && remoteBookings.length === 0) {
+      return (
+        <Screen scroll contentStyle={styles.pad}>
+          <AppText variant="h1" color="text" style={styles.title}>
+            {t('booking.title')}
+          </AppText>
+          <AppText variant="body" color="textSecondary" style={styles.sub}>
+            {t('booking.subtitleLive')}
+          </AppText>
+          <AppText variant="body" color="error" style={styles.err}>
+            {loadError}
+          </AppText>
+          <PrimaryButton title={t('common.retry')} onPress={() => void loadRemote()} />
+        </Screen>
+      );
+    }
+
+    const pending = remoteBookings.filter((b) => b.status === 'pending_payment');
+    const upcoming = remoteBookings.filter((b) => b.status === 'upcoming');
+    const past = remoteBookings.filter((b) => b.status === 'past' || b.status === 'cancelled');
+
+    const emptyAll = remoteBookings.length === 0;
+
+    return (
+      <Screen scroll contentStyle={styles.pad}>
+        <AppText variant="h1" color="text" style={styles.title}>
+          {t('booking.title')}
+        </AppText>
+        <AppText variant="body" color="textSecondary" style={styles.sub}>
+          {t('booking.subtitleLive')}
+        </AppText>
+        {loadError ? (
+          <AppText variant="caption" color="warning" style={styles.warnBanner}>
+            {loadError}
+          </AppText>
+        ) : null}
+
+        {emptyAll ? (
+          <EmptyState
+            icon="ticket-outline"
+            title={t('booking.noUpcomingTitle')}
+            description={t('booking.noUpcomingDesc')}
+            actionLabel={t('booking.exploreCta')}
+            onAction={() => router.push('/(tabs)/explore')}
+          />
+        ) : null}
+
+        {!emptyAll && pending.length > 0 ? (
+          <>
+            <SectionHeader title={t('booking.pending')} />
+            {pending.map((b) => (
+              <BookingCard key={b.id} booking={b} onOpen={() => router.push(`/booking/${b.id}`)} />
+            ))}
+          </>
+        ) : null}
+
+        {!emptyAll ? (
+          <>
+            <SectionHeader title={t('booking.upcoming')} />
+            {upcoming.length === 0 ? (
+              <EmptyState
+                icon="ticket-outline"
+                title={t('booking.noUpcomingTitle')}
+                description={t('booking.noUpcomingDesc')}
+                actionLabel={t('booking.exploreCta')}
+                onAction={() => router.push('/(tabs)/explore')}
+              />
+            ) : (
+              upcoming.map((b) => (
+                <BookingCard key={b.id} booking={b} onOpen={() => router.push(`/booking/${b.id}`)} />
+              ))
+            )}
+
+            <SectionHeader title={t('booking.past')} />
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {past.length === 0 ? (
+                <AppText variant="caption" color="textMuted" style={styles.pastEmpty}>
+                  {t('booking.noPast')}
+                </AppText>
+              ) : (
+                past.map((b) => (
+                  <BookingCard
+                    key={b.id}
+                    booking={b}
+                    narrow
+                    onOpen={() => router.push(`/booking/${b.id}`)}
+                  />
+                ))
+              )}
+            </ScrollView>
+          </>
+        ) : null}
+
+        <View style={styles.actions}>
+          <Pressable style={styles.actionBtn}>
+            <Ionicons name="qr-code-outline" size={22} color={colors.accent} />
+            <AppText variant="meta" color="textSecondary">
+              {t('booking.qr')}
+            </AppText>
+          </Pressable>
+          <Pressable style={styles.actionBtn}>
+            <Ionicons name="calendar-outline" size={22} color={colors.accent} />
+            <AppText variant="meta" color="textSecondary">
+              {t('booking.calendar')}
+            </AppText>
+          </Pressable>
+          <Pressable style={styles.actionBtn}>
+            <Ionicons name="download-outline" size={22} color={colors.accent} />
+            <AppText variant="meta" color="textSecondary">
+              {t('booking.ticket')}
+            </AppText>
+          </Pressable>
+        </View>
+      </Screen>
+    );
+  }
+
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming');
   const past = MOCK_BOOKINGS.filter((b) => b.status === 'past');
   const pending = MOCK_BOOKINGS.filter((b) => b.status === 'pending_payment');
@@ -91,7 +286,7 @@ function BookingCard({
   narrow,
   onOpen,
 }: {
-  booking: (typeof MOCK_BOOKINGS)[0];
+  booking: Booking;
   narrow?: boolean;
   onOpen: () => void;
 }) {
@@ -135,7 +330,7 @@ function BookingCard({
   );
 }
 
-function StatusPill({ status }: { status: (typeof MOCK_BOOKINGS)[0]['status'] }) {
+function StatusPill({ status }: { status: Booking['status'] }) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -160,6 +355,10 @@ function createStyles(colors: ThemeColors) {
   pad: { paddingTop: spacing.md },
   title: { marginBottom: spacing.xs },
   sub: { marginBottom: spacing.lg, lineHeight: 22 },
+  center: { paddingVertical: 48, alignItems: 'center' },
+  err: { marginBottom: spacing.md },
+  warnBanner: { marginBottom: spacing.md },
+  pastEmpty: { paddingVertical: spacing.md, paddingHorizontal: spacing.sm },
   card: {
     flexDirection: 'row',
     backgroundColor: colors.surface,

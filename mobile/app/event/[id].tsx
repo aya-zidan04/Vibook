@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,10 +14,12 @@ import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getCityName, getEventById, getOrganizerById, getTiersForEvent } from '@/services/mock';
+import { useEventPdp, useOrganizerForEvent } from '@/hooks/useCatalogPdp';
+import { getCityName } from '@/services/mock';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
+import { useLocaleStore } from '@/store/localeStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -30,17 +32,35 @@ export default function EventDetailScreen() {
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
 
-  const event = id ? getEventById(id) : undefined;
-  const organizer = event ? getOrganizerById(event.organizerId) : undefined;
-  const tiers = event ? getTiersForEvent(event.id) : [];
-  const [tierId, setTierId] = useState(tiers[0]?.id ?? '');
+  const { event, tiers, loading } = useEventPdp(id);
+  const organizer = useOrganizerForEvent(event);
+  const [tierId, setTierId] = useState('');
   const [qty, setQty] = useState(1);
+
+  useEffect(() => {
+    setTierId(tiers[0]?.id ?? '');
+  }, [tiers]);
 
   const selectedTier = useMemo(() => tiers.find((te) => te.id === tierId), [tiers, tierId]);
 
+  const displayCurrency = useLocaleStore((s) => s.currency);
   const lineTotal = selectedTier ? selectedTier.price * qty : (event?.priceFrom ?? 0) * qty;
-  const currency = event?.currency ?? 'SAR';
+  const currency = event?.currency ?? displayCurrency;
   const fees = Math.round(lineTotal * 0.05);
+
+  if (loading) {
+    return (
+      <Screen>
+        <DetailHeader title={t('explore.event')} />
+        <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+            {t('common.loading')}
+          </AppText>
+        </View>
+      </Screen>
+    );
+  }
 
   if (!event) {
     return (
@@ -67,6 +87,9 @@ export default function EventDetailScreen() {
       unitPrice: selectedTier?.price ?? event.priceFrom,
       quantity: qty,
       fees,
+      startsAt: event.startAt,
+      cityName: getCityName(event.cityId, 'en'),
+      cityNameAr: getCityName(event.cityId, 'ar'),
       tierName: selectedTier?.name ?? t('event.tierGeneral'),
       metaLine: `${formatMoney(lineTotal, currency)} ${t('event.plusFees')}`,
     });

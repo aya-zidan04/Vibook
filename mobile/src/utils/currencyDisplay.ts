@@ -5,6 +5,8 @@ const TO_USD: Record<string, number> = {
   SAR: 0.266,
   AED: 0.272,
   USD: 1,
+  /** Backend-supported display currency; approximate USD per 1 JOD for mixed-catalog normalization. */
+  JOD: 1.41,
 };
 
 /**

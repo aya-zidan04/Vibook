@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import type { User } from '@/types';
+import { isApiConfigured } from '@/config/api';
 import { CURRENT_USER, mergeMockUser } from '@/services/mock';
+import { useAppStore } from '@/store/appStore';
+import { useSessionStore } from '@/store/sessionStore';
 import { useUserProfileStore } from '@/store/userProfileStore';
 import type { UserProfileOverrides } from '@/store/userProfileStore';
 
@@ -18,29 +21,34 @@ export type UseMockUserResult = {
 };
 
 /**
- * Single source for mock identity + local profile overrides until backend auth exists.
+ * Baseline user: API session when configured + signed in; otherwise mock {@link CURRENT_USER}.
+ * Local overrides still layer on top for quick edits until PATCH /me runs.
  */
 export function useMockUser(): UseMockUserResult {
   const overrides = useUserProfileStore((s) => s.overrides);
   const setOverrides = useUserProfileStore((s) => s.setOverrides);
   const resetProfile = useUserProfileStore((s) => s.reset);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const serverUser = useSessionStore((s) => s.serverUser);
 
-  const user = useMemo(
-    () => mergeMockUser(CURRENT_USER, overrides),
-    [overrides],
-  );
+  const baseline = useMemo(() => {
+    if (isApiConfigured() && isAuthenticated && serverUser) return serverUser;
+    return CURRENT_USER;
+  }, [isAuthenticated, serverUser]);
+
+  const user = useMemo(() => mergeMockUser(baseline, overrides), [baseline, overrides]);
 
   const firstName = useMemo(() => user.name.split(/\s+/)[0] ?? user.name, [user.name]);
 
   return useMemo(
     () => ({
-      baseline: CURRENT_USER,
+      baseline,
       overrides,
       user,
       setOverrides,
       resetProfile,
       firstName,
     }),
-    [overrides, user, setOverrides, resetProfile, firstName],
+    [baseline, overrides, user, setOverrides, resetProfile, firstName],
   );
 }

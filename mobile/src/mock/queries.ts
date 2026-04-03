@@ -1,3 +1,5 @@
+import { isApiConfigured } from '@/config/api';
+import { useReferenceStore } from '@/store/referenceStore';
 import type {
   EventItem,
   ExperienceItem,
@@ -46,6 +48,13 @@ export function getOrganizerById(id: string): Organizer | undefined {
 }
 
 export function getCityName(cityId: string, locale: 'en' | 'ar' = 'en'): string {
+  if (isApiConfigured()) {
+    const { cities } = useReferenceStore.getState();
+    const fromApi = cities.find((x) => x.id === cityId);
+    if (fromApi) {
+      return locale === 'ar' ? fromApi.nameAr : fromApi.nameEn;
+    }
+  }
   const c = MOCK_CITIES.find((x) => x.id === cityId);
   if (!c) return '';
   return locale === 'ar' ? c.nameAr : c.nameEn;

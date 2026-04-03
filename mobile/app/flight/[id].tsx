@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,8 @@ import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getFlightById } from '@/services/mock';
+import { useFlightPdp } from '@/hooks/useCatalogPdp';
+import { useLocaleStore } from '@/store/localeStore';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -30,7 +31,22 @@ export default function FlightDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const f = id ? getFlightById(id) : undefined;
+  const { flight: f, loading } = useFlightPdp(id);
+  const displayCurrency = useLocaleStore((s) => s.currency);
+
+  if (loading) {
+    return (
+      <Screen>
+        <DetailHeader title={t('flight.title')} />
+        <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+            {t('common.loading')}
+          </AppText>
+        </View>
+      </Screen>
+    );
+  }
 
   if (!f) {
     return (
@@ -52,10 +68,12 @@ export default function FlightDetailScreen() {
       title: `${f.from} → ${f.to}`,
       imageUrl:
         'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=80&auto=format&fit=crop',
-      currency: f.currency,
+      currency: f.currency ?? displayCurrency,
       unitPrice: f.price,
       quantity: 1,
       fees,
+      startsAt: f.departAt,
+      cityName: f.from,
       metaLine: `${f.airline} · ${f.cabin} · ${flightStopLabel(f.stops, t)}`,
     });
     router.push('/checkout');

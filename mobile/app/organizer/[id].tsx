@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,7 +14,8 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
-import { MOCK_EVENTS, getOrganizerById } from '@/services/mock';
+import { useOrganizerPdp } from '@/hooks/useCatalogPdp';
+import { getCityName } from '@/services/mock';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -25,8 +26,21 @@ export default function OrganizerScreen() {
   const router = useRouter();
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const org = id ? getOrganizerById(id) : undefined;
-  const events = org ? MOCK_EVENTS.filter((e) => e.organizerId === org.id) : [];
+  const { organizer: org, events, loading } = useOrganizerPdp(id);
+
+  if (loading) {
+    return (
+      <Screen>
+        <DetailHeader title={t('organizer.title')} />
+        <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+            {t('common.loading')}
+          </AppText>
+        </View>
+      </Screen>
+    );
+  }
 
   if (!org) {
     return (
@@ -88,7 +102,7 @@ export default function OrganizerScreen() {
                   {e.title}
                 </AppText>
                 <AppText variant="caption" color="textMuted">
-                  {e.venueName}
+                  {[e.venueName, getCityName(e.cityId, locale)].filter(Boolean).join(' · ')}
                 </AppText>
                 <AppText variant="price" color="accent">
                   {t('common.from')} {formatMoney(e.priceFrom, e.currency)}

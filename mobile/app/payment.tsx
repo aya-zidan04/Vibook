@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
@@ -7,12 +7,21 @@ import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useIntegrationMode } from '@/hooks/useIntegrationMode';
 import { useTranslation } from '@/i18n/useTranslation';
+import { bookingsApi } from '@/services/api/bookingsApi';
+import { ApiRequestError } from '@/services/api/http';
+import { getAccessToken } from '@/services/auth/tokenStorage';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import {
+  buildCreateBookingRequestFromDraft,
+  isNumericCatalogRef,
+} from '@/utils/bookingApiMap';
 
 export default function PaymentScreen() {
+  const { api: apiMode } = useIntegrationMode();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
@@ -37,15 +46,42 @@ export default function PaymentScreen() {
 
   const total = draft.unitPrice * draft.quantity + draft.fees;
 
-  const pay = () => {
+  const pay = async () => {
     setBusy(true);
-    setTimeout(() => {
+    const token = await getAccessToken();
+    const canUseBookingApi =
+      apiMode && token && isNumericCatalogRef(draft.refId);
+
+    const finishMock = () => {
       const id = `VB-${Date.now().toString(36).toUpperCase()}`;
       setLastOrderId(id);
       setDraft(null);
       setBusy(false);
       router.replace('/confirmation');
-    }, 600);
+    };
+
+    if (!canUseBookingApi) {
+      setTimeout(finishMock, 600);
+      return;
+    }
+
+    try {
+      const body = buildCreateBookingRequestFromDraft(draft);
+      const res = await bookingsApi.create(body);
+      setLastOrderId(res.id);
+      setDraft(null);
+      router.replace('/confirmation');
+    } catch (e) {
+      const msg =
+        e instanceof ApiRequestError
+          ? e.message
+          : e instanceof Error
+            ? e.message
+            : t('common.error');
+      Alert.alert(t('common.error'), msg);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -93,7 +129,7 @@ export default function PaymentScreen() {
         </ScrollView>
         <View style={styles.footer}>
           <SecondaryButton title={t('common.back')} onPress={() => router.back()} style={styles.half} />
-          <PrimaryButton title={t('payment.payNow')} onPress={pay} loading={busy} style={styles.half} />
+          <PrimaryButton title={t('payment.payNow')} onPress={() => void pay()} loading={busy} style={styles.half} />
         </View>
       </View>
     </SafeAreaView>

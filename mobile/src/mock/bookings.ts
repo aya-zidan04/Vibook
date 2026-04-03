@@ -15,7 +15,7 @@ export const MOCK_BOOKINGS: Booking[] = [
     startsAt: '2026-07-18T19:00:00+03:00',
     cityName: 'Riyadh',
     totalPaid: 350,
-    currency: 'SAR',
+    currency: 'JOD',
   },
   {
     id: 'b2',
@@ -29,7 +29,7 @@ export const MOCK_BOOKINGS: Booking[] = [
     startsAt: '2026-03-02T20:00:00+03:00',
     cityName: 'Riyadh',
     totalPaid: 890,
-    currency: 'SAR',
+    currency: 'JOD',
   },
   {
     id: 'b3',
@@ -45,6 +45,6 @@ export const MOCK_BOOKINGS: Booking[] = [
     startsAt: '2026-09-01T15:00:00+04:00',
     cityName: 'Dubai',
     totalPaid: 0,
-    currency: 'AED',
+    currency: 'USD',
   },
 ];

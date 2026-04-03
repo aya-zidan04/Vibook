@@ -4,7 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
+import { isApiConfigured } from '@/config/api';
+import { restoreApiSession } from '@/services/auth/session';
 import { useAppStore } from '@/store/appStore';
+import { loadReferenceData } from '@/store/referenceStore';
 import { Image } from 'expo-image';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -21,6 +24,7 @@ export default function SplashScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [hydrated, setHydrated] = useState(() => useAppStore.persist.hasHydrated());
+  const [apiReady, setApiReady] = useState(() => !isApiConfigured());
 
   useEffect(() => {
     const unsub = useAppStore.persist.onFinishHydration(() => setHydrated(true));
@@ -29,6 +33,27 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (!hydrated) return;
+    if (!isApiConfigured()) return;
+    void loadReferenceData();
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!isApiConfigured()) {
+      setApiReady(true);
+      return;
+    }
+    let cancelled = false;
+    restoreApiSession().finally(() => {
+      if (!cancelled) setApiReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || !apiReady) return;
     const done = useAppStore.getState().hasCompletedOnboarding;
     if (!done) {
       router.replace('/entry');
@@ -38,7 +63,7 @@ export default function SplashScreen() {
       router.replace('/(tabs)/explore');
     }, SPLASH_MS);
     return () => clearTimeout(id);
-  }, [hydrated, router]);
+  }, [hydrated, apiReady, router]);
 
   return (
     <LinearGradient

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField, PasswordToggleIcon } from '@/components/auth/AuthTextField';
@@ -7,7 +7,11 @@ import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { isApiConfigured } from '@/config/api';
+import { authApi } from '@/services/auth/authApi';
+import { applyAuthResponse } from '@/services/auth/session';
 import { useAppStore } from '@/store/appStore';
+import { formatApiErrorMessage } from '@/utils/apiError';
 import { canSubmitLogin } from '@/utils/authValidation';
 import { ltrNavigationChrome } from '@/utils/navigationChrome';
 import { colors, radii, spacing } from '@/theme';
@@ -18,6 +22,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const setHasCompletedOnboarding = useAppStore((s) => s.setHasCompletedOnboarding);
   const setAuthenticated = useAppStore((s) => s.setAuthenticated);
@@ -30,12 +35,25 @@ export default function LoginScreen() {
     else router.replace('/entry');
   };
 
-  const onLogin = () => {
-    if (!canLogin) return;
-    setAuthenticated(true);
-    setGuest(false);
-    setHasCompletedOnboarding(true);
-    router.replace('/(tabs)/explore');
+  const onLogin = async () => {
+    if (!canLogin || busy) return;
+    if (!isApiConfigured()) {
+      setAuthenticated(true);
+      setGuest(false);
+      setHasCompletedOnboarding(true);
+      router.replace('/(tabs)/explore');
+      return;
+    }
+    setBusy(true);
+    try {
+      const auth = await authApi.login(email.trim(), password);
+      await applyAuthResponse(auth);
+      router.replace('/(tabs)/explore');
+    } catch (e) {
+      Alert.alert(t('common.error'), formatApiErrorMessage(e));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const browseWithoutAccount = () => {
@@ -92,7 +110,15 @@ export default function LoginScreen() {
         </AppText>
       </Pressable>
 
-      <PrimaryButton title={t('auth.loginCta')} onPress={onLogin} disabled={!canLogin} style={btnFull} />
+      <PrimaryButton
+        title={t('auth.loginCta')}
+        onPress={() => void onLogin()}
+        disabled={!canLogin || busy}
+        style={btnFull}
+      />
+      {busy ? (
+        <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} />
+      ) : null}
 
       <View style={styles.divider} />
 

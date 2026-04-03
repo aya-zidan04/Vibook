@@ -14,6 +14,7 @@ import { chevronForwardTrailing } from '@/utils/rtl';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useMockUser } from '@/hooks/useMockUser';
 import { MOCK_BOOKINGS, MOCK_VOUCHERS } from '@/services/mock';
+import { signOutFromApi } from '@/services/auth/session';
 import { useAppStore } from '@/store/appStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -43,8 +44,11 @@ export default function MeScreen() {
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming').length;
 
   const handleLogout = () => {
-    logout();
-    router.replace('/entry');
+    void (async () => {
+      await signOutFromApi();
+      logout();
+      router.replace('/entry');
+    })();
   };
 
   const openMenu = (key: string) => {

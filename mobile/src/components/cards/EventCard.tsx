@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { createShadows, fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import type { EventItem } from '@/types';
+import { useFavoritesStore } from '@/store/favoritesStore';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { formatDateShort, formatDecimalForLocale } from '@/utils/format';
@@ -23,7 +24,9 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
   const router = useRouter();
   const { locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const [fav, setFav] = useState(false);
+  const favKey = `event:${event.id}`;
+  const isFav = useFavoritesStore((s) => !!s.keys[favKey]);
+  const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
   const wide = variant === 'wide';
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors, wide), [colors, wide]);
@@ -55,9 +58,15 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
             <Badge tone={event.badge} />
           </View>
         ) : null}
-        <Pressable style={styles.fav} onPress={() => setFav((x) => !x)} hitSlop={10}>
+        <Pressable
+          style={styles.fav}
+          onPress={() => void toggleFavorite('event', event.id)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={isFav ? 'Remove from favorites' : 'Add to favorites'}
+        >
           <Ionicons
-            name={fav ? 'heart' : 'heart-outline'}
+            name={isFav ? 'heart' : 'heart-outline'}
             size={18}
             color={colors.text}
           />

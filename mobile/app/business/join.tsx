@@ -1,25 +1,104 @@
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { AuthTextField } from '@/components/auth/AuthTextField';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
+import { isApiConfigured } from '@/config/api';
 import { useTranslation } from '@/i18n/useTranslation';
+import { businessLeadsApi } from '@/services/api/businessLeadsApi';
+import { formatApiErrorMessage } from '@/utils/apiError';
+import { isValidEmail } from '@/utils/authValidation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+
+const MAX = {
+  company: 300,
+  email: 255,
+  phone: 32,
+  category: 120,
+  message: 4000,
+} as const;
+
+function isValidBusinessPhone(raw: string): boolean {
+  const t = raw.trim();
+  return t.length >= 6 && t.length <= MAX.phone;
+}
+
+type FieldKey = 'companyName' | 'email' | 'phone' | 'category' | 'message';
 
 export default function BusinessJoinScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { t } = useTranslation();
-  const [company, setCompany] = useState('');
+  const router = useRouter();
+  const { t, isRTL } = useTranslation();
+
+  const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [category, setCategory] = useState('');
   const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const submit = () => {
-    Alert.alert(t('membership.mockTitle'), t('businessJoin.disclaimer'));
+  const clearError = (k: FieldKey) => {
+    setErrors((e) => {
+      const next = { ...e };
+      delete next[k];
+      return next;
+    });
+  };
+
+  const validate = (): boolean => {
+    const next: Partial<Record<FieldKey, string>> = {};
+    if (!companyName.trim()) next.companyName = t('businessJoin.errRequired');
+    else if (companyName.trim().length > MAX.company) next.companyName = t('businessJoin.errTooLong');
+
+    if (!email.trim()) next.email = t('businessJoin.errRequired');
+    else if (!isValidEmail(email)) next.email = t('businessJoin.errEmail');
+    else if (email.trim().length > MAX.email) next.email = t('businessJoin.errTooLong');
+
+    if (!isValidBusinessPhone(phone)) {
+      next.phone = phone.trim() ? t('businessJoin.errPhone') : t('businessJoin.errRequired');
+    }
+
+    if (!category.trim()) next.category = t('businessJoin.errRequired');
+    else if (category.trim().length > MAX.category) next.category = t('businessJoin.errTooLong');
+
+    if (message.trim().length > MAX.message) next.message = t('businessJoin.errTooLong');
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const submit = async () => {
+    setSubmitError(null);
+    if (!validate() || busy) return;
+
+    const body = {
+      companyName: companyName.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      category: category.trim(),
+      message: message.trim() || t('businessJoin.messageDefault'),
+    };
+
+    setBusy(true);
+    try {
+      if (isApiConfigured()) {
+        await businessLeadsApi.submit(body);
+      } else {
+        await new Promise((r) => setTimeout(r, 550));
+      }
+      router.replace('/business/success');
+    } catch (e) {
+      setSubmitError(formatApiErrorMessage(e) || t('businessJoin.errSubmit'));
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -29,88 +108,138 @@ export default function BusinessJoinScreen() {
         {t('businessJoin.subtitle')}
       </AppText>
 
-      <LabeledField label={t('businessJoin.company')} placeholder={t('businessJoin.companyPh')} value={company} onChange={setCompany} />
-      <LabeledField label={t('businessJoin.email')} placeholder={t('businessJoin.emailPh')} value={email} onChange={setEmail} keyboard="email-address" />
-      <LabeledField label={t('businessJoin.phone')} placeholder={t('businessJoin.phonePh')} value={phone} onChange={setPhone} keyboard="phone-pad" />
-      <LabeledField label={t('businessJoin.category')} placeholder={t('businessJoin.categoryPh')} value={category} onChange={setCategory} />
-      <LabeledField
-        label={t('businessJoin.message')}
-        placeholder={t('businessJoin.messagePh')}
-        value={message}
-        onChange={setMessage}
-        multiline
+      <AuthTextField
+        label={t('businessJoin.company')}
+        placeholder={t('businessJoin.companyPh')}
+        value={companyName}
+        onChangeText={(v) => {
+          setCompanyName(v);
+          clearError('companyName');
+        }}
+        autoCapitalize="words"
       />
+      {errors.companyName ? (
+        <AppText variant="meta" color="error" style={styles.inlineErr}>
+          {errors.companyName}
+        </AppText>
+      ) : null}
 
-      <PrimaryButton title={t('businessJoin.submit')} onPress={submit} />
+      <AuthTextField
+        label={t('businessJoin.email')}
+        placeholder={t('businessJoin.emailPh')}
+        value={email}
+        onChangeText={(v) => {
+          setEmail(v);
+          clearError('email');
+        }}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      {errors.email ? (
+        <AppText variant="meta" color="error" style={styles.inlineErr}>
+          {errors.email}
+        </AppText>
+      ) : null}
+
+      <AuthTextField
+        label={t('businessJoin.phone')}
+        placeholder={t('businessJoin.phonePh')}
+        value={phone}
+        onChangeText={(v) => {
+          setPhone(v);
+          clearError('phone');
+        }}
+        keyboardType="phone-pad"
+        autoCapitalize="none"
+      />
+      {errors.phone ? (
+        <AppText variant="meta" color="error" style={styles.inlineErr}>
+          {errors.phone}
+        </AppText>
+      ) : null}
+
+      <AuthTextField
+        label={t('businessJoin.category')}
+        placeholder={t('businessJoin.categoryPh')}
+        value={category}
+        onChangeText={(v) => {
+          setCategory(v);
+          clearError('category');
+        }}
+        autoCapitalize="sentences"
+      />
+      {errors.category ? (
+        <AppText variant="meta" color="error" style={styles.inlineErr}>
+          {errors.category}
+        </AppText>
+      ) : null}
+
+      <View style={styles.msgBlock}>
+        <AppText variant="caption" color="text" style={styles.msgLabel}>
+          {t('businessJoin.message')}
+        </AppText>
+        <AppText variant="meta" color="textMuted" style={styles.optional}>
+          {t('businessJoin.messageOptional')}
+        </AppText>
+        <TextInput
+          value={message}
+          onChangeText={(v) => {
+            setMessage(v);
+            clearError('message');
+          }}
+          placeholder={t('businessJoin.messagePh')}
+          placeholderTextColor={colors.textMuted}
+          multiline
+          numberOfLines={5}
+          textAlignVertical="top"
+          textAlign={isRTL ? 'right' : 'left'}
+          style={[
+            styles.msgInput,
+            { writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr' },
+          ]}
+        />
+        {errors.message ? (
+          <AppText variant="meta" color="error" style={styles.inlineErr}>
+            {errors.message}
+          </AppText>
+        ) : null}
+      </View>
+
+      {submitError ? (
+        <AppText variant="body" color="error" style={styles.bannerErr}>
+          {submitError}
+        </AppText>
+      ) : null}
+
+      <PrimaryButton title={t('businessJoin.submit')} onPress={() => void submit()} loading={busy} />
 
       <AppText variant="caption" color="textMuted" style={styles.disclaimer}>
-        {t('businessJoin.disclaimer')}
+        {isApiConfigured() ? t('businessJoin.disclaimerLive') : t('businessJoin.disclaimerMock')}
       </AppText>
     </Screen>
   );
 }
 
-function LabeledField({
-  label,
-  placeholder,
-  value,
-  onChange,
-  keyboard,
-  multiline,
-}: {
-  label: string;
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-  keyboard?: 'default' | 'email-address' | 'phone-pad';
-  multiline?: boolean;
-}) {
-  const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
-  const { isRTL } = useTranslation();
-  return (
-    <View style={styles.field}>
-      <AppText variant="caption" color="textMuted">
-        {label}
-      </AppText>
-      <TextInput
-        value={value}
-        onChangeText={onChange}
-        placeholder={placeholder}
-        placeholderTextColor={colors.textMuted}
-        keyboardType={keyboard ?? 'default'}
-        multiline={multiline}
-        numberOfLines={multiline ? 4 : 1}
-        textAlign={isRTL ? 'right' : 'left'}
-        style={[
-          styles.input,
-          multiline && styles.inputMulti,
-          { writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr' },
-        ]}
-      />
-    </View>
-  );
-}
-
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
-  field: { gap: 6 },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 12,
-    color: colors.text,
-    backgroundColor: colors.surface,
-    fontSize: 16,
-  },
-  inputMulti: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  disclaimer: { lineHeight: 18 },
-});
-
+    pad: { paddingTop: spacing.md, gap: 0, paddingBottom: spacing.xxxl },
+    inlineErr: { marginTop: -spacing.sm, marginBottom: spacing.sm },
+    msgBlock: { marginBottom: spacing.md, gap: 6 },
+    msgLabel: { fontWeight: '600' },
+    optional: { marginBottom: 2 },
+    msgInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radii.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      color: colors.text,
+      backgroundColor: colors.surface,
+      fontSize: 16,
+      minHeight: 120,
+    },
+    bannerErr: { marginBottom: spacing.sm, lineHeight: 22 },
+    disclaimer: { lineHeight: 18, marginTop: spacing.sm },
+  });
 }

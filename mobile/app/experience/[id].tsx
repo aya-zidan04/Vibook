@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +13,8 @@ import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getCityName, getExperienceById } from '@/services/mock';
+import { useExperiencePdp } from '@/hooks/useCatalogPdp';
+import { getCityName } from '@/services/mock';
 import { formatDecimalForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { spacing, useThemeColors } from '@/theme';
@@ -27,8 +28,22 @@ export default function ExperienceDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const x = id ? getExperienceById(id) : undefined;
+  const { experience: x, loading } = useExperiencePdp(id);
   const [qty, setQty] = useState(2);
+
+  if (loading) {
+    return (
+      <Screen>
+        <DetailHeader title={t('experience.title')} />
+        <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+            {t('common.loading')}
+          </AppText>
+        </View>
+      </Screen>
+    );
+  }
 
   if (!x) {
     return (
@@ -53,6 +68,9 @@ export default function ExperienceDetailScreen() {
       unitPrice: x.priceFrom,
       quantity: qty,
       fees,
+      startsAt: new Date(Date.now() + 5 * 86400000).toISOString(),
+      cityName: getCityName(x.cityId, 'en'),
+      cityNameAr: getCityName(x.cityId, 'ar'),
       metaLine: `${x.durationHours} ${t('experience.hours')} · ${getCityName(x.cityId, locale)}`,
     });
     router.push('/checkout');

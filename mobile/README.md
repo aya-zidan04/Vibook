@@ -1,6 +1,6 @@
 # Vibook — Mobile app
 
-Expo + React Native frontend for **Vibook**, a lifestyle booking experience (events, dining, stays, flights, and more). This README documents what the app does today and how it is organized.
+Expo + React Native frontend for **Vibook**, a lifestyle booking experience (events, dining, stays, flights, and more).
 
 ## Tech stack
 
@@ -9,11 +9,18 @@ Expo + React Native frontend for **Vibook**, a lifestyle booking experience (eve
 | Runtime | Expo SDK 54, React Native 0.81, React 19 |
 | Language | TypeScript (strict) |
 | Navigation | **expo-router** (file-based routes) |
-| State | **Zustand** with **AsyncStorage** persistence for onboarding / city |
+| State | **Zustand** with **AsyncStorage** persistence where noted |
 | Images / gradients | `expo-image`, `expo-linear-gradient` |
-| Gestures | `react-native-gesture-handler` |
-| Animations | React Native `Animated` for skeleton shimmer; Reanimated remains in deps for future use |
 | Path alias | `@/*` → `./src/*` (see `tsconfig.json`) |
+
+## Backend integration
+
+The app runs in **API mode** or **mock-only mode** depending on environment:
+
+- Set **`EXPO_PUBLIC_API_BASE_URL`** (no trailing slash) to your Spring API origin, e.g. `http://localhost:8080` or your LAN IP for a device.
+- If unset, listings and many account flows use **`src/mock/`** and local simulation.
+
+Details, ID rules (numeric vs `e1`-style mocks), and per-feature behavior: **[INTEGRATION.md](./INTEGRATION.md)**.
 
 ## How to run
 
@@ -31,91 +38,76 @@ Then press `i` (iOS simulator), `a` (Android), or scan the QR code with **Expo G
   npm run start:8085
   ```
 
-- Always run commands from the **`mobile`** folder so Metro finds `app/` and `package.json`.
+- Run commands from the **`mobile`** folder so Metro finds `app/` and `package.json`.
 
-## App entry & flow
+### Example with API
 
-1. **`/` (`app/index.tsx`) — Splash**  
-   First screen on cold start: branding, short delay (~2.2s). Waits for persisted state to hydrate.
+```bash
+cd mobile
+EXPO_PUBLIC_API_BASE_URL=http://127.0.0.1:8080 npm start
+```
 
-2. **Onboarding (`app/onboarding.tsx`)** — Shown only until the user taps **Get started** the first time.  
-   `hasCompletedOnboarding` is stored via Zustand **persist** + **AsyncStorage** (`vibook-storage`).
+## App entry & tabs
 
-3. **Main app — Tabs (`app/(tabs)/`)**  
-   After splash (and onboarding when needed), user lands on **Home** and can switch tabs:
+1. **`/` (`app/index.tsx`)** — Splash; optional API health check when URL is configured.
+2. **Onboarding (`app/onboarding.tsx`)** — First launch; persisted via Zustand + AsyncStorage.
+3. **Tabs (`app/(tabs)/`)**
 
-   | Tab | File | Purpose |
-   |-----|------|---------|
-   | Home | `(tabs)/index.tsx` | Rich homepage: header, search, categories, hero carousel, sections (trending, restaurants, experiences, etc.) |
-   | Explore | `(tabs)/explore.tsx` | Discovery: themes, category grid, destinations, picks |
-   | Search | `(tabs)/search.tsx` | Search UI: segments, recent/popular, results from mock data |
-   | Bookings | `(tabs)/bookings.tsx` | Lists bookings from mock data, status pills, action placeholders |
-   | Profile | `(tabs)/profile.tsx` | Profile header, stats, vouchers, account menu |
+   | Tab | Route | Role |
+   |-----|--------|------|
+   | Explore | `(tabs)/explore` | Discovery; API catalog when configured + numeric filters |
+   | Booking | `(tabs)/booking` | Bookings: API when `liveAccount`, else `MOCK_BOOKINGS` |
+   | Favorites | `(tabs)/favorites` | Favorites: API sync when signed in + numeric refs |
+   | Me | `(tabs)/me` | Profile hub, wallet/vouchers/notifications entry points |
 
-4. **Auth shell (`app/(auth)/`)**  
-   `welcome.tsx` is a placeholder for a future auth flow; not part of the default splash → tabs path.
+Additional stacks: `wallet`, `vouchers`, `membership/*`, `notifications`, PDPs under `event/[id]`, `restaurant/[id]`, etc.
 
 ## Project layout
 
 ```
 mobile/
-├── app/                    # expo-router routes only
-│   ├── _layout.tsx         # Root: gesture handler, safe area, stack
-│   ├── index.tsx           # Splash (first route)
-│   ├── onboarding.tsx      # First-time onboarding
-│   ├── (tabs)/             # Bottom tab navigator + screens
-│   └── (auth)/             # Auth group (placeholder)
+├── app/                 # expo-router routes
 ├── src/
-│   ├── components/         # UI library (screens import from @/components)
-│   │   ├── ui/             # AppText, Button, Badge, CategoryChip
-│   │   ├── layout/         # Screen, AppHeader, SearchBar, SectionHeader, HeroCarousel, …
-│   │   ├── feedback/       # EmptyState, ErrorState, ShimmerLoader
-│   │   └── cards/          # EventCard, …
-│   ├── theme/              # colors, typography, spacing, radii, shadows
-│   ├── mock/               # Fake data: events, cities, bookings, hotels, …
-│   ├── types/              # Shared TypeScript models
-│   ├── store/              # Zustand store (persisted slice)
-│   ├── constants/          # App constants
-│   └── utils/              # e.g. formatPrice, formatDateShort
-├── app.json                # Expo config: name **Vibook**, slug **vibook**, dark UI, plugins
-├── babel.config.js         # babel-preset-expo; reanimated plugin must stay **last**
-├── tsconfig.json           # strict, jsx, paths `@/*` → `./src/*`
-└── package.json            # `"main": "expo-router/entry"`
+│   ├── components/
+│   ├── theme/
+│   ├── mock/            # Fallback data when API unset or non-numeric ids
+│   ├── services/api/    # HTTP clients + DTO types
+│   ├── store/
+│   ├── hooks/           # includes useIntegrationMode, useCatalogPdp, …
+│   └── utils/
+├── INTEGRATION.md       # API vs mock matrix for developers
+├── app.json
+├── tsconfig.json
+└── package.json
 ```
 
 ## Design system
 
-- **Location:** `src/theme/` — dark, premium palette (navy base, purple / pink / cyan accents).
-- **Usage:** import from `@/theme` or `@/theme/colors` in components.
-
-## Data
-
-- All listings are **mock data** under `src/mock/`. There is **no backend** wired in this repo.
-- Types live in `src/types/index.ts`.
+- **Location:** `src/theme/` — dark, premium palette.
+- **Usage:** import from `@/theme`.
 
 ## Scripts
 
 | Script | Description |
 |--------|-------------|
 | `npm start` | Expo dev server (Metro) |
-| `npm run start:8085` | Same, on port 8085 if 8081 is taken |
+| `npm run start:8085` | Same on port 8085 if 8081 is taken |
 | `npm run lint` | `tsc --noEmit` |
 
 ## Troubleshooting
 
 | Issue | What to try |
 |--------|-------------|
-| Metro won’t start / “port in use” | `npm run start:8085` or stop the other process on 8081 |
-| Red screen on open related to **Reanimated** | Skeleton shimmer was moved to RN `Animated` in `ShimmerLoader.tsx`; reload after pull |
-| Onboarding shows every time | Clear app storage or AsyncStorage key `vibook-storage` to reset state |
-| Wrong folder | Run Expo from **`mobile`**, not the monorepo root only |
+| Metro won’t start / port in use | `npm run start:8085` or free port 8081 |
+| API works in simulator but not on device | Use LAN IP in `EXPO_PUBLIC_API_BASE_URL`, not `localhost` |
+| Onboarding every time | Clear AsyncStorage / app data for the build |
+| Wrong folder | Run Expo from **`mobile/`** |
 
 ## Naming
 
-- **npm package name:** `vibook` (`package.json`)
-- **App display name / Expo:** **Vibook** / slug `vibook` (`app.json`)
-- **Folder:** `mobile/` (path on disk only)
+- **npm package:** `vibook`
+- **Expo app:** Vibook / slug `vibook`
 
 ## License / product
 
-Student / graduation project UI; replace mock data and add a real API when ready.
+Student / graduation project; backend and mocks evolve together — see **INTEGRATION.md** for the current contract.

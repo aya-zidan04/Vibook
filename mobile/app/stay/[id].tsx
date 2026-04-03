@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +13,8 @@ import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getCityName, getHotelById } from '@/services/mock';
+import { useHotelPdp } from '@/hooks/useCatalogPdp';
+import { getCityName } from '@/services/mock';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
@@ -27,8 +28,22 @@ export default function StayDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const h = id ? getHotelById(id) : undefined;
+  const { hotel: h, loading } = useHotelPdp(id);
   const [nights] = useState(2);
+
+  if (loading) {
+    return (
+      <Screen>
+        <DetailHeader title={t('stay.title')} />
+        <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+            {t('common.loading')}
+          </AppText>
+        </View>
+      </Screen>
+    );
+  }
 
   if (!h) {
     return (
@@ -53,6 +68,9 @@ export default function StayDetailScreen() {
       unitPrice: h.priceFrom,
       quantity: nights,
       fees,
+      startsAt: new Date(Date.now() + 14 * 86400000).toISOString(),
+      cityName: getCityName(h.cityId, 'en'),
+      cityNameAr: getCityName(h.cityId, 'ar'),
       metaLine: `${nights} ${t('stay.nights')} · ${getCityName(h.cityId, locale)}`,
     });
     router.push('/checkout');

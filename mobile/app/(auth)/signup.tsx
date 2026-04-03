@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField, PasswordToggleIcon } from '@/components/auth/AuthTextField';
@@ -7,7 +7,12 @@ import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { isApiConfigured } from '@/config/api';
+import { authApi } from '@/services/auth/authApi';
+import { applyAuthResponse } from '@/services/auth/session';
 import { useAppStore } from '@/store/appStore';
+import { useLocaleStore } from '@/store/localeStore';
+import { formatApiErrorMessage } from '@/utils/apiError';
 import {
   isValidEmail,
   isValidJordanLocalPhone,
@@ -47,6 +52,7 @@ export default function SignupScreen() {
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [terms, setTerms] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const setHasCompletedOnboarding = useAppStore((s) => s.setHasCompletedOnboarding);
   const setAuthenticated = useAppStore((s) => s.setAuthenticated);
@@ -60,12 +66,33 @@ export default function SignupScreen() {
     setPhone(d);
   };
 
-  const onCreate = () => {
-    if (!canCreate) return;
-    setAuthenticated(true);
-    setGuest(false);
-    setHasCompletedOnboarding(true);
-    router.replace('/(tabs)/explore');
+  const onCreate = async () => {
+    if (!canCreate || busy) return;
+    if (!isApiConfigured()) {
+      setAuthenticated(true);
+      setGuest(false);
+      setHasCompletedOnboarding(true);
+      router.replace('/(tabs)/explore');
+      return;
+    }
+    setBusy(true);
+    try {
+      const locale = useLocaleStore.getState().locale;
+      const auth = await authApi.register({
+        email: email.trim(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: `+962${digitsOnly}`,
+        preferredLanguage: locale === 'ar' ? 'AR' : 'EN',
+      });
+      await applyAuthResponse(auth);
+      router.replace('/(tabs)/explore');
+    } catch (e) {
+      Alert.alert(t('common.error'), formatApiErrorMessage(e));
+    } finally {
+      setBusy(false);
+    }
   };
 
   const btnFull = { borderRadius: radii.lg, width: '100%' as const };
@@ -179,10 +206,13 @@ export default function SignupScreen() {
 
       <PrimaryButton
         title={t('auth.createAccountSubmit')}
-        onPress={onCreate}
-        disabled={!canCreate}
+        onPress={() => void onCreate()}
+        disabled={!canCreate || busy}
         style={{ ...btnFull, marginTop: spacing.md }}
       />
+      {busy ? (
+        <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.accent} />
+      ) : null}
 
       <Pressable
         onPress={() => {

@@ -1,10 +1,10 @@
 /**
  * User listing ratings (1–5 stars).
  *
- * Current implementation: device-local persistence via `userRatingsStore`.
- * For backend integration, keep `useUserListingRating` as the UI boundary and
- * either replace the hook body with API-backed state or sync the store from
- * `GET /me/ratings` and mirror writes to `POST`/`DELETE` as needed.
+ * UI boundary: `useUserListingRating` → `userRatingsStore` (persisted).
+ * When the API is configured and the user is signed in, `GET /me/ratings` merges
+ * into the store on login/session restore and `PUT /me/ratings/{vertical}/{refId}`
+ * mirrors changes (numeric ref ids only).
  */
 import { ratingKey, useUserRatingsStore, type RatingVertical } from '@/store/userRatingsStore';
 

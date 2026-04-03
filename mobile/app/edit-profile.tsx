@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { AuthTextField } from '@/components/auth/AuthTextField';
@@ -9,6 +9,12 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useMockUser } from '@/hooks/useMockUser';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useIntegrationMode } from '@/hooks/useIntegrationMode';
+import { mapUserResponseToUser } from '@/services/auth/mapUser';
+import { userApi } from '@/services/auth/userApi';
+import { useSessionStore } from '@/store/sessionStore';
+import { formatApiErrorMessage } from '@/utils/apiError';
+import { nameToFirstLast, normalizePhoneForApi } from '@/utils/profilePatch';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -24,6 +30,8 @@ export default function EditProfileScreen() {
   const [name, setName] = useState(user.name);
   const [nameAr, setNameAr] = useState(user.nameAr ?? '');
   const [phone, setPhone] = useState(user.phone);
+  const [busy, setBusy] = useState(false);
+  const { liveAccount } = useIntegrationMode();
 
   useEffect(() => {
     setName(user.name);
@@ -31,7 +39,29 @@ export default function EditProfileScreen() {
     setPhone(user.phone);
   }, [user]);
 
-  const save = () => {
+  const save = async () => {
+    if (busy) return;
+    if (liveAccount) {
+      setBusy(true);
+      try {
+        const { firstName, lastName } = nameToFirstLast(name);
+        const dto = await userApi.patchMe({
+          firstName,
+          ...(lastName ? { lastName } : {}),
+          nameAr: nameAr.trim() ? nameAr.trim() : null,
+          phone: normalizePhoneForApi(phone),
+        });
+        useSessionStore.getState().setServerUser(mapUserResponseToUser(dto));
+        setOverrides({});
+        Alert.alert(t('editProfile.saved'));
+        router.back();
+      } catch (e) {
+        Alert.alert(t('common.error'), formatApiErrorMessage(e));
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     setOverrides({
       name,
       nameAr: nameAr.trim() || undefined,
@@ -82,7 +112,8 @@ export default function EditProfileScreen() {
         {t('editProfile.note')}
       </AppText>
 
-      <PrimaryButton title={t('common.save')} onPress={save} />
+      <PrimaryButton title={t('common.save')} onPress={() => void save()} disabled={busy} />
+      {busy ? <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.accent} /> : null}
     </Screen>
   );
 }

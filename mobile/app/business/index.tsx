@@ -60,7 +60,7 @@ export default function BusinessScreen() {
         ))}
       </View>
 
-      <PrimaryButton title={t('business.joinCta')} onPress={() => router.push('/business/join')} />
+      <PrimaryButton title={t('business.applyCta')} onPress={() => router.push('/business/join')} />
 
       <AppText variant="caption" color="textMuted" style={styles.note}>
         {t('business.note')}

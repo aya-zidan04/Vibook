@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +12,8 @@ import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { getPackageById } from '@/services/mock';
+import { usePackagePdp } from '@/hooks/useCatalogPdp';
+import { getCityName } from '@/services/mock';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -25,8 +26,22 @@ export default function PackageDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const p = id ? getPackageById(id) : undefined;
+  const { pkg: p, loading } = usePackagePdp(id);
   const [travelers] = useState(2);
+
+  if (loading) {
+    return (
+      <Screen>
+        <DetailHeader title={t('package.title')} />
+        <View style={{ paddingVertical: 48, alignItems: 'center' }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
+            {t('common.loading')}
+          </AppText>
+        </View>
+      </Screen>
+    );
+  }
 
   if (!p) {
     return (
@@ -42,6 +57,7 @@ export default function PackageDetailScreen() {
   const fees = Math.round(total * 0.06);
 
   const book = () => {
+    const primaryCityId = p.cityIds[0];
     setDraft({
       vertical: 'package',
       refId: p.id,
@@ -51,6 +67,9 @@ export default function PackageDetailScreen() {
       unitPrice: p.priceFrom,
       quantity: travelers,
       fees,
+      startsAt: new Date(Date.now() + 21 * 86400000).toISOString(),
+      cityName: primaryCityId ? getCityName(primaryCityId, 'en') : undefined,
+      cityNameAr: primaryCityId ? getCityName(primaryCityId, 'ar') : undefined,
       metaLine: `${p.nights} ${t('stay.nights')} · ${travelers} ${t('package.travelers')}`,
     });
     router.push('/checkout');
