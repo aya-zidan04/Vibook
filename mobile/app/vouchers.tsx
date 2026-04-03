@@ -1,27 +1,21 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
   TextInput,
   View,
 } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { EmptyState } from '@/components/feedback/EmptyState';
-import { useIntegrationMode } from '@/hooks/useIntegrationMode';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { meVouchersApi } from '@/services/api/meVouchersApi';
-import { ApiRequestError } from '@/services/api/http';
 import { MOCK_VOUCHERS } from '@/services/mock';
 import { useLocaleStore } from '@/store/localeStore';
 import type { Voucher } from '@/types';
-import { voucherResponseToVoucher } from '@/utils/meFeatureMappers';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -29,123 +23,42 @@ export default function VouchersScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
-  const router = useRouter();
-  const { api, authenticated, liveAccount } = useIntegrationMode();
-
-  const [list, setList] = useState<Voucher[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [listError, setListError] = useState<string | null>(null);
+  const [extra, setExtra] = useState<Voucher[]>([]);
   const [code, setCode] = useState('');
   const [redeemBusy, setRedeemBusy] = useState(false);
 
-  const loadList = useCallback(async () => {
-    if (!liveAccount) {
-      setList([]);
-      setListError(null);
-      return;
-    }
-    setLoading(true);
-    setListError(null);
-    try {
-      const res = await meVouchersApi.list();
-      setList(res.vouchers.map(voucherResponseToVoucher));
-    } catch (e) {
-      setList([]);
-      setListError(e instanceof ApiRequestError ? e.message : t('vouchers.loadError'));
-    } finally {
-      setLoading(false);
-    }
-  }, [liveAccount, t]);
-
-  useFocusEffect(
-    useCallback(() => {
-      void loadList();
-    }, [loadList]),
-  );
+  const displayList = useMemo(() => [...MOCK_VOUCHERS, ...extra], [extra]);
 
   const redeem = async () => {
-    const trimmed = code.trim();
+    const trimmed = code.trim().toUpperCase();
     if (!trimmed) {
       Alert.alert(t('common.error'), t('vouchers.codeRequired'));
       return;
     }
-    setRedeemBusy(true);
-    try {
-      const v = await meVouchersApi.redeem({ code: trimmed });
-      setList((prev) => [voucherResponseToVoucher(v), ...prev.filter((x) => x.id !== v.id)]);
-      setCode('');
-      Alert.alert(t('vouchers.redeemSuccessTitle'), t('vouchers.redeemSuccessBody'));
-    } catch (e) {
-      if (e instanceof ApiRequestError) {
-        let msg = e.message;
-        if (e.status === 404) msg = t('vouchers.errorInvalid');
-        else if (e.status === 409) msg = t('vouchers.errorRedeemed');
-        else if (e.status === 400 && (!msg || msg === 'Request failed'))
-          msg = t('vouchers.errorExpired');
-        Alert.alert(t('common.error'), msg);
-      } else {
-        Alert.alert(t('common.error'), t('common.error'));
-      }
-    } finally {
-      setRedeemBusy(false);
+    if (displayList.some((v) => v.code.toUpperCase() === trimmed)) {
+      Alert.alert(t('common.error'), t('vouchers.errorRedeemed'));
+      return;
     }
+    setRedeemBusy(true);
+    setTimeout(() => {
+      setExtra((prev) => [
+        {
+          id: `local-${Date.now()}`,
+          code: trimmed,
+          title: `${t('vouchers.title')} · ${trimmed}`,
+          titleAr: undefined,
+          discountValue: 10,
+          discountType: 'percent',
+          expiresAt: new Date(Date.now() + 86400000 * 30).toISOString(),
+          redeemed: false,
+        },
+        ...prev,
+      ]);
+      setCode('');
+      setRedeemBusy(false);
+      Alert.alert(t('vouchers.redeemSuccessTitle'), t('vouchers.redeemSuccessBody'));
+    }, 400);
   };
-
-  if (api && !authenticated) {
-    return (
-      <Screen scroll contentStyle={styles.pad}>
-        <DetailHeader title={t('vouchers.title')} />
-        <EmptyState
-          icon="pricetag-outline"
-          title={t('vouchers.signInTitle')}
-          description={t('vouchers.signInDesc')}
-          actionLabel={t('entry.loginSignup')}
-          onAction={() => router.push('/(auth)/login')}
-        />
-      </Screen>
-    );
-  }
-
-  if (!api) {
-    return (
-      <Screen scroll contentStyle={styles.pad}>
-        <DetailHeader title={t('vouchers.title')} />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {MOCK_VOUCHERS.map((v) => (
-            <VoucherCard key={v.id} v={v} locale={locale} styles={styles} />
-          ))}
-        </ScrollView>
-      </Screen>
-    );
-  }
-
-  if (loading && list.length === 0 && !listError) {
-    return (
-      <Screen scroll contentStyle={styles.pad}>
-        <DetailHeader title={t('vouchers.title')} />
-        <View style={styles.center}>
-          <ActivityIndicator color={colors.primary} size="large" />
-          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
-            {t('common.loading')}
-          </AppText>
-        </View>
-      </Screen>
-    );
-  }
-
-  if (listError && list.length === 0) {
-    return (
-      <Screen scroll contentStyle={styles.pad}>
-        <DetailHeader title={t('vouchers.title')} />
-        <AppText variant="body" color="error" style={styles.err}>
-          {listError}
-        </AppText>
-        <PrimaryButton title={t('common.retry')} onPress={() => void loadList()} />
-      </Screen>
-    );
-  }
-
-  const displayList = list;
 
   return (
     <Screen scroll contentStyle={styles.pad}>
@@ -165,11 +78,6 @@ export default function VouchersScreen() {
         />
         <PrimaryButton title={t('vouchers.redeemCta')} onPress={() => void redeem()} loading={redeemBusy} />
       </View>
-      {listError ? (
-        <AppText variant="caption" color="warning" style={styles.warn}>
-          {listError}
-        </AppText>
-      ) : null}
       {displayList.length === 0 ? (
         <EmptyState
           icon="pricetag-outline"
@@ -225,9 +133,6 @@ function VoucherCard({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md },
-    center: { paddingVertical: 40, alignItems: 'center' },
-    err: { marginBottom: spacing.sm },
-    warn: { marginBottom: spacing.xs },
     redeemBox: {
       gap: spacing.sm,
       padding: spacing.md,

@@ -14,8 +14,8 @@ export const MOCK_VOUCHERS: Voucher[] = [
   {
     id: 'v2',
     code: 'DINE40',
-    title: 'SAR 40 off dining',
-    titleAr: 'خصم ٤٠ ر.س على المطاعم',
+    title: 'JOD 40 off dining',
+    titleAr: 'خصم ٤٠ د.أ على المطاعم',
     discountValue: 40,
     discountType: 'fixed',
     expiresAt: '2026-04-30T23:59:59+03:00',

@@ -1,6 +1,5 @@
 import type { BookingDraft } from '@/store/bookingDraftStore';
 import type { Booking, BookingStatus } from '@/types';
-import type { BookingResponseDto, CreateBookingRequestDto } from '@/services/api/types';
 import { isNumericCatalogId } from '@/services/catalog/mapCatalog';
 import { useLocaleStore } from '@/store/localeStore';
 
@@ -11,14 +10,8 @@ export function isBookingUuid(id: string): boolean {
   return UUID_RE.test(id.trim());
 }
 
-/** Draft/listing ref id is a backend catalog id (digits only). */
 export function isNumericCatalogRef(refId: string): boolean {
   return isNumericCatalogId(refId);
-}
-
-/** Draft `stay` maps to backend booking type `hotel`. */
-export function draftVerticalToApiType(vertical: BookingDraft['vertical']): string {
-  return vertical === 'stay' ? 'hotel' : vertical;
 }
 
 export function apiBookingTypeToUiType(type: string): Booking['type'] {
@@ -41,41 +34,8 @@ export function normalizeCurrencyForApi(
   return fallback;
 }
 
-function toNumber(v: number | string | null | undefined): number {
-  if (v == null) return 0;
-  if (typeof v === 'number') return v;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function assertBookingStatus(s: string): BookingStatus {
-  if (
-    s === 'upcoming' ||
-    s === 'past' ||
-    s === 'cancelled' ||
-    s === 'pending_payment'
-  ) {
-    return s;
-  }
-  return 'upcoming';
-}
-
-export function bookingResponseDtoToBooking(d: BookingResponseDto): Booking {
-  return {
-    id: d.id,
-    userId: d.userId,
-    type: apiBookingTypeToUiType(d.type),
-    refId: String(d.refId),
-    refTitle: d.refTitle,
-    refTitleAr: d.refTitleAr ?? undefined,
-    imageUrl: d.imageUrl,
-    status: assertBookingStatus(d.status.trim().toLowerCase()),
-    startsAt: d.startsAt,
-    cityName: d.cityName,
-    cityNameAr: d.cityNameAr ?? undefined,
-    totalPaid: toNumber(d.totalPaid),
-    currency: d.currency.trim().toUpperCase(),
-  };
+export function canCancelBookingStatus(status: BookingStatus): boolean {
+  return status === 'upcoming' || status === 'pending_payment';
 }
 
 const FALLBACK_START_MS = 3 * 24 * 60 * 60 * 1000;
@@ -95,36 +55,4 @@ export function resolveDraftCityNames(draft: BookingDraft): { cityName: string; 
     ? draft.cityNameAr.trim().slice(0, 200)
     : undefined;
   return { cityName, cityNameAr };
-}
-
-export function buildCreateBookingRequestFromDraft(draft: BookingDraft): CreateBookingRequestDto {
-  const refId = Number(draft.refId.trim());
-  const fallbackCur = useLocaleStore.getState().currency;
-  const currency = normalizeCurrencyForApi(draft.currency, fallbackCur);
-  const { cityName, cityNameAr } = resolveDraftCityNames(draft);
-  const quantity = draft.quantity;
-  const unitPrice = draft.unitPrice;
-  const fees = draft.fees;
-  const totalPaid = unitPrice * quantity + fees;
-
-  return {
-    type: draftVerticalToApiType(draft.vertical),
-    refId,
-    refTitle: draft.title.trim().slice(0, 500),
-    refTitleAr: draft.refTitleAr?.trim() ? draft.refTitleAr.trim().slice(0, 500) : undefined,
-    imageUrl: draft.imageUrl.trim().slice(0, 1024),
-    startsAt: resolveDraftStartsAtIso(draft),
-    cityName,
-    cityNameAr: cityNameAr ?? null,
-    quantity,
-    unitPrice,
-    fees,
-    totalPaid,
-    currency,
-    paymentReference: 'MOCK_CHECKOUT_4242',
-  };
-}
-
-export function canCancelBookingStatus(status: BookingStatus): boolean {
-  return status === 'upcoming' || status === 'pending_payment';
 }

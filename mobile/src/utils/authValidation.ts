@@ -14,6 +14,15 @@ export function isValidJordanLocalPhone(digits: string): boolean {
   return /^7\d{8}$/.test(digits.replace(/\s/g, ''));
 }
 
+/** Local 9 digits from stored E.164 (+962…) or legacy values (last 9 digits fallback). */
+export function jordanLocalDigitsFromStored(phone: string): string {
+  const d = phone.replace(/\D/g, '');
+  if (d.startsWith('962') && d.length >= 12) return d.slice(3, 12);
+  if (/^7\d{8}$/.test(d)) return d;
+  if (d.length >= 9) return d.slice(-9);
+  return '';
+}
+
 export function canSubmitLogin(email: string, password: string): boolean {
   return isValidEmail(email) && isValidSignupPassword(password);
 }

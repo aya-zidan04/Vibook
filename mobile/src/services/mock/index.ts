@@ -1,7 +1,4 @@
-/**
- * Mock data façade — import from here in app code so backend integration can
- * replace this module (or its internals) without sweeping screen edits.
- */
+/** Mock data façade — fixtures and helpers for the standalone app. */
 export { mergeMockUser } from '@/services/profileMerge';
 export { CURRENT_USER } from '@/mock/users';
 
@@ -11,6 +8,8 @@ export * from '@/mock/queries';
 /** Curated aggregates used across tabs, search, and PDPs. */
 export {
   MOCK_BOOKINGS,
+  MOCK_CATEGORIES,
+  MOCK_CITIES,
   MOCK_EVENTS,
   MOCK_EXPERIENCES,
   MOCK_FLIGHTS,

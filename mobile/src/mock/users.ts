@@ -6,10 +6,10 @@ export const MOCK_USERS: User[] = [
     name: 'Layla Al-Harbi',
     nameAr: 'ليلى الحربي',
     email: 'layla.h@email.com',
-    phone: '+966501112233',
+    phone: '+962791234567',
     avatarUrl:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80&auto=format&fit=crop',
-    cityId: 'c1',
+    cityId: 'gov-amman',
     membershipTier: 'gold',
     walletBalance: 450,
     preferredLanguage: 'en',

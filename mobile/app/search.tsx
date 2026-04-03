@@ -17,8 +17,8 @@ import { ltrNavigationChrome } from '@/utils/navigationChrome';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import type { ThemeColors } from '@/theme/palettes';
 
-const RECENT = ['Jazz night Riyadh', 'Dubai weekend', 'Chef’s table'];
-const POPULAR = ['Concerts', 'Fine dining', 'Boutique hotels', 'Flights DXB'];
+const RECENT = ['Jazz night Irbid', 'Aqaba weekend', 'Chef’s table'];
+const POPULAR = ['Concerts', 'Fine dining', 'Boutique hotels', 'Flights AMM'];
 const TAGS = ['Family', 'Romantic', 'Last minute', 'Luxury', 'Outdoor'];
 
 type Segment = 'all' | 'events' | 'restaurants' | 'hotels' | 'flights';

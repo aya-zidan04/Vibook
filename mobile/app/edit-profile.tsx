@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
@@ -9,11 +10,11 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useMockUser } from '@/hooks/useMockUser';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useIntegrationMode } from '@/hooks/useIntegrationMode';
-import { mapUserResponseToUser } from '@/services/auth/mapUser';
-import { userApi } from '@/services/auth/userApi';
-import { useSessionStore } from '@/store/sessionStore';
-import { formatApiErrorMessage } from '@/utils/apiError';
+import {
+  isValidEmail,
+  isValidJordanLocalPhone,
+  jordanLocalDigitsFromStored,
+} from '@/utils/authValidation';
 import { nameToFirstLast, normalizePhoneForApi } from '@/utils/profilePatch';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -22,50 +23,52 @@ export default function EditProfileScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const { user, setOverrides } = useMockUser();
 
-  const displayName = locale === 'ar' && user.nameAr ? user.nameAr : user.name;
+  const initialParts = useMemo(() => nameToFirstLast(user.name), [user.name]);
 
-  const [name, setName] = useState(user.name);
-  const [nameAr, setNameAr] = useState(user.nameAr ?? '');
-  const [phone, setPhone] = useState(user.phone);
-  const [busy, setBusy] = useState(false);
-  const { liveAccount } = useIntegrationMode();
+  const [firstName, setFirstName] = useState(initialParts.firstName);
+  const [lastName, setLastName] = useState(initialParts.lastName ?? '');
+  const [email, setEmail] = useState(user.email);
+  const [phoneLocal, setPhoneLocal] = useState(() => jordanLocalDigitsFromStored(user.phone));
 
   useEffect(() => {
-    setName(user.name);
-    setNameAr(user.nameAr ?? '');
-    setPhone(user.phone);
+    const p = nameToFirstLast(user.name);
+    setFirstName(p.firstName);
+    setLastName(p.lastName ?? '');
+    setEmail(user.email);
+    setPhoneLocal(jordanLocalDigitsFromStored(user.phone));
   }, [user]);
 
-  const save = async () => {
-    if (busy) return;
-    if (liveAccount) {
-      setBusy(true);
-      try {
-        const { firstName, lastName } = nameToFirstLast(name);
-        const dto = await userApi.patchMe({
-          firstName,
-          ...(lastName ? { lastName } : {}),
-          nameAr: nameAr.trim() ? nameAr.trim() : null,
-          phone: normalizePhoneForApi(phone),
-        });
-        useSessionStore.getState().setServerUser(mapUserResponseToUser(dto));
-        setOverrides({});
-        Alert.alert(t('editProfile.saved'));
-        router.back();
-      } catch (e) {
-        Alert.alert(t('common.error'), formatApiErrorMessage(e));
-      } finally {
-        setBusy(false);
-      }
+  const onPhoneChange = (text: string) => {
+    const d = text.replace(/\D/g, '').slice(0, 9);
+    setPhoneLocal(d);
+  };
+
+  const onChangePhotoPress = () => {
+    Alert.alert(t('editProfile.changePhotoMockTitle'), t('editProfile.changePhotoMockBody'));
+  };
+
+  const save = () => {
+    if (!firstName.trim()) {
+      Alert.alert(t('common.error'), t('editProfile.errFirstName'));
+      return;
+    }
+    const trimmedEmail = email.trim();
+    if (!isValidEmail(trimmedEmail)) {
+      Alert.alert(t('common.error'), t('editProfile.errEmail'));
+      return;
+    }
+    if (!isValidJordanLocalPhone(phoneLocal)) {
+      Alert.alert(t('common.error'), t('editProfile.errPhoneJordan'));
       return;
     }
     setOverrides({
-      name,
-      nameAr: nameAr.trim() || undefined,
-      phone,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: trimmedEmail,
+      phone: normalizePhoneForApi(phoneLocal),
     });
     Alert.alert(t('editProfile.saved'));
     router.back();
@@ -75,67 +78,154 @@ export default function EditProfileScreen() {
     <Screen scroll contentStyle={styles.pad} edges={['top', 'left', 'right', 'bottom']}>
       <DetailHeader title={t('editProfile.title')} />
       <View style={styles.hero}>
-        <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
-        <View style={styles.heroText}>
-          <AppText variant="h3" color="text">
-            {displayName}
-          </AppText>
-          <AppText variant="caption" color="textMuted">
-            {user.email}
-          </AppText>
-          <AppText variant="meta" color="textMuted" style={styles.emailNote}>
-            {t('editProfile.emailNote')}
+        <View style={styles.avatarColumn}>
+          <View style={styles.avatarWrap}>
+            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
+            <Pressable
+              style={({ pressed }) => [styles.avatarEditBadge, pressed && styles.avatarEditPressed]}
+              onPress={onChangePhotoPress}
+              accessibilityRole="button"
+              accessibilityLabel={t('editProfile.changePhotoA11y')}
+              hitSlop={8}
+            >
+              <Ionicons name="pencil" size={18} color={colors.accent} />
+            </Pressable>
+          </View>
+          <AppText variant="meta" color="textMuted" style={styles.heroNote}>
+            {t('editProfile.note')}
           </AppText>
         </View>
       </View>
 
-      <AuthTextField
-        label={t('editProfile.name')}
-        value={name}
-        onChangeText={setName}
-        autoCapitalize="words"
-      />
-      <AuthTextField
-        label={t('editProfile.nameAr')}
-        value={nameAr}
-        onChangeText={setNameAr}
-        autoCapitalize="words"
-      />
+      <View style={styles.nameRow}>
+        <View style={styles.nameHalf}>
+          <AuthTextField
+            label={t('editProfile.firstName')}
+            value={firstName}
+            onChangeText={setFirstName}
+            autoCapitalize="words"
+          />
+        </View>
+        <View style={styles.nameHalf}>
+          <AuthTextField
+            label={t('editProfile.lastName')}
+            value={lastName}
+            onChangeText={setLastName}
+            autoCapitalize="words"
+          />
+        </View>
+      </View>
+
       <AuthTextField
         label={t('editProfile.phone')}
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
+        value={phoneLocal}
+        onChangeText={onPhoneChange}
+        placeholder={t('auth.phonePlaceholder')}
+        helper={t('editProfile.phoneJordanNote')}
+        keyboardType="number-pad"
+        autoCorrect={false}
+        textInputStyle={styles.phoneInput}
+        leftSlot={
+          <View style={styles.phonePrefix}>
+            <AppText variant="bodyMedium" style={styles.flag}>
+              🇯🇴
+            </AppText>
+            <AppText variant="bodyMedium" color="textSecondary">
+              +962
+            </AppText>
+            <View style={styles.phoneSep} />
+          </View>
+        }
       />
 
-      <AppText variant="caption" color="textMuted" style={styles.note}>
-        {t('editProfile.note')}
-      </AppText>
+      <AuthTextField
+        label={t('editProfile.email')}
+        value={email}
+        onChangeText={setEmail}
+        placeholder={t('auth.emailPlaceholder')}
+        helper={t('editProfile.emailHelper')}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
 
-      <PrimaryButton title={t('common.save')} onPress={() => void save()} disabled={busy} />
-      {busy ? <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.accent} /> : null}
+      <PrimaryButton title={t('common.save')} onPress={save} />
     </Screen>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-    pad: { paddingTop: spacing.md, paddingBottom: spacing.xxxl, gap: 0 },
+    pad: { paddingTop: spacing.md, gap: spacing.md },
     hero: {
-      flexDirection: 'row',
-      gap: spacing.lg,
       alignItems: 'center',
-      marginBottom: spacing.xl,
+      marginBottom: spacing.sm,
+    },
+    avatarColumn: {
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    avatarWrap: {
+      position: 'relative',
     },
     avatar: {
-      width: 88,
-      height: 88,
-      borderRadius: 44,
-      borderWidth: 2,
-      borderColor: colors.border,
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: colors.surfaceMuted,
+      borderWidth: 3,
+      borderColor: colors.primaryMuted,
     },
-    heroText: { flex: 1, gap: 4 },
-    emailNote: { marginTop: 4, lineHeight: 18 },
-    note: { lineHeight: 20, marginTop: spacing.sm, marginBottom: spacing.lg },
+    avatarEditBadge: {
+      position: 'absolute',
+      bottom: 2,
+      end: 2,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.15,
+          shadowRadius: 2,
+        },
+        android: { elevation: 4 },
+        default: {},
+      }),
+    },
+    avatarEditPressed: { opacity: 0.85 },
+    heroNote: {
+      textAlign: 'center',
+      paddingHorizontal: spacing.lg,
+      lineHeight: 18,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginBottom: 0,
+    },
+    nameHalf: { flex: 1 },
+    phonePrefix: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingStart: spacing.sm,
+    },
+    flag: { fontSize: 20 },
+    phoneSep: {
+      width: 1,
+      height: 26,
+      backgroundColor: colors.border,
+    },
+    phoneInput: {
+      textAlign: 'left',
+      writingDirection: 'ltr',
+    },
   });
 }

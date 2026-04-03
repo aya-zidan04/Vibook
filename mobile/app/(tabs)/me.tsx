@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -8,19 +8,16 @@ import { Screen } from '@/components/layout/Screen';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
-import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useMockUser } from '@/hooks/useMockUser';
 import { MOCK_BOOKINGS, MOCK_VOUCHERS } from '@/services/mock';
-import { signOutFromApi } from '@/services/auth/session';
 import { useAppStore } from '@/store/appStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 const MENU_ACCOUNT: { key: string; labelKey: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'wallet', labelKey: 'me.menuWallet', icon: 'wallet-outline' },
   { key: 'vouchers', labelKey: 'me.menuVouchers', icon: 'pricetag-outline' },
   { key: 'favorites', labelKey: 'me.menuFavorites', icon: 'heart-outline' },
   { key: 'bookings', labelKey: 'me.menuBookings', icon: 'ticket-outline' },
@@ -34,8 +31,7 @@ const MENU_ACCOUNT: { key: string; labelKey: string; icon: keyof typeof Ionicons
 
 export default function MeScreen() {
   const router = useRouter();
-  const { t, locale, currency } = useTranslation();
-  const { formatMoney } = useFormatMoney();
+  const { t, locale } = useTranslation();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user } = useMockUser();
@@ -44,18 +40,12 @@ export default function MeScreen() {
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming').length;
 
   const handleLogout = () => {
-    void (async () => {
-      await signOutFromApi();
-      logout();
-      router.replace('/entry');
-    })();
+    logout();
+    router.replace('/entry');
   };
 
   const openMenu = (key: string) => {
     switch (key) {
-      case 'wallet':
-        router.push('/wallet');
-        break;
       case 'vouchers':
         router.push('/vouchers');
         break;
@@ -128,17 +118,16 @@ export default function MeScreen() {
           colors={colors}
           boxStyle={styles.stat}
         />
-        <StatItem
-          label={t('me.wallet')}
-          value={formatMoney(user.walletBalance, currency)}
-          icon="wallet-outline"
-          colors={colors}
-          boxStyle={styles.stat}
-        />
       </View>
 
       <SectionHeader title={t('me.vouchersTitle')} />
-      <View style={styles.voucherList}>
+      <ScrollView
+        horizontal
+        nestedScrollEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.voucherScrollContent}
+        accessibilityRole="list"
+      >
         {MOCK_VOUCHERS.map((v) => (
           <View key={v.id} style={styles.voucher}>
             <AppText variant="meta" color="accent">
@@ -152,7 +141,7 @@ export default function MeScreen() {
             </AppText>
           </View>
         ))}
-      </View>
+      </ScrollView>
 
       <SectionHeader title={t('settings.businessForPartners')} />
       <Pressable
@@ -291,12 +280,14 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       gap: 4,
     },
-    voucherList: {
+    voucherScrollContent: {
+      flexDirection: 'row',
       gap: spacing.md,
+      paddingBottom: 2,
       marginBottom: spacing.xl,
     },
     voucher: {
-      width: '100%',
+      width: 280,
       padding: spacing.md,
       backgroundColor: colors.surface,
       borderRadius: radii.xl,

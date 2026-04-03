@@ -1,13 +1,11 @@
 import { useMemo } from 'react';
-import { isApiConfigured } from '@/config/api';
 import { useAppStore } from '@/store/appStore';
 
 /**
- * Single place for API vs mock vs guest semantics (see `mobile/INTEGRATION.md`).
+ * Mock-only app: no HTTP API. Flags mirror the old shape so screens keep simple conditionals.
  *
- * - **mockOnly** — `EXPO_PUBLIC_API_BASE_URL` unset: catalog + account UX use bundled mocks.
- * - **guestWithApi** — URL set but user not signed in: public catalog APIs where wired; `/me/*` screens show sign-in prompts.
- * - **liveAccount** — URL set and signed in: authenticated API for bookings, wallet, favorites sync, etc.
+ * - **liveAccount** is always false (nothing remote to hydrate).
+ * - **authenticated** still reflects mock login state.
  */
 export type IntegrationMode = {
   api: boolean;
@@ -18,16 +16,15 @@ export type IntegrationMode = {
 };
 
 export function useIntegrationMode(): IntegrationMode {
-  const api = isApiConfigured();
   const authenticated = useAppStore((s) => s.isAuthenticated);
   return useMemo(
     () => ({
-      api,
+      api: false,
       authenticated,
-      liveAccount: api && authenticated,
-      mockOnly: !api,
-      guestWithApi: api && !authenticated,
+      liveAccount: false,
+      mockOnly: true,
+      guestWithApi: false,
     }),
-    [api, authenticated],
+    [authenticated],
   );
 }

@@ -8,6 +8,10 @@ export function nameToFirstLast(full: string): { firstName: string; lastName?: s
   return lastName.length > 0 ? { firstName, lastName } : { firstName: t };
 }
 
+export function joinFirstLast(first: string, last: string): string {
+  return [first.trim(), last.trim()].filter((s) => s.length > 0).join(' ');
+}
+
 /** Backend expects E.164-style phone (e.g. +9627xxxxxxxx). */
 export function normalizePhoneForApi(phone: string): string {
   const t = phone.trim().replace(/\s/g, '');

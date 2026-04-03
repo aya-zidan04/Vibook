@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { clearTokens } from '@/services/auth/tokenStorage';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { useFavoritesStore } from '@/store/favoritesStore';
 import { useSessionStore } from '@/store/sessionStore';
@@ -12,22 +11,18 @@ type AppState = {
   setSelectedCityId: (id: string) => void;
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (v: boolean) => void;
-  /** True after a successful sign-in (mock or real). */
+  /** True after a successful sign-in (mock). */
   isAuthenticated: boolean;
   setAuthenticated: (v: boolean) => void;
   isGuest: boolean;
   setGuest: (v: boolean) => void;
-  /**
-   * Clears session-like state and resets entry flow so the user sees `/entry` again
-   * (cold start also shows entry while `hasCompletedOnboarding` is false).
-   */
   logout: () => void;
 };
 
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      selectedCityId: 'c1',
+      selectedCityId: 'gov-amman',
       setSelectedCityId: (id) => set({ selectedCityId: id }),
       hasCompletedOnboarding: false,
       setHasCompletedOnboarding: (v) => set({ hasCompletedOnboarding: v }),
@@ -36,7 +31,6 @@ export const useAppStore = create<AppState>()(
       isGuest: true,
       setGuest: (v) => set({ isGuest: v }),
       logout: () => {
-        void clearTokens();
         useSessionStore.getState().setServerUser(null);
         useBookingDraftStore.getState().setDraft(null);
         useBookingDraftStore.getState().setLastOrderId(null);

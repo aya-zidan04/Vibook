@@ -1,24 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
-import { EmptyState } from '@/components/feedback/EmptyState';
 import { Screen } from '@/components/layout/Screen';
 import { EventCard } from '@/components';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useIntegrationMode } from '@/hooks/useIntegrationMode';
 import {
   catalogRouteSegment,
   loadFavoritePreview,
   type FavoritePreview,
 } from '@/services/favorites/loadFavoritePreview';
-import { isNumericCatalogId } from '@/services/catalog/mapCatalog';
 import { MOCK_EVENTS } from '@/services/mock';
-import { hydrateFavoritesFromApi, useFavoritesStore } from '@/store/favoritesStore';
+import { useFavoritesStore } from '@/store/favoritesStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { chevronForwardTrailing } from '@/utils/rtl';
@@ -29,9 +26,7 @@ export default function FavoritesTabScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const { api, authenticated, liveAccount } = useIntegrationMode();
   const keys = useFavoritesStore((s) => s.keys);
-  const listHydrating = useFavoritesStore((s) => s.listHydrating);
 
   const entries = useMemo(() => {
     return Object.keys(keys).map((key) => {
@@ -45,61 +40,22 @@ export default function FavoritesTabScreen() {
   }, [keys]);
 
   const [previews, setPreviews] = useState<Record<string, FavoritePreview>>({});
-  const [previewsLoading, setPreviewsLoading] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (liveAccount) {
-        void hydrateFavoritesFromApi();
-      }
-    }, [liveAccount]),
-  );
 
   useEffect(() => {
-    if (!liveAccount || entries.length === 0) {
+    if (entries.length === 0) {
       setPreviews({});
-      setPreviewsLoading(false);
       return;
     }
-    let cancelled = false;
-    setPreviewsLoading(true);
-    (async () => {
-      const next: Record<string, FavoritePreview> = {};
-      await Promise.all(
-        entries.map(async (e) => {
-          if (!isNumericCatalogId(e.refId)) return;
-          const p = await loadFavoritePreview(e.type, Number(e.refId));
-          if (p && !cancelled) next[e.key] = p;
-        }),
-      );
-      if (!cancelled) {
-        setPreviews(next);
-        setPreviewsLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [liveAccount, entries]);
+    const next: Record<string, FavoritePreview> = {};
+    for (const e of entries) {
+      if (!e.refId) continue;
+      const p = loadFavoritePreview(e.type, e.refId);
+      if (p) next[e.key] = p;
+    }
+    setPreviews(next);
+  }, [entries]);
 
-  if (api && !authenticated) {
-    return (
-      <Screen scroll contentStyle={styles.pad}>
-        <AppText variant="h1" color="text" style={styles.title}>
-          {t('favorites.title')}
-        </AppText>
-        <EmptyState
-          icon="heart-outline"
-          title={t('favorites.signInTitle')}
-          description={t('favorites.signInDesc')}
-          actionLabel={t('entry.loginSignup')}
-          onAction={() => router.push('/(auth)/login')}
-        />
-      </Screen>
-    );
-  }
-
-  if (!api) {
+  if (entries.length === 0) {
     return (
       <Screen scroll contentStyle={styles.pad}>
         <AppText variant="h1" color="text" style={styles.title}>
@@ -119,39 +75,6 @@ export default function FavoritesTabScreen() {
     );
   }
 
-  if (listHydrating && entries.length === 0) {
-    return (
-      <Screen scroll contentStyle={styles.pad}>
-        <AppText variant="h1" color="text" style={styles.title}>
-          {t('favorites.title')}
-        </AppText>
-        <View style={styles.center}>
-          <ActivityIndicator color={colors.primary} size="large" />
-          <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
-            {t('common.loading')}
-          </AppText>
-        </View>
-      </Screen>
-    );
-  }
-
-  if (entries.length === 0) {
-    return (
-      <Screen scroll contentStyle={styles.pad}>
-        <AppText variant="h1" color="text" style={styles.title}>
-          {t('favorites.title')}
-        </AppText>
-        <EmptyState
-          icon="heart-outline"
-          title={t('favorites.emptyTitle')}
-          description={t('favorites.emptyDesc')}
-          actionLabel={t('favorites.discover')}
-          onAction={() => router.push('/(tabs)/explore')}
-        />
-      </Screen>
-    );
-  }
-
   return (
     <Screen scroll contentStyle={styles.pad}>
       <AppText variant="h1" color="text" style={styles.title}>
@@ -160,16 +83,10 @@ export default function FavoritesTabScreen() {
       <AppText variant="body" color="textSecondary" style={styles.sub}>
         {t('favorites.subtitleLive')}
       </AppText>
-      {previewsLoading ? (
-        <View style={styles.inlineLoad}>
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      ) : null}
       {entries.map((e) => {
         const p = previews[e.key];
         const segment = catalogRouteSegment(e.type);
-        const href =
-          segment === 'explore' ? '/(tabs)/explore' : `/${segment}/${e.refId}`;
+        const href = segment === 'explore' ? '/(tabs)/explore' : `/${segment}/${e.refId}`;
         return (
           <Pressable
             key={e.key}
@@ -188,11 +105,7 @@ export default function FavoritesTabScreen() {
                 {p?.title ?? t('favorites.unresolvedTitle')}
               </AppText>
               <AppText variant="caption" color="textMuted" numberOfLines={2}>
-                {p?.subtitle
-                  ? p.subtitle
-                  : isNumericCatalogId(e.refId)
-                    ? t('favorites.tapToOpen')
-                    : t('favorites.mockItemHint')}
+                {p?.subtitle ? p.subtitle : t('favorites.tapToOpen')}
               </AppText>
               {p?.priceFrom != null && p.currency ? (
                 <AppText variant="price" color="accent">
@@ -215,8 +128,6 @@ function createStyles(colors: ThemeColors) {
     title: { marginBottom: spacing.xs },
     sub: { lineHeight: 22, marginBottom: spacing.sm },
     mockNote: { marginBottom: spacing.sm, lineHeight: 18 },
-    center: { paddingVertical: 48, alignItems: 'center' },
-    inlineLoad: { paddingVertical: spacing.sm, alignItems: 'center' },
     row: {
       flexDirection: 'row',
       alignItems: 'center',

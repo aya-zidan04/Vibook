@@ -6,9 +6,13 @@ import { createJSONStorage, persist } from 'zustand/middleware';
  * Client-only profile overrides (mock phase). Replace with API-backed user later.
  */
 export type UserProfileOverrides = {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   nameAr?: string;
   phone?: string;
+  /** Legacy; applied when firstName/lastName are absent */
+  name?: string;
 };
 
 type State = {

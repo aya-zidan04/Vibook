@@ -1,13 +1,8 @@
 import { create } from 'zustand';
-import { isApiConfigured } from '@/config/api';
-import { referenceApi } from '@/services/api/referenceApi';
-import {
-  mapCategoryDto,
-  mapCityDto,
-} from '@/services/reference/mapReference';
+import { MOCK_CATEGORIES } from '@/mock/categories';
+import { MOCK_CITIES } from '@/mock/cities';
 import type { Category, City } from '@/types';
 import { useAppStore } from '@/store/appStore';
-import { formatApiErrorMessage } from '@/utils/apiError';
 
 type ReferenceStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -24,7 +19,9 @@ function ensureValidSelectedCity(cities: City[]): void {
   const { selectedCityId, setSelectedCityId } = useAppStore.getState();
   const ok = cities.some((c) => c.id === selectedCityId);
   if (!ok) {
-    setSelectedCityId(cities[0].id);
+    const fallback =
+      cities.find((c) => c.id === 'gov-amman')?.id ?? cities[0].id;
+    setSelectedCityId(fallback);
   }
 }
 
@@ -34,18 +31,10 @@ export const useReferenceStore = create<ReferenceState>((set) => ({
   status: 'idle',
   errorMessage: null,
   load: async () => {
-    if (!isApiConfigured()) {
-      set({ status: 'idle', errorMessage: null });
-      return;
-    }
     set({ status: 'loading', errorMessage: null });
     try {
-      const [cityDtos, categoryDtos] = await Promise.all([
-        referenceApi.listCities(),
-        referenceApi.listCategories(),
-      ]);
-      const cities = cityDtos.map(mapCityDto);
-      const categories = categoryDtos.map(mapCategoryDto);
+      const cities = [...MOCK_CITIES];
+      const categories = [...MOCK_CATEGORIES];
       ensureValidSelectedCity(cities);
       set({
         cities,
@@ -53,10 +42,10 @@ export const useReferenceStore = create<ReferenceState>((set) => ({
         status: 'ready',
         errorMessage: null,
       });
-    } catch (e) {
+    } catch {
       set({
         status: 'error',
-        errorMessage: formatApiErrorMessage(e),
+        errorMessage: 'Failed to load reference data',
         cities: [],
         categories: [],
       });

@@ -6,10 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
-import { isApiConfigured } from '@/config/api';
 import { useTranslation } from '@/i18n/useTranslation';
-import { businessLeadsApi } from '@/services/api/businessLeadsApi';
-import { formatApiErrorMessage } from '@/utils/apiError';
 import { isValidEmail } from '@/utils/authValidation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -88,14 +85,10 @@ export default function BusinessJoinScreen() {
 
     setBusy(true);
     try {
-      if (isApiConfigured()) {
-        await businessLeadsApi.submit(body);
-      } else {
-        await new Promise((r) => setTimeout(r, 550));
-      }
+      await new Promise((r) => setTimeout(r, 550));
       router.replace('/business/success');
-    } catch (e) {
-      setSubmitError(formatApiErrorMessage(e) || t('businessJoin.errSubmit'));
+    } catch {
+      setSubmitError(t('businessJoin.errSubmit'));
     } finally {
       setBusy(false);
     }
@@ -215,7 +208,7 @@ export default function BusinessJoinScreen() {
       <PrimaryButton title={t('businessJoin.submit')} onPress={() => void submit()} loading={busy} />
 
       <AppText variant="caption" color="textMuted" style={styles.disclaimer}>
-        {isApiConfigured() ? t('businessJoin.disclaimerLive') : t('businessJoin.disclaimerMock')}
+        {t('businessJoin.disclaimerMock')}
       </AppText>
     </Screen>
   );

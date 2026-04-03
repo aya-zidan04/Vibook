@@ -1,17 +1,4 @@
 import { useEffect, useState } from 'react';
-import { isApiConfigured } from '@/config/api';
-import { catalogReadApi } from '@/services/api/catalogReadApi';
-import {
-  eventDtoToEventItem,
-  experienceDtoToExperienceItem,
-  flightDtoToFlight,
-  hotelDtoToHotel,
-  organizerDtoToOrganizer,
-  packageDtoToTravelPackage,
-  parseCatalogNumericId,
-  restaurantDtoToRestaurant,
-  tierDtoToTicketTier,
-} from '@/services/catalog/mapCatalog';
 import {
   getEventById,
   getExperienceById,
@@ -42,77 +29,28 @@ export function useEventPdp(id: string | undefined): {
   const [event, setEvent] = useState<EventItem | undefined>();
   const [tiers, setTiers] = useState<TicketTier[]>([]);
   const [loading, setLoading] = useState(true);
-  const apiMode = isApiConfigured();
-  const n = parseCatalogNumericId(id);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const mockEvent = id ? getEventById(id) : undefined;
-      const mockTiers = mockEvent ? getTiersForEvent(mockEvent.id) : [];
-      if (!apiMode || n == null) {
-        if (!cancelled) {
-          setEvent(mockEvent);
-          setTiers(mockTiers);
-          setLoading(false);
-        }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const [dto, tierList] = await Promise.all([
-          catalogReadApi.getEvent(n),
-          catalogReadApi.listEventTiers(n).catch(() => []),
-        ]);
-        if (!cancelled) {
-          setEvent(eventDtoToEventItem(dto));
-          setTiers(tierList.map(tierDtoToTicketTier));
-        }
-      } catch {
-        if (!cancelled) {
-          setEvent(mockEvent);
-          setTiers(mockTiers);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, n, apiMode]);
+    const mockEvent = id ? getEventById(id) : undefined;
+    const mockTiers = mockEvent ? getTiersForEvent(mockEvent.id) : [];
+    setEvent(mockEvent);
+    setTiers(mockTiers);
+    setLoading(false);
+  }, [id]);
 
   return { event, tiers, loading };
 }
 
 export function useOrganizerForEvent(event: EventItem | undefined): Organizer | undefined {
   const [organizer, setOrganizer] = useState<Organizer | undefined>();
-  const apiMode = isApiConfigured();
-  const oid = event ? parseCatalogNumericId(event.organizerId) : null;
 
   useEffect(() => {
     if (!event) {
       setOrganizer(undefined);
       return;
     }
-    const mock = getOrganizerById(event.organizerId);
-    if (!apiMode || oid == null) {
-      setOrganizer(mock);
-      return;
-    }
-    let cancelled = false;
-    catalogReadApi
-      .getOrganizer(oid)
-      .then((d) => {
-        if (!cancelled) setOrganizer(organizerDtoToOrganizer(d));
-      })
-      .catch(() => {
-        if (!cancelled) setOrganizer(mock);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [event?.organizerId, event?.id, oid, apiMode]);
+    setOrganizer(getOrganizerById(event.organizerId));
+  }, [event?.organizerId, event?.id]);
 
   return organizer;
 }
@@ -123,34 +61,11 @@ export function useRestaurantPdp(id: string | undefined): {
 } {
   const [restaurant, setRestaurant] = useState<Restaurant | undefined>();
   const [loading, setLoading] = useState(true);
-  const apiMode = isApiConfigured();
-  const n = parseCatalogNumericId(id);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const mock = id ? getRestaurantById(id) : undefined;
-      if (!apiMode || n == null) {
-        if (!cancelled) {
-          setRestaurant(mock);
-          setLoading(false);
-        }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const dto = await catalogReadApi.getRestaurant(n);
-        if (!cancelled) setRestaurant(restaurantDtoToRestaurant(dto));
-      } catch {
-        if (!cancelled) setRestaurant(mock);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, n, apiMode]);
+    setRestaurant(id ? getRestaurantById(id) : undefined);
+    setLoading(false);
+  }, [id]);
 
   return { restaurant, loading };
 }
@@ -161,34 +76,11 @@ export function useExperiencePdp(id: string | undefined): {
 } {
   const [experience, setExperience] = useState<ExperienceItem | undefined>();
   const [loading, setLoading] = useState(true);
-  const apiMode = isApiConfigured();
-  const n = parseCatalogNumericId(id);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const mock = id ? getExperienceById(id) : undefined;
-      if (!apiMode || n == null) {
-        if (!cancelled) {
-          setExperience(mock);
-          setLoading(false);
-        }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const dto = await catalogReadApi.getExperience(n);
-        if (!cancelled) setExperience(experienceDtoToExperienceItem(dto));
-      } catch {
-        if (!cancelled) setExperience(mock);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, n, apiMode]);
+    setExperience(id ? getExperienceById(id) : undefined);
+    setLoading(false);
+  }, [id]);
 
   return { experience, loading };
 }
@@ -196,34 +88,11 @@ export function useExperiencePdp(id: string | undefined): {
 export function useHotelPdp(id: string | undefined): { hotel: Hotel | undefined; loading: boolean } {
   const [hotel, setHotel] = useState<Hotel | undefined>();
   const [loading, setLoading] = useState(true);
-  const apiMode = isApiConfigured();
-  const n = parseCatalogNumericId(id);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const mock = id ? getHotelById(id) : undefined;
-      if (!apiMode || n == null) {
-        if (!cancelled) {
-          setHotel(mock);
-          setLoading(false);
-        }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const dto = await catalogReadApi.getHotel(n);
-        if (!cancelled) setHotel(hotelDtoToHotel(dto));
-      } catch {
-        if (!cancelled) setHotel(mock);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, n, apiMode]);
+    setHotel(id ? getHotelById(id) : undefined);
+    setLoading(false);
+  }, [id]);
 
   return { hotel, loading };
 }
@@ -234,34 +103,11 @@ export function usePackagePdp(id: string | undefined): {
 } {
   const [pkg, setPkg] = useState<TravelPackage | undefined>();
   const [loading, setLoading] = useState(true);
-  const apiMode = isApiConfigured();
-  const n = parseCatalogNumericId(id);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const mock = id ? getPackageById(id) : undefined;
-      if (!apiMode || n == null) {
-        if (!cancelled) {
-          setPkg(mock);
-          setLoading(false);
-        }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const dto = await catalogReadApi.getPackage(n);
-        if (!cancelled) setPkg(packageDtoToTravelPackage(dto));
-      } catch {
-        if (!cancelled) setPkg(mock);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, n, apiMode]);
+    setPkg(id ? getPackageById(id) : undefined);
+    setLoading(false);
+  }, [id]);
 
   return { pkg, loading };
 }
@@ -272,34 +118,11 @@ export function useFlightPdp(id: string | undefined): {
 } {
   const [flight, setFlight] = useState<Flight | undefined>();
   const [loading, setLoading] = useState(true);
-  const apiMode = isApiConfigured();
-  const n = parseCatalogNumericId(id);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const mock = id ? getFlightById(id) : undefined;
-      if (!apiMode || n == null) {
-        if (!cancelled) {
-          setFlight(mock);
-          setLoading(false);
-        }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const dto = await catalogReadApi.getFlight(n);
-        if (!cancelled) setFlight(flightDtoToFlight(dto));
-      } catch {
-        if (!cancelled) setFlight(mock);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, n, apiMode]);
+    setFlight(id ? getFlightById(id) : undefined);
+    setLoading(false);
+  }, [id]);
 
   return { flight, loading };
 }
@@ -312,45 +135,14 @@ export function useOrganizerPdp(id: string | undefined): {
   const [organizer, setOrganizer] = useState<Organizer | undefined>();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const apiMode = isApiConfigured();
-  const n = parseCatalogNumericId(id);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const mockOrg = id ? getOrganizerById(id) : undefined;
-      const mockEvents = mockOrg ? MOCK_EVENTS.filter((e) => e.organizerId === mockOrg.id) : [];
-      if (!apiMode || n == null) {
-        if (!cancelled) {
-          setOrganizer(mockOrg);
-          setEvents(mockEvents);
-          setLoading(false);
-        }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const [orgDto, page] = await Promise.all([
-          catalogReadApi.getOrganizer(n),
-          catalogReadApi.listEvents({ organizerId: n, page: 0, size: 40, sort: 'start_at_asc' }),
-        ]);
-        if (!cancelled) {
-          setOrganizer(organizerDtoToOrganizer(orgDto));
-          setEvents(page.content.map(eventDtoToEventItem));
-        }
-      } catch {
-        if (!cancelled) {
-          setOrganizer(mockOrg);
-          setEvents(mockEvents);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [id, n, apiMode]);
+    const mockOrg = id ? getOrganizerById(id) : undefined;
+    const mockEvents = mockOrg ? MOCK_EVENTS.filter((e) => e.organizerId === mockOrg.id) : [];
+    setOrganizer(mockOrg);
+    setEvents(mockEvents);
+    setLoading(false);
+  }, [id]);
 
   return { organizer, events, loading };
 }

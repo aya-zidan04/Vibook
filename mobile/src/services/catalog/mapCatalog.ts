@@ -8,7 +8,7 @@ import type {
   PackageDto,
   RestaurantDto,
   TicketTierDto,
-} from '@/services/api/catalogReadApi';
+} from '@/types/catalogDtos';
 import type {
   BadgeTone,
   EventItem,
@@ -35,7 +35,7 @@ function num(v: unknown, fallback = 0): number {
   return fallback;
 }
 
-/** `selectedCityId` from app store: numeric string → filter catalog; mock ids (e.g. `c1`) → all cities. */
+/** `selectedCityId` from app store: numeric string → filter catalog; mock ids (e.g. `gov-amman`) → all cities. */
 export function parseCityIdForCatalog(selectedCityId: string): number | undefined {
   if (/^\d+$/.test(selectedCityId)) return Number(selectedCityId);
   return undefined;
@@ -43,7 +43,7 @@ export function parseCityIdForCatalog(selectedCityId: string): number | undefine
 
 /**
  * True when the id is a backend catalog numeric id (digits only).
- * Mock routes use opaque ids (`e1`, `r1`, `c1`, …).
+ * Mock routes use opaque ids (`e1`, `r1`, `gov-amman`, …).
  */
 export function isNumericCatalogId(id: string | undefined | null): boolean {
   if (id == null || id === '') return false;

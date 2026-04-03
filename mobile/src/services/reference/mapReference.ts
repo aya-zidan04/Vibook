@@ -1,6 +1,21 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import type { CategoryDto, CityDto } from '@/services/api/referenceApi';
 import type { Category, City } from '@/types';
+
+export type CityDto = {
+  id: number;
+  nameEn: string;
+  nameAr: string;
+  country: string;
+  imageUrl?: string | null;
+};
+
+export type CategoryDto = {
+  id: number;
+  slug: string;
+  labelEn: string;
+  labelAr: string;
+  icon: string;
+};
 
 export function mapCityDto(dto: CityDto): City {
   return {

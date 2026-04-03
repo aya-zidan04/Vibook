@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { CityPickerSheet } from '@/components/forms/CityPickerSheet';
 import { GovernoratePickerSheet } from '@/components/forms/GovernoratePickerSheet';
 import { JORDAN_GOVERNORATES } from '@/constants/jordanGovernorates';
-import { isApiConfigured } from '@/config/api';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { useLocaleStore } from '@/store/localeStore';
@@ -19,8 +18,6 @@ type Props = {
   onLanguageCurrency: () => void;
   a11yLanguageCurrency: string;
   a11ySearch: string;
-  /** Optional greeting under brand (e.g. authenticated user). */
-  greetingLine?: string;
 };
 
 /** Top bar uses app background; mirrors correctly under global RTL. */
@@ -30,7 +27,6 @@ export function ExploreHeader({
   onLanguageCurrency,
   a11yLanguageCurrency,
   a11ySearch,
-  greetingLine,
 }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -44,10 +40,10 @@ export function ExploreHeader({
   const refError = useReferenceStore((s) => s.errorMessage);
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const apiMode = isApiConfigured();
+  const catalogCityMode = cities.length > 0;
 
   const regionDisplay = useMemo(() => {
-    if (apiMode) {
+    if (catalogCityMode) {
       if (refStatus === 'loading' && cities.length === 0) {
         return t('common.loading');
       }
@@ -55,13 +51,13 @@ export function ExploreHeader({
       if (city) {
         return locale === 'ar' ? city.nameAr : city.nameEn;
       }
-      return t('explore.pickCity');
+      return t('explore.pickGovernorate');
     }
     const row = JORDAN_GOVERNORATES.find((g) => g.en === regionStored);
     if (!row) return regionStored;
     return locale === 'ar' ? t(`explore.gov.${row.slug}`) : row.en;
   }, [
-    apiMode,
+    catalogCityMode,
     cities,
     locale,
     refStatus,
@@ -71,11 +67,11 @@ export function ExploreHeader({
   ]);
 
   const citySheetEmptyHint = useMemo(() => {
-    if (!apiMode || cities.length > 0) return undefined;
+    if (!catalogCityMode || cities.length > 0) return undefined;
     if (refStatus === 'loading' || refStatus === 'idle') return t('common.loading');
     if (refStatus === 'error') return refError ?? t('common.error');
     return t('explore.emptyCities');
-  }, [apiMode, cities.length, refError, refStatus, t]);
+  }, [catalogCityMode, cities.length, refError, refStatus, t]);
 
   return (
     <View style={styles.bar}>
@@ -84,18 +80,13 @@ export function ExploreHeader({
           <Text style={styles.wordmark} numberOfLines={1}>
             {brandLabel}
           </Text>
-          {greetingLine ? (
-            <Text style={styles.greeting} numberOfLines={1}>
-              {greetingLine}
-            </Text>
-          ) : null}
         </View>
         <Pressable
           onPress={() => setPickerOpen(true)}
           style={({ pressed }) => [styles.regionBtn, pressed && styles.pressed]}
           hitSlop={8}
           accessibilityRole="button"
-          accessibilityLabel={apiMode ? t('explore.a11yCity') : t('explore.a11yGovernorate')}
+          accessibilityLabel={t('explore.a11yGovernorate')}
           accessibilityState={{ expanded: pickerOpen }}
         >
           <Text style={styles.regionText} numberOfLines={1}>
@@ -124,13 +115,13 @@ export function ExploreHeader({
         </Pressable>
       </View>
 
-      {apiMode ? (
+      {catalogCityMode ? (
         <CityPickerSheet
           visible={pickerOpen}
           onClose={() => setPickerOpen(false)}
           cities={cities}
           selectedId={selectedCityId}
-          title={t('explore.pickCity')}
+          title={t('explore.pickGovernorate')}
           locale={locale}
           emptyHint={citySheetEmptyHint}
           onSelect={setSelectedCityId}
@@ -175,11 +166,6 @@ function createStyles(colors: ThemeColors) {
       fontSize: 20,
       fontWeight: '600',
       letterSpacing: -0.3,
-    },
-    greeting: {
-      color: colors.textMuted,
-      fontSize: 13,
-      fontWeight: '500',
     },
     regionBtn: {
       flexDirection: 'row',
