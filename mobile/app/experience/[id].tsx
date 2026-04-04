@@ -33,8 +33,7 @@ export default function ExperienceDetailScreen() {
 
   if (loading) {
     return (
-      <Screen>
-        <DetailHeader title={t('experience.title')} />
+      <Screen header={<DetailHeader title={t('experience.title')} />}>
         <View style={{ paddingVertical: 48, alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
           <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
@@ -47,8 +46,7 @@ export default function ExperienceDetailScreen() {
 
   if (!x) {
     return (
-      <Screen>
-        <DetailHeader title={t('experience.title')} />
+      <Screen header={<DetailHeader title={t('experience.title')} />}>
         <AppText color="textSecondary">{t('common.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>

@@ -61,8 +61,7 @@ export default function VouchersScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('vouchers.title')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('vouchers.title')} />}>
       <View style={styles.redeemBox}>
         <AppText variant="caption" color="textMuted">
           {t('vouchers.redeemLabel')}

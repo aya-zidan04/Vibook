@@ -55,15 +55,31 @@ export default function FavoritesTabScreen() {
     setPreviews(next);
   }, [entries]);
 
+  const headerEmpty = (
+    <View style={styles.tabHeader}>
+      <AppText variant="h1" color="text" style={styles.title}>
+        {t('favorites.title')}
+      </AppText>
+      <AppText variant="body" color="textSecondary" style={styles.sub}>
+        {t('favorites.subtitle')}
+      </AppText>
+    </View>
+  );
+
+  const headerList = (
+    <View style={styles.tabHeader}>
+      <AppText variant="h1" color="text" style={styles.title}>
+        {t('favorites.title')}
+      </AppText>
+      <AppText variant="body" color="textSecondary" style={styles.sub}>
+        {t('favorites.subtitleLive')}
+      </AppText>
+    </View>
+  );
+
   if (entries.length === 0) {
     return (
-      <Screen scroll contentStyle={styles.pad}>
-        <AppText variant="h1" color="text" style={styles.title}>
-          {t('favorites.title')}
-        </AppText>
-        <AppText variant="body" color="textSecondary" style={styles.sub}>
-          {t('favorites.subtitle')}
-        </AppText>
+      <Screen scroll contentStyle={styles.pad} header={headerEmpty}>
         <AppText variant="caption" color="textMuted" style={styles.mockNote}>
           {t('favorites.mockNote')}
         </AppText>
@@ -76,13 +92,7 @@ export default function FavoritesTabScreen() {
   }
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <AppText variant="h1" color="text" style={styles.title}>
-        {t('favorites.title')}
-      </AppText>
-      <AppText variant="body" color="textSecondary" style={styles.sub}>
-        {t('favorites.subtitleLive')}
-      </AppText>
+    <Screen scroll contentStyle={styles.pad} header={headerList}>
       {entries.map((e) => {
         const p = previews[e.key];
         const segment = catalogRouteSegment(e.type);
@@ -125,8 +135,9 @@ export default function FavoritesTabScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md },
+    tabHeader: { paddingTop: spacing.md, paddingBottom: spacing.sm },
     title: { marginBottom: spacing.xs },
-    sub: { lineHeight: 22, marginBottom: spacing.sm },
+    sub: { lineHeight: 22 },
     mockNote: { marginBottom: spacing.sm, lineHeight: 18 },
     row: {
       flexDirection: 'row',

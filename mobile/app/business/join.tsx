@@ -7,6 +7,7 @@ import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useBusinessHubStore } from '@/store/businessHubStore';
 import { isValidEmail } from '@/utils/authValidation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -31,6 +32,7 @@ export default function BusinessJoinScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t, isRTL } = useTranslation();
+  const submitApplication = useBusinessHubStore((s) => s.submitApplication);
 
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
@@ -86,7 +88,8 @@ export default function BusinessJoinScreen() {
     setBusy(true);
     try {
       await new Promise((r) => setTimeout(r, 550));
-      router.replace('/business/success');
+      submitApplication(body);
+      router.replace('/business/application-pending');
     } catch {
       setSubmitError(t('businessJoin.errSubmit'));
     } finally {
@@ -95,8 +98,12 @@ export default function BusinessJoinScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad} edges={['top', 'left', 'right', 'bottom']}>
-      <DetailHeader title={t('businessJoin.title')} />
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      edges={['top', 'left', 'right', 'bottom']}
+      header={<DetailHeader title={t('businessJoin.title')} />}
+    >
       <AppText variant="body" color="textSecondary">
         {t('businessJoin.subtitle')}
       </AppText>

@@ -33,8 +33,7 @@ export default function FlightResultsScreen() {
   const toLabel = to ?? t('flight.any');
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('flight.resultsTitle')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('flight.resultsTitle')} />}>
       <AppText variant="caption" color="textMuted">
         {fromLabel} → {toLabel}
       </AppText>

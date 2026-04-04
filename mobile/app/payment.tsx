@@ -25,8 +25,7 @@ export default function PaymentScreen() {
 
   if (!draft) {
     return (
-      <Screen>
-        <DetailHeader title={t('payment.title')} />
+      <Screen header={<DetailHeader title={t('payment.title')} />}>
         <AppText variant="body" color="textSecondary" style={styles.empty}>
           {t('payment.empty')}
         </AppText>

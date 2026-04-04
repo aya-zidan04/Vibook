@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "babel-preset-expo": "^55.0.13"
+    "babel-preset-expo": "^55.0.13",
+    "react-native-worklets": "^0.5.1"
   }
 }

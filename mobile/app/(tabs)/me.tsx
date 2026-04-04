@@ -26,6 +26,7 @@ const MENU_ACCOUNT: { key: string; labelKey: string; icon: keyof typeof Ionicons
   { key: 'notifications', labelKey: 'me.menuNotif', icon: 'notifications-outline' },
   { key: 'language', labelKey: 'me.menuLanguage', icon: 'language-outline' },
   { key: 'help', labelKey: 'me.menuHelp', icon: 'help-circle-outline' },
+  { key: 'about', labelKey: 'me.menuAbout', icon: 'information-circle-outline' },
   { key: 'settings', labelKey: 'me.menuSettings', icon: 'settings-outline' },
 ];
 
@@ -70,6 +71,9 @@ export default function MeScreen() {
       case 'help':
         router.push('/help');
         break;
+      case 'about':
+        router.push('/about');
+        break;
       case 'settings':
         router.push('/settings');
         break;
@@ -83,20 +87,12 @@ export default function MeScreen() {
       <LinearGradient colors={[colors.primaryMuted, 'transparent']} style={styles.header}>
         <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
         <View style={styles.headerText}>
-          <AppText variant="h1" color="text">
+          <AppText variant="h1" color="text" style={styles.headerName}>
             {displayName}
           </AppText>
-          <View style={styles.badgeRow}>
-            <View style={styles.tier}>
-              <AppText variant="meta" color="accent">
-                {user.membershipTier.toUpperCase()}
-              </AppText>
-            </View>
-            <AppText variant="caption" color="textSecondary">
-              {user.email}
-            </AppText>
-            <AppText variant="caption" color="textMuted">
-              {user.phone}
+          <View style={styles.tier}>
+            <AppText variant="meta" color="accent">
+              {user.membershipTier.toUpperCase()}
             </AppText>
           </View>
         </View>
@@ -208,6 +204,8 @@ export default function MeScreen() {
   );
 }
 
+const statValueText = { fontWeight: '700' as const };
+
 function StatItem({
   label,
   value,
@@ -223,8 +221,8 @@ function StatItem({
 }) {
   return (
     <View style={boxStyle}>
-      <Ionicons name={icon} size={18} color={colors.accent} />
-      <AppText variant="h2" color="text">
+      <Ionicons name={icon} size={16} color={colors.accent} />
+      <AppText variant="h3" color="text" style={statValueText}>
         {value}
       </AppText>
       <AppText variant="caption" color="textMuted">
@@ -238,6 +236,7 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md },
     header: {
+      alignItems: 'center',
       borderRadius: radii.xxl,
       padding: spacing.lg,
       marginBottom: spacing.lg,
@@ -252,10 +251,15 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.primary,
       marginBottom: spacing.md,
     },
-    headerText: { gap: spacing.xs },
-    badgeRow: { gap: 6 },
+    headerText: {
+      alignItems: 'center',
+      gap: spacing.sm,
+      width: '100%',
+    },
+    headerName: {
+      textAlign: 'center',
+    },
     tier: {
-      alignSelf: 'flex-start',
       paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: radii.xs,
@@ -263,22 +267,23 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 1,
       borderColor: colors.border,
     },
-    edit: { marginTop: spacing.lg },
+    edit: { marginTop: spacing.lg, alignSelf: 'stretch', width: '100%' },
     stats: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: spacing.xl,
+      marginBottom: spacing.lg,
       gap: spacing.sm,
     },
     stat: {
       flex: 1,
       backgroundColor: colors.surface,
-      borderRadius: radii.lg,
-      padding: spacing.md,
+      borderRadius: radii.md,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
       borderWidth: 1,
       borderColor: colors.border,
       alignItems: 'center',
-      gap: 4,
+      gap: 2,
     },
     voucherScrollContent: {
       flexDirection: 'row',

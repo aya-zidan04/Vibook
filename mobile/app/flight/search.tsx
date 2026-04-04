@@ -22,8 +22,7 @@ export default function FlightSearchScreen() {
   const [to, setTo] = useState(MOCK_FLIGHTS[0]?.to ?? 'DXB');
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('flight.searchTitle')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('flight.searchTitle')} />}>
       <AppText variant="body" color="textSecondary" style={styles.intro}>
         {t('flight.intro')}
       </AppText>

@@ -36,8 +36,7 @@ export default function FlightDetailScreen() {
 
   if (loading) {
     return (
-      <Screen>
-        <DetailHeader title={t('flight.title')} />
+      <Screen header={<DetailHeader title={t('flight.title')} />}>
         <View style={{ paddingVertical: 48, alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
           <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
@@ -50,8 +49,7 @@ export default function FlightDetailScreen() {
 
   if (!f) {
     return (
-      <Screen>
-        <DetailHeader title={t('flight.title')} />
+      <Screen header={<DetailHeader title={t('flight.title')} />}>
         <AppText color="textSecondary">{t('flight.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>

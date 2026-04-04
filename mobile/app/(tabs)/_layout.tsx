@@ -75,7 +75,6 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
-
 function createTabStyles(colors: ThemeColors) {
   const sh = createShadows(colors);
   return StyleSheet.create({
@@ -95,3 +94,4 @@ function createTabStyles(colors: ThemeColors) {
     },
   });
 }
+

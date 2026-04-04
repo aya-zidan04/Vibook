@@ -33,8 +33,7 @@ export default function StayDetailScreen() {
 
   if (loading) {
     return (
-      <Screen>
-        <DetailHeader title={t('stay.title')} />
+      <Screen header={<DetailHeader title={t('stay.title')} />}>
         <View style={{ paddingVertical: 48, alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
           <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
@@ -47,8 +46,7 @@ export default function StayDetailScreen() {
 
   if (!h) {
     return (
-      <Screen>
-        <DetailHeader title={t('stay.title')} />
+      <Screen header={<DetailHeader title={t('stay.title')} />}>
         <AppText color="textSecondary">{t('common.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>

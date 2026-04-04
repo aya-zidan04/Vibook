@@ -18,8 +18,7 @@ export default function NotificationsScreen() {
   const { t } = useTranslation();
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('notifications.title')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('notifications.title')} />}>
       {MOCK_KEYS.map((n, i) => (
         <View key={i} style={styles.card}>
           <AppText variant="bodyMedium" color="text">

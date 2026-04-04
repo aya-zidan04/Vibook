@@ -32,8 +32,7 @@ export default function MembershipScreen() {
   const mockPlan = getPlanById(planId);
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('membership.title')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('membership.title')} />}>
       <LinearGradient colors={[colors.primaryMuted, 'transparent']} style={styles.hero}>
         <Ionicons name="diamond-outline" size={36} color={colors.accent} style={styles.heroIcon} />
         <AppText variant="overline" color="accent">

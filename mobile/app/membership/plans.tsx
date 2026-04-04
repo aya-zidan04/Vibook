@@ -54,8 +54,11 @@ export default function MembershipPlansScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('membership.plansTitle')} />
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      header={<DetailHeader title={t('membership.plansTitle')} />}
+    >
       <AppText variant="body" color="textSecondary" style={styles.intro}>
         {t('membership.plansSubtitle')}
       </AppText>

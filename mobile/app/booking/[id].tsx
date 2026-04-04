@@ -45,8 +45,7 @@ export default function BookingDetailScreen() {
 
   if (!id) {
     return (
-      <Screen>
-        <DetailHeader title={t('bookingDetail.title')} />
+      <Screen header={<DetailHeader title={t('bookingDetail.title')} />}>
         <AppText color="textSecondary">{t('common.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>
@@ -57,8 +56,7 @@ export default function BookingDetailScreen() {
 
   if (!booking) {
     return (
-      <Screen>
-        <DetailHeader title={t('bookingDetail.title')} />
+      <Screen header={<DetailHeader title={t('bookingDetail.title')} />}>
         <AppText color="textSecondary">{t('common.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>
@@ -88,8 +86,11 @@ export default function BookingDetailScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('bookingDetail.title')} />
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      header={<DetailHeader title={t('bookingDetail.title')} />}
+    >
       <Image source={{ uri: booking.imageUrl }} style={styles.hero} contentFit="cover" />
       <AppText variant="h1" color="text" style={styles.mt}>
         {refTitle}

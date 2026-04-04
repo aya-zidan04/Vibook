@@ -45,8 +45,7 @@ export default function RestaurantDetailScreen() {
 
   if (loading) {
     return (
-      <Screen>
-        <DetailHeader title={t('restaurant.title')} />
+      <Screen header={<DetailHeader title={t('restaurant.title')} />}>
         <View style={{ paddingVertical: 48, alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
           <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
@@ -59,8 +58,7 @@ export default function RestaurantDetailScreen() {
 
   if (!r) {
     return (
-      <Screen>
-        <DetailHeader title={t('restaurant.title')} />
+      <Screen header={<DetailHeader title={t('restaurant.title')} />}>
         <AppText color="textSecondary">{t('restaurant.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>

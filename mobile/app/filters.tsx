@@ -30,8 +30,7 @@ export default function FiltersScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('filters.title')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('filters.title')} />}>
       <AppText variant="body" color="textSecondary">
         {t('filters.body')}
       </AppText>

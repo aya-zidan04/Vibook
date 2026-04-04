@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
@@ -20,6 +21,12 @@ type Props = {
   rightSlot?: ReactNode;
   leftSlot?: ReactNode;
   textInputStyle?: object;
+  /** Extra styles for the bordered input row (e.g. partner profile “premium” fields). */
+  fieldRowStyle?: object;
+  /** When true, row border uses accent while the input is focused. */
+  highlightOnFocus?: boolean;
+  /** Wrapper around label + field (e.g. tighten vertical spacing). */
+  wrapperStyle?: StyleProp<ViewStyle>;
 };
 
 export function AuthTextField({
@@ -35,17 +42,30 @@ export function AuthTextField({
   rightSlot,
   leftSlot,
   textInputStyle,
+  fieldRowStyle,
+  highlightOnFocus,
+  wrapperStyle,
 }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { isRTL } = useTranslation();
+  const [rowFocused, setRowFocused] = useState(false);
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, wrapperStyle]}>
       <AppText variant="caption" color="text" style={styles.label}>
         {label}
       </AppText>
-      <View style={[styles.fieldRow, leftSlot || rightSlot ? styles.fieldRowPad : null]}>
+      <View
+        style={[
+          styles.fieldRow,
+          leftSlot || rightSlot ? styles.fieldRowPad : null,
+          fieldRowStyle,
+          highlightOnFocus && rowFocused
+            ? { borderColor: colors.primary, borderWidth: 1.5 }
+            : null,
+        ]}
+      >
         {leftSlot ? <View style={styles.left}>{leftSlot}</View> : null}
         <TextInput
           value={value}
@@ -56,6 +76,8 @@ export function AuthTextField({
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoCorrect={autoCorrect}
+          onFocus={() => setRowFocused(true)}
+          onBlur={() => setRowFocused(false)}
           style={[
             styles.input,
             {

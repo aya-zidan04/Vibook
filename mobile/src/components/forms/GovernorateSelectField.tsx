@@ -14,6 +14,8 @@ type Props = {
   valueSlug: JordanGovernorateSlug;
   onChangeSlug: (slug: JordanGovernorateSlug) => void;
   sheetTitle: string;
+  /** Match partner event form: muted pill row + map icon. */
+  appearance?: 'default' | 'business';
 };
 
 function enNameForSlug(slug: JordanGovernorateSlug): string {
@@ -23,7 +25,13 @@ function enNameForSlug(slug: JordanGovernorateSlug): string {
 /**
  * Tappable field that opens the shared governorate picker (edit profile, forms).
  */
-export function GovernorateSelectField({ label, valueSlug, onChangeSlug, sheetTitle }: Props) {
+export function GovernorateSelectField({
+  label,
+  valueSlug,
+  onChangeSlug,
+  sheetTitle,
+  appearance = 'default',
+}: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale, isRTL } = useTranslation();
@@ -43,10 +51,19 @@ export function GovernorateSelectField({ label, valueSlug, onChangeSlug, sheetTi
       </AppText>
       <Pressable
         onPress={() => setOpen(true)}
-        style={({ pressed }) => [styles.field, pressed && styles.pressed]}
+        style={({ pressed }) => [
+          styles.field,
+          appearance === 'business' && styles.fieldBusiness,
+          pressed && styles.pressed,
+        ]}
         accessibilityRole="button"
         accessibilityLabel={label}
       >
+        {appearance === 'business' ? (
+          <View style={[styles.iconSlot, { backgroundColor: colors.primaryMuted }]}>
+            <Ionicons name="map-outline" size={20} color={colors.primary} />
+          </View>
+        ) : null}
         <AppText
           variant="body"
           color="text"
@@ -84,6 +101,20 @@ function createStyles(colors: ThemeColors) {
       minHeight: 52,
       paddingHorizontal: spacing.md,
       gap: spacing.sm,
+    },
+    fieldBusiness: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: radii.xl,
+      borderColor: colors.borderLight,
+      minHeight: 54,
+      paddingHorizontal: spacing.sm,
+    },
+    iconSlot: {
+      width: 40,
+      height: 40,
+      borderRadius: radii.md,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     value: { flex: 1 },
     pressed: { opacity: 0.88 },

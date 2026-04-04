@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ import { MOCK_BOOKINGS } from '@/services/mock';
 import type { Booking } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import { googleCalendarEventUrl, primaryShortcutBooking } from '@/utils/bookingQuickActions';
 import { formatDateShort } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 
@@ -20,21 +21,67 @@ export default function BookingTabScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming');
   const past = MOCK_BOOKINGS.filter((b) => b.status === 'past');
   const pending = MOCK_BOOKINGS.filter((b) => b.status === 'pending_payment');
+  const shortcutBooking = primaryShortcutBooking(upcoming, pending, past);
+
+  const alertNoBooking = () =>
+    Alert.alert(t('booking.shortcutNoBookingTitle'), t('booking.shortcutNoBookingBody'), [
+      { text: t('common.ok') },
+    ]);
+
+  const onQrPreview = () => {
+    if (!shortcutBooking) {
+      alertNoBooking();
+      return;
+    }
+    router.push(`/booking/${shortcutBooking.id}`);
+  };
+
+  const onAddToCalendar = () => {
+    if (!shortcutBooking) {
+      alertNoBooking();
+      return;
+    }
+    void Linking.openURL(googleCalendarEventUrl(shortcutBooking));
+  };
+
+  const onShareTicket = async () => {
+    if (!shortcutBooking) {
+      alertNoBooking();
+      return;
+    }
+    const title =
+      locale === 'ar' && shortcutBooking.refTitleAr ? shortcutBooking.refTitleAr : shortcutBooking.refTitle;
+    const city =
+      locale === 'ar' && shortcutBooking.cityNameAr ? shortcutBooking.cityNameAr : shortcutBooking.cityName;
+    const when = formatDateShort(shortcutBooking.startsAt, locale);
+    const message = `${title}\n${when} · ${city}\n${t('common.brandDisplay')} · ${shortcutBooking.id}`;
+    try {
+      await Share.share({ title: t('booking.ticketShareTitle'), message });
+    } catch {
+      /* user dismissed share sheet */
+    }
+  };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <AppText variant="h1" color="text" style={styles.title}>
-        {t('booking.title')}
-      </AppText>
-      <AppText variant="body" color="textSecondary" style={styles.sub}>
-        {t('booking.subtitle')}
-      </AppText>
-
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      header={
+        <View style={styles.tabHeader}>
+          <AppText variant="h1" color="text" style={styles.title}>
+            {t('booking.title')}
+          </AppText>
+          <AppText variant="body" color="textSecondary" style={styles.sub}>
+            {t('booking.subtitle')}
+          </AppText>
+        </View>
+      }
+    >
       {pending.length > 0 ? (
         <>
           <SectionHeader title={t('booking.pending')} />
@@ -65,19 +112,34 @@ export default function BookingTabScreen() {
       </ScrollView>
 
       <View style={styles.actions}>
-        <Pressable style={styles.actionBtn}>
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          onPress={onQrPreview}
+          accessibilityRole="button"
+          accessibilityLabel={t('booking.qr')}
+        >
           <Ionicons name="qr-code-outline" size={22} color={colors.accent} />
           <AppText variant="meta" color="textSecondary">
             {t('booking.qr')}
           </AppText>
         </Pressable>
-        <Pressable style={styles.actionBtn}>
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          onPress={onAddToCalendar}
+          accessibilityRole="button"
+          accessibilityLabel={t('booking.calendar')}
+        >
           <Ionicons name="calendar-outline" size={22} color={colors.accent} />
           <AppText variant="meta" color="textSecondary">
             {t('booking.calendar')}
           </AppText>
         </Pressable>
-        <Pressable style={styles.actionBtn}>
+        <Pressable
+          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
+          onPress={() => void onShareTicket()}
+          accessibilityRole="button"
+          accessibilityLabel={t('booking.ticket')}
+        >
           <Ionicons name="download-outline" size={22} color={colors.accent} />
           <AppText variant="meta" color="textSecondary">
             {t('booking.ticket')}
@@ -160,8 +222,9 @@ function StatusPill({ status }: { status: Booking['status'] }) {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md },
+    tabHeader: { paddingTop: spacing.md, paddingBottom: spacing.lg },
     title: { marginBottom: spacing.xs },
-    sub: { marginBottom: spacing.lg, lineHeight: 22 },
+    sub: { lineHeight: 22 },
     pastEmpty: { paddingVertical: spacing.md, paddingHorizontal: spacing.sm },
     card: {
       flexDirection: 'row',
@@ -197,6 +260,7 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.border,
       minWidth: 96,
     },
+    actionBtnPressed: { opacity: 0.88 },
     pill: {
       paddingHorizontal: 8,
       paddingVertical: 4,

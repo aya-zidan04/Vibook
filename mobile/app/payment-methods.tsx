@@ -23,8 +23,11 @@ export default function PaymentMethodsScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('paymentMethods.title')} />
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      header={<DetailHeader title={t('paymentMethods.title')} />}
+    >
 
       <View style={styles.card}>
         <Ionicons name="card-outline" size={28} color={colors.primary} />

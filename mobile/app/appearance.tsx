@@ -21,8 +21,7 @@ export default function AppearanceScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('appearance.title')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('appearance.title')} />}>
       <AppText variant="body" color="textSecondary" style={styles.intro}>
         {t('appearance.subtitle')}
       </AppText>

@@ -75,8 +75,12 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad} edges={['top', 'left', 'right', 'bottom']}>
-      <DetailHeader title={t('editProfile.title')} />
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      edges={['top', 'left', 'right', 'bottom']}
+      header={<DetailHeader title={t('editProfile.title')} />}
+    >
       <View style={styles.hero}>
         <View style={styles.avatarColumn}>
           <View style={styles.avatarWrap}>

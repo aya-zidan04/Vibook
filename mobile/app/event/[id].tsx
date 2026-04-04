@@ -50,8 +50,7 @@ export default function EventDetailScreen() {
 
   if (loading) {
     return (
-      <Screen>
-        <DetailHeader title={t('explore.event')} />
+      <Screen header={<DetailHeader title={t('explore.event')} />}>
         <View style={{ paddingVertical: 48, alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
           <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
@@ -64,8 +63,7 @@ export default function EventDetailScreen() {
 
   if (!event) {
     return (
-      <Screen>
-        <DetailHeader title={t('event.notFoundTitle')} />
+      <Screen header={<DetailHeader title={t('event.notFoundTitle')} />}>
         <AppText variant="body" color="textSecondary">
           {t('event.notFound')}
         </AppText>

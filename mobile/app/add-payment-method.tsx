@@ -74,8 +74,12 @@ export default function AddPaymentMethodScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad} edges={['top', 'left', 'right', 'bottom']}>
-      <DetailHeader title={t('paymentMethods.addAnother')} />
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      edges={['top', 'left', 'right', 'bottom']}
+      header={<DetailHeader title={t('paymentMethods.addAnother')} />}
+    >
       <AppText variant="caption" color="textMuted" style={styles.intro}>
         {t('paymentMethods.addCardMockNote')}
       </AppText>

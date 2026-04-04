@@ -23,8 +23,7 @@ export default function CheckoutScreen() {
 
   if (!draft) {
     return (
-      <Screen>
-        <DetailHeader title={t('checkout.title')} />
+      <Screen header={<DetailHeader title={t('checkout.title')} />}>
         <AppText variant="body" color="textSecondary" style={styles.empty}>
           {t('checkout.empty')}
         </AppText>

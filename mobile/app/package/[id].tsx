@@ -31,8 +31,7 @@ export default function PackageDetailScreen() {
 
   if (loading) {
     return (
-      <Screen>
-        <DetailHeader title={t('package.title')} />
+      <Screen header={<DetailHeader title={t('package.title')} />}>
         <View style={{ paddingVertical: 48, alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
           <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
@@ -45,8 +44,7 @@ export default function PackageDetailScreen() {
 
   if (!p) {
     return (
-      <Screen>
-        <DetailHeader title={t('package.title')} />
+      <Screen header={<DetailHeader title={t('package.title')} />}>
         <AppText color="textSecondary">{t('common.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>

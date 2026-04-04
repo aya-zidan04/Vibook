@@ -17,8 +17,7 @@ export default function WalletScreen() {
   const { user } = useMockUser();
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <DetailHeader title={t('wallet.title')} />
+    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('wallet.title')} />}>
       <View style={styles.balance}>
         <AppText variant="caption" color="textMuted">
           {t('wallet.balance')}

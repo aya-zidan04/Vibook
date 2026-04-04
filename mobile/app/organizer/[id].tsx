@@ -30,8 +30,7 @@ export default function OrganizerScreen() {
 
   if (loading) {
     return (
-      <Screen>
-        <DetailHeader title={t('organizer.title')} />
+      <Screen header={<DetailHeader title={t('organizer.title')} />}>
         <View style={{ paddingVertical: 48, alignItems: 'center' }}>
           <ActivityIndicator color={colors.primary} size="large" />
           <AppText variant="caption" color="textMuted" style={{ marginTop: spacing.md }}>
@@ -44,8 +43,7 @@ export default function OrganizerScreen() {
 
   if (!org) {
     return (
-      <Screen>
-        <DetailHeader title={t('organizer.title')} />
+      <Screen header={<DetailHeader title={t('organizer.title')} />}>
         <AppText color="textSecondary">{t('organizer.notFound')}</AppText>
         <PrimaryButton title={t('common.back')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
       </Screen>
