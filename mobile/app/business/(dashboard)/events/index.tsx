@@ -40,13 +40,20 @@ export default function BusinessEventsIndexScreen() {
   );
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <AppText variant="h2" color="text">
-        {t('businessHub.eventsTitle')}
-      </AppText>
-      <AppText variant="body" color="textSecondary">
-        {t('businessHub.eventsLead')}
-      </AppText>
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      header={
+        <View style={styles.header}>
+          <AppText variant="h2" color="text">
+            {t('businessHub.eventsTitle')}
+          </AppText>
+          <AppText variant="body" color="textSecondary">
+            {t('businessHub.eventsLead')}
+          </AppText>
+        </View>
+      }
+    >
       <PrimaryButton title={t('businessHub.eventAdd')} onPress={() => router.push('/business/events/new')} />
       {events.length === 0 ? (
         <AppText variant="body" color="textMuted">
@@ -62,6 +69,7 @@ export default function BusinessEventsIndexScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
+    header: { paddingTop: spacing.md, paddingHorizontal: spacing.screen, gap: spacing.xs },
     list: { gap: spacing.sm },
     card: {
       padding: spacing.lg,

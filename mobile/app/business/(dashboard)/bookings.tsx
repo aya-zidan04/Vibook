@@ -22,13 +22,20 @@ export default function BusinessBookingsScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <AppText variant="h2" color="text">
-        {t('businessHub.bookingsTitle')}
-      </AppText>
-      <AppText variant="body" color="textSecondary">
-        {t('businessHub.bookingsLead')}
-      </AppText>
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      header={
+        <View style={styles.header}>
+          <AppText variant="h2" color="text">
+            {t('businessHub.bookingsTitle')}
+          </AppText>
+          <AppText variant="body" color="textSecondary">
+            {t('businessHub.bookingsLead')}
+          </AppText>
+        </View>
+      }
+    >
       {bookings.length === 0 ? (
         <AppText variant="body" color="textMuted" style={styles.empty}>
           {t('businessHub.bookingsEmpty')}
@@ -66,6 +73,7 @@ export default function BusinessBookingsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
+    header: { paddingTop: spacing.md, paddingHorizontal: spacing.screen, gap: spacing.xs },
     empty: { marginTop: spacing.lg },
     list: { gap: spacing.md },
     card: {

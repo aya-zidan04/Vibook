@@ -1,21 +1,26 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
+import { PrimaryButton } from '@/components/ui/Button';
 import {
   ExploreCategoryStrip,
   ExploreEventFeedCard,
   ExploreHeader,
   ExploreHeroCarousel,
   ExplorePromoGrid,
-  type ExploreCategory,
   type HeroSlideItem,
   type PromoTile,
 } from '@/components/explore';
 import { useTranslation } from '@/i18n/useTranslation';
-import { backendIconToOutline } from '@/services/reference/mapReference';
 import type { CatalogRouter } from '@/services/catalog/mapCatalog';
+import {
+  MOCK_EXPLORE_CATEGORIES,
+  MOCK_EXPLORE_EVENT_TAGS,
+  type ExploreEventTaxonomyTag,
+  type ExploreMainCategory,
+} from '@/mock/exploreCategories';
 import {
   MOCK_EVENTS,
   MOCK_EXPERIENCES,
@@ -23,19 +28,9 @@ import {
   MOCK_PACKAGES,
   getCityName,
 } from '@/services/mock';
-import { useReferenceStore } from '@/store/referenceStore';
 import type { EventItem } from '@/types';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-
-const CATEGORIES: ExploreCategory[] = [
-  { id: 'sports', icon: 'football-outline', labelEn: 'Match day', labelAr: 'يوم المباراة' },
-  { id: 'dining', icon: 'restaurant-outline', labelEn: 'Fine dining', labelAr: 'مطاعم فاخرة' },
-  { id: 'hotels', icon: 'bed-outline', labelEn: 'Stays', labelAr: 'إقامة' },
-  { id: 'concerts', icon: 'mic-outline', labelEn: 'Live shows', labelAr: 'حفلات مباشرة' },
-  { id: 'theater', icon: 'color-palette-outline', labelEn: 'Theatre', labelAr: 'مسرح' },
-  { id: 'shopping', icon: 'bag-handle-outline', labelEn: 'Retail therapy', labelAr: 'تسوّق' },
-];
 
 function mockHeroSlides(router: CatalogRouter, t: (key: string) => string): HeroSlideItem[] {
   return [
@@ -130,25 +125,43 @@ export default function ExploreScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
-  const refCategories = useReferenceStore((s) => s.categories);
-
-  const stripCategories = useMemo(() => {
-    if (refCategories.length > 0) {
-      return refCategories.map((c) => ({
-        id: c.id,
-        icon: backendIconToOutline(c.icon),
-        labelEn: c.labelEn,
-        labelAr: c.labelAr,
-      }));
-    }
-    return CATEGORIES;
-  }, [refCategories]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(MOCK_EXPLORE_CATEGORIES[0]?.id ?? '');
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
 
   const r = router as CatalogRouter;
 
   const heroSlides = useMemo(() => mockHeroSlides(r, t), [r, t]);
   const promo = useMemo(() => mockPromoGrid(r, t), [r, t]);
-  const feedEvents: EventItem[] = MOCK_EVENTS;
+  const selectedCategory = useMemo<ExploreMainCategory | undefined>(
+    () => MOCK_EXPLORE_CATEGORIES.find((c) => c.id === selectedCategoryId),
+    [selectedCategoryId],
+  );
+  const selectedSubcategories = selectedCategory?.subcategories ?? [];
+
+  const feedEvents: EventItem[] = useMemo(() => {
+    const fallbackTag = (event: EventItem): ExploreEventTaxonomyTag => {
+      if (event.categoryId === 'cat5') {
+        return { mainId: 'sports', subcategoryId: 'activities' };
+      }
+      return { mainId: 'entertainment', subcategoryId: 'concerts' };
+    };
+
+    return MOCK_EVENTS.filter((event) => {
+      const tag = MOCK_EXPLORE_EVENT_TAGS[event.id] ?? fallbackTag(event);
+      if (selectedCategoryId && tag.mainId !== selectedCategoryId) return false;
+      if (selectedSubcategoryId && tag.subcategoryId !== selectedSubcategoryId) return false;
+      return true;
+    });
+  }, [selectedCategoryId, selectedSubcategoryId]);
+
+  const selectedCategoryLabel = selectedCategory
+    ? locale === 'ar'
+      ? selectedCategory.nameAr
+      : selectedCategory.name
+    : '';
+  const selectedSubcategoryLabel = selectedSubcategoryId
+    ? selectedSubcategories.find((sub) => sub.id === selectedSubcategoryId)
+    : undefined;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -202,9 +215,16 @@ export default function ExploreScreen() {
             </AppText>
           </View>
           <ExploreCategoryStrip
-            categories={stripCategories}
+            categories={MOCK_EXPLORE_CATEGORIES}
+            selectedCategoryId={selectedCategoryId}
+            onSelectCategory={(id) => {
+              setSelectedCategoryId(id);
+              setSelectedSubcategoryId(null);
+            }}
+            subcategories={selectedSubcategories}
+            selectedSubcategoryId={selectedSubcategoryId}
+            onSelectSubcategory={setSelectedSubcategoryId}
             locale={locale}
-            onPress={() => router.push('/search')}
           />
 
           <View style={[styles.sectionHead, styles.padH]}>
@@ -212,19 +232,40 @@ export default function ExploreScreen() {
               {t('explore.eventsTitle')}
             </AppText>
             <AppText variant="caption" color="textMuted">
-              {t('explore.eventsSubtitle')}
+              {selectedSubcategoryLabel
+                ? `${selectedCategoryLabel} · ${locale === 'ar' ? selectedSubcategoryLabel.nameAr : selectedSubcategoryLabel.name}`
+                : selectedCategoryLabel}
             </AppText>
           </View>
 
           <View style={styles.feed}>
-            {feedEvents.map((e) => (
-              <ExploreEventFeedCard
-                key={e.id}
-                event={e}
-                cityName={getCityName(e.cityId, locale)}
-                onPress={() => router.push(`/event/${e.id}`)}
-              />
-            ))}
+            {feedEvents.length > 0 ? (
+              feedEvents.map((e) => (
+                <ExploreEventFeedCard
+                  key={e.id}
+                  event={e}
+                  cityName={getCityName(e.cityId, locale)}
+                  onPress={() => router.push(`/event/${e.id}`)}
+                />
+              ))
+            ) : (
+              <View style={styles.emptyCard}>
+                <AppText variant="h3" color="text">
+                  {t('search.noMatches')}
+                </AppText>
+                <AppText variant="caption" color="textSecondary" style={styles.emptyBody}>
+                  {t('search.noMatchesDesc')}
+                </AppText>
+                <PrimaryButton
+                  title={t('booking.exploreCta')}
+                  onPress={() => {
+                    setSelectedSubcategoryId(null);
+                    router.push('/search');
+                  }}
+                  style={styles.emptyCta}
+                />
+              </View>
+            )}
           </View>
         </ScrollView>
       </View>
@@ -251,5 +292,23 @@ function createStyles(colors: ThemeColors) {
     padH: { paddingHorizontal: spacing.screen },
     horizontalPad: { paddingHorizontal: spacing.screen },
     feed: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm },
+    emptyCard: {
+      marginTop: spacing.xs,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 18,
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    emptyBody: {
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    emptyCta: {
+      width: '100%',
+      marginTop: spacing.xs,
+    },
   });
 }

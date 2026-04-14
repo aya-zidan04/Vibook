@@ -1,59 +1,142 @@
-import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { type ReactNode, useMemo, useRef } from 'react';
+import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import { spacing, useThemeColors } from '@/theme';
+import type { ExploreMainCategory, ExploreSubcategory } from '@/mock/exploreCategories';
+import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { ltrNavigationChrome } from '@/utils/navigationChrome';
-
-export type ExploreCategory = {
-  id: string;
-  /** Ionicons glyph name (outline style for consistency). */
-  icon: keyof typeof Ionicons.glyphMap;
-  labelEn: string;
-  labelAr: string;
-};
 
 type Props = {
-  categories: ExploreCategory[];
+  categories: ExploreMainCategory[];
+  selectedCategoryId: string;
+  onSelectCategory: (id: string) => void;
+  subcategories?: ExploreSubcategory[];
+  selectedSubcategoryId?: string | null;
+  onSelectSubcategory?: (id: string | null) => void;
   locale: 'en' | 'ar';
-  onPress?: (id: string) => void;
 };
 
 /**
- * Full-width vertical list: outline icons + labels, minimal dividers (inspired by clean category grids,
- * not a pixel copy). LTR chrome keeps icon-on-left even in Arabic.
+ * Horizontal Explore category + subcategory selectors with gentle press feedback.
  */
-export function ExploreCategoryStrip({ categories, locale, onPress }: Props) {
+export function ExploreCategoryStrip({
+  categories,
+  selectedCategoryId,
+  onSelectCategory,
+  subcategories = [],
+  selectedSubcategoryId = null,
+  onSelectSubcategory,
+  locale,
+}: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={styles.section}>
-      <View style={ltrNavigationChrome}>
-        {categories.map((c, i) => (
-          <Pressable
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.mainRow}
+      >
+        {categories.map((c) => (
+          <AnimatedChip
             key={c.id}
-            onPress={() => onPress?.(c.id)}
-            style={({ pressed }) => [
-              styles.row,
-              i < categories.length - 1 && styles.rowDivider,
-              pressed && styles.rowPressed,
+            active={selectedCategoryId === c.id}
+            onPress={() => onSelectCategory(c.id)}
+            accessibilityLabel={locale === 'ar' ? c.nameAr : c.name}
+            style={[
+              styles.mainChip,
+              selectedCategoryId === c.id && styles.mainChipActive,
             ]}
-            accessibilityRole="button"
-            accessibilityLabel={locale === 'ar' ? c.labelAr : c.labelEn}
           >
-            <View style={styles.iconSlot}>
-              <Ionicons name={c.icon} size={24} color={colors.text} />
-            </View>
-            <AppText variant="bodyMedium" color="text" style={styles.label} numberOfLines={2}>
-              {locale === 'ar' ? c.labelAr : c.labelEn}
+            <Ionicons
+              name={c.icon}
+              size={18}
+              color={selectedCategoryId === c.id ? colors.textOnPrimary : colors.primary}
+            />
+            <AppText
+              variant="bodyMedium"
+              color={selectedCategoryId === c.id ? 'textOnPrimary' : 'text'}
+              style={styles.mainChipLabel}
+            >
+              {locale === 'ar' ? c.nameAr : c.name}
             </AppText>
-            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-          </Pressable>
+          </AnimatedChip>
         ))}
-      </View>
+      </ScrollView>
+
+      {subcategories.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.subRow}
+        >
+          {subcategories.map((s) => {
+            const active = selectedSubcategoryId === s.id;
+            return (
+              <AnimatedChip
+                key={s.id}
+                active={active}
+                onPress={() => onSelectSubcategory?.(active ? null : s.id)}
+                accessibilityLabel={locale === 'ar' ? s.nameAr : s.name}
+                style={[styles.subChip, active && styles.subChipActive]}
+              >
+                <AppText variant="caption" color={active ? 'textOnPrimary' : 'textSecondary'}>
+                  {locale === 'ar' ? s.nameAr : s.name}
+                </AppText>
+              </AnimatedChip>
+            );
+          })}
+        </ScrollView>
+      ) : null}
     </View>
+  );
+}
+
+function AnimatedChip({
+  children,
+  active,
+  onPress,
+  accessibilityLabel,
+  style,
+}: {
+  children: ReactNode;
+  active: boolean;
+  onPress: () => void;
+  accessibilityLabel: string;
+  style?: object | object[];
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const onPressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      speed: 24,
+      bounciness: 6,
+    }).start();
+  };
+  const onPressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 24,
+      bounciness: 6,
+    }).start();
+  };
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+    >
+      <Animated.View style={[style, { transform: [{ scale }] }]}>
+        {children}
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -61,32 +144,50 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     section: {
       marginBottom: spacing.xl,
-      paddingHorizontal: spacing.screen,
+      gap: spacing.sm,
     },
-    row: {
-      width: '100%',
+    mainRow: {
+      paddingHorizontal: spacing.screen,
+      gap: spacing.sm,
+      paddingBottom: 2,
+    },
+    mainChip: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.md,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.xs,
-      backgroundColor: 'transparent',
+      gap: spacing.xs,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: radii.full,
+      borderWidth: 1,
+      borderColor: colors.borderLight,
+      backgroundColor: colors.surface,
+      minHeight: 44,
     },
-    rowDivider: {
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.border,
+    mainChipLabel: {
+      marginTop: 1,
     },
-    rowPressed: {
-      opacity: 0.72,
+    mainChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
     },
-    iconSlot: {
-      width: 30,
+    subRow: {
+      paddingHorizontal: spacing.screen,
+      gap: spacing.xs,
+      paddingBottom: 2,
+    },
+    subChip: {
       alignItems: 'center',
       justifyContent: 'center',
+      paddingVertical: 7,
+      paddingHorizontal: spacing.md,
+      borderRadius: radii.full,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceMuted,
     },
-    label: {
-      flex: 1,
-      lineHeight: 22,
+    subChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
     },
   });
 }

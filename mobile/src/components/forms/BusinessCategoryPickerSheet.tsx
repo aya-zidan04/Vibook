@@ -20,7 +20,7 @@ type Props = {
 export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSelect, title }: Props) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { locale } = useTranslation();
   const styles = useMemo(
     () => createStyles(colors, insets.bottom),
     [colors, insets.bottom],
@@ -41,7 +41,8 @@ export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSe
           >
             {BUSINESS_PARTNER_CATEGORIES.map((c) => {
               const selected = selectedEn === c.en;
-              const label = t(`businessHub.partnerCat.${c.slug}`);
+              const label = locale === 'ar' ? c.ar : c.en;
+              const partsLabel = (locale === 'ar' ? c.partsAr : c.partsEn).join(' · ');
               return (
                 <Pressable
                   key={c.slug}
@@ -55,12 +56,27 @@ export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSe
                     pressed && styles.optionPressed,
                   ]}
                 >
+                  <View style={styles.optionIconWrap}>
+                    <Ionicons
+                      name={c.icon}
+                      size={19}
+                      color={selected ? colors.primary : colors.textSecondary}
+                    />
+                  </View>
                   <AppText
                     variant="bodyMedium"
                     color="text"
                     style={[styles.optionLabel, selected && styles.optionLabelSelected]}
                   >
                     {label}
+                  </AppText>
+                  <AppText
+                    variant="meta"
+                    color="textMuted"
+                    style={styles.optionParts}
+                    numberOfLines={1}
+                  >
+                    {partsLabel}
                   </AppText>
                   {selected ? (
                     <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
@@ -108,7 +124,7 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     option: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      flexWrap: 'wrap',
       paddingVertical: 14,
       paddingHorizontal: spacing.md,
       borderRadius: radii.lg,
@@ -126,7 +142,15 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     },
     optionLabel: {
       flex: 1,
+      marginStart: spacing.sm,
       marginEnd: spacing.md,
+      minWidth: 120,
+    },
+    optionParts: {
+      width: '100%',
+      marginTop: 2,
+      marginStart: 28 + spacing.sm,
+      lineHeight: 16,
     },
     optionLabelSelected: {
       fontWeight: '700',
@@ -137,6 +161,11 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
       borderRadius: 11,
       borderWidth: 2,
       borderColor: colors.borderLight,
+    },
+    optionIconWrap: {
+      width: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 }

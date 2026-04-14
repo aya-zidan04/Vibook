@@ -1,6 +1,7 @@
 export * from './users';
 export * from './cities';
 export * from './categories';
+export * from './exploreCategories';
 export * from './organizers';
 export * from './events';
 export * from './experiences';

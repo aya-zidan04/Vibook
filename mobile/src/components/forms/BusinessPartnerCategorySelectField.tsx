@@ -20,12 +20,14 @@ type Props = {
 export function BusinessPartnerCategorySelectField({ label, valueEn, onChangeEn, sheetTitle }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { t, isRTL } = useTranslation();
+  const { t, isRTL, locale } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const row = partnerCategoryRowForStored(valueEn);
   const displayLabel = row
-    ? t(`businessHub.partnerCat.${row.slug}`)
+    ? locale === 'ar'
+      ? row.ar
+      : row.en
     : valueEn.trim() || t('businessHub.profileCategoryPlaceholder');
 
   const selectedEn = row?.en ?? '';
@@ -46,7 +48,11 @@ export function BusinessPartnerCategorySelectField({ label, valueEn, onChangeEn,
         accessibilityLabel={label}
       >
         <View style={[styles.iconSlot, { backgroundColor: colors.primaryMuted }]}>
-          <Ionicons name="pricetag-outline" size={20} color={colors.primary} />
+          <Ionicons
+            name={row?.icon ?? 'pricetag-outline'}
+            size={20}
+            color={colors.primary}
+          />
         </View>
         <AppText
           variant="body"
