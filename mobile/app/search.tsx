@@ -11,24 +11,22 @@ import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_EVENTS, MOCK_FLIGHTS, MOCK_HOTELS, MOCK_RESTAURANTS } from '@/services/mock';
+import { MOCK_EVENTS, MOCK_HOTELS, MOCK_RESTAURANTS } from '@/services/mock';
 import { radii, spacing, useThemeColors } from '@/theme';
 import { ltrNavigationChrome } from '@/utils/navigationChrome';
-import { chevronForwardTrailing } from '@/utils/rtl';
 import type { ThemeColors } from '@/theme/palettes';
 
 const RECENT = ['Jazz night Irbid', 'Aqaba weekend', 'Chef’s table'];
-const POPULAR = ['Concerts', 'Fine dining', 'Boutique hotels', 'Flights AMM'];
+const POPULAR = ['Concerts', 'Fine dining', 'Boutique hotels', 'Spa day'];
 const TAGS = ['Family', 'Romantic', 'Last minute', 'Luxury', 'Outdoor'];
 
-type Segment = 'all' | 'events' | 'restaurants' | 'hotels' | 'flights';
+type Segment = 'all' | 'events' | 'restaurants' | 'hotels';
 
 const SEGMENTS: { key: Segment; labelKey: string }[] = [
   { key: 'all', labelKey: 'search.all' },
   { key: 'events', labelKey: 'search.events' },
   { key: 'restaurants', labelKey: 'search.dining' },
   { key: 'hotels', labelKey: 'search.stays' },
-  { key: 'flights', labelKey: 'search.flights' },
 ];
 
 export default function SearchScreen() {
@@ -51,15 +49,12 @@ export default function SearchScreen() {
     const h = MOCK_HOTELS.filter((x) =>
       query ? x.name.toLowerCase().includes(query) : true,
     );
-    const f = MOCK_FLIGHTS.filter((x) =>
-      query ? x.airline.toLowerCase().includes(query) || x.to.toLowerCase().includes(query) : true,
-    );
-    return { ev, r, h, f };
+    return { ev, r, h };
   }, [q]);
 
   const empty =
     q.length > 0 &&
-    results.ev.length + results.r.length + results.h.length + results.f.length === 0;
+    results.ev.length + results.r.length + results.h.length === 0;
 
   const goBack = () => {
     if (router.canGoBack()) {
@@ -85,13 +80,6 @@ export default function SearchScreen() {
           {t('search.title')}
         </AppText>
       </View>
-      <Pressable style={styles.flightLink} onPress={() => router.push('/flight/search')}>
-        <Ionicons name="airplane-outline" size={18} color={colors.accent} />
-        <AppText variant="bodyMedium" color="accent">
-          {t('search.flightSearch')}
-        </AppText>
-        <Ionicons name={chevronForwardTrailing()} size={18} color={colors.accent} />
-      </Pressable>
       <SearchBar placeholder={t('search.placeholder')} onPress={() => setQ('')} />
 
       <View style={styles.segWrap}>
@@ -189,17 +177,6 @@ export default function SearchScreen() {
                     onPress={() => router.push(`/stay/${h.id}`)}
                   />
                 ))}
-              {(seg === 'all' || seg === 'flights') &&
-                results.f.map((fl) => (
-                  <ResultRow
-                    key={fl.id}
-                    imageUrl="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=200&q=80"
-                    title={`${fl.from} → ${fl.to}`}
-                    meta={fl.airline}
-                    price={formatMoney(fl.price, fl.currency)}
-                    onPress={() => router.push(`/flight/${fl.id}`)}
-                  />
-                ))}
             </View>
           )}
         </>
@@ -263,13 +240,6 @@ function createStyles(colors: ThemeColors) {
     marginBottom: 4,
   },
   title: { marginBottom: spacing.sm },
-  flightLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-    paddingVertical: spacing.sm,
-  },
   segWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',

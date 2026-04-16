@@ -1,7 +1,6 @@
 import {
   getEventById,
   getExperienceById,
-  getFlightById,
   getHotelById,
   getOrganizerById,
   getPackageById,
@@ -29,8 +28,6 @@ export function catalogRouteSegment(type: string): string {
       return 'stay';
     case 'package':
       return 'package';
-    case 'flight':
-      return 'flight';
     case 'organizer':
       return 'organizer';
     default:
@@ -91,18 +88,6 @@ export function loadFavoritePreview(type: string, refId: string): FavoritePrevie
         imageUrl: p.imageUrl,
         priceFrom: p.priceFrom,
         currency: p.currency,
-      };
-    }
-    case 'flight': {
-      const f = getFlightById(refId);
-      if (!f) return null;
-      return {
-        title: `${f.from} → ${f.to}`,
-        subtitle: f.airline,
-        imageUrl:
-          'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80&auto=format&fit=crop',
-        priceFrom: f.price,
-        currency: f.currency,
       };
     }
     case 'organizer': {

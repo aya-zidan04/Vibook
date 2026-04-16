@@ -1,6 +1,6 @@
 # Vibook — Mobile app
 
-Expo + React Native frontend for **Vibook**, a lifestyle booking experience (events, dining, stays, flights, and more).
+Expo + React Native frontend for **Vibook**, a lifestyle booking experience (events, dining, stays, and more).
 
 This repository build is **mock-only**: there is no backend or HTTP API. All catalog and account data ships with the app.
 

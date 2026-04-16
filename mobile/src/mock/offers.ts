@@ -12,7 +12,7 @@ export const MOCK_OFFERS: Offer[] = [
   },
   {
     id: 'o2',
-    title: 'Early bird flights',
+    title: 'Early booking perks',
     subtitle: 'Book 21+ days ahead',
     imageUrl:
       'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=85&auto=format&fit=crop',

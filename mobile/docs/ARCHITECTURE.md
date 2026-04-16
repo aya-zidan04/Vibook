@@ -27,7 +27,6 @@ App
 │   ├── Experience detail
 │   ├── Restaurant detail
 │   ├── Hotel detail
-│   ├── Flight results (from search or home CTA)
 │   ├── Package detail
 │   └── Organizer / venue profile
 ├── Search & filters
@@ -94,9 +93,6 @@ app/
 │   └── [id].tsx
 ├── stay/                       # hotels
 │   └── [id].tsx
-├── flight/
-│   ├── search.tsx              # Form
-│   └── results.tsx
 ├── package/
 │   └── [id].tsx
 ├── organizer/
@@ -127,7 +123,7 @@ app/
 |--------|----------------|-------------|
 | **Discovery** | Feed, hero, categories, editorial | `(tabs)/index`, `(tabs)/explore` |
 | **Search** | Query, facets, results list | `(tabs)/search`, `filters.tsx` |
-| **Commerce** | PDPs per vertical | `event/[id]`, `restaurant/[id]`, `stay/[id]`, `flight/*`, `package/[id]` |
+| **Commerce** | PDPs per vertical | `event/[id]`, `restaurant/[id]`, `stay/[id]`, `package/[id]` |
 | **Booking** | Options → checkout → pay → confirm | `(booking)/*`, `booking/[id]` |
 | **User** | Profile, wallet, vouchers, favorites, settings | `(tabs)/profile`, `wallet`, `favorites`, etc. |
 | **Auth** | Identity (when backend exists) | `(auth)/*` |
@@ -160,7 +156,6 @@ app/
 | **Event [id]** | Sell tickets | Hero, title+badge, datetime, venue, map preview, tiers, reviews | `Gallery` or hero image, `Badge`, `StickyBottomBar` | Select tier, qty, **Book** | → `options` or checkout |
 | **Restaurant [id]** | Reservations | Gallery, cuisine, hours, slots, party size | chips, time list | Pick slot, **Reserve** | → checkout |
 | **Stay [id]** | Rooms | Carousel, amenities, room cards, dates | image carousel, cards | Select room, dates, **Book** | → checkout |
-| **Flight results** | Compare legs | List of `FlightCard` | filter/sort | Select leg | → checkout / detail expand |
 | **Package [id]** | Travel bundle | Itinerary, inclusions, dates | sections | **Book** | → checkout |
 | **Organizer [id]** | Trust & more events | Cover, follow, upcoming list | `EventCard` | Follow, open event | → event detail |
 
@@ -206,11 +201,6 @@ app/
 
 1. PDP → **dates**, **guests**, **room type**  
 2. Checkout → Payment → Confirmation
-
-**D. Flight**
-
-1. **Flight search** form → **results**  
-2. Select itinerary → optional fare rules → Checkout → Payment → Confirmation
 
 **Mermaid (conceptual)**
 
@@ -313,23 +303,10 @@ flowchart LR
     "rating": 0,
     "amenityIds": ["string"]
   },
-  "Flight": {
-    "id": "string",
-    "airline": "string",
-    "from": "IATA",
-    "to": "IATA",
-    "departAt": "ISO8601",
-    "arriveAt": "ISO8601",
-    "durationMin": 0,
-    "stops": 0,
-    "price": 0,
-    "currency": "string",
-    "cabin": "economy | business | first"
-  },
   "Booking": {
     "id": "string",
     "userId": "string",
-    "vertical": "event | restaurant | hotel | flight | experience | package",
+    "vertical": "event | restaurant | hotel | experience | package",
     "refId": "string",
     "refTitle": "string",
     "imageUrl": "string",
@@ -359,7 +336,7 @@ Align existing `src/types` and `src/mock` with these shapes; add `vertical` + `l
 
 ## 8. UX rules (conversion-focused)
 
-1. **One primary CTA per screen** on PDP (Book / Reserve / Search flights).  
+1. **One primary CTA per screen** on PDP (Book / Reserve).  
 2. **Sticky bottom bar** on PDP + checkout with price + action.  
 3. **No dead cards** — `onPress` → route with `id`.  
 4. **Loading:** skeleton on first paint; **pull-to-refresh** on lists when API exists.  

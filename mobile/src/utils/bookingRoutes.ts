@@ -14,8 +14,6 @@ export function hrefForBookingRef(b: Booking): string | null {
       return `/experience/${b.refId}`;
     case 'package':
       return `/package/${b.refId}`;
-    case 'flight':
-      return `/flight/${b.refId}`;
     default:
       return null;
   }

@@ -11,7 +11,7 @@ type Props = {
 };
 
 export function SearchBar({
-  placeholder = 'Search events, dining, stays, flights…',
+  placeholder = 'Search events, dining, stays…',
   onPress,
 }: Props) {
   const colors = useThemeColors();

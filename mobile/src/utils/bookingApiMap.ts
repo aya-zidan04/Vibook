@@ -19,7 +19,6 @@ export function apiBookingTypeToUiType(type: string): Booking['type'] {
   if (t === 'hotel') return 'hotel';
   if (t === 'event') return 'event';
   if (t === 'restaurant') return 'restaurant';
-  if (t === 'flight') return 'flight';
   if (t === 'experience') return 'experience';
   if (t === 'package') return 'package';
   return 'event';

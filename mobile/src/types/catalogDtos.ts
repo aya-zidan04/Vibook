@@ -92,20 +92,6 @@ export type HotelDto = {
   badge?: string | null;
 };
 
-export type FlightDto = {
-  id: number;
-  airline: string;
-  from: string;
-  to: string;
-  departAt: string;
-  arriveAt: string;
-  durationMin: number;
-  stops: number;
-  price: number;
-  currency: string;
-  cabin: string;
-};
-
 export type OrganizerDto = {
   id: number;
   name: string;

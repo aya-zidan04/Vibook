@@ -110,20 +110,6 @@ export type Hotel = {
   badge?: BadgeTone;
 };
 
-export type Flight = {
-  id: ID;
-  airline: string;
-  from: string;
-  to: string;
-  departAt: string;
-  arriveAt: string;
-  durationMin: number;
-  stops: number;
-  price: number;
-  currency: string;
-  cabin: 'economy' | 'business' | 'first';
-};
-
 export type TravelPackage = {
   id: ID;
   title: string;
@@ -153,7 +139,7 @@ export type BookingStatus =
 export type Booking = {
   id: ID;
   userId: ID;
-  type: 'event' | 'restaurant' | 'hotel' | 'flight' | 'experience' | 'package';
+  type: 'event' | 'restaurant' | 'hotel' | 'experience' | 'package';
   /** Target entity id for deep links (optional for legacy mocks). */
   refId?: ID;
   refTitle: string;

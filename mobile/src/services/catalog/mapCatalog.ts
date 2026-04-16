@@ -1,7 +1,6 @@
 import type {
   EventDto,
   ExperienceDto,
-  FlightDto,
   HotelDto,
   OfferDto,
   OrganizerDto,
@@ -13,7 +12,6 @@ import type {
   BadgeTone,
   EventItem,
   ExperienceItem,
-  Flight,
   Hotel,
   Organizer,
   Restaurant,
@@ -108,17 +106,9 @@ export function navigateForOffer(router: CatalogRouter, offer: OfferDto): void {
     case 'STAY':
       router.push(`/stay/${id}`);
       return;
-    case 'FLIGHT':
-      router.push(`/flight/${id}`);
-      return;
     default:
       router.push('/search');
   }
-}
-
-export function offerSuggestsFlights(offer: OfferDto): boolean {
-  const t = `${offer.title} ${offer.subtitle}`.toLowerCase();
-  return t.includes('flight') || t.includes('طيران') || t.includes('رحل');
 }
 
 export function tierDtoToTicketTier(dto: TicketTierDto): TicketTier {
@@ -138,13 +128,6 @@ function clampPriceLevel(n: number): 1 | 2 | 3 | 4 {
   if (x < 1) return 1;
   if (x > 4) return 4;
   return x as 1 | 2 | 3 | 4;
-}
-
-function normalizeFlightCabin(raw: string): Flight['cabin'] {
-  const c = raw.trim().toLowerCase();
-  if (c === 'business') return 'business';
-  if (c === 'first' || c === 'first_class') return 'first';
-  return 'economy';
 }
 
 export function restaurantDtoToRestaurant(dto: RestaurantDto): Restaurant {
@@ -187,22 +170,6 @@ export function hotelDtoToHotel(dto: HotelDto): Hotel {
     currency: dto.currency,
     rating: num(dto.rating),
     badge: parseCatalogBadge(dto.badge ?? undefined),
-  };
-}
-
-export function flightDtoToFlight(dto: FlightDto): Flight {
-  return {
-    id: String(dto.id),
-    airline: dto.airline,
-    from: dto.from,
-    to: dto.to,
-    departAt: String(dto.departAt ?? ''),
-    arriveAt: String(dto.arriveAt ?? ''),
-    durationMin: typeof dto.durationMin === 'number' ? dto.durationMin : 0,
-    stops: typeof dto.stops === 'number' ? dto.stops : 0,
-    price: num(dto.price),
-    currency: dto.currency,
-    cabin: normalizeFlightCabin(dto.cabin ?? 'economy'),
   };
 }
 

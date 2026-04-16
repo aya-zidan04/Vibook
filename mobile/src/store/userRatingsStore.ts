@@ -8,8 +8,7 @@ export type RatingVertical =
   | 'experience'
   | 'stay'
   | 'organizer'
-  | 'package'
-  | 'flight';
+  | 'package';
 
 export function ratingKey(vertical: RatingVertical, id: string): string {
   return `${vertical}:${id}`;

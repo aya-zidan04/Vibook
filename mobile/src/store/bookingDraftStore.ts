@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export type BookingDraft = {
-  vertical: 'event' | 'restaurant' | 'stay' | 'flight' | 'experience' | 'package';
+  vertical: 'event' | 'restaurant' | 'stay' | 'experience' | 'package';
   refId: string;
   title: string;
   /** Arabic listing title when known (optional for API create). */
@@ -11,7 +11,7 @@ export type BookingDraft = {
   unitPrice: number;
   quantity: number;
   fees: number;
-  /** ISO 8601 start time for the booking (events, flights, etc.). */
+  /** ISO 8601 start time for the booking (events, stays, etc.). */
   startsAt?: string;
   /** Display / API city (English). */
   cityName?: string;

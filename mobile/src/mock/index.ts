@@ -7,7 +7,6 @@ export * from './events';
 export * from './experiences';
 export * from './restaurants';
 export * from './hotels';
-export * from './flights';
 export * from './packages';
 export * from './offers';
 export * from './bookings';

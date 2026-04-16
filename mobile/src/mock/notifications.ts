@@ -11,7 +11,7 @@ export const MOCK_NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'n2',
-    title: 'Price drop on flights to Aqaba',
+    title: 'Price drop on stays in Aqaba',
     body: 'Royal Jordanian AMM→AQJ now from JOD 45.',
     createdAt: '2026-03-27T18:30:00+03:00',
     read: true,

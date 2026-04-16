@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   getEventById,
   getExperienceById,
-  getFlightById,
   getHotelById,
   getOrganizerById,
   getPackageById,
@@ -13,7 +12,6 @@ import {
 import type {
   EventItem,
   ExperienceItem,
-  Flight,
   Hotel,
   Organizer,
   Restaurant,
@@ -110,21 +108,6 @@ export function usePackagePdp(id: string | undefined): {
   }, [id]);
 
   return { pkg, loading };
-}
-
-export function useFlightPdp(id: string | undefined): {
-  flight: Flight | undefined;
-  loading: boolean;
-} {
-  const [flight, setFlight] = useState<Flight | undefined>();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setFlight(id ? getFlightById(id) : undefined);
-    setLoading(false);
-  }, [id]);
-
-  return { flight, loading };
 }
 
 export function useOrganizerPdp(id: string | undefined): {

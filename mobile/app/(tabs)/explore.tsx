@@ -65,7 +65,7 @@ function mockHeroSlides(router: CatalogRouter, t: (key: string) => string): Hero
       title: MOCK_OFFERS[1].title,
       subtitle: MOCK_OFFERS[1].subtitle,
       eyebrow: t('explore.offer'),
-      onPress: () => router.push('/flight/search'),
+      onPress: () => router.push('/search'),
     },
   ];
 }
