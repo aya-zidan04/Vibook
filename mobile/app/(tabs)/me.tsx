@@ -85,7 +85,13 @@ export default function MeScreen() {
   return (
     <Screen scroll contentStyle={styles.pad}>
       <LinearGradient colors={[colors.primaryMuted, 'transparent']} style={styles.header}>
-        <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
+        {user.avatarUrl ? (
+          <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
+        ) : (
+          <View style={[styles.avatar, styles.avatarPlaceholder]}>
+            <Ionicons name="person" size={40} color={colors.textMuted} />
+          </View>
+        )}
         <View style={styles.headerText}>
           <AppText variant="h1" color="text" style={styles.headerName}>
             {displayName}
@@ -250,6 +256,11 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 3,
       borderColor: colors.primary,
       marginBottom: spacing.md,
+    },
+    avatarPlaceholder: {
+      backgroundColor: colors.surfaceMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     headerText: {
       alignItems: 'center',

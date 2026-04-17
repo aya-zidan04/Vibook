@@ -28,6 +28,8 @@ import {
   MOCK_PACKAGES,
   getCityName,
 } from '@/services/mock';
+import { useBusinessHubStore } from '@/store/businessHubStore';
+import { businessEventToEventItem } from '@/utils/businessEventToEventItem';
 import type { EventItem } from '@/types';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -125,6 +127,7 @@ export default function ExploreScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
+  const hubEvents = useBusinessHubStore((s) => s.events);
   const [selectedCategoryId, setSelectedCategoryId] = useState(MOCK_EXPLORE_CATEGORIES[0]?.id ?? '');
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
 
@@ -146,13 +149,19 @@ export default function ExploreScreen() {
       return { mainId: 'entertainment', subcategoryId: 'concerts' };
     };
 
-    return MOCK_EVENTS.filter((event) => {
+    const fromBusiness = hubEvents
+      .filter((e) => !e.hidden)
+      .map((e) => businessEventToEventItem(e));
+
+    const combined = [...MOCK_EVENTS, ...fromBusiness];
+
+    return combined.filter((event) => {
       const tag = MOCK_EXPLORE_EVENT_TAGS[event.id] ?? fallbackTag(event);
       if (selectedCategoryId && tag.mainId !== selectedCategoryId) return false;
       if (selectedSubcategoryId && tag.subcategoryId !== selectedSubcategoryId) return false;
       return true;
     });
-  }, [selectedCategoryId, selectedSubcategoryId]);
+  }, [selectedCategoryId, selectedSubcategoryId, hubEvents]);
 
   const selectedCategoryLabel = selectedCategory
     ? locale === 'ar'

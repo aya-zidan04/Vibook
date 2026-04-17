@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -16,6 +16,7 @@ import {
   jordanLocalDigitsFromStored,
 } from '@/utils/authValidation';
 import { nameToFirstLast, normalizePhoneForApi } from '@/utils/profilePatch';
+import { pickGalleryImage } from '@/utils/pickGalleryImage';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -46,9 +47,35 @@ export default function EditProfileScreen() {
     setPhoneLocal(d);
   };
 
-  const onChangePhotoPress = () => {
-    Alert.alert(t('editProfile.changePhotoMockTitle'), t('editProfile.changePhotoMockBody'));
-  };
+  const photoPermission = useMemo(
+    () => ({
+      title: t('editProfile.photoPermissionTitle'),
+      body: t('editProfile.photoPermissionBody'),
+    }),
+    [t],
+  );
+
+  const onChangePhotoPress = useCallback(async () => {
+    const uri = await pickGalleryImage({
+      aspect: [1, 1],
+      permissionTitle: photoPermission.title,
+      permissionBody: photoPermission.body,
+    });
+    if (uri) {
+      setOverrides({ avatarUrl: uri });
+    }
+  }, [photoPermission.body, photoPermission.title, setOverrides]);
+
+  const onRemovePhotoPress = useCallback(() => {
+    Alert.alert(t('editProfile.removePhotoTitle'), t('editProfile.removePhotoBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('editProfile.removePhoto'),
+        style: 'destructive',
+        onPress: () => setOverrides({ avatarUrl: null }),
+      },
+    ]);
+  }, [setOverrides, t]);
 
   const save = () => {
     if (!firstName.trim()) {
@@ -84,10 +111,16 @@ export default function EditProfileScreen() {
       <View style={styles.hero}>
         <View style={styles.avatarColumn}>
           <View style={styles.avatarWrap}>
-            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
+            {user.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Ionicons name="person" size={44} color={colors.textMuted} />
+              </View>
+            )}
             <Pressable
               style={({ pressed }) => [styles.avatarEditBadge, pressed && styles.avatarEditPressed]}
-              onPress={onChangePhotoPress}
+              onPress={() => void onChangePhotoPress()}
               accessibilityRole="button"
               accessibilityLabel={t('editProfile.changePhotoA11y')}
               hitSlop={8}
@@ -98,6 +131,13 @@ export default function EditProfileScreen() {
           <AppText variant="meta" color="textMuted" style={styles.heroNote}>
             {t('editProfile.note')}
           </AppText>
+          {user.avatarUrl ? (
+            <Pressable onPress={onRemovePhotoPress} hitSlop={8} accessibilityRole="button">
+              <AppText variant="caption" color="accent" style={styles.removePhoto}>
+                {t('editProfile.removePhoto')}
+              </AppText>
+            </Pressable>
+          ) : null}
         </View>
       </View>
 
@@ -179,6 +219,13 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.surfaceMuted,
       borderWidth: 3,
       borderColor: colors.primaryMuted,
+    },
+    avatarPlaceholder: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    removePhoto: {
+      textDecorationLine: 'underline',
     },
     avatarEditBadge: {
       position: 'absolute',

@@ -1,4 +1,6 @@
 import { useReferenceStore } from '@/store/referenceStore';
+import { useBusinessHubStore } from '@/store/businessHubStore';
+import { businessEventToEventItem } from '@/utils/businessEventToEventItem';
 import type {
   EventItem,
   ExperienceItem,
@@ -17,7 +19,11 @@ import { MOCK_RESTAURANTS } from './restaurants';
 import { MOCK_TICKET_TIERS } from './ticketTiers';
 
 export function getEventById(id: string): EventItem | undefined {
-  return MOCK_EVENTS.find((e) => e.id === id);
+  const mock = MOCK_EVENTS.find((e) => e.id === id);
+  if (mock) return mock;
+  const biz = useBusinessHubStore.getState().events.find((e) => e.id === id);
+  if (!biz || biz.hidden) return undefined;
+  return businessEventToEventItem(biz);
 }
 
 export function getRestaurantById(id: string): Restaurant | undefined {

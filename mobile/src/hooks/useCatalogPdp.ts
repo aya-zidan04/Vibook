@@ -9,6 +9,7 @@ import {
   getTiersForEvent,
   MOCK_EVENTS,
 } from '@/services/mock';
+import { useBusinessHubStore } from '@/store/businessHubStore';
 import type {
   EventItem,
   ExperienceItem,
@@ -24,17 +25,47 @@ export function useEventPdp(id: string | undefined): {
   tiers: TicketTier[];
   loading: boolean;
 } {
+  const hubEvents = useBusinessHubStore((s) => s.events);
   const [event, setEvent] = useState<EventItem | undefined>();
   const [tiers, setTiers] = useState<TicketTier[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mockEvent = id ? getEventById(id) : undefined;
-    const mockTiers = mockEvent ? getTiersForEvent(mockEvent.id) : [];
-    setEvent(mockEvent);
-    setTiers(mockTiers);
+    if (!id) {
+      setEvent(undefined);
+      setTiers([]);
+      setLoading(false);
+      return;
+    }
+    const ev = getEventById(id);
+    setEvent(ev);
+    if (!ev) {
+      setTiers([]);
+      setLoading(false);
+      return;
+    }
+    const fromMock = MOCK_EVENTS.some((e) => e.id === id);
+    if (fromMock) {
+      setTiers(getTiersForEvent(ev.id));
+    } else {
+      const biz = hubEvents.find((e) => e.id === id && !e.hidden);
+      if (biz) {
+        setTiers([
+          {
+            id: `${biz.id}-tier-general`,
+            eventId: biz.id,
+            name: 'General admission',
+            price: biz.priceJod,
+            currency: biz.currency || 'JOD',
+            benefits: [],
+          },
+        ]);
+      } else {
+        setTiers([]);
+      }
+    }
     setLoading(false);
-  }, [id]);
+  }, [id, hubEvents]);
 
   return { event, tiers, loading };
 }

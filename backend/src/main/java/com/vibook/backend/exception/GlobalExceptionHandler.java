@@ -67,6 +67,35 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(
+        ResourceNotFoundException ex,
+        HttpServletRequest request
+    ) {
+        ErrorResponse response = new ErrorResponse(
+            Instant.now(),
+            HttpStatus.NOT_FOUND.value(),
+            "Not found",
+            ex.getMessage(),
+            request.getRequestURI(),
+            null
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex, HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+            Instant.now(),
+            HttpStatus.FORBIDDEN.value(),
+            "Forbidden",
+            ex.getMessage(),
+            request.getRequestURI(),
+            null
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse(

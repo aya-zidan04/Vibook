@@ -2,6 +2,17 @@ import type { User } from '@/types';
 import type { UserProfileOverrides } from '@/store/userProfileStore';
 import { joinFirstLast, nameToFirstLast } from '@/utils/profilePatch';
 
+function resolveAvatarUrl(base: User, overrides: UserProfileOverrides): string | null {
+  if (overrides.avatarUrl === undefined) {
+    return base.avatarUrl;
+  }
+  if (overrides.avatarUrl === null) {
+    return null;
+  }
+  const trimmed = overrides.avatarUrl.trim();
+  return trimmed === '' ? null : trimmed;
+}
+
 /** Merge mock baseline user with persisted local overrides (no network). */
 export function mergeMockUser(base: User, overrides: UserProfileOverrides): User {
   const baseParts = nameToFirstLast(base.name);
@@ -33,5 +44,6 @@ export function mergeMockUser(base: User, overrides: UserProfileOverrides): User
     nameAr: overrides.nameAr ?? base.nameAr,
     email: overrides.email ?? base.email,
     phone: overrides.phone ?? base.phone,
+    avatarUrl: resolveAvatarUrl(base, overrides),
   };
 }

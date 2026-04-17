@@ -7,6 +7,7 @@ import com.vibook.backend.exception.NotFoundException;
 import com.vibook.backend.exception.UnauthorizedException;
 import com.vibook.backend.mapper.UserMapper;
 import com.vibook.backend.repository.UserRepository;
+import com.vibook.backend.service.ProfileImageStorageService;
 import com.vibook.backend.service.UserService;
 import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,16 +15,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final ProfileImageStorageService profileImageStorageService;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(
+        UserRepository userRepository,
+        UserMapper userMapper,
+        ProfileImageStorageService profileImageStorageService
+    ) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.profileImageStorageService = profileImageStorageService;
     }
 
     @Override
@@ -57,6 +66,28 @@ public class UserServiceImpl implements UserService {
         target.setLastName(request.lastName().trim());
         target.setPhone(request.phone().trim());
         User saved = userRepository.save(target);
+        return userMapper.toResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfileImage(MultipartFile image) {
+        User user = getCurrentAuthenticatedUser();
+        String publicPath = profileImageStorageService.saveProfileImage(image);
+        user.setProfileImageUrl(publicPath);
+        User saved = userRepository.save(user);
+        return userMapper.toResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse clearProfileImage() {
+        User user = getCurrentAuthenticatedUser();
+        if (StringUtils.hasText(user.getProfileImageUrl())) {
+            profileImageStorageService.tryDeleteStoredFile(user.getProfileImageUrl());
+        }
+        user.setProfileImageUrl(null);
+        User saved = userRepository.save(user);
         return userMapper.toResponse(saved);
     }
 

@@ -16,28 +16,42 @@ export default function BusinessEventsIndexScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const events = useBusinessHubStore((s) => s.events);
+  const updateEvent = useBusinessHubStore((s) => s.updateEvent);
 
-  const row = (item: BusinessEventRecord) => (
-    <Pressable
-      key={item.id}
-      onPress={() => router.push(`/business/events/${item.id}`)}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-    >
-      <AppText variant="bodyMedium" color="text">
-        {item.title.trim() || t('businessHub.eventUntitled')}
-      </AppText>
-      <AppText variant="caption" color="textSecondary">
-        {t('businessHub.eventMeta')
-          .replace('{price}', item.price || '—')
-          .replace('{cap}', item.capacity || '—')}
-      </AppText>
-      {item.hidden ? (
-        <AppText variant="meta" color="textMuted">
-          {t('businessHub.eventHidden')}
-        </AppText>
-      ) : null}
-    </Pressable>
-  );
+  const row = (item: BusinessEventRecord) => {
+    const priceLabel = Number.isFinite(item.priceJod) ? String(item.priceJod) : '—';
+    const capLabel = Number.isFinite(item.capacityGuests) ? String(item.capacityGuests) : '—';
+    return (
+      <View key={item.id} style={styles.card}>
+        <Pressable
+          onPress={() => router.push(`/business/events/${item.id}`)}
+          style={({ pressed }) => [styles.cardMain, pressed && styles.pressed]}
+        >
+          <AppText variant="bodyMedium" color="text">
+            {item.title.trim() || t('businessHub.eventUntitled')}
+          </AppText>
+          <AppText variant="caption" color="textSecondary">
+            {t('businessHub.eventMeta').replace('{price}', priceLabel).replace('{cap}', capLabel)}
+          </AppText>
+          {item.hidden ? (
+            <AppText variant="meta" color="textMuted">
+              {t('businessHub.eventHidden')}
+            </AppText>
+          ) : null}
+        </Pressable>
+        <Pressable
+          onPress={() => updateEvent(item.id, { hidden: !item.hidden })}
+          style={({ pressed }) => [styles.visibilityBtn, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel={item.hidden ? t('businessHub.eventShowPublic') : t('businessHub.eventHidePublic')}
+        >
+          <AppText variant="caption" color="accent">
+            {item.hidden ? t('businessHub.eventShowPublic') : t('businessHub.eventHidePublic')}
+          </AppText>
+        </Pressable>
+      </View>
+    );
+  };
 
   return (
     <Screen
@@ -72,12 +86,22 @@ function createStyles(colors: ThemeColors) {
     header: { paddingTop: spacing.md, paddingHorizontal: spacing.screen, gap: spacing.xs },
     list: { gap: spacing.sm },
     card: {
-      padding: spacing.lg,
       borderRadius: radii.xl,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
+      overflow: 'hidden',
+    },
+    cardMain: {
+      padding: spacing.lg,
       gap: 4,
+    },
+    visibilityBtn: {
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      alignItems: 'center',
     },
     pressed: { opacity: 0.94 },
   });

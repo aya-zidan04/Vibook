@@ -11,6 +11,8 @@ export type UserProfileOverrides = {
   email?: string;
   nameAr?: string;
   phone?: string;
+  /** Local `file://` or remote URL; `null` clears the photo (optional field). */
+  avatarUrl?: string | null;
   /** Legacy; applied when firstName/lastName are absent */
   name?: string;
 };

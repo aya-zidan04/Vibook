@@ -1,11 +1,12 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { EventPhotosField } from '@/components/business/EventPhotosField';
 import { BusinessIconMultiline, BusinessIconTextField } from '@/components/business/BusinessFormField';
 import { GovernorateSelectField } from '@/components/forms/GovernorateSelectField';
 import { BUSINESS_PARTNER_CATEGORIES } from '@/constants/businessPartnerCategories';
+import { canonicalizeToEventTimeSlot, EVENT_TIME_OPTIONS } from '@/constants/eventTimeSlots';
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
@@ -52,20 +53,17 @@ const EVENT_CATEGORY_GROUPS: EventCategoryGroup[] = BUSINESS_PARTNER_CATEGORIES.
 
 const EVENT_CATEGORY_OPTIONS: EventCategoryOption[] = EVENT_CATEGORY_GROUPS.flatMap((group) => group.options);
 
-const TIME_OPTIONS: string[] = Array.from({ length: 48 }, (_, i) => {
-  const hour = Math.floor(i / 2);
-  const minute = i % 2 === 0 ? 0 : 30;
-  const meridiem = hour >= 12 ? 'PM' : 'AM';
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  return `${hour12}:${String(minute).padStart(2, '0')} ${meridiem}`;
-});
-
 const CALENDAR_WEEKDAY_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
 const CALENDAR_WEEKDAY_AR = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'] as const;
 
 export default function BusinessEventEditorScreen() {
   const { id: rawId } = useLocalSearchParams<{ id: string }>();
-  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const segments = useSegments();
+  const paramId = Array.isArray(rawId) ? rawId[0] : rawId;
+  const tail = segments[segments.length - 1];
+  const segmentId = typeof tail === 'string' ? tail : '';
+  /** Params can be empty on the first paint; the file segment (e.g. `new` or event id) is still in `useSegments`. */
+  const id = (paramId && String(paramId).length > 0 ? String(paramId) : segmentId) || '';
   const isNew = id === 'new';
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(), []);
@@ -76,19 +74,23 @@ export default function BusinessEventEditorScreen() {
   const updateEvent = useBusinessHubStore((s) => s.updateEvent);
   const removeEvent = useBusinessHubStore((s) => s.removeEvent);
 
-  const existing = !isNew ? events.find((e) => e.id === id) : undefined;
+  const existing = !isNew && id ? events.find((e) => e.id === id) : undefined;
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
-  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+  /** Canonical slot labels from {@link EVENT_TIME_OPTIONS}, plus any legacy tokens that could not be normalized. */
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
+  const [timeSlotsError, setTimeSlotsError] = useState(false);
   const [governorateSlug, setGovernorateSlug] = useState<JordanGovernorateSlug>('amman');
   const [mapsUrl, setMapsUrl] = useState('');
   const [price, setPrice] = useState('');
   const [capacity, setCapacity] = useState('');
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [hidden, setHidden] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const saveLockRef = useRef(false);
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
   const [timeSheetOpen, setTimeSheetOpen] = useState(false);
@@ -100,20 +102,57 @@ export default function BusinessEventEditorScreen() {
   });
 
   useEffect(() => {
+    saveLockRef.current = false;
+    setSaving(false);
+  }, [id]);
+
+  useEffect(() => {
     if (existing) {
       setTitle(existing.title);
       setCategory(existing.category);
       setDescription(existing.description);
       setDate(existing.date);
-      setTimeSlots(parseStoredTimes(existing.time));
+      setSelectedTimeSlots(parseStoredTimes(existing.time));
+      setTimeSlotsError(false);
       setGovernorateSlug(existing.governorateSlug);
       setMapsUrl(existing.mapsUrl);
-      setPrice(existing.price);
-      setCapacity(existing.capacity);
+      setPrice(String(existing.priceJod ?? ''));
+      setCapacity(String(existing.capacityGuests ?? ''));
       setImageUris(parseStoredImages(existing.images));
       setHidden(existing.hidden);
+    } else if (isNew) {
+      setTitle('');
+      setCategory('');
+      setDescription('');
+      setDate('');
+      setSelectedTimeSlots([]);
+      setTimeSlotsError(false);
+      setGovernorateSlug('amman');
+      setMapsUrl('');
+      setPrice('');
+      setCapacity('');
+      setImageUris([]);
+      setHidden(false);
+      setCalendarMonth(() => {
+        const d = new Date();
+        d.setDate(1);
+        d.setHours(0, 0, 0, 0);
+        return d;
+      });
     }
-  }, [existing]);
+  }, [existing, isNew]);
+
+  if (!id) {
+    return (
+      <Screen
+        scroll
+        contentStyle={styles.pad}
+        header={<DetailHeader title={t('common.loading')} />}
+      >
+        <ActivityIndicator color={colors.primary} />
+      </Screen>
+    );
+  }
 
   if (!isNew && !existing) {
     return (
@@ -130,33 +169,72 @@ export default function BusinessEventEditorScreen() {
   }
 
   const save = () => {
+    if (saveLockRef.current || saving) return;
+    if (!category.trim()) {
+      Alert.alert(t('common.error'), t('businessHub.eventValidationCategory'));
+      return;
+    }
+    if (!description.trim()) {
+      Alert.alert(t('common.error'), t('businessHub.eventValidationDescription'));
+      return;
+    }
+    const dateTrim = date.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateTrim)) {
+      Alert.alert(t('common.error'), t('businessHub.eventValidationDate'));
+      return;
+    }
+    if (selectedTimeSlots.length === 0) {
+      setTimeSlotsError(true);
+      return;
+    }
+    setTimeSlotsError(false);
+    const priceNum = parseFloat(price.replace(/[^\d.]/g, ''));
+    if (!Number.isFinite(priceNum) || priceNum < 0) {
+      Alert.alert(t('common.error'), t('businessHub.eventValidationPrice'));
+      return;
+    }
+    const capNum = parseInt(capacity.replace(/\D/g, ''), 10);
+    if (!Number.isFinite(capNum) || capNum < 1) {
+      Alert.alert(t('common.error'), t('businessHub.eventValidationCapacity'));
+      return;
+    }
+
     const payload = {
       title: title.trim() || t('businessHub.eventUntitled'),
       category: category.trim() || t('businessHub.uncategorized'),
       description: description.trim(),
-      date: date.trim(),
-      time: timeSlots.join(', '),
+      date: dateTrim,
+      time: selectedTimeSlots.join(', '),
       governorateSlug,
       mapsUrl: mapsUrl.trim(),
-      price: price.trim(),
-      capacity: capacity.trim(),
+      priceJod: priceNum,
+      currency: 'JOD',
+      capacityGuests: capNum,
       images: imageUris.map((u) => u.trim()).filter(Boolean).join('\n'),
       listingId: isNew ? null : (existing?.listingId ?? null),
       hidden,
     };
-    if (isNew) {
-      const newId = addEvent(payload);
-      router.replace(`/business/events/${newId}`);
-    } else if (id) {
-      updateEvent(id, payload);
-      router.back();
+    saveLockRef.current = true;
+    setSaving(true);
+    try {
+      if (isNew) {
+        const newId = addEvent(payload);
+        router.replace(`/business/events/${newId}`);
+      } else if (id) {
+        updateEvent(id, payload);
+        router.back();
+      }
+    } catch (e) {
+      saveLockRef.current = false;
+      setSaving(false);
+      throw e;
     }
   };
 
   const del = () => {
     if (!id || isNew) return;
     Alert.alert(t('businessHub.deleteEvent'), '', [
-      { text: 'Cancel', style: 'cancel' },
+      { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('businessHub.deleteEvent'),
         style: 'destructive',
@@ -219,8 +297,9 @@ export default function BusinessEventEditorScreen() {
       <PickerField
         icon="time-outline"
         label={t('businessHub.fieldTime')}
-        value={timeSlots.join(', ')}
+        value={selectedTimeSlots.join(', ')}
         placeholder="12:00 PM"
+        errorText={timeSlotsError ? t('businessHub.eventValidationTime') : undefined}
         onPress={() => setTimeSheetOpen(true)}
         trailingIcon="chevron-down"
       />
@@ -275,7 +354,7 @@ export default function BusinessEventEditorScreen() {
         </View>
         <Switch value={hidden} onValueChange={setHidden} />
       </View>
-      <PrimaryButton title={t('businessHub.save')} onPress={save} />
+      <PrimaryButton title={t('businessHub.save')} onPress={save} disabled={saving} loading={saving} />
       {!isNew ? <SecondaryButton title={t('businessHub.deleteEvent')} onPress={del} /> : null}
 
       <CalendarDateSheet
@@ -366,15 +445,50 @@ export default function BusinessEventEditorScreen() {
         title={t('businessHub.fieldTime')}
         onClose={() => setTimeSheetOpen(false)}
       >
-        {TIME_OPTIONS.map((opt) => {
-          const selected = timeSlots.includes(opt);
+        {selectedTimeSlots.filter((s) => !EVENT_TIME_OPTIONS.includes(s)).map((slot) => (
+          <Pressable
+            key={`legacy-${slot}`}
+            accessibilityRole="button"
+            accessibilityState={{ selected: true }}
+            onPress={() => {
+              setSelectedTimeSlots((prev) => {
+                const next = prev.filter((v) => v !== slot);
+                if (next.length > 0) setTimeSlotsError(false);
+                return next;
+              });
+            }}
+            style={({ pressed }) => [
+              styles.sheetRow,
+              styles.sheetRowSelected,
+              pressed && styles.sheetRowPressed,
+              {
+                borderColor: colors.primary,
+                backgroundColor: colors.primaryMuted,
+              },
+            ]}
+          >
+            <View style={styles.sheetIconWrap}>
+              <Ionicons name="time-outline" size={18} color={colors.primary} />
+            </View>
+            <AppText variant="bodyMedium" color="text" style={styles.sheetLabel}>
+              {slot}
+            </AppText>
+            <Ionicons name="checkmark-circle" size={21} color={colors.accent} />
+          </Pressable>
+        ))}
+        {EVENT_TIME_OPTIONS.map((opt) => {
+          const selected = selectedTimeSlots.includes(opt);
           return (
             <Pressable
               key={opt}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
               onPress={() => {
-                setTimeSlots((prev) =>
-                  prev.includes(opt) ? prev.filter((v) => v !== opt) : [...prev, opt],
-                );
+                setSelectedTimeSlots((prev) => {
+                  const next = prev.includes(opt) ? prev.filter((v) => v !== opt) : [...prev, opt];
+                  if (next.length > 0) setTimeSlotsError(false);
+                  return next;
+                });
               }}
               style={({ pressed }) => [
                 styles.sheetRow,
@@ -400,8 +514,9 @@ export default function BusinessEventEditorScreen() {
             </Pressable>
           );
         })}
-        <PrimaryButton title="Done" onPress={() => setTimeSheetOpen(false)} style={styles.timeSheetBtn} />
+        <PrimaryButton title={t('common.ok')} onPress={() => setTimeSheetOpen(false)} style={styles.timeSheetBtn} />
       </BottomListSheet>
+
     </Screen>
   );
 }
@@ -568,6 +683,7 @@ function PickerField({
   label,
   value,
   placeholder,
+  errorText,
   onPress,
   trailingIcon = 'chevron-down',
 }: {
@@ -575,6 +691,7 @@ function PickerField({
   label: string;
   value: string;
   placeholder?: string;
+  errorText?: string;
   onPress: () => void;
   trailingIcon?: keyof typeof Ionicons.glyphMap;
 }) {
@@ -587,6 +704,11 @@ function PickerField({
       <AppText variant="caption" color="text" style={styles.pickerLabel}>
         {label}
       </AppText>
+      {errorText ? (
+        <AppText variant="caption" color="error" style={styles.pickerFieldError}>
+          {errorText}
+        </AppText>
+      ) : null}
       <Pressable
         onPress={onPress}
         style={({ pressed }) => [
@@ -661,10 +783,17 @@ function parseStoredImages(raw: string): string[] {
 }
 
 function parseStoredTimes(raw: string): string[] {
-  return raw
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => TIME_OPTIONS.includes(s));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of raw.split(',').map((s) => s.trim()).filter(Boolean)) {
+    const canon = canonicalizeToEventTimeSlot(part);
+    const value = canon ?? part;
+    if (!seen.has(value)) {
+      seen.add(value);
+      out.push(value);
+    }
+  }
+  return out;
 }
 
 function createStyles() {
@@ -697,6 +826,7 @@ function createStyles() {
     },
     pickerWrap: { gap: spacing.xs, marginBottom: spacing.md },
     pickerLabel: { fontWeight: '600' },
+    pickerFieldError: { marginBottom: 2 },
     pickerRow: {
       minHeight: 54,
       borderRadius: radii.xl,
@@ -831,10 +961,6 @@ function createStyles() {
       height: 20,
       borderRadius: 10,
       borderWidth: 2,
-    },
-    timeSheetActions: {
-      marginTop: spacing.sm,
-      paddingBottom: spacing.xs,
     },
     timeSheetBtn: { marginTop: spacing.sm },
   });

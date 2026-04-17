@@ -8,5 +8,4 @@ export const MOCK_CATEGORIES: Category[] = [
   { id: 'cat5', slug: 'sports', labelEn: 'Sports', labelAr: 'رياضة', icon: 'football' },
   { id: 'cat6', slug: 'wellness', labelEn: 'Wellness', labelAr: 'عافية', icon: 'leaf' },
   { id: 'cat7', slug: 'travel', labelEn: 'Packages', labelAr: 'باقات', icon: 'globe' },
-  { id: 'cat8', slug: 'drops', labelEn: 'Drops', labelAr: 'إصدارات', icon: 'flash' },
 ];

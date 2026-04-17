@@ -2,6 +2,10 @@ server:
   port: 8080
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   datasource:
     url: jdbc:mysql://localhost:3306/vibook_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
@@ -16,7 +20,19 @@ spring:
   jackson:
     time-zone: UTC
 
+vibook:
+  demo:
+    # Set to true to auto-create a sample CONFIRMED booking (first user + first event) for rating API tests.
+    rating-data: false
+
 app:
+  upload:
+    profile-images-dir: uploads/profile-images
+    public-profile-image-path: /api/v1/files/profile-images
+    business-logos-dir: uploads/business-logos
+    public-business-logo-path: /api/v1/files/business-logos
+    business-banners-dir: uploads/business-banners
+    public-business-banner-path: /api/v1/files/business-banners
   jwt:
     secret: bXktc3VwZXItc2VjcmV0LWtleS1mb3Itdmlib29rLWp3dC1zaWduaW5nLXRva2Vucy0xMjM0NTY3ODkw
     expiration-ms: 86400000

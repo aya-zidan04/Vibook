@@ -9,7 +9,8 @@ export type User = {
   nameAr?: string;
   email: string;
   phone: string;
-  avatarUrl: string;
+  /** Null when the user has no profile photo (optional). */
+  avatarUrl: string | null;
   cityId: ID;
   membershipTier: 'standard' | 'gold' | 'platinum';
   walletBalance: number;

@@ -6,11 +6,13 @@ import com.vibook.backend.repository.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 @Configuration
 public class RoleSeederConfig {
 
     @Bean
+    @Order(1)
     CommandLineRunner seedRoles(RoleRepository roleRepository) {
         return args -> {
             for (RoleName roleName : RoleName.values()) {

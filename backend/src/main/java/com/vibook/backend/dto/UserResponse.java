@@ -10,6 +10,7 @@ public record UserResponse(
     String lastName,
     String email,
     String phone,
+    String profileImageUrl,
     boolean enabled,
     Instant createdAt,
     Instant updatedAt,

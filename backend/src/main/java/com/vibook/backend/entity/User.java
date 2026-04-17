@@ -45,6 +45,10 @@ public class User {
     @Column(nullable = false, length = 20)
     private String phone;
 
+    /** Public path or URL fragment served under {@code /api/v1/files/profile-images/...}; nullable when unset. */
+    @Column(length = 512)
+    private String profileImageUrl;
+
     @Column(nullable = false)
     private Instant createdAt;
 

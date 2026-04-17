@@ -9,7 +9,7 @@ import type { ThemeColors } from '@/theme/palettes';
 type Props = {
   greeting: string;
   cityLabel: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   onCityPress?: () => void;
   onNotifPress?: () => void;
   onAvatarPress?: () => void;
@@ -50,7 +50,13 @@ export function AppHeader({
           <View style={styles.dot} />
         </Pressable>
         <Pressable onPress={onAvatarPress} accessibilityLabel="Profile">
-          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatar} contentFit="cover" />
+          ) : (
+            <View style={[styles.avatar, styles.avatarPlaceholder]}>
+              <Ionicons name="person" size={22} color={colors.textMuted} />
+            </View>
+          )}
         </Pressable>
       </View>
     </View>
@@ -99,6 +105,11 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 22,
       borderWidth: 2,
       borderColor: colors.primaryMuted,
+    },
+    avatarPlaceholder: {
+      backgroundColor: colors.surfaceMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 }
