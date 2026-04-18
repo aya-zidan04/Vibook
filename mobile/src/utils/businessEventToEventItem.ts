@@ -1,6 +1,7 @@
 import { eventTimeSlotToMinutes } from '@/constants/eventTimeSlots';
 import type { BusinessEventRecord } from '@/types/businessHub';
 import type { EventItem } from '@/types';
+import { minTicketPriceJod } from '@/utils/businessEventTickets';
 
 function parseTimeSlotsFromStored(timeRaw: string): string[] {
   return String(timeRaw ?? '')
@@ -160,8 +161,8 @@ export function businessEventToEventItem(e: BusinessEventRecord): EventItem {
   const { startAt, endAt } = startEndIsoForBusinessEvent(e);
   const gallery = galleryFromImages(e.images);
   const imageUrl = gallery[0] ?? 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80';
-  const priceFrom = Number.isFinite(e.priceJod) ? e.priceJod : 0;
   const currency = e.currency?.trim() || 'JOD';
+  const priceFrom = minTicketPriceJod(e.ticketOptions ?? []);
 
   return {
     id: e.id,

@@ -51,6 +51,8 @@ export type TicketTier = {
   price: number;
   currency: string;
   benefits: string[];
+  /** Optional subtitle line (e.g. from business ticket description). */
+  description?: string;
   remaining?: number;
 };
 

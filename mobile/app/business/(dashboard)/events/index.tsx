@@ -7,6 +7,7 @@ import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import type { BusinessEventRecord } from '@/types/businessHub';
+import { minTicketPriceJod } from '@/utils/businessEventTickets';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -19,7 +20,8 @@ export default function BusinessEventsIndexScreen() {
   const updateEvent = useBusinessHubStore((s) => s.updateEvent);
 
   const row = (item: BusinessEventRecord) => {
-    const priceLabel = Number.isFinite(item.priceJod) ? String(item.priceJod) : '—';
+    const floor = minTicketPriceJod(item.ticketOptions);
+    const priceLabel = item.ticketOptions.length > 0 && Number.isFinite(floor) ? String(floor) : '—';
     const capLabel = Number.isFinite(item.capacityGuests) ? String(item.capacityGuests) : '—';
     return (
       <View key={item.id} style={styles.card}>

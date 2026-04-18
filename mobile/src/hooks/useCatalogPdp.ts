@@ -19,6 +19,10 @@ import type {
   TicketTier,
   TravelPackage,
 } from '@/types';
+import {
+  businessTicketOptionsToTicketTiers,
+  syntheticTierFromEventItem,
+} from '@/utils/businessEventTickets';
 
 export function useEventPdp(id: string | undefined): {
   event: EventItem | undefined;
@@ -46,20 +50,12 @@ export function useEventPdp(id: string | undefined): {
     }
     const fromMock = MOCK_EVENTS.some((e) => e.id === id);
     if (fromMock) {
-      setTiers(getTiersForEvent(ev.id));
+      const explicit = getTiersForEvent(ev.id);
+      setTiers(explicit.length > 0 ? explicit : [syntheticTierFromEventItem(ev)]);
     } else {
       const biz = hubEvents.find((e) => e.id === id && !e.hidden);
-      if (biz) {
-        setTiers([
-          {
-            id: `${biz.id}-tier-general`,
-            eventId: biz.id,
-            name: 'General admission',
-            price: biz.priceJod,
-            currency: biz.currency || 'JOD',
-            benefits: [],
-          },
-        ]);
+      if (biz && biz.ticketOptions?.length) {
+        setTiers(businessTicketOptionsToTicketTiers(biz.id, biz.ticketOptions));
       } else {
         setTiers([]);
       }

@@ -15,7 +15,7 @@ export const MOCK_EVENTS: EventItem[] = [
     venueName: 'Boulevard Amphitheatre',
     address: 'Abdali Boulevard, Amman',
     description: 'A multi-stage night with regional headliners and skyline views.',
-    priceFrom: 25,
+    priceFrom: 34,
     currency: 'JOD',
     rating: 4.9,
     reviewCount: 842,

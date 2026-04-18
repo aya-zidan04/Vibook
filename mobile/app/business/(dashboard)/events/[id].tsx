@@ -53,6 +53,22 @@ const EVENT_CATEGORY_GROUPS: EventCategoryGroup[] = BUSINESS_PARTNER_CATEGORIES.
 
 const EVENT_CATEGORY_OPTIONS: EventCategoryOption[] = EVENT_CATEGORY_GROUPS.flatMap((group) => group.options);
 
+type TicketFormRow = {
+  key: string;
+  persistedId?: string;
+  name: string;
+  description: string;
+  priceStr: string;
+};
+
+function newTicketRowKey(): string {
+  return `tk-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function emptyTicketFormRow(): TicketFormRow {
+  return { key: newTicketRowKey(), name: '', description: '', priceStr: '' };
+}
+
 const CALENDAR_WEEKDAY_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
 const CALENDAR_WEEKDAY_AR = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'] as const;
 
@@ -85,7 +101,7 @@ export default function BusinessEventEditorScreen() {
   const [timeSlotsError, setTimeSlotsError] = useState(false);
   const [governorateSlug, setGovernorateSlug] = useState<JordanGovernorateSlug>('amman');
   const [mapsUrl, setMapsUrl] = useState('');
-  const [price, setPrice] = useState('');
+  const [ticketRows, setTicketRows] = useState<TicketFormRow[]>([emptyTicketFormRow()]);
   const [capacity, setCapacity] = useState('');
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [hidden, setHidden] = useState(false);
@@ -116,7 +132,17 @@ export default function BusinessEventEditorScreen() {
       setTimeSlotsError(false);
       setGovernorateSlug(existing.governorateSlug);
       setMapsUrl(existing.mapsUrl);
-      setPrice(String(existing.priceJod ?? ''));
+      setTicketRows(
+        existing.ticketOptions?.length
+          ? existing.ticketOptions.map((opt) => ({
+              key: opt.id,
+              persistedId: opt.id,
+              name: opt.name,
+              description: opt.description ?? '',
+              priceStr: String(opt.priceJod),
+            }))
+          : [emptyTicketFormRow()],
+      );
       setCapacity(String(existing.capacityGuests ?? ''));
       setImageUris(parseStoredImages(existing.images));
       setHidden(existing.hidden);
@@ -129,7 +155,7 @@ export default function BusinessEventEditorScreen() {
       setTimeSlotsError(false);
       setGovernorateSlug('amman');
       setMapsUrl('');
-      setPrice('');
+      setTicketRows([emptyTicketFormRow()]);
       setCapacity('');
       setImageUris([]);
       setHidden(false);
@@ -188,16 +214,38 @@ export default function BusinessEventEditorScreen() {
       return;
     }
     setTimeSlotsError(false);
-    const priceNum = parseFloat(price.replace(/[^\d.]/g, ''));
-    if (!Number.isFinite(priceNum) || priceNum < 0) {
-      Alert.alert(t('common.error'), t('businessHub.eventValidationPrice'));
+    if (ticketRows.length === 0) {
+      Alert.alert(t('common.error'), t('businessHub.eventValidationTickets'));
       return;
+    }
+    for (const row of ticketRows) {
+      if (!row.name.trim()) {
+        Alert.alert(t('common.error'), t('businessHub.eventValidationTicketName'));
+        return;
+      }
+      const p = parseFloat(row.priceStr.replace(/[^\d.]/g, ''));
+      if (!Number.isFinite(p) || p < 0) {
+        Alert.alert(t('common.error'), t('businessHub.eventValidationTicketPrice'));
+        return;
+      }
     }
     const capNum = parseInt(capacity.replace(/\D/g, ''), 10);
     if (!Number.isFinite(capNum) || capNum < 1) {
       Alert.alert(t('common.error'), t('businessHub.eventValidationCapacity'));
       return;
     }
+
+    const baseTicketIds = Date.now();
+    const ticketOptions = ticketRows.map((row, idx) => {
+      const priceJod = parseFloat(row.priceStr.replace(/[^\d.]/g, ''));
+      return {
+        id: row.persistedId ?? `tkt-${baseTicketIds}-${idx}`,
+        name: row.name.trim(),
+        description: row.description.trim() || undefined,
+        priceJod,
+        currency: 'JOD' as const,
+      };
+    });
 
     const payload = {
       title: title.trim() || t('businessHub.eventUntitled'),
@@ -207,7 +255,7 @@ export default function BusinessEventEditorScreen() {
       time: selectedTimeSlots.join(', '),
       governorateSlug,
       mapsUrl: mapsUrl.trim(),
-      priceJod: priceNum,
+      ticketOptions,
       currency: 'JOD',
       capacityGuests: capNum,
       images: imageUris.map((u) => u.trim()).filter(Boolean).join('\n'),
@@ -319,12 +367,67 @@ export default function BusinessEventEditorScreen() {
         autoCapitalize="none"
         autoCorrect={false}
       />
-      <BusinessIconTextField
-        icon="cash-outline"
-        label={t('businessHub.fieldPrice')}
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="number-pad"
+      <AppText variant="caption" color="text" style={styles.ticketsSectionLabel}>
+        {t('businessHub.fieldTicketsSection')}
+      </AppText>
+      {ticketRows.map((row, index) => (
+        <View
+          key={row.key}
+          style={[
+            styles.ticketCard,
+            { borderColor: colors.borderLight, backgroundColor: colors.surfaceMuted },
+          ]}
+        >
+          <View style={styles.ticketCardHead}>
+            <AppText variant="caption" color="textMuted">
+              {t('businessHub.ticketOptionLabel').replace('{n}', String(index + 1))}
+            </AppText>
+            {ticketRows.length > 1 ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('businessHub.removeTicketTypeA11y')}
+                hitSlop={10}
+                onPress={() =>
+                  setTicketRows((prev) => (prev.length <= 1 ? prev : prev.filter((r) => r.key !== row.key)))
+                }
+              >
+                <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
+              </Pressable>
+            ) : null}
+          </View>
+          <BusinessIconTextField
+            icon="pricetag-outline"
+            label={t('businessHub.fieldTicketName')}
+            value={row.name}
+            onChangeText={(text) =>
+              setTicketRows((prev) => prev.map((r) => (r.key === row.key ? { ...r, name: text } : r)))
+            }
+            placeholder={t('businessHub.ticketNamePlaceholder')}
+          />
+          <BusinessIconMultiline
+            icon="list-outline"
+            label={t('businessHub.fieldTicketDescription')}
+            value={row.description}
+            onChangeText={(text) =>
+              setTicketRows((prev) => prev.map((r) => (r.key === row.key ? { ...r, description: text } : r)))
+            }
+            placeholder=""
+            minHeight={72}
+          />
+          <BusinessIconTextField
+            icon="cash-outline"
+            label={t('businessHub.fieldTicketPrice')}
+            value={row.priceStr}
+            onChangeText={(text) =>
+              setTicketRows((prev) => prev.map((r) => (r.key === row.key ? { ...r, priceStr: text } : r)))
+            }
+            keyboardType="number-pad"
+          />
+        </View>
+      ))}
+      <SecondaryButton
+        title={t('businessHub.addTicketType')}
+        onPress={() => setTicketRows((prev) => [...prev, emptyTicketFormRow()])}
       />
       <BusinessIconTextField
         icon="people-outline"
@@ -799,6 +902,18 @@ function parseStoredTimes(raw: string): string[] {
 function createStyles() {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
+    ticketsSectionLabel: { fontWeight: '600', marginBottom: -4 },
+    ticketCard: {
+      borderRadius: radii.xl,
+      borderWidth: 1,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    ticketCardHead: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
     switchRow: {
       flexDirection: 'row',
       alignItems: 'center',

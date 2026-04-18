@@ -34,6 +34,16 @@ export type BusinessListing = {
   visible: boolean;
 };
 
+/** One sellable ticket row for a business event (single or multi-tier). */
+export type BusinessTicketOption = {
+  id: string;
+  name: string;
+  /** Unit price in the ticket’s {@link BusinessTicketOption#currency} (typically JOD). */
+  priceJod: number;
+  currency: string;
+  description?: string;
+};
+
 /** Client-side event row; maps cleanly to a future REST/JSON body (ISO date, numeric money, slug fields). */
 export type BusinessEventRecord = {
   id: string;
@@ -50,8 +60,11 @@ export type BusinessEventRecord = {
   governorateSlug: JordanGovernorateSlug;
   /** Google Maps place or share link. */
   mapsUrl: string;
-  /** Ticket / entry price in JOD (persisted). */
-  priceJod: number;
+  /**
+   * Ticket types for this event (one or many). Persisted with the hub; legacy storage with only `priceJod`
+   * is upgraded in {@link migrateBusinessEventRecord}.
+   */
+  ticketOptions: BusinessTicketOption[];
   currency: string;
   /** Max guests / capacity for business use only (not shown on public PDP). */
   capacityGuests: number;

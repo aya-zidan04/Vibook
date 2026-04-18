@@ -41,10 +41,10 @@ export default function EventDetailScreen() {
     setTierId(tiers[0]?.id ?? '');
   }, [tiers]);
 
-  const selectedTier = useMemo(() => tiers.find((te) => te.id === tierId), [tiers, tierId]);
+  const activeTier = useMemo(() => tiers.find((te) => te.id === tierId) ?? tiers[0], [tiers, tierId]);
 
   const displayCurrency = useLocaleStore((s) => s.currency);
-  const lineTotal = selectedTier ? selectedTier.price * qty : (event?.priceFrom ?? 0) * qty;
+  const lineTotal = activeTier ? activeTier.price * qty : 0;
   const currency = event?.currency ?? displayCurrency;
   const fees = Math.round(lineTotal * 0.05);
 
@@ -76,19 +76,20 @@ export default function EventDetailScreen() {
   const dateStr = new Date(event.startAt).toLocaleString(dateLocale, { dateStyle: 'medium', timeStyle: 'short' });
 
   const onBook = () => {
+    if (!activeTier) return;
     setDraft({
       vertical: 'event',
       refId: event.id,
       title: event.title,
       imageUrl: event.imageUrl,
       currency,
-      unitPrice: selectedTier?.price ?? event.priceFrom,
+      unitPrice: activeTier.price,
       quantity: qty,
       fees,
       startsAt: event.startAt,
       cityName: getCityName(event.cityId, 'en'),
       cityNameAr: getCityName(event.cityId, 'ar'),
-      tierName: selectedTier?.name ?? t('event.tierGeneral'),
+      tierName: activeTier.name,
       metaLine: `${formatMoney(lineTotal, currency)} ${t('event.plusFees')}`,
     });
     router.push('/checkout');
@@ -160,31 +161,37 @@ export default function EventDetailScreen() {
             </AppText>
 
             <AppText variant="h3" color="text" style={styles.sectionTitle}>
-              {tiers.length ? t('event.tickets') : t('event.admission')}
+              {t('event.tickets')}
             </AppText>
-            {tiers.length ? (
-              tiers.map((tier) => (
-                <Pressable
-                  key={tier.id}
-                  onPress={() => setTierId(tier.id)}
-                  style={[styles.tier, tierId === tier.id && styles.tierOn]}
-                >
-                  <View style={{ flex: 1 }}>
-                    <AppText variant="bodyMedium" color="text">
-                      {tier.name}
+            {tiers.length > 0 ? (
+              tiers.map((tier) => {
+                const subtitle =
+                  (tier.description && tier.description.trim()) || tier.benefits.filter(Boolean).join(' · ');
+                return (
+                  <Pressable
+                    key={tier.id}
+                    onPress={() => setTierId(tier.id)}
+                    style={[styles.tier, tierId === tier.id && styles.tierOn]}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <AppText variant="bodyMedium" color="text">
+                        {tier.name}
+                      </AppText>
+                      {subtitle ? (
+                        <AppText variant="caption" color="textMuted">
+                          {subtitle}
+                        </AppText>
+                      ) : null}
+                    </View>
+                    <AppText variant="price" color="accent">
+                      {formatMoney(tier.price, tier.currency)}
                     </AppText>
-                    <AppText variant="caption" color="textMuted">
-                      {tier.benefits.join(' · ')}
-                    </AppText>
-                  </View>
-                  <AppText variant="price" color="accent">
-                    {formatMoney(tier.price, tier.currency)}
-                  </AppText>
-                </Pressable>
-              ))
+                  </Pressable>
+                );
+              })
             ) : (
               <AppText variant="body" color="textSecondary">
-                {t('common.from')} {formatMoney(event.priceFrom, currency)}
+                {t('event.noTicketsConfigured')}
               </AppText>
             )}
 
@@ -224,7 +231,12 @@ export default function EventDetailScreen() {
                 {formatMoney(lineTotal + fees, currency)}
               </AppText>
             </View>
-            <PrimaryButton title={t('event.bookNow')} onPress={onBook} style={styles.cta} />
+            <PrimaryButton
+              title={t('event.bookNow')}
+              onPress={onBook}
+              style={styles.cta}
+              disabled={!activeTier}
+            />
           </View>
         </StickyBottomBar>
       </View>
