@@ -21,6 +21,11 @@ public record BusinessProfileResponse(
     BusinessProfileStatus status,
     Instant createdAt,
     Instant updatedAt,
-    String rejectionReason
+    String rejectionReason,
+    String ownerEmail,
+    Long ownerUserId,
+    String adminNotes,
+    Instant approvedAt,
+    Instant rejectedAt
 ) {
 }

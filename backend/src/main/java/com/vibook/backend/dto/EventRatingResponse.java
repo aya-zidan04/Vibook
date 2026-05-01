@@ -9,6 +9,7 @@ public record EventRatingResponse(
     double averageRating,
     int reviewCount,
     Integer myRating,
+    Long myRatingId,
     boolean canRate
 ) {
 }

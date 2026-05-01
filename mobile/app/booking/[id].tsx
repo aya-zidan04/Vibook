@@ -9,13 +9,18 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
+import { cancelMyBooking, getMyBooking } from '@/api/bookingsApi';
+import { ApiError } from '@/api/http';
+import { bookingResponseToBooking } from '@/services/api/bookingMap';
 import { MOCK_BOOKINGS } from '@/services/mock';
+import { useAppStore } from '@/store/appStore';
 import type { Booking, BookingStatus } from '@/types';
 import { canCancelBookingStatus } from '@/utils/bookingApiMap';
 import { hrefForBookingRef } from '@/utils/bookingRoutes';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { formatDateShort } from '@/utils/format';
+import { ReportIssueModal } from '@/components/report/ReportIssueModal';
 
 const STATUS_KEYS: Record<BookingStatus, string> = {
   upcoming: 'booking.statusUpcoming',
@@ -31,17 +36,39 @@ export default function BookingDetailScreen() {
   const router = useRouter();
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
 
-  const mockBooking = useMemo(
-    () => (id ? MOCK_BOOKINGS.find((b) => b.id === id) : undefined),
-    [id],
-  );
-
+  const [booking, setBooking] = useState<Booking | undefined>();
+  const [loading, setLoading] = useState(true);
   const [mockCancelled, setMockCancelled] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+
+  const isApiId = !!(id && /^\d+$/.test(id));
 
   useEffect(() => {
     setMockCancelled(false);
-  }, [id]);
+    if (!id) {
+      setBooking(undefined);
+      setLoading(false);
+      return;
+    }
+    if (isApiId && isAuthenticated) {
+      setLoading(true);
+      void (async () => {
+        try {
+          const row = await getMyBooking(Number(id));
+          setBooking(bookingResponseToBooking(row));
+        } catch {
+          setBooking(undefined);
+        } finally {
+          setLoading(false);
+        }
+      })();
+      return;
+    }
+    setBooking(MOCK_BOOKINGS.find((b) => b.id === id));
+    setLoading(false);
+  }, [id, isApiId, isAuthenticated]);
 
   if (!id) {
     return (
@@ -52,7 +79,13 @@ export default function BookingDetailScreen() {
     );
   }
 
-  const booking = mockBooking;
+  if (loading) {
+    return (
+      <Screen header={<DetailHeader title={t('bookingDetail.title')} />}>
+        <AppText color="textMuted">{t('common.loading')}</AppText>
+      </Screen>
+    );
+  }
 
   if (!booking) {
     return (
@@ -65,12 +98,24 @@ export default function BookingDetailScreen() {
 
   const displayStatus: BookingStatus = mockCancelled ? 'cancelled' : booking.status;
   const listingHref = hrefForBookingRef(booking);
-  const showCancel = canCancelBookingStatus(booking.status) && !mockCancelled;
+  const showCancel = canCancelBookingStatus(booking.status) && !mockCancelled && !(isApiId && booking.status === 'cancelled');
 
   const refTitle = locale === 'ar' && booking.refTitleAr ? booking.refTitleAr : booking.refTitle;
   const cityLine = locale === 'ar' && booking.cityNameAr ? booking.cityNameAr : booking.cityName;
 
   const runCancel = () => {
+    if (isApiId && isAuthenticated) {
+      void (async () => {
+        try {
+          const row = await cancelMyBooking(Number(id), null);
+          setBooking(bookingResponseToBooking(row));
+        } catch (e) {
+          const msg = e instanceof ApiError ? e.message : t('common.error');
+          Alert.alert(t('bookingDetail.title'), msg);
+        }
+      })();
+      return;
+    }
     setMockCancelled(true);
   };
 
@@ -127,11 +172,31 @@ export default function BookingDetailScreen() {
           </AppText>
         </Pressable>
       ) : null}
+      {isApiId && isAuthenticated ? (
+        <Pressable
+          onPress={() => setReportOpen(true)}
+          style={({ pressed }) => [styles.reportPress, pressed && { opacity: 0.7 }]}
+          accessibilityRole="button"
+        >
+          <AppText variant="bodyMedium" color="accent">
+            {t('report.bookingAction')}
+          </AppText>
+        </Pressable>
+      ) : null}
       <SecondaryButton
         title={t('bookingDetail.listBookings')}
         onPress={() => router.replace('/(tabs)/booking')}
         style={styles.mt}
       />
+      {isApiId ? (
+        <ReportIssueModal
+          visible={reportOpen}
+          onClose={() => setReportOpen(false)}
+          targetType="BOOKING"
+          targetId={Number(id)}
+          title={t('report.bookingTitle')}
+        />
+      ) : null}
     </Screen>
   );
 }
@@ -168,6 +233,7 @@ function createStyles(colors: ThemeColors) {
     hero: { width: '100%', height: 200, borderRadius: radii.xl, marginTop: spacing.md },
     mt: { marginTop: spacing.md },
     cancelPress: { marginTop: spacing.md, paddingVertical: spacing.sm, alignItems: 'center' },
+    reportPress: { marginTop: spacing.sm, paddingVertical: spacing.sm, alignItems: 'center' },
     card: {
       marginVertical: spacing.lg,
       padding: spacing.md,

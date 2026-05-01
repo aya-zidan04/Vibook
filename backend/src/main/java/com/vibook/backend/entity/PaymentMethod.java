@@ -42,7 +42,8 @@ public class PaymentMethod {
     @Column(nullable = false, length = 120)
     private String cardHolderName;
 
-    @Column(nullable = false)
+    /** Persisted as {@code is_default} — explicit name avoids MySQL reserved word issues with implicit mapping. */
+    @Column(name = "is_default", nullable = false)
     private boolean isDefault;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

@@ -27,6 +27,7 @@ type Props = {
   highlightOnFocus?: boolean;
   /** Wrapper around label + field (e.g. tighten vertical spacing). */
   wrapperStyle?: StyleProp<ViewStyle>;
+  editable?: boolean;
 };
 
 export function AuthTextField({
@@ -45,6 +46,7 @@ export function AuthTextField({
   fieldRowStyle,
   highlightOnFocus,
   wrapperStyle,
+  editable = true,
 }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -70,6 +72,7 @@ export function AuthTextField({
         <TextInput
           value={value}
           onChangeText={onChangeText}
+          editable={editable}
           placeholder={placeholder}
           placeholderTextColor={colors.textMuted}
           secureTextEntry={secureTextEntry}

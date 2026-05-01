@@ -86,6 +86,10 @@ public class BusinessEvent {
     @OrderBy("sortOrder ASC")
     private List<BusinessEventPhoto> photos = new ArrayList<>();
 
+    /** Internal moderation notes; not shown to consumers. */
+    @Column(name = "admin_notes", length = 2000)
+    private String adminNotes;
+
     @Column(nullable = false)
     private Instant createdAt;
 

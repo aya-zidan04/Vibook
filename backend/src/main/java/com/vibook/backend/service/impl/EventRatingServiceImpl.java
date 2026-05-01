@@ -77,6 +77,7 @@ public class EventRatingServiceImpl implements EventRatingService {
         }
 
         Optional<EventRating> existingOpt = eventRatingRepository.findByUserAndBusinessEvent(user, event);
+        EventRating savedRating;
 
         if (existingOpt.isEmpty()) {
             int oldCount = event.getReviewCount();
@@ -90,12 +91,12 @@ public class EventRatingServiceImpl implements EventRatingService {
             created.setUser(user);
             created.setBusinessEvent(event);
             created.setRatingValue(ratingValue);
-            eventRatingRepository.save(created);
+            savedRating = eventRatingRepository.save(created);
         } else {
             EventRating existing = existingOpt.get();
             int previousValue = existing.getRatingValue();
             existing.setRatingValue(ratingValue);
-            eventRatingRepository.save(existing);
+            savedRating = eventRatingRepository.save(existing);
 
             int count = event.getReviewCount();
             double oldAvg = event.getAverageRating();
@@ -114,7 +115,7 @@ public class EventRatingServiceImpl implements EventRatingService {
             event,
             RATING_ELIGIBLE_STATUSES
         );
-        return eventRatingMapper.toResponse(event, ratingValue, canRate);
+        return eventRatingMapper.toResponse(event, ratingValue, savedRating.getId(), canRate);
     }
 
     @Override
@@ -142,16 +143,15 @@ public class EventRatingServiceImpl implements EventRatingService {
     }
 
     private BusinessEventResponse buildViewerBusinessEventResponse(User user, BusinessEvent event) {
-        Integer myRating = eventRatingRepository
-            .findByUserAndBusinessEvent(user, event)
-            .map(EventRating::getRatingValue)
-            .orElse(null);
+        Optional<EventRating> ratingOpt = eventRatingRepository.findByUserAndBusinessEvent(user, event);
+        Integer myRating = ratingOpt.map(EventRating::getRatingValue).orElse(null);
+        Long myRatingId = ratingOpt.map(EventRating::getId).orElse(null);
         boolean canRate = bookingRepository.existsByUserAndBusinessEventAndStatusIn(
             user,
             event,
             RATING_ELIGIBLE_STATUSES
         );
-        return businessEventMapper.toResponse(event, myRating, canRate);
+        return businessEventMapper.toResponse(event, myRating, myRatingId, canRate);
     }
 
     private static boolean canViewerSeeEvent(User viewer, BusinessEvent event) {

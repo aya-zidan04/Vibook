@@ -7,7 +7,11 @@ import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { registerRequest } from '@/api/authApi';
+import { saveAuthResponse } from '@/api/authSession';
+import { ApiError } from '@/api/http';
 import { useAppStore } from '@/store/appStore';
+import { useSessionStore } from '@/store/sessionStore';
 import {
   isValidEmail,
   isValidJordanLocalPhone,
@@ -47,6 +51,7 @@ export default function SignupScreen() {
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [terms, setTerms] = useState(false);
+  const [busy, setBusy] = useState(false);
   const setHasCompletedOnboarding = useAppStore((s) => s.setHasCompletedOnboarding);
   const setAuthenticated = useAppStore((s) => s.setAuthenticated);
   const setGuest = useAppStore((s) => s.setGuest);
@@ -60,11 +65,31 @@ export default function SignupScreen() {
   };
 
   const onCreate = () => {
-    if (!canCreate) return;
-    setAuthenticated(true);
-    setGuest(false);
-    setHasCompletedOnboarding(true);
-    router.replace('/(tabs)/explore');
+    if (!canCreate || busy) return;
+    setBusy(true);
+    void (async () => {
+      try {
+        const phoneE164 = `+962${digitsOnly}`;
+        const auth = await registerRequest({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          password,
+          phone: phoneE164,
+        });
+        await saveAuthResponse(auth);
+        useSessionStore.getState().setSessionFromAuthResponse(auth.user);
+        setAuthenticated(true);
+        setGuest(false);
+        setHasCompletedOnboarding(true);
+        router.replace('/(tabs)/explore');
+      } catch (e) {
+        const msg = e instanceof ApiError ? e.message : t('common.error');
+        Alert.alert(t('auth.signupTitle'), msg);
+      } finally {
+        setBusy(false);
+      }
+    })();
   };
 
   const btnFull = { borderRadius: radii.lg, width: '100%' as const };
@@ -179,7 +204,7 @@ export default function SignupScreen() {
       <PrimaryButton
         title={t('auth.createAccountSubmit')}
         onPress={onCreate}
-        disabled={!canCreate}
+        disabled={!canCreate || busy}
         style={{ ...btnFull, marginTop: spacing.md }}
       />
 

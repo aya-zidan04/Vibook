@@ -10,7 +10,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
-const BRAND_LOGO = require('../../assets/icon.png');
+const BRAND_LOGO = require('../../assets/vibook-wordmark.png');
 
 /**
  * Optional auth-adjacent welcome (e.g. deep links). Primary first-run experience is `/entry`.

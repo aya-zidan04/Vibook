@@ -3,6 +3,8 @@ import { create } from 'zustand';
 export type BookingDraft = {
   vertical: 'event' | 'restaurant' | 'stay' | 'experience' | 'package';
   refId: string;
+  /** When set, checkout calls `POST /api/v1/bookings` with this id. */
+  apiEventId?: number;
   title: string;
   /** Arabic listing title when known (optional for API create). */
   refTitleAr?: string;

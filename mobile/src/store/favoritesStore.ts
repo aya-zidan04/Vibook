@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { addFavorite, removeFavorite } from '@/api/favoritesApi';
+import { getTokensSync } from '@/api/authSession';
 import { ratingKey, type RatingVertical } from '@/store/userRatingsStore';
 
 export type FavoriteListEntry = { type: string; refId: string };
@@ -24,6 +26,26 @@ export const useFavoritesStore = create<FavoritesState>()(
       toggleFavorite: async (type, refId) => {
         const key = ratingKey(type, refId);
         const was = !!get().keys[key];
+        const numericEvent = type === 'event' && /^\d+$/.test(refId) && getTokensSync()?.accessToken;
+        if (numericEvent) {
+          const eventId = Number(refId);
+          try {
+            if (was) {
+              await removeFavorite(eventId);
+            } else {
+              await addFavorite(eventId);
+            }
+            set((s) => {
+              const k = { ...s.keys };
+              if (was) delete k[key];
+              else k[key] = true;
+              return { keys: k };
+            });
+          } catch {
+            /* leave state unchanged */
+          }
+          return;
+        }
         set((s) => {
           const k = { ...s.keys };
           if (was) delete k[key];

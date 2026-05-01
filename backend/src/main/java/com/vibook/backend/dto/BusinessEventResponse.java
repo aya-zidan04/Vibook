@@ -30,6 +30,8 @@ public record BusinessEventResponse(
     Instant updatedAt,
     /** Viewer's saved stars; null if this user has not rated yet. */
     Integer myRating,
+    /** Primary key of the viewer's {@code EventRating} row, when {@link #myRating} is set. */
+    Long myRatingId,
     /** True when the viewer has a CONFIRMED or COMPLETED booking for this event. */
     Boolean canRate
 ) {

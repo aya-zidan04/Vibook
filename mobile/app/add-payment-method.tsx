@@ -6,6 +6,8 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
+import { addPaymentMethod } from '@/api/paymentMethodsApi';
+import { ApiError } from '@/api/http';
 import { useTranslation } from '@/i18n/useTranslation';
 import { spacing } from '@/theme';
 
@@ -62,15 +64,31 @@ export default function AddPaymentMethodScreen() {
       Alert.alert(t('common.error'), t('paymentMethods.errExpiry'));
       return;
     }
+    const yy = parseInt(expRaw.slice(2, 4), 10);
+    const yyyy = yy < 100 ? 2000 + yy : yy;
     const cvcDigits = cvc.replace(/\D/g, '');
     if (cvcDigits.length < 3 || cvcDigits.length > 4) {
       Alert.alert(t('common.error'), t('paymentMethods.errCvc'));
       return;
     }
 
-    Alert.alert(t('paymentMethods.addCardSuccessTitle'), t('paymentMethods.addCardSuccessBody'), [
-      { text: t('common.ok'), onPress: () => router.back() },
-    ]);
+    void (async () => {
+      try {
+        await addPaymentMethod({
+          cardNumber: pan,
+          cardHolderName: nameOnCard.trim(),
+          expiryMonth: mm,
+          expiryYear: yyyy,
+          cvc: cvcDigits,
+        });
+        Alert.alert(t('paymentMethods.addCardSuccessTitle'), t('paymentMethods.addCardSuccessBody'), [
+          { text: t('common.ok'), onPress: () => router.back() },
+        ]);
+      } catch (e) {
+        const msg = e instanceof ApiError ? e.message : t('common.error');
+        Alert.alert(t('common.error'), msg);
+      }
+    })();
   };
 
   return (

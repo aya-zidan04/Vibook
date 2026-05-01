@@ -1,9 +1,12 @@
 import type { BottomTabBarProps, BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BusinessTabBar } from '@/components/navigation/BusinessTabBar';
 import { useTranslation } from '@/i18n/useTranslation';
 import { bottomTabSoftCrossFade } from '@/navigation/transitionPresets';
+import { refreshBusinessHubLists } from '@/services/businessHubSync';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import { useThemeColors } from '@/theme';
 
@@ -63,6 +66,15 @@ export default function BusinessDashboardLayout() {
   const { t } = useTranslation();
   const colors = useThemeColors();
   const applicationStatus = useBusinessHubStore((s) => s.applicationStatus);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (applicationStatus !== 'approved') return;
+      void refreshBusinessHubLists().catch(() => {
+        /* offline / session — screens still show last fetch */
+      });
+    }, [applicationStatus]),
+  );
 
   if (applicationStatus !== 'approved') {
     return <Redirect href="/business" />;

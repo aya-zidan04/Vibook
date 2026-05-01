@@ -5,6 +5,7 @@ import com.vibook.backend.dto.BusinessProfileUpsertRequest;
 import com.vibook.backend.entity.BusinessProfile;
 import com.vibook.backend.entity.Category;
 import com.vibook.backend.entity.Governorate;
+import com.vibook.backend.entity.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -14,6 +15,7 @@ public class BusinessProfileMapper {
     public BusinessProfileResponse toResponse(BusinessProfile entity) {
         Category category = entity.getPrimaryCategory();
         Governorate governorate = entity.getGovernorate();
+        User user = entity.getUser();
         return new BusinessProfileResponse(
             entity.getId(),
             entity.getBusinessName(),
@@ -32,7 +34,12 @@ public class BusinessProfileMapper {
             entity.getStatus(),
             entity.getCreatedAt(),
             entity.getUpdatedAt(),
-            entity.getRejectionReason()
+            entity.getRejectionReason(),
+            user != null ? user.getEmail() : null,
+            user != null ? user.getId() : null,
+            entity.getAdminNotes(),
+            entity.getApprovedAt(),
+            entity.getRejectedAt()
         );
     }
 

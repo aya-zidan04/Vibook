@@ -5,13 +5,14 @@ import { useNavigationContainerRef, useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
+import { hydrateAuthSession } from '@/bootstrap/hydrateAuthSession';
 import { loadReferenceData } from '@/store/referenceStore';
 import { Image } from 'expo-image';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 const SPLASH_MS = 2200;
-const BRAND_LOGO = require('../assets/icon.png');
+const BRAND_LOGO = require('../assets/vibook-wordmark.png');
 
 /**
  * First screen on cold start: brand splash, then entry (welcome carousel) or main tabs.
@@ -31,7 +32,9 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (!hydrated) return;
-    void loadReferenceData();
+    void Promise.all([loadReferenceData(), hydrateAuthSession()]).catch(() => {
+      /* individual loaders set their own error state */
+    });
   }, [hydrated]);
 
   useEffect(() => {

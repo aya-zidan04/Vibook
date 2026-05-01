@@ -109,6 +109,8 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
 
         entity.setStatus(BusinessProfileStatus.PENDING_REVIEW);
         entity.setRejectionReason(null);
+        entity.setApprovedAt(null);
+        entity.setRejectedAt(null);
         BusinessProfile saved = businessProfileRepository.save(entity);
         return businessProfileMapper.toResponse(saved);
     }

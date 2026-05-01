@@ -30,7 +30,7 @@ public class BusinessProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @OneToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
@@ -48,7 +48,7 @@ public class BusinessProfile {
     @Column(length = 512)
     private String logoImageUrl;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "primary_category_id", nullable = false)
     private Category primaryCategory;
 
@@ -61,7 +61,7 @@ public class BusinessProfile {
     @Column(length = 30)
     private String phone;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "governorate_id", nullable = false)
     private Governorate governorate;
 
@@ -78,6 +78,14 @@ public class BusinessProfile {
     /** Set when an admin rejects the profile; cleared on resubmit / approve. */
     @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
+
+    /** Internal admin notes; not shown to business owners in API responses unless included in admin DTOs. */
+    @Column(name = "admin_notes", columnDefinition = "TEXT")
+    private String adminNotes;
+
+    private Instant approvedAt;
+
+    private Instant rejectedAt;
 
     @Column(nullable = false)
     private Instant createdAt;

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { formatIntForLocale } from '@/utils/format';
+import { rateEvent } from '@/api/eventsApi';
 import { useUserListingRating, type RatingVertical } from '@/services/ratings';
 import { ltrNavigationChrome } from '@/utils/navigationChrome';
 import { spacing, useThemeColors } from '@/theme';
@@ -60,10 +61,25 @@ export function StarRatingInput({ value, onChange, starSize = 32 }: StarRatingIn
 type UserRatingBlockProps = {
   vertical: RatingVertical;
   refId: string;
+  /** When set, commits stars to `POST /api/v1/events/{id}/rate` (consumer events). */
+  backendEventId?: number;
+  /** Server rating row id when loaded (for reporting). */
+  myRatingId?: number | null;
+  /** Called after a successful API rating save (e.g. to refresh `myRatingId`). */
+  onRatingSaved?: () => void;
+  /** When set with `myRatingId`, shows a control to report this rating. */
+  onReportIssue?: () => void;
 };
 
 /** Uses ratings service (local persist today; API-ready boundary). */
-export function UserRatingBlock({ vertical, refId }: UserRatingBlockProps) {
+export function UserRatingBlock({
+  vertical,
+  refId,
+  backendEventId,
+  myRatingId,
+  onRatingSaved,
+  onReportIssue,
+}: UserRatingBlockProps) {
   const colors = useThemeColors();
   const styles = useMemo(() => createBlockStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -79,8 +95,30 @@ export function UserRatingBlock({ vertical, refId }: UserRatingBlockProps) {
       </AppText>
       <StarRatingInput
         value={value}
-        onChange={(n) => setStars(n < 1 ? null : n)}
+        onChange={(n) => {
+          if (backendEventId != null) {
+            if (n < 1) return;
+            void (async () => {
+              try {
+                await rateEvent(backendEventId, n);
+                setStars(n);
+                onRatingSaved?.();
+              } catch {
+                /* keep previous value */
+              }
+            })();
+            return;
+          }
+          setStars(n < 1 ? null : n);
+        }}
       />
+      {onReportIssue != null && myRatingId != null ? (
+        <Pressable onPress={onReportIssue} hitSlop={8} accessibilityRole="button">
+          <AppText variant="meta" color="accent" style={styles.reportLink}>
+            {t('report.ratingAction')}
+          </AppText>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -110,5 +148,6 @@ function createBlockStyles(colors: ThemeColors) {
       gap: spacing.xs,
     },
     hint: { lineHeight: 18, marginBottom: spacing.xs },
+    reportLink: { marginTop: spacing.xs, alignSelf: 'flex-start' },
   });
 }

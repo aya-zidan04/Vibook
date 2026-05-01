@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
 import { SectionHeader } from '@/components/layout/SectionHeader';
@@ -12,8 +12,11 @@ import { formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useMockUser } from '@/hooks/useMockUser';
-import { MOCK_BOOKINGS, MOCK_VOUCHERS } from '@/services/mock';
+import { listMyBookings } from '@/api/bookingsApi';
+import { bookingResponseToBooking } from '@/services/api/bookingMap';
+import { MOCK_VOUCHERS } from '@/services/mock';
 import { useAppStore } from '@/store/appStore';
+import type { Booking } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -38,7 +41,31 @@ export default function MeScreen() {
   const { user } = useMockUser();
   const displayName = locale === 'ar' && user.nameAr ? user.nameAr : user.name;
   const logout = useAppStore((s) => s.logout);
-  const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming').length;
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+
+  const loadBookings = useCallback(() => {
+    if (!isAuthenticated) {
+      setBookings([]);
+      return;
+    }
+    void (async () => {
+      try {
+        const rows = await listMyBookings();
+        setBookings(rows.map(bookingResponseToBooking));
+      } catch {
+        setBookings([]);
+      }
+    })();
+  }, [isAuthenticated]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadBookings();
+    }, [loadBookings]),
+  );
+
+  const upcoming = bookings.filter((b) => b.status === 'upcoming').length;
 
   const handleLogout = () => {
     logout();
@@ -108,7 +135,7 @@ export default function MeScreen() {
       <View style={styles.stats}>
         <StatItem
           label={t('me.bookings')}
-          value={formatIntForLocale(MOCK_BOOKINGS.length, locale)}
+          value={formatIntForLocale(bookings.length, locale)}
           icon="calendar-outline"
           colors={colors}
           boxStyle={styles.stat}

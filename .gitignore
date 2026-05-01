@@ -1,1 +1,19 @@
 .DS_Store
+Thumbs.db
+
+# Root-level tooling / accidental installs
+node_modules/
+
+# Java / Spring (when opened from repo root)
+backend/target/
+*.class
+
+# Env and secrets
+.env
+.env.*.local
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json

@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
+import { hideMyBusinessEvent, unhideMyBusinessEvent } from '@/api/businessEventsApi';
+import { refreshBusinessHubLists } from '@/services/businessHubSync';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import type { BusinessEventRecord } from '@/types/businessHub';
 import { minTicketPriceJod } from '@/utils/businessEventTickets';
@@ -17,7 +19,7 @@ export default function BusinessEventsIndexScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const events = useBusinessHubStore((s) => s.events);
-  const updateEvent = useBusinessHubStore((s) => s.updateEvent);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const row = (item: BusinessEventRecord) => {
     const floor = minTicketPriceJod(item.ticketOptions);
@@ -42,7 +44,29 @@ export default function BusinessEventsIndexScreen() {
           ) : null}
         </Pressable>
         <Pressable
-          onPress={() => updateEvent(item.id, { hidden: !item.hidden })}
+          disabled={busyId === item.id}
+          onPress={() => {
+            const nid = Number(item.id);
+            if (!Number.isFinite(nid)) {
+              Alert.alert(t('common.error'), t('businessHub.missingEvent'));
+              return;
+            }
+            setBusyId(item.id);
+            void (async () => {
+              try {
+                if (item.hidden) {
+                  await unhideMyBusinessEvent(nid);
+                } else {
+                  await hideMyBusinessEvent(nid);
+                }
+                await refreshBusinessHubLists();
+              } catch {
+                Alert.alert(t('common.error'), t('businessHub.eventSaveError'));
+              } finally {
+                setBusyId(null);
+              }
+            })();
+          }}
           style={({ pressed }) => [styles.visibilityBtn, pressed && styles.pressed]}
           accessibilityRole="button"
           accessibilityLabel={item.hidden ? t('businessHub.eventShowPublic') : t('businessHub.eventHidePublic')}

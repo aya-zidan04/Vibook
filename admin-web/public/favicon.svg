@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="32" height="32">
+  <defs>
+    <linearGradient id="vb-favicon-grad" x1="8" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#d5a892" />
+      <stop offset="48%" stop-color="#c4896c" />
+      <stop offset="100%" stop-color="#5b3b4b" />
+    </linearGradient>
+  </defs>
+  <rect x="1.5" y="1.5" width="37" height="37" rx="9" ry="9" fill="url(#vb-favicon-grad)" />
+  <path fill="#f7efe7" d="M11 10 20 27 29 10h-3.5L20 20l-5.5-10H11z" />
+</svg>

@@ -3,10 +3,10 @@ export function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t);
 }
 
-/** At least 8 chars, one letter, one number (case-sensitive allowed). */
+/** Backend RegisterRequest: 8–64 chars, at least one uppercase letter and one digit. */
 export function isValidSignupPassword(value: string): boolean {
-  if (value.length < 8) return false;
-  return /[a-zA-Z]/.test(value) && /\d/.test(value);
+  if (value.length < 8 || value.length > 64) return false;
+  return /[A-Z]/.test(value) && /\d/.test(value);
 }
 
 /** Jordan mobile without country code: 9 digits starting with 7. */

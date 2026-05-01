@@ -74,6 +74,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/events").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/events/*").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/events/*/rate").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/reports").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/profile-images/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-logos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-banners/**").permitAll()
@@ -82,8 +83,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/business/bookings/**").hasAnyRole("USER", "ADMIN")
                 // Consumer favorites / wishlist
                 .requestMatchers("/api/v1/favorites/**").hasAnyRole("USER", "ADMIN")
-                // Admin business onboarding
-                .requestMatchers("/api/v1/admin/business-profiles/**").hasRole("ADMIN")
+                // Admin dashboard + business onboarding
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 // Business profile (owner)
                 .requestMatchers(HttpMethod.GET, "/api/v1/business-profile/me").hasRole("USER")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/business-profile/me").hasRole("USER")

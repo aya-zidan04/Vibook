@@ -5,14 +5,16 @@ import com.vibook.backend.entity.BookingStatus;
 import com.vibook.backend.entity.BusinessEvent;
 import com.vibook.backend.entity.BusinessProfile;
 import com.vibook.backend.entity.User;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface BookingRepository extends JpaRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpecificationExecutor<Booking> {
 
     boolean existsByUserAndBusinessEvent(User user, BusinessEvent businessEvent);
 
@@ -36,4 +38,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     int sumGuestsByEventIdAndStatusIn(@Param("eventId") Long eventId, @Param("statuses") Collection<BookingStatus> statuses);
 
     List<Booking> findAllByOrderByCreatedAtDesc();
+
+    List<Booking> findByCreatedAtGreaterThanEqual(Instant from);
 }

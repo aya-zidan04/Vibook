@@ -13,8 +13,20 @@ import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useBusinessHubStore } from '@/store/businessHubStore';
+import {
+  createMyBusinessEvent,
+  deleteMyBusinessEvent,
+  getMyBusinessEvent,
+  updateMyBusinessEvent,
+  type BusinessEventUpsertPayload,
+} from '@/api/businessEventsApi';
+import { listActiveGovernorates } from '@/api/governoratesApi';
+import { refreshBusinessHubLists } from '@/services/businessHubSync';
 import { radii, spacing, useThemeColors } from '@/theme';
+import type { BusinessEventRecord } from '@/types/businessHub';
+import { businessEventResponseToRecord, photoUrlsForApi } from '@/utils/businessHubMappers';
+import { resolveGovernorateId } from '@/utils/resolveGovernorateId';
+import { resolveSubcategoryIdForHubCategory } from '@/utils/resolveHubSubcategory';
 
 type EventCategoryOption = {
   id: string;
@@ -85,12 +97,10 @@ export default function BusinessEventEditorScreen() {
   const styles = useMemo(() => createStyles(), []);
   const router = useRouter();
   const { t, locale } = useTranslation();
-  const events = useBusinessHubStore((s) => s.events);
-  const addEvent = useBusinessHubStore((s) => s.addEvent);
-  const updateEvent = useBusinessHubStore((s) => s.updateEvent);
-  const removeEvent = useBusinessHubStore((s) => s.removeEvent);
-
-  const existing = !isNew && id ? events.find((e) => e.id === id) : undefined;
+  const numericEdit = !isNew && !!id && /^\d+$/.test(String(id));
+  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState(false);
+  const [loadedRecord, setLoadedRecord] = useState<BusinessEventRecord | null>(null);
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
@@ -123,50 +133,88 @@ export default function BusinessEventEditorScreen() {
   }, [id]);
 
   useEffect(() => {
-    if (existing) {
-      setTitle(existing.title);
-      setCategory(existing.category);
-      setDescription(existing.description);
-      setDate(existing.date);
-      setSelectedTimeSlots(parseStoredTimes(existing.time));
-      setTimeSlotsError(false);
-      setGovernorateSlug(existing.governorateSlug);
-      setMapsUrl(existing.mapsUrl);
-      setTicketRows(
-        existing.ticketOptions?.length
-          ? existing.ticketOptions.map((opt) => ({
-              key: opt.id,
-              persistedId: opt.id,
-              name: opt.name,
-              description: opt.description ?? '',
-              priceStr: String(opt.priceJod),
-            }))
-          : [emptyTicketFormRow()],
-      );
-      setCapacity(String(existing.capacityGuests ?? ''));
-      setImageUris(parseStoredImages(existing.images));
-      setHidden(existing.hidden);
-    } else if (isNew) {
-      setTitle('');
-      setCategory('');
-      setDescription('');
-      setDate('');
-      setSelectedTimeSlots([]);
-      setTimeSlotsError(false);
-      setGovernorateSlug('amman');
-      setMapsUrl('');
-      setTicketRows([emptyTicketFormRow()]);
-      setCapacity('');
-      setImageUris([]);
-      setHidden(false);
-      setCalendarMonth(() => {
-        const d = new Date();
-        d.setDate(1);
-        d.setHours(0, 0, 0, 0);
-        return d;
-      });
+    if (!isNew) return;
+    setLoadedRecord(null);
+    setRemoteError(false);
+    setTitle('');
+    setCategory('');
+    setDescription('');
+    setDate('');
+    setSelectedTimeSlots([]);
+    setTimeSlotsError(false);
+    setGovernorateSlug('amman');
+    setMapsUrl('');
+    setTicketRows([emptyTicketFormRow()]);
+    setCapacity('');
+    setImageUris([]);
+    setHidden(false);
+    setCalendarMonth(() => {
+      const d = new Date();
+      d.setDate(1);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    });
+  }, [isNew]);
+
+  useEffect(() => {
+    if (!numericEdit || !id) {
+      if (!numericEdit) {
+        setRemoteLoading(false);
+        setRemoteError(false);
+        setLoadedRecord(null);
+      }
+      return;
     }
-  }, [existing, isNew]);
+    let cancelled = false;
+    setRemoteLoading(true);
+    setRemoteError(false);
+    setLoadedRecord(null);
+    const nid = Number(id);
+    void (async () => {
+      try {
+        const r = await getMyBusinessEvent(nid);
+        if (cancelled) return;
+        const rec = businessEventResponseToRecord(r);
+        setLoadedRecord(rec);
+        setTitle(rec.title);
+        setCategory(rec.category);
+        setDescription(rec.description);
+        setDate(rec.date);
+        setSelectedTimeSlots(parseStoredTimes(rec.time));
+        setTimeSlotsError(false);
+        setGovernorateSlug(rec.governorateSlug);
+        setMapsUrl(rec.mapsUrl);
+        setTicketRows(
+          rec.ticketOptions?.length
+            ? rec.ticketOptions.map((opt) => ({
+                key: opt.id,
+                persistedId: opt.id,
+                name: opt.name,
+                description: opt.description ?? '',
+                priceStr: String(opt.priceJod),
+              }))
+            : [emptyTicketFormRow()],
+        );
+        setCapacity(String(rec.capacityGuests ?? ''));
+        setImageUris(parseStoredImages(rec.images));
+        setHidden(rec.hidden);
+        const calBase = parseIsoDate(rec.date) ?? new Date();
+        calBase.setDate(1);
+        calBase.setHours(0, 0, 0, 0);
+        setCalendarMonth(calBase);
+      } catch {
+        if (!cancelled) {
+          setRemoteError(true);
+          setLoadedRecord(null);
+        }
+      } finally {
+        if (!cancelled) setRemoteLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [numericEdit, id]);
 
   if (!id) {
     return (
@@ -180,7 +228,19 @@ export default function BusinessEventEditorScreen() {
     );
   }
 
-  if (!isNew && !existing) {
+  if (numericEdit && remoteLoading) {
+    return (
+      <Screen
+        scroll
+        contentStyle={styles.pad}
+        header={<DetailHeader title={t('businessHub.eventEdit')} />}
+      >
+        <ActivityIndicator color={colors.primary} />
+      </Screen>
+    );
+  }
+
+  if (numericEdit && (remoteError || loadedRecord == null)) {
     return (
       <Screen
         scroll
@@ -194,7 +254,7 @@ export default function BusinessEventEditorScreen() {
     );
   }
 
-  const save = () => {
+  const save = async () => {
     if (saveLockRef.current || saving) return;
     if (!category.trim()) {
       Alert.alert(t('common.error'), t('businessHub.eventValidationCategory'));
@@ -247,48 +307,75 @@ export default function BusinessEventEditorScreen() {
       };
     });
 
-    const payload = {
-      title: title.trim() || t('businessHub.eventUntitled'),
-      category: category.trim() || t('businessHub.uncategorized'),
-      description: description.trim(),
-      date: dateTrim,
-      time: selectedTimeSlots.join(', '),
-      governorateSlug,
-      mapsUrl: mapsUrl.trim(),
-      ticketOptions,
-      currency: 'JOD',
-      capacityGuests: capNum,
-      images: imageUris.map((u) => u.trim()).filter(Boolean).join('\n'),
-      listingId: isNew ? null : (existing?.listingId ?? null),
-      hidden,
-    };
     saveLockRef.current = true;
     setSaving(true);
     try {
+      const subcategoryId =
+        (await resolveSubcategoryIdForHubCategory(category.trim())) ?? loadedRecord?.apiSubcategoryId ?? null;
+      if (subcategoryId == null) {
+        Alert.alert(t('common.error'), t('businessHub.eventValidationCategory'));
+        return;
+      }
+      const govs = await listActiveGovernorates();
+      const governorateId = resolveGovernorateId(govs, governorateSlug);
+      if (governorateId == null) {
+        Alert.alert(t('common.error'), t('businessHub.eventGovernorateError'));
+        return;
+      }
+      const priceJod = String(ticketOptions[0]?.priceJod ?? '');
+      const apiPayload: BusinessEventUpsertPayload = {
+        title: title.trim() || t('businessHub.eventUntitled'),
+        subcategoryId,
+        description: description.trim(),
+        eventDate: dateTrim,
+        timeSlots: selectedTimeSlots.map((slot) => canonicalizeToEventTimeSlot(slot) ?? slot),
+        governorateId,
+        googleMapsUrl: mapsUrl.trim() ? mapsUrl.trim() : null,
+        priceJod,
+        currency: 'JOD',
+        capacityGuests: capNum,
+        hidden,
+        photoUrls: (() => {
+          const urls = photoUrlsForApi(imageUris);
+          return urls.length ? urls : null;
+        })(),
+      };
       if (isNew) {
-        const newId = addEvent(payload);
-        router.replace(`/business/events/${newId}`);
-      } else if (id) {
-        updateEvent(id, payload);
+        const created = await createMyBusinessEvent(apiPayload);
+        await refreshBusinessHubLists();
+        router.replace(`/business/events/${created.id}`);
+      } else if (id && /^\d+$/.test(String(id))) {
+        await updateMyBusinessEvent(Number(id), apiPayload);
+        await refreshBusinessHubLists();
         router.back();
       }
-    } catch (e) {
+    } catch {
+      Alert.alert(t('common.error'), t('businessHub.eventSaveError'));
+    } finally {
       saveLockRef.current = false;
       setSaving(false);
-      throw e;
     }
   };
 
   const del = () => {
     if (!id || isNew) return;
+    const nid = Number(id);
+    if (!Number.isFinite(nid)) return;
     Alert.alert(t('businessHub.deleteEvent'), '', [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('businessHub.deleteEvent'),
         style: 'destructive',
         onPress: () => {
-          removeEvent(id);
-          router.replace('/business/events');
+          void (async () => {
+            try {
+              await deleteMyBusinessEvent(nid);
+              await refreshBusinessHubLists();
+              router.replace('/business/events');
+            } catch {
+              Alert.alert(t('common.error'), t('businessHub.eventSaveError'));
+            }
+          })();
         },
       },
     ]);
@@ -457,7 +544,14 @@ export default function BusinessEventEditorScreen() {
         </View>
         <Switch value={hidden} onValueChange={setHidden} />
       </View>
-      <PrimaryButton title={t('businessHub.save')} onPress={save} disabled={saving} loading={saving} />
+      <PrimaryButton
+        title={t('businessHub.save')}
+        onPress={() => {
+          void save();
+        }}
+        disabled={saving}
+        loading={saving}
+      />
       {!isNew ? <SecondaryButton title={t('businessHub.deleteEvent')} onPress={del} /> : null}
 
       <CalendarDateSheet

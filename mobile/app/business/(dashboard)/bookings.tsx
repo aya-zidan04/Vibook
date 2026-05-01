@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
+import { updateMyBusinessBookingStatus } from '@/api/businessBookingsApi';
+import { refreshBusinessHubLists } from '@/services/businessHubSync';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import type { BusinessBookingStatus } from '@/types/businessHub';
+import { localBookingStatusToApi, nextPartnerBookingStatus } from '@/utils/businessHubMappers';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -13,11 +16,12 @@ export default function BusinessBookingsScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const bookings = useBusinessHubStore((s) => s.bookings);
-  const cycleBookingStatus = useBusinessHubStore((s) => s.cycleBookingStatus);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const labelFor = (s: BusinessBookingStatus) => {
     if (s === 'pending') return t('businessHub.bookingPending');
     if (s === 'confirmed') return t('businessHub.bookingConfirmed');
+    if (s === 'completed') return t('businessHub.bookingCompleted');
     return t('businessHub.bookingCancelled');
   };
 
@@ -45,7 +49,31 @@ export default function BusinessBookingsScreen() {
           {bookings.map((item) => (
             <Pressable
               key={item.id}
-              onPress={() => cycleBookingStatus(item.id)}
+              disabled={busyId === item.id}
+              onPress={() => {
+                const sid = item.serverStatus ?? localBookingStatusToApi(item.status);
+                const next = nextPartnerBookingStatus(sid);
+                if (!next) {
+                  Alert.alert(t('businessHub.bookingNoAdvance'));
+                  return;
+                }
+                const nid = Number(item.id);
+                if (!Number.isFinite(nid)) {
+                  Alert.alert(t('common.error'), t('common.notFound'));
+                  return;
+                }
+                setBusyId(item.id);
+                void (async () => {
+                  try {
+                    await updateMyBusinessBookingStatus(nid, { status: next });
+                    await refreshBusinessHubLists();
+                  } catch {
+                    Alert.alert(t('common.error'), t('common.retry'));
+                  } finally {
+                    setBusyId(null);
+                  }
+                })();
+              }}
               style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
             >
               <AppText variant="bodyMedium" color="text">

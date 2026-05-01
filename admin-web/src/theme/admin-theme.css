@@ -1,0 +1,150 @@
+/**
+ * Vibook admin theme — aligned with mobile `src/theme/palettes.ts` (light palette + brand ramp).
+ */
+:root {
+  /* Brand ramp (shared dark/light) */
+  --vb-terracotta: #c4896c;
+  --vb-terracotta-light: #d5a892;
+  --vb-terracotta-dark: #b9724c;
+  --vb-burnt-sienna: #a35a40;
+  --vb-cream: #f7efe7;
+  --vb-plum: #5b3b4b;
+  --vb-plum-deep: #3d2a32;
+  --vb-beige: #c4a990;
+
+  /* Light surfaces (primary admin chrome) */
+  --vb-bg: #f4efea;
+  --vb-bg-elevated: #ffffff;
+  --vb-surface: #ffffff;
+  --vb-surface-hover: #efe8e2;
+  --vb-surface-muted: #e8e0da;
+  --vb-border: #ddd4cc;
+  --vb-border-light: #eae3dd;
+
+  --vb-text: #2a1f24;
+  --vb-text-secondary: #5c4d55;
+  --vb-text-muted: #8a7b82;
+  --vb-text-on-primary: #f7efe7;
+
+  --vb-success: #2e7d4a;
+  --vb-warning: #c9946a;
+  --vb-error: #a35a40;
+
+  --vb-glow-primary: rgba(196, 137, 108, 0.28);
+  --vb-glow-accent: rgba(196, 169, 144, 0.45);
+  --vb-primary-muted: rgba(196, 137, 108, 0.18);
+
+  /* Radii / spacing (from mobile spacing.ts + radii) */
+  --vb-radius-xs: 6px;
+  --vb-radius-sm: 10px;
+  --vb-radius-md: 14px;
+  --vb-radius-lg: 18px;
+  --vb-radius-xl: 22px;
+
+  --vb-space-xs: 4px;
+  --vb-space-sm: 8px;
+  --vb-space-md: 12px;
+  --vb-space-lg: 16px;
+  --vb-space-xl: 20px;
+  --vb-space-xxl: 24px;
+  --vb-space-xxxl: 32px;
+
+  /* Typography */
+  --vb-font: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --vb-display-weight: 800;
+  --vb-heading-weight: 700;
+  --vb-body-weight: 400;
+
+  /* Shadows (web adaptation of mobile card shadow) */
+  --vb-shadow-sm: 0 1px 2px rgba(42, 31, 36, 0.06), 0 4px 12px rgba(42, 31, 36, 0.06);
+  --vb-shadow-md: 0 4px 8px rgba(42, 31, 36, 0.08), 0 12px 28px rgba(91, 59, 75, 0.1);
+  --vb-shadow-lg: 0 8px 16px rgba(42, 31, 36, 0.1), 0 20px 40px rgba(91, 59, 75, 0.12);
+
+  /* Layout */
+  --vb-sidebar-width: 260px;
+  --vb-topbar-height: 64px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--vb-font);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--vb-text);
+  background: var(--vb-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Subtle page background gradient (warm, Vibook) */
+.vb-page-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgba(196, 137, 108, 0.12), transparent 55%),
+    radial-gradient(900px 500px at -10% 20%, rgba(91, 59, 75, 0.08), transparent 50%),
+    linear-gradient(180deg, var(--vb-bg) 0%, #efe8e2 100%);
+}
+
+a {
+  color: var(--vb-terracotta-dark);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--vb-burnt-sienna);
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--vb-terracotta);
+  outline-offset: 2px;
+}
+
+.vb-muted {
+  color: var(--vb-text-muted);
+}
+
+.vb-overline {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vb-text-muted);
+}
+
+@keyframes vb-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.vb-skeleton {
+  border-radius: var(--vb-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--vb-surface-muted) 0%,
+    var(--vb-border-light) 40%,
+    var(--vb-surface-muted) 80%
+  );
+  background-size: 200% 100%;
+  animation: vb-shimmer 1.2s ease-in-out infinite;
+}

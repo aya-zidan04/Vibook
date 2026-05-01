@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
@@ -8,6 +8,8 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
+import { createBooking } from '@/api/bookingsApi';
+import { ApiError } from '@/api/http';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -38,14 +40,28 @@ export default function PaymentScreen() {
 
   const pay = async () => {
     setBusy(true);
-    const finish = () => {
+    try {
+      if (draft.apiEventId != null && draft.vertical === 'event') {
+        const created = await createBooking({
+          eventId: draft.apiEventId,
+          guestsCount: draft.quantity,
+          note: null,
+        });
+        setLastOrderId(String(created.id));
+        setDraft(null);
+        router.replace('/confirmation');
+        return;
+      }
       const id = `VB-${Date.now().toString(36).toUpperCase()}`;
       setLastOrderId(id);
       setDraft(null);
-      setBusy(false);
       router.replace('/confirmation');
-    };
-    setTimeout(finish, 600);
+    } catch (e) {
+      const msg = e instanceof ApiError ? e.message : t('common.error');
+      Alert.alert(t('payment.title'), msg);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (

@@ -17,7 +17,10 @@ public class CorsConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(corsProperties.getAllowedOriginPatterns());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        // Browsers send Accept (and sometimes others) on preflight; listing only Authorization breaks admin-web + axios.
+        configuration.setAllowedHeaders(
+            List.of("Authorization", "Content-Type", "Accept", "Accept-Language", "Origin", "X-Requested-With")
+        );
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

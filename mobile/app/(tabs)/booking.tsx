@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
 import { SectionHeader } from '@/components/layout/SectionHeader';
@@ -9,7 +9,10 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { AppText } from '@/components/ui/AppText';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_BOOKINGS } from '@/services/mock';
+import { listMyBookings } from '@/api/bookingsApi';
+import { ApiError } from '@/api/http';
+import { bookingResponseToBooking } from '@/services/api/bookingMap';
+import { useAppStore } from '@/store/appStore';
 import type { Booking } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -22,10 +25,37 @@ export default function BookingTabScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t, locale } = useTranslation();
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const upcoming = MOCK_BOOKINGS.filter((b) => b.status === 'upcoming');
-  const past = MOCK_BOOKINGS.filter((b) => b.status === 'past');
-  const pending = MOCK_BOOKINGS.filter((b) => b.status === 'pending_payment');
+  const load = useCallback(() => {
+    if (!isAuthenticated) {
+      setBookings([]);
+      setLoadError(null);
+      return;
+    }
+    void (async () => {
+      try {
+        const rows = await listMyBookings();
+        setBookings(rows.map(bookingResponseToBooking));
+        setLoadError(null);
+      } catch (e) {
+        setBookings([]);
+        setLoadError(e instanceof ApiError ? e.message : t('common.error'));
+      }
+    })();
+  }, [isAuthenticated, t]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
+  const upcoming = bookings.filter((b) => b.status === 'upcoming');
+  const past = bookings.filter((b) => b.status === 'past');
+  const pending = bookings.filter((b) => b.status === 'pending_payment');
   const shortcutBooking = primaryShortcutBooking(upcoming, pending, past);
 
   const alertNoBooking = () =>
@@ -66,6 +96,53 @@ export default function BookingTabScreen() {
       /* user dismissed share sheet */
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <Screen
+        scroll
+        contentStyle={styles.pad}
+        header={
+          <View style={styles.tabHeader}>
+            <AppText variant="h1" color="text" style={styles.title}>
+              {t('booking.title')}
+            </AppText>
+            <AppText variant="body" color="textSecondary" style={styles.sub}>
+              {t('favorites.backendSignInHint')}
+            </AppText>
+          </View>
+        }
+      >
+        <EmptyState
+          icon="ticket-outline"
+          title={t('booking.signInForBookingsTitle')}
+          description={t('booking.signInForBookingsBody')}
+          actionLabel={t('auth.loginCta')}
+          onAction={() => router.push('/login')}
+        />
+      </Screen>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Screen
+        scroll
+        contentStyle={styles.pad}
+        header={
+          <View style={styles.tabHeader}>
+            <AppText variant="h1" color="text" style={styles.title}>
+              {t('booking.title')}
+            </AppText>
+          </View>
+        }
+      >
+        <AppText variant="body" color="textSecondary">
+          {loadError}
+        </AppText>
+      </Screen>
+    );
+  }
 
   return (
     <Screen

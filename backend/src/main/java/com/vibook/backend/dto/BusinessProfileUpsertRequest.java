@@ -24,8 +24,9 @@ public record BusinessProfileUpsertRequest(
     @Size(max = 120, message = "Work email must not exceed 120 characters")
     String workEmail,
 
+    /** Digits, spaces, and common phone punctuation (international formats). */
     @Pattern(
-        regexp = "^$|^\\+?[0-9]{1,3}[- ]?\\(?[0-9]{2,4}\\)?[- ]?[0-9]{3,4}[- ]?[0-9]{3,4}$",
+        regexp = "^[\\+]?[0-9\\s().\\-]{6,30}$",
         message = "Phone format is invalid"
     )
     @Size(max = 30, message = "Phone must not exceed 30 characters")

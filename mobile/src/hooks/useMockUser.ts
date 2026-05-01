@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { User } from '@/types';
 import { CURRENT_USER, mergeMockUser } from '@/services/mock';
+import { useSessionStore } from '@/store/sessionStore';
 import { useUserProfileStore } from '@/store/userProfileStore';
 import type { UserProfileOverrides } from '@/store/userProfileStore';
 
@@ -18,8 +19,9 @@ export function useMockUser(): UseMockUserResult {
   const overrides = useUserProfileStore((s) => s.overrides);
   const setOverrides = useUserProfileStore((s) => s.setOverrides);
   const resetProfile = useUserProfileStore((s) => s.reset);
+  const serverUser = useSessionStore((s) => s.serverUser);
 
-  const baseline = CURRENT_USER;
+  const baseline = serverUser ?? CURRENT_USER;
 
   const user = useMemo(() => mergeMockUser(baseline, overrides), [baseline, overrides]);
 

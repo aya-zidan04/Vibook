@@ -1,5 +1,6 @@
 package com.vibook.backend.mapper;
 
+import com.vibook.backend.dto.AdminEventRowResponse;
 import com.vibook.backend.dto.BusinessEventResponse;
 import com.vibook.backend.dto.BusinessEventSummaryResponse;
 import com.vibook.backend.entity.BusinessEvent;
@@ -14,10 +15,10 @@ import org.springframework.stereotype.Component;
 public class BusinessEventMapper {
 
     public BusinessEventResponse toResponse(BusinessEvent entity) {
-        return toResponse(entity, null, null);
+        return toResponse(entity, null, null, null);
     }
 
-    public BusinessEventResponse toResponse(BusinessEvent entity, Integer myRating, Boolean canRate) {
+    public BusinessEventResponse toResponse(BusinessEvent entity, Integer myRating, Long myRatingId, Boolean canRate) {
         Subcategory sub = entity.getSubcategory();
         Category cat = sub != null ? sub.getCategory() : null;
         Governorate gov = entity.getGovernorate();
@@ -45,7 +46,28 @@ public class BusinessEventMapper {
             entity.getCreatedAt(),
             entity.getUpdatedAt(),
             myRating,
+            myRatingId,
             canRate
+        );
+    }
+
+    public AdminEventRowResponse toAdminRow(BusinessEvent entity) {
+        Subcategory sub = entity.getSubcategory();
+        Category cat = sub != null ? sub.getCategory() : null;
+        Governorate gov = entity.getGovernorate();
+        String visibility = entity.isHidden() ? "HIDDEN" : "VISIBLE";
+        return new AdminEventRowResponse(
+            entity.getId(),
+            entity.getTitle(),
+            entity.getBusinessProfile().getId(),
+            entity.getBusinessProfile().getBusinessName(),
+            cat != null ? cat.getName() : null,
+            gov != null ? gov.getName() : null,
+            entity.getPriceJod(),
+            entity.getCurrency(),
+            entity.getCapacityGuests(),
+            visibility,
+            entity.getCreatedAt()
         );
     }
 

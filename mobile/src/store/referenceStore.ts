@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { MOCK_CATEGORIES } from '@/mock/categories';
-import { MOCK_CITIES } from '@/mock/cities';
-import type { Category, City } from '@/types';
+import { listCategories } from '@/api/categoriesApi';
+import { listActiveGovernorates } from '@/api/governoratesApi';
+import type { Category } from '@/types';
+import type { City } from '@/types';
 import { useAppStore } from '@/store/appStore';
 
 type ReferenceStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -19,8 +20,7 @@ function ensureValidSelectedCity(cities: City[]): void {
   const { selectedCityId, setSelectedCityId } = useAppStore.getState();
   const ok = cities.some((c) => c.id === selectedCityId);
   if (!ok) {
-    const fallback =
-      cities.find((c) => c.id === 'gov-amman')?.id ?? cities[0].id;
+    const fallback = cities[0]?.id ?? '1';
     setSelectedCityId(fallback);
   }
 }
@@ -33,8 +33,22 @@ export const useReferenceStore = create<ReferenceState>((set) => ({
   load: async () => {
     set({ status: 'loading', errorMessage: null });
     try {
-      const cities = [...MOCK_CITIES];
-      const categories = [...MOCK_CATEGORIES];
+      const [govs, cats] = await Promise.all([listActiveGovernorates(), listCategories()]);
+      const cities: City[] = govs.map((g) => ({
+        id: String(g.id),
+        nameEn: g.name,
+        nameAr: g.name,
+        country: 'Jordan',
+      }));
+      const categories: Category[] = cats
+        .filter((c) => c.active)
+        .map((c) => ({
+          id: String(c.id),
+          slug: c.slug,
+          labelEn: c.name,
+          labelAr: c.name,
+          icon: c.icon || 'pricetag-outline',
+        }));
       ensureValidSelectedCity(cities);
       set({
         cities,

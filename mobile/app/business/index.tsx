@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
-import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
+import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -20,9 +20,6 @@ export default function BusinessIntroScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const applicationStatus = useBusinessHubStore((s) => s.applicationStatus);
-  const setApplicationStatus = useBusinessHubStore((s) => s.setApplicationStatus);
-  const devSetRejected = useBusinessHubStore((s) => s.devSetRejected);
-  const resetHub = useBusinessHubStore((s) => s.resetHub);
 
   if (applicationStatus === 'pending') return <Redirect href="/business/application-pending" />;
   if (applicationStatus === 'rejected') return <Redirect href="/business/application-rejected" />;
@@ -73,23 +70,6 @@ export default function BusinessIntroScreen() {
       <AppText variant="caption" color="textMuted" style={styles.note}>
         {t('business.note')}
       </AppText>
-
-      {__DEV__ ? (
-        <View style={styles.devBox}>
-          <AppText variant="caption" color="textMuted">
-            {t('businessHub.devMockHint')}
-          </AppText>
-          <View style={styles.devRow}>
-            <SecondaryButton title={t('businessHub.devPending')} onPress={() => setApplicationStatus('pending')} />
-            <SecondaryButton
-              title={t('businessHub.devRejected')}
-              onPress={() => devSetRejected(t('businessHub.devRejectReason'))}
-            />
-            <SecondaryButton title={t('businessHub.devApproved')} onPress={() => setApplicationStatus('approved')} />
-          </View>
-          <SecondaryButton title={t('businessHub.devReset')} onPress={() => resetHub()} />
-        </View>
-      ) : null}
     </Screen>
   );
 }
@@ -123,7 +103,5 @@ function createStyles(colors: ThemeColors) {
       justifyContent: 'center',
     },
     note: { lineHeight: 18, textAlign: 'center', marginTop: spacing.sm },
-    devBox: { gap: spacing.sm, marginTop: spacing.lg },
-    devRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   });
 }

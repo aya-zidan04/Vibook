@@ -43,6 +43,14 @@ public class EventRating {
     @JoinColumn(name = "event_id", nullable = false)
     private BusinessEvent businessEvent;
 
+    /** Hidden from public discovery / event aggregates when true. */
+    @Column(name = "moderation_hidden", nullable = false)
+    private boolean moderationHidden = false;
+
+    /** User- or system-flagged for moderator review. */
+    @Column(name = "flagged", nullable = false)
+    private boolean flagged = false;
+
     @Column(nullable = false)
     private Instant createdAt;
 

@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { listSubcategories } from '@/api/categoriesApi';
+import { searchEvents } from '@/api/eventsApi';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import {
@@ -15,109 +18,71 @@ import {
 } from '@/components/explore';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { CatalogRouter } from '@/services/catalog/mapCatalog';
-import {
-  MOCK_EXPLORE_CATEGORIES,
-  MOCK_EXPLORE_EVENT_TAGS,
-  type ExploreEventTaxonomyTag,
-  type ExploreMainCategory,
-} from '@/mock/exploreCategories';
-import {
-  MOCK_EVENTS,
-  MOCK_EXPERIENCES,
-  MOCK_OFFERS,
-  MOCK_PACKAGES,
-  getCityName,
-} from '@/services/mock';
-import { useBusinessHubStore } from '@/store/businessHubStore';
-import { businessEventToEventItem } from '@/utils/businessEventToEventItem';
+import type { ExploreMainCategory, ExploreSubcategory } from '@/mock/exploreCategories';
+import { businessEventSummaryToEventItem } from '@/services/api/eventMap';
+import { useAppStore } from '@/store/appStore';
+import { useReferenceStore } from '@/store/referenceStore';
 import type { EventItem } from '@/types';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
-function mockHeroSlides(router: CatalogRouter, t: (key: string) => string): HeroSlideItem[] {
-  return [
-    {
-      id: 'h1',
-      imageUrl: MOCK_OFFERS[0].imageUrl,
-      title: MOCK_OFFERS[0].title,
-      subtitle: MOCK_OFFERS[0].subtitle,
-      eyebrow: t('explore.featured'),
-      onPress: () => router.push('/restaurant/r1'),
-    },
-    {
-      id: 'h2',
-      imageUrl: MOCK_EVENTS[0].imageUrl,
-      title: MOCK_EVENTS[0].title,
-      subtitle: MOCK_EVENTS[0].venueName,
-      eyebrow: t('explore.event'),
-      onPress: () => router.push(`/event/${MOCK_EVENTS[0].id}`),
-    },
-    {
-      id: 'h3',
-      imageUrl: MOCK_EXPERIENCES[1]?.imageUrl ?? MOCK_EXPERIENCES[0].imageUrl,
-      title: MOCK_EXPERIENCES[1]?.title ?? MOCK_EXPERIENCES[0].title,
-      subtitle: `${MOCK_EXPERIENCES[1]?.durationHours ?? MOCK_EXPERIENCES[0].durationHours} ${t('experience.hours')} · ${t('explore.experience')}`,
-      eyebrow: t('explore.experience'),
-      onPress: () =>
-        router.push(`/experience/${MOCK_EXPERIENCES[1]?.id ?? MOCK_EXPERIENCES[0].id}`),
-    },
-    {
-      id: 'h4',
-      imageUrl: MOCK_OFFERS[1].imageUrl,
-      title: MOCK_OFFERS[1].title,
-      subtitle: MOCK_OFFERS[1].subtitle,
-      eyebrow: t('explore.offer'),
-      onPress: () => router.push('/search'),
-    },
-  ];
-}
-
-function mockPromoGrid(router: CatalogRouter, t: (key: string) => string) {
+function promoFromEvents(events: EventItem[], router: CatalogRouter, t: (k: string) => string): {
+  large: PromoTile;
+  stackTop: PromoTile;
+  stackBottom: PromoTile;
+  rowLeft: PromoTile;
+  rowRight: PromoTile;
+} | null {
+  if (events.length < 5) return null;
+  const e = events;
   return {
     large: {
-      id: 'p-large',
-      imageUrl: MOCK_EVENTS[0].imageUrl,
-      title: MOCK_EVENTS[0].title,
-      subtitle: MOCK_EVENTS[0].description.slice(0, 72) + '…',
-      kind: 'event' as const,
+      id: `p-${e[0].id}`,
+      imageUrl: e[0].imageUrl,
+      title: e[0].title,
+      subtitle: (() => {
+        const raw = (e[0].description || e[0].venueName || '').trim();
+        return raw.length > 72 ? `${raw.slice(0, 72)}…` : raw;
+      })(),
+      kind: 'event',
       kindLabel: t('explore.event'),
-      onPress: () => router.push(`/event/${MOCK_EVENTS[0].id}`),
+      onPress: () => router.push(`/event/${e[0].id}`),
     },
     stackTop: {
-      id: 'p-st1',
-      imageUrl: MOCK_OFFERS[0].imageUrl,
-      title: MOCK_OFFERS[0].title,
-      subtitle: MOCK_OFFERS[0].subtitle,
-      kind: 'offer' as const,
-      kindLabel: t('explore.offer'),
-      onPress: () => router.push('/package/p1'),
+      id: `p-${e[1].id}`,
+      imageUrl: e[1].imageUrl,
+      title: e[1].title,
+      subtitle: e[1].venueName,
+      kind: 'event',
+      kindLabel: t('explore.event'),
+      onPress: () => router.push(`/event/${e[1].id}`),
     },
     stackBottom: {
-      id: 'p-st2',
-      imageUrl: MOCK_EXPERIENCES[0].imageUrl,
-      title: MOCK_EXPERIENCES[0].title,
-      subtitle: `${MOCK_EXPERIENCES[0].durationHours} ${t('experience.hours')}`,
-      kind: 'experience' as const,
-      kindLabel: t('explore.experience'),
-      onPress: () => router.push(`/experience/${MOCK_EXPERIENCES[0].id}`),
+      id: `p-${e[2].id}`,
+      imageUrl: e[2].imageUrl,
+      title: e[2].title,
+      subtitle: e[2].venueName,
+      kind: 'event',
+      kindLabel: t('explore.event'),
+      onPress: () => router.push(`/event/${e[2].id}`),
     },
     rowLeft: {
-      id: 'p-r1',
-      imageUrl: MOCK_PACKAGES[0].imageUrl,
-      title: MOCK_PACKAGES[0].title,
-      subtitle: `${MOCK_PACKAGES[0].nights} ${t('stay.nights')}`,
-      kind: 'event' as const,
+      id: `p-${e[3].id}`,
+      imageUrl: e[3].imageUrl,
+      title: e[3].title,
+      subtitle: e[3].venueName,
+      kind: 'event',
       kindLabel: t('explore.featured'),
-      onPress: () => router.push(`/package/${MOCK_PACKAGES[0].id}`),
+      onPress: () => router.push(`/event/${e[3].id}`),
     },
     rowRight: {
-      id: 'p-r2',
-      imageUrl: MOCK_EVENTS[1].imageUrl,
-      title: MOCK_EVENTS[1].title,
-      subtitle: MOCK_EVENTS[1].venueName,
-      kind: 'event' as const,
+      id: `p-${e[4].id}`,
+      imageUrl: e[4].imageUrl,
+      title: e[4].title,
+      subtitle: e[4].venueName,
+      kind: 'event',
       kindLabel: t('explore.event'),
-      onPress: () => router.push(`/event/${MOCK_EVENTS[1].id}`),
+      onPress: () => router.push(`/event/${e[4].id}`),
     },
   };
 }
@@ -127,41 +92,115 @@ export default function ExploreScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale } = useTranslation();
-  const hubEvents = useBusinessHubStore((s) => s.events);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(MOCK_EXPLORE_CATEGORIES[0]?.id ?? '');
-  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
-
   const r = router as CatalogRouter;
+  const categories = useReferenceStore((s) => s.categories);
+  const selectedCityId = useAppStore((s) => s.selectedCityId);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const cities = useReferenceStore((s) => s.cities);
 
-  const heroSlides = useMemo(() => mockHeroSlides(r, t), [r, t]);
-  const promo = useMemo(() => mockPromoGrid(r, t), [r, t]);
-  const selectedCategory = useMemo<ExploreMainCategory | undefined>(
-    () => MOCK_EXPLORE_CATEGORIES.find((c) => c.id === selectedCategoryId),
-    [selectedCategoryId],
+  const [subsByParent, setSubsByParent] = useState<Record<string, ExploreSubcategory[]>>({});
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
+  const [apiEvents, setApiEvents] = useState<EventItem[]>([]);
+  const [loadingFeed, setLoadingFeed] = useState(false);
+
+  useEffect(() => {
+    if (categories.length === 0) return;
+    let cancelled = false;
+    void (async () => {
+      const next: Record<string, ExploreSubcategory[]> = {};
+      for (const c of categories) {
+        try {
+          const subs = await listSubcategories(Number(c.id));
+          if (cancelled) return;
+          next[c.id] = subs
+            .filter((s) => s.active)
+            .map((s) => ({
+              id: String(s.id),
+              parentId: c.id,
+              name: s.name,
+              nameAr: s.name,
+            }));
+        } catch {
+          next[c.id] = [];
+        }
+      }
+      if (!cancelled) setSubsByParent(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [categories]);
+
+  const exploreCategories = useMemo<ExploreMainCategory[]>(() => {
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.labelEn,
+      nameAr: c.labelAr,
+      icon: (c.icon as keyof typeof Ionicons.glyphMap) || 'grid-outline',
+      subcategories: subsByParent[c.id] ?? [],
+    }));
+  }, [categories, subsByParent]);
+
+  useEffect(() => {
+    if (exploreCategories.length === 0) return;
+    if (!exploreCategories.some((c) => c.id === selectedCategoryId)) {
+      setSelectedCategoryId(exploreCategories[0].id);
+      setSelectedSubcategoryId(null);
+    }
+  }, [exploreCategories, selectedCategoryId]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setApiEvents([]);
+      setLoadingFeed(false);
+      return;
+    }
+    let cancelled = false;
+    setLoadingFeed(true);
+    void (async () => {
+      try {
+        const gid = Number(selectedCityId);
+        const cat = selectedCategoryId ? Number(selectedCategoryId) : undefined;
+        const sub = selectedSubcategoryId ? Number(selectedSubcategoryId) : undefined;
+        const page = await searchEvents({
+          page: 0,
+          size: 40,
+          governorateId: Number.isFinite(gid) ? gid : undefined,
+          categoryId: sub == null ? cat : undefined,
+          subcategoryId: sub ?? undefined,
+        });
+        if (cancelled) return;
+        setApiEvents(page.content.map(businessEventSummaryToEventItem));
+      } catch {
+        if (!cancelled) setApiEvents([]);
+      } finally {
+        if (!cancelled) setLoadingFeed(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, selectedCityId, selectedCategoryId, selectedSubcategoryId]);
+
+  const heroSlides: HeroSlideItem[] = useMemo(() => {
+    return apiEvents.slice(0, 4).map((e, i) => ({
+      id: `hero-${e.id}-${i}`,
+      imageUrl: e.imageUrl,
+      title: e.title,
+      subtitle: e.venueName,
+      eyebrow: t('explore.event'),
+      onPress: () => router.push(`/event/${e.id}`),
+    }));
+  }, [apiEvents, router, t]);
+
+  const promo = useMemo(() => promoFromEvents(apiEvents, r, t), [apiEvents, r, t]);
+
+  const selectedCategory = useMemo(
+    () => exploreCategories.find((c) => c.id === selectedCategoryId),
+    [exploreCategories, selectedCategoryId],
   );
   const selectedSubcategories = selectedCategory?.subcategories ?? [];
-
-  const feedEvents: EventItem[] = useMemo(() => {
-    const fallbackTag = (event: EventItem): ExploreEventTaxonomyTag => {
-      if (event.categoryId === 'cat5') {
-        return { mainId: 'sports', subcategoryId: 'activities' };
-      }
-      return { mainId: 'entertainment', subcategoryId: 'concerts' };
-    };
-
-    const fromBusiness = hubEvents
-      .filter((e) => !e.hidden)
-      .map((e) => businessEventToEventItem(e));
-
-    const combined = [...MOCK_EVENTS, ...fromBusiness];
-
-    return combined.filter((event) => {
-      const tag = MOCK_EXPLORE_EVENT_TAGS[event.id] ?? fallbackTag(event);
-      if (selectedCategoryId && tag.mainId !== selectedCategoryId) return false;
-      if (selectedSubcategoryId && tag.subcategoryId !== selectedSubcategoryId) return false;
-      return true;
-    });
-  }, [selectedCategoryId, selectedSubcategoryId, hubEvents]);
 
   const selectedCategoryLabel = selectedCategory
     ? locale === 'ar'
@@ -171,6 +210,12 @@ export default function ExploreScreen() {
   const selectedSubcategoryLabel = selectedSubcategoryId
     ? selectedSubcategories.find((sub) => sub.id === selectedSubcategoryId)
     : undefined;
+
+  const cityLabelForCard = (cityId: string) => {
+    const c = cities.find((x) => x.id === cityId);
+    if (c) return locale === 'ar' ? c.nameAr : c.nameEn;
+    return cityId;
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -199,42 +244,53 @@ export default function ExploreScreen() {
 
           {heroSlides.length > 0 ? <ExploreHeroCarousel slides={heroSlides} /> : null}
 
-          <View style={styles.sectionHead}>
-            <AppText variant="h2" color="text">
-              {t('explore.promoTitle')}
-            </AppText>
-            <AppText variant="caption" color="textMuted">
-              {t('explore.promoSubtitle')}
-            </AppText>
-          </View>
-
-          <View style={styles.horizontalPad}>
-            <ExplorePromoGrid
-              large={promo.large}
-              stackTop={promo.stackTop}
-              stackBottom={promo.stackBottom}
-              rowLeft={promo.rowLeft}
-              rowRight={promo.rowRight}
-            />
-          </View>
+          {promo ? (
+            <>
+              <View style={styles.sectionHead}>
+                <AppText variant="h2" color="text">
+                  {t('explore.promoTitle')}
+                </AppText>
+                <AppText variant="caption" color="textMuted">
+                  {t('explore.promoSubtitle')}
+                </AppText>
+              </View>
+              <View style={styles.horizontalPad}>
+                <ExplorePromoGrid
+                  large={promo.large}
+                  stackTop={promo.stackTop}
+                  stackBottom={promo.stackBottom}
+                  rowLeft={promo.rowLeft}
+                  rowRight={promo.rowRight}
+                />
+              </View>
+            </>
+          ) : null}
 
           <View style={[styles.sectionHead, styles.padH]}>
             <AppText variant="h2" color="text">
               {t('explore.categoriesTitle')}
             </AppText>
           </View>
-          <ExploreCategoryStrip
-            categories={MOCK_EXPLORE_CATEGORIES}
-            selectedCategoryId={selectedCategoryId}
-            onSelectCategory={(id) => {
-              setSelectedCategoryId(id);
-              setSelectedSubcategoryId(null);
-            }}
-            subcategories={selectedSubcategories}
-            selectedSubcategoryId={selectedSubcategoryId}
-            onSelectSubcategory={setSelectedSubcategoryId}
-            locale={locale}
-          />
+          {exploreCategories.length > 0 ? (
+            <ExploreCategoryStrip
+              categories={exploreCategories}
+              selectedCategoryId={selectedCategoryId}
+              onSelectCategory={(id) => {
+                setSelectedCategoryId(id);
+                setSelectedSubcategoryId(null);
+              }}
+              subcategories={selectedSubcategories}
+              selectedSubcategoryId={selectedSubcategoryId}
+              onSelectSubcategory={setSelectedSubcategoryId}
+              locale={locale}
+            />
+          ) : (
+            <View style={[styles.padH, { marginBottom: spacing.md }]}>
+              <AppText variant="caption" color="textMuted">
+                {t('explore.catalogFallbackHint')}
+              </AppText>
+            </View>
+          )}
 
           <View style={[styles.sectionHead, styles.padH]}>
             <AppText variant="h2" color="text">
@@ -248,12 +304,24 @@ export default function ExploreScreen() {
           </View>
 
           <View style={styles.feed}>
-            {feedEvents.length > 0 ? (
-              feedEvents.map((e) => (
+            {!isAuthenticated ? (
+              <View style={styles.emptyCard}>
+                <AppText variant="h3" color="text">
+                  {t('explore.guestEventsTitle')}
+                </AppText>
+                <AppText variant="caption" color="textSecondary" style={styles.emptyBody}>
+                  {t('explore.guestEventsBody')}
+                </AppText>
+                <PrimaryButton title={t('auth.loginCta')} onPress={() => router.push('/login')} style={styles.emptyCta} />
+              </View>
+            ) : loadingFeed ? (
+              <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.xl }} />
+            ) : apiEvents.length > 0 ? (
+              apiEvents.map((e) => (
                 <ExploreEventFeedCard
                   key={e.id}
                   event={e}
-                  cityName={getCityName(e.cityId, locale)}
+                  cityName={cityLabelForCard(e.cityId)}
                   onPress={() => router.push(`/event/${e.id}`)}
                 />
               ))
@@ -263,7 +331,7 @@ export default function ExploreScreen() {
                   {t('search.noMatches')}
                 </AppText>
                 <AppText variant="caption" color="textSecondary" style={styles.emptyBody}>
-                  {t('search.noMatchesDesc')}
+                  {t('explore.noEventsForCity')}
                 </AppText>
                 <PrimaryButton
                   title={t('booking.exploreCta')}

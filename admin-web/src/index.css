@@ -1,0 +1,5 @@
+/* App-level tweaks; tokens live in theme/admin-theme.css */
+
+.vb-skeleton {
+  min-height: 8px;
+}

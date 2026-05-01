@@ -8,8 +8,12 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
+import { fetchCurrentUser } from '@/api/authApi';
+import { ApiError } from '@/api/http';
+import { updateUser } from '@/api/usersApi';
 import { useMockUser } from '@/hooks/useMockUser';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useSessionStore } from '@/store/sessionStore';
 import {
   isValidEmail,
   isValidJordanLocalPhone,
@@ -26,6 +30,7 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, setOverrides } = useMockUser();
+  const authSource = useSessionStore((s) => s.authSource);
 
   const initialParts = useMemo(() => nameToFirstLast(user.name), [user.name]);
 
@@ -83,12 +88,37 @@ export default function EditProfileScreen() {
       return;
     }
     const trimmedEmail = email.trim();
-    if (!isValidEmail(trimmedEmail)) {
+    if (!authSource && !isValidEmail(trimmedEmail)) {
       Alert.alert(t('common.error'), t('editProfile.errEmail'));
       return;
     }
     if (!isValidJordanLocalPhone(phoneLocal)) {
       Alert.alert(t('common.error'), t('editProfile.errPhoneJordan'));
+      return;
+    }
+    if (authSource) {
+      void (async () => {
+        try {
+          const phone = `+962${phoneLocal.replace(/\D/g, '').slice(-9)}`;
+          const updated = await updateUser(authSource.id, {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            phone,
+          });
+          useSessionStore.getState().patchSessionUser(updated);
+          try {
+            const fresh = await fetchCurrentUser();
+            useSessionStore.getState().patchSessionUser(fresh);
+          } catch {
+            /* ignore */
+          }
+          Alert.alert(t('editProfile.saved'));
+          router.back();
+        } catch (e) {
+          const msg = e instanceof ApiError ? e.message : t('common.error');
+          Alert.alert(t('editProfile.title'), msg);
+        }
+      })();
       return;
     }
     setOverrides({
@@ -187,10 +217,11 @@ export default function EditProfileScreen() {
         value={email}
         onChangeText={setEmail}
         placeholder={t('auth.emailPlaceholder')}
-        helper={t('editProfile.emailHelper')}
+        helper={authSource ? t('editProfile.emailReadOnlyBackend') : t('editProfile.emailHelper')}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        editable={!authSource}
       />
 
       <PrimaryButton title={t('common.save')} onPress={save} />

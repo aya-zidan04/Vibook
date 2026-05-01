@@ -1,11 +1,11 @@
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
+import type { BookingStatusApi } from '@/api/types';
 
 /**
  * Business hub domain types used by the mobile app.
  *
- * Persistence today: Zustand `persist` → AsyncStorage (`vibook-business-hub`). No HTTP layer here.
- * When a backend exists, add mappers (e.g. `toBusinessEventRecord` / `fromBusinessEventRecord`) beside API
- * DTOs; keep screens and form state tied to these shapes rather than raw JSON.
+ * Hub profile/listings: Zustand `persist` → AsyncStorage. Partner **events** and **bookings** are loaded from
+ * the API (`refreshBusinessHubLists`) and are not persisted in the hub store.
  */
 
 export type ApplicationStatus = 'none' | 'pending' | 'rejected' | 'approved';
@@ -71,15 +71,19 @@ export type BusinessEventRecord = {
   images: string;
   listingId: string | null;
   hidden: boolean;
+  /** Set when loaded from `GET /business/events/{id}` — used if category resolution fails. */
+  apiSubcategoryId?: number;
 };
 
-export type BusinessBookingStatus = 'pending' | 'confirmed' | 'cancelled';
+export type BusinessBookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 export type BusinessBookingRecord = {
   id: string;
   guestEmail: string;
   partySize: number;
   status: BusinessBookingStatus;
+  /** Raw API status for partner actions (advance PENDING → CONFIRMED → COMPLETED). */
+  serverStatus?: BookingStatusApi;
   listingTitle: string;
   createdAt: string;
 };

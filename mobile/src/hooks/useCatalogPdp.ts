@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { BusinessEventResponse } from '@/api/types';
+import { getEventById as getEventByIdFromApi } from '@/api/eventsApi';
 import {
   getEventById,
   getExperienceById,
@@ -9,6 +11,8 @@ import {
   getTiersForEvent,
   MOCK_EVENTS,
 } from '@/services/mock';
+import { businessEventDetailToEventItem, tiersFromBusinessEvent } from '@/services/api/eventMap';
+import { useAppStore } from '@/store/appStore';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import type {
   EventItem,
@@ -28,25 +32,78 @@ export function useEventPdp(id: string | undefined): {
   event: EventItem | undefined;
   tiers: TicketTier[];
   loading: boolean;
+  /** Present for numeric/API-backed events; use for ratings and bookings. */
+  apiDetail: BusinessEventResponse | null;
+  refetchApiDetail: () => void;
 } {
   const hubEvents = useBusinessHubStore((s) => s.events);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [event, setEvent] = useState<EventItem | undefined>();
   const [tiers, setTiers] = useState<TicketTier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [apiDetail, setApiDetail] = useState<BusinessEventResponse | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  const refetchApiDetail = useCallback(() => {
+    setRefreshTick((t) => t + 1);
+  }, []);
 
   useEffect(() => {
+    let cancelled = false;
     if (!id) {
       setEvent(undefined);
       setTiers([]);
+      setApiDetail(null);
       setLoading(false);
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
+
+    const isNumericCatalog = /^\d+$/.test(id);
+
+    if (isNumericCatalog) {
+      if (!isAuthenticated) {
+        setEvent(undefined);
+        setTiers([]);
+        setApiDetail(null);
+        setLoading(false);
+        return () => {
+          cancelled = true;
+        };
+      }
+      setLoading(true);
+      void (async () => {
+        try {
+          const raw = await getEventByIdFromApi(Number(id));
+          if (cancelled) return;
+          setApiDetail(raw);
+          setEvent(businessEventDetailToEventItem(raw));
+          setTiers(tiersFromBusinessEvent(raw));
+        } catch {
+          if (!cancelled) {
+            setApiDetail(null);
+            setEvent(undefined);
+            setTiers([]);
+          }
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setApiDetail(null);
     const ev = getEventById(id);
     setEvent(ev);
     if (!ev) {
       setTiers([]);
       setLoading(false);
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
     const fromMock = MOCK_EVENTS.some((e) => e.id === id);
     if (fromMock) {
@@ -61,9 +118,12 @@ export function useEventPdp(id: string | undefined): {
       }
     }
     setLoading(false);
-  }, [id, hubEvents]);
+    return () => {
+      cancelled = true;
+    };
+  }, [id, hubEvents, isAuthenticated, refreshTick]);
 
-  return { event, tiers, loading };
+  return { event, tiers, loading, apiDetail, refetchApiDetail };
 }
 
 export function useOrganizerForEvent(event: EventItem | undefined): Organizer | undefined {

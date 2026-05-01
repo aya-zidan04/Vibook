@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import type { BusinessProfileResponseDto } from '@/api/types';
 import type {
   ApplicationStatus,
   BusinessBookingRecord,
@@ -10,7 +11,6 @@ import type {
   BusinessProfile,
   PartnerApplicationPayload,
 } from '@/types/businessHub';
-import { migrateBusinessEventRecord } from '@/utils/migrateBusinessEventRecord';
 import { migrateBusinessProfile } from '@/utils/migrateBusinessProfile';
 
 function emptyProfile(): BusinessProfile {
@@ -38,14 +38,18 @@ type State = {
   rejectedReason: string;
   profile: BusinessProfile;
   listings: BusinessListing[];
+  /** Partner events from `GET /business/events` (not persisted). */
   events: BusinessEventRecord[];
+  /** Partner bookings from `GET /business/bookings` (not persisted). */
   bookings: BusinessBookingRecord[];
 
-  setApplicationStatus: (s: ApplicationStatus) => void;
-  devSetRejected: (reason: string) => void;
   submitApplication: (p: PartnerApplicationPayload) => void;
   updateProfile: (patch: Partial<BusinessProfile>) => void;
-  resetHub: () => void;
+  resetApplicationGate: () => void;
+  syncBusinessApprovalFromApi: (profile: BusinessProfileResponseDto | null | undefined) => void;
+
+  replaceHubEvents: (events: BusinessEventRecord[]) => void;
+  replaceHubBookings: (bookings: BusinessBookingRecord[]) => void;
 
   addListing: (l: Omit<BusinessListing, 'id'>) => string;
   updateListing: (id: string, patch: Partial<BusinessListing>) => void;
@@ -59,17 +63,6 @@ type State = {
   cycleBookingStatus: (id: string) => void;
 };
 
-const initialBookings: BusinessBookingRecord[] = [
-  {
-    id: 'demo-1',
-    guestEmail: 'guest@example.com',
-    partySize: 2,
-    status: 'pending',
-    listingTitle: 'Demo listing',
-    createdAt: new Date().toISOString(),
-  },
-];
-
 export const useBusinessHubStore = create<State>()(
   persist(
     (set) => ({
@@ -78,12 +71,7 @@ export const useBusinessHubStore = create<State>()(
       profile: emptyProfile(),
       listings: [],
       events: [],
-      bookings: [...initialBookings],
-
-      setApplicationStatus: (applicationStatus) => set({ applicationStatus }),
-
-      devSetRejected: (rejectedReason) =>
-        set({ applicationStatus: 'rejected', rejectedReason }),
+      bookings: [],
 
       submitApplication: (p) =>
         set((s) => ({
@@ -104,15 +92,36 @@ export const useBusinessHubStore = create<State>()(
           profile: { ...s.profile, ...patch },
         })),
 
-      resetHub: () =>
+      resetApplicationGate: () =>
         set({
           applicationStatus: 'none',
           rejectedReason: '',
-          profile: emptyProfile(),
-          listings: [],
-          events: [],
-          bookings: [...initialBookings],
         }),
+
+      syncBusinessApprovalFromApi: (profile: BusinessProfileResponseDto | null | undefined) =>
+        set((s) => {
+          if (profile === undefined) {
+            return s;
+          }
+          if (profile === null) {
+            return { applicationStatus: 'none', rejectedReason: '' };
+          }
+          const reason = profile.rejectionReason?.trim() ?? '';
+          switch (profile.status) {
+            case 'APPROVED':
+              return { applicationStatus: 'approved', rejectedReason: '' };
+            case 'PENDING_REVIEW':
+              return { applicationStatus: 'pending', rejectedReason: '' };
+            case 'REJECTED':
+              return { applicationStatus: 'rejected', rejectedReason: reason };
+            case 'DRAFT':
+            default:
+              return { applicationStatus: 'none', rejectedReason: '' };
+          }
+        }),
+
+      replaceHubEvents: (events) => set({ events }),
+      replaceHubBookings: (bookings) => set({ bookings }),
 
       addListing: (l) => {
         const id = newId('listing');
@@ -159,7 +168,7 @@ export const useBusinessHubStore = create<State>()(
         })),
 
       cycleBookingStatus: (id) => {
-        const order: BusinessBookingStatus[] = ['pending', 'confirmed', 'cancelled'];
+        const order: BusinessBookingStatus[] = ['pending', 'confirmed', 'completed', 'cancelled'];
         set((s) => ({
           bookings: s.bookings.map((b) => {
             if (b.id !== id) return b;
@@ -171,25 +180,23 @@ export const useBusinessHubStore = create<State>()(
       },
     }),
     {
-      name: 'vibook-business-hub',
+      name: 'vibook-business-hub-v2',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (s) => ({
         applicationStatus: s.applicationStatus,
         rejectedReason: s.rejectedReason,
         profile: s.profile,
         listings: s.listings,
-        events: s.events,
-        bookings: s.bookings,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<State>;
-        const eventsRaw = p.events ?? current.events;
         const profileRaw = p.profile ?? current.profile;
         return {
           ...current,
           ...p,
           profile: migrateBusinessProfile(profileRaw),
-          events: eventsRaw.map(migrateBusinessEventRecord),
+          events: [],
+          bookings: [],
         };
       },
     },

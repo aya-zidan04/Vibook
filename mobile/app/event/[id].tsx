@@ -16,12 +16,18 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useEventPdp, useOrganizerForEvent } from '@/hooks/useCatalogPdp';
 import { getCityName } from '@/services/mock';
+import { useAppStore } from '@/store/appStore';
+import { useReferenceStore } from '@/store/referenceStore';
+import { ratingKey } from '@/services/ratings';
+import { useUserRatingsStore } from '@/store/userRatingsStore';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { useLocaleStore } from '@/store/localeStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import type { ModerationReportType } from '@/api/types';
+import { ReportIssueModal } from '@/components/report/ReportIssueModal';
 
 export default function EventDetailScreen() {
   const colors = useThemeColors();
@@ -31,11 +37,38 @@ export default function EventDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const cities = useReferenceStore((s) => s.cities);
 
-  const { event, tiers, loading } = useEventPdp(id);
+  const { event, tiers, loading, apiDetail, refetchApiDetail } = useEventPdp(id);
   const organizer = useOrganizerForEvent(event);
+
+  const cityDisplay = useMemo(() => {
+    if (!event) return '';
+    const c = cities.find((x) => x.id === event.cityId);
+    if (c) return locale === 'ar' ? c.nameAr : c.nameEn;
+    return getCityName(event.cityId, locale);
+  }, [cities, event, locale]);
+
+  useEffect(() => {
+    if (!id || !apiDetail?.myRating) return;
+    useUserRatingsStore.getState().setRating(ratingKey('event', id), apiDetail.myRating);
+  }, [id, apiDetail?.myRating]);
   const [tierId, setTierId] = useState('');
   const [qty, setQty] = useState(1);
+  const [reportCtx, setReportCtx] = useState<{
+    type: ModerationReportType;
+    targetId: number | null;
+  } | null>(null);
+
+  const openEventReport = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+    if (apiDetail?.id == null) return;
+    setReportCtx({ type: 'EVENT', targetId: apiDetail.id });
+  };
 
   useEffect(() => {
     setTierId(tiers[0]?.id ?? '');
@@ -62,12 +95,17 @@ export default function EventDetailScreen() {
   }
 
   if (!event) {
+    const numericGuest = id && /^\d+$/.test(id) && !isAuthenticated;
     return (
       <Screen header={<DetailHeader title={t('event.notFoundTitle')} />}>
         <AppText variant="body" color="textSecondary">
-          {t('event.notFound')}
+          {numericGuest ? t('explore.signInForEvents') : t('event.notFound')}
         </AppText>
-        <PrimaryButton title={t('event.goBack')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
+        {numericGuest ? (
+          <PrimaryButton title={t('auth.loginCta')} onPress={() => router.push('/login')} style={{ marginTop: spacing.lg }} />
+        ) : (
+          <PrimaryButton title={t('event.goBack')} onPress={() => router.back()} style={{ marginTop: spacing.lg }} />
+        )}
       </Screen>
     );
   }
@@ -80,6 +118,7 @@ export default function EventDetailScreen() {
     setDraft({
       vertical: 'event',
       refId: event.id,
+      apiEventId: apiDetail?.id,
       title: event.title,
       imageUrl: event.imageUrl,
       currency,
@@ -87,8 +126,8 @@ export default function EventDetailScreen() {
       quantity: qty,
       fees,
       startsAt: event.startAt,
-      cityName: getCityName(event.cityId, 'en'),
-      cityNameAr: getCityName(event.cityId, 'ar'),
+      cityName: cities.find((x) => x.id === event.cityId)?.nameEn ?? getCityName(event.cityId, 'en'),
+      cityNameAr: cities.find((x) => x.id === event.cityId)?.nameAr ?? getCityName(event.cityId, 'ar'),
       tierName: activeTier.name,
       metaLine: `${formatMoney(lineTotal, currency)} ${t('event.plusFees')}`,
     });
@@ -130,11 +169,28 @@ export default function EventDetailScreen() {
               </AppText>
             </View>
 
-            <UserRatingBlock vertical="event" refId={event.id} />
+            <UserRatingBlock
+              vertical="event"
+              refId={event.id}
+              backendEventId={apiDetail?.id}
+              myRatingId={apiDetail?.myRatingId}
+              onRatingSaved={refetchApiDetail}
+              onReportIssue={
+                apiDetail?.myRatingId != null
+                  ? () => {
+                      if (!isAuthenticated) {
+                        router.push('/login');
+                        return;
+                      }
+                      setReportCtx({ type: 'RATING', targetId: apiDetail.myRatingId ?? null });
+                    }
+                  : undefined
+              }
+            />
 
             <View style={styles.card}>
               <Row icon="calendar-outline" label={t('event.date')} value={dateStr} />
-              <Row icon="location-outline" label={t('event.venue')} value={`${event.venueName}, ${getCityName(event.cityId, locale)}`} />
+              <Row icon="location-outline" label={t('event.venue')} value={`${event.venueName}, ${cityDisplay}`} />
               <Row icon="navigate-outline" label={t('event.address')} value={event.address} />
             </View>
 
@@ -216,7 +272,7 @@ export default function EventDetailScreen() {
               {t('event.similar')}
             </AppText>
             <AppText variant="caption" color="textMuted">
-              {t('event.similarHint')} {getCityName(event.cityId, locale)}.
+              {t('event.similarHint')} {cityDisplay}.
             </AppText>
           </View>
         </ScrollView>
@@ -240,6 +296,15 @@ export default function EventDetailScreen() {
           </View>
         </StickyBottomBar>
       </View>
+      {reportCtx ? (
+        <ReportIssueModal
+          visible
+          onClose={() => setReportCtx(null)}
+          targetType={reportCtx.type}
+          targetId={reportCtx.targetId}
+          title={reportCtx.type === 'RATING' ? t('report.ratingTitle') : t('report.eventTitle')}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -270,6 +335,7 @@ function createStyles(colors: ThemeColors) {
   scrollContent: { paddingBottom: 120 },
   hero: { height: 280 },
   heroHeader: { paddingHorizontal: spacing.screen, paddingTop: spacing.md },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   body: { paddingHorizontal: spacing.screen, paddingTop: spacing.lg, gap: spacing.sm },
   title: { marginTop: spacing.xs },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md },
