@@ -2,13 +2,18 @@ package com.vibook.backend.controller;
 
 import com.vibook.backend.dto.AuthResponse;
 import com.vibook.backend.dto.LoginRequest;
+import com.vibook.backend.dto.LogoutRequest;
+import com.vibook.backend.dto.MessageResponse;
 import com.vibook.backend.dto.RefreshTokenRequest;
 import com.vibook.backend.dto.RegisterRequest;
 import com.vibook.backend.dto.TokenRefreshResponse;
+import com.vibook.backend.exception.UnauthorizedException;
+import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +42,20 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<TokenRefreshResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(authService.refreshAccessToken(request));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponse> logout(@Valid @RequestBody LogoutRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok(new MessageResponse("Logged out"));
+    }
+
+    @PostMapping("/logout-all")
+    public ResponseEntity<MessageResponse> logoutAll(@AuthenticationPrincipal AuthenticatedUser principal) {
+        if (principal == null) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        authService.logoutAll(principal.getUsername());
+        return ResponseEntity.ok(new MessageResponse("All refresh tokens revoked"));
     }
 }

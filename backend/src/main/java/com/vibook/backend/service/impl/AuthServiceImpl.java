@@ -2,6 +2,7 @@ package com.vibook.backend.service.impl;
 
 import com.vibook.backend.dto.AuthResponse;
 import com.vibook.backend.dto.LoginRequest;
+import com.vibook.backend.dto.LogoutRequest;
 import com.vibook.backend.dto.RefreshTokenRequest;
 import com.vibook.backend.dto.RegisterRequest;
 import com.vibook.backend.dto.TokenRefreshResponse;
@@ -124,5 +125,19 @@ public class AuthServiceImpl implements AuthService {
         }
         String token = jwtService.generateToken(new AuthenticatedUser(user));
         return new TokenRefreshResponse(token, "Bearer");
+    }
+
+    @Override
+    public void logout(LogoutRequest request) {
+        refreshTokenService.revokeRefreshToken(request.refreshToken());
+    }
+
+    @Override
+    @Transactional
+    public void logoutAll(String userEmail) {
+        User user = userRepository
+            .findByEmail(userEmail.trim().toLowerCase(Locale.ROOT))
+            .orElseThrow(() -> new UnauthorizedException("Unauthorized"));
+        refreshTokenService.revokeAllRefreshTokensForUser(user);
     }
 }

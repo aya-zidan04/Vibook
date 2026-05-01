@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +43,12 @@ public class BusinessProfileController {
     ) {
         requirePrincipal(principal);
         return ResponseEntity.ok(businessProfileService.upsertMyProfile(request));
+    }
+
+    @PatchMapping("/me/submit")
+    public ResponseEntity<BusinessProfileResponse> submitForReview(@AuthenticationPrincipal AuthenticatedUser principal) {
+        requirePrincipal(principal);
+        return ResponseEntity.ok(businessProfileService.submitMyProfileForReview());
     }
 
     @PostMapping(value = "/me/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

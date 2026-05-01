@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ViewToken } from 'react-native';
 import {
   FlatList,
   NativeScrollEvent,
@@ -12,7 +11,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -20,9 +19,8 @@ import { useAppStore } from '@/store/appStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
-const AUTO_MS = 4800;
-
-const BRAND_LOGO = require('../assets/icon.png');
+/** Time between automatic slide advances (manual swipe still uses native momentum). */
+const AUTO_MS = 3800;
 
 const SLIDES = [
   {
@@ -47,40 +45,38 @@ export default function AppEntryScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
-  const { width, height } = useWindowDimensions();
-  const { t } = useTranslation();
+  const { width: winW, height: winH } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const { t, isRTL } = useTranslation();
+
+  /** Full physical page size so photos bleed behind status bar + home indicator. */
+  const pageW = winW + insets.left + insets.right;
+  const pageH = winH + insets.top + insets.bottom;
+  const bleedStyle = useMemo(
+    () => ({
+      position: 'absolute' as const,
+      top: -insets.top,
+      bottom: -insets.bottom,
+      left: -insets.left,
+      right: -insets.right,
+    }),
+    [insets.top, insets.bottom, insets.left, insets.right],
+  );
   const setHasCompletedOnboarding = useAppStore((s) => s.setHasCompletedOnboarding);
   const setGuest = useAppStore((s) => s.setGuest);
 
   const listRef = useRef<FlatList>(null);
   const [layoutReady, setLayoutReady] = useState(false);
-  const [active, setActive] = useState(0);
   const activeRef = useRef(0);
   const userScrolling = useRef(false);
-
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      const i = viewableItems[0]?.index;
-      if (i != null && i !== activeRef.current) {
-        activeRef.current = i;
-        setActive(i);
-      }
-    },
-    [],
-  );
-
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 72,
-  }).current;
 
   const scrollToIndex = useCallback(
     (index: number, animated: boolean) => {
       const clamped = ((index % SLIDES.length) + SLIDES.length) % SLIDES.length;
-      listRef.current?.scrollToOffset({ offset: clamped * width, animated });
+      listRef.current?.scrollToOffset({ offset: clamped * pageW, animated });
       activeRef.current = clamped;
-      setActive(clamped);
     },
-    [width],
+    [pageW],
   );
 
   useEffect(() => {
@@ -99,9 +95,8 @@ export default function AppEntryScreen() {
 
   const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = e.nativeEvent.contentOffset.x;
-    const i = Math.round(x / width);
+    const i = Math.round(x / pageW);
     activeRef.current = i;
-    setActive(i);
     setTimeout(() => {
       userScrolling.current = false;
     }, 400);
@@ -109,9 +104,8 @@ export default function AppEntryScreen() {
 
   const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = e.nativeEvent.contentOffset.x;
-    const i = Math.round(x / width);
+    const i = Math.round(x / pageW);
     activeRef.current = i;
-    setActive(i);
     userScrolling.current = false;
   };
 
@@ -130,7 +124,7 @@ export default function AppEntryScreen() {
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
-      <View style={styles.carousel}>
+      <View style={[styles.carousel, bleedStyle]}>
         <FlatList
           ref={listRef}
           data={SLIDES}
@@ -144,15 +138,18 @@ export default function AppEntryScreen() {
           onScrollBeginDrag={onScrollBeginDrag}
           onScrollEndDrag={onScrollEndDrag}
           onMomentumScrollEnd={onMomentumScrollEnd}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
           getItemLayout={(_, index) => ({
-            length: width,
-            offset: width * index,
+            length: pageW,
+            offset: pageW * index,
             index,
           })}
           renderItem={({ item }) => (
-            <Image source={{ uri: item.uri }} style={{ width, height }} contentFit="cover" priority="high" />
+            <Image
+              source={{ uri: item.uri }}
+              style={{ width: pageW, height: pageH }}
+              contentFit="cover"
+              priority="high"
+            />
           )}
           decelerationRate="fast"
         />
@@ -166,29 +163,22 @@ export default function AppEntryScreen() {
           fadeFromBackground(colors, 0.97),
         ]}
         locations={[0, 0.35, 0.72, 1]}
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, bleedStyle]}
         pointerEvents="none"
       />
 
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-        <View style={styles.top}>
-          <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
-          <AppText variant="display" color="text" style={styles.brand}>
-            Vibook
-          </AppText>
-          <AppText variant="body" color="textSecondary" style={styles.tagline}>
-            {t('entry.tagline')}
-          </AppText>
-        </View>
+        <View style={styles.topSpacer} />
 
         <View style={styles.bottom}>
-          <View style={styles.dots}>
-            {SLIDES.map((s, i) => (
-              <View
-                key={s.key}
-                style={[styles.dot, i === active ? styles.dotOn : styles.dotOff]}
-              />
-            ))}
+          <View style={[styles.brandBlock, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <AppText
+              variant="display"
+              color="textSecondary"
+              style={[styles.tagline, { textAlign: isRTL ? 'right' : 'left' }]}
+            >
+              {t('entry.tagline')}
+            </AppText>
           </View>
           <PrimaryButton title={t('entry.loginSignup')} onPress={goAuth} style={btnShape} />
           <SecondaryButton title={t('entry.browseFirst')} onPress={browseFirst} style={btnShape} />
@@ -201,42 +191,32 @@ export default function AppEntryScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  carousel: { ...StyleSheet.absoluteFillObject },
+  /** Position + outsets applied in JSX via `bleedStyle` for edge-to-edge photos. */
+  carousel: {},
   carouselList: { flex: 1 },
   safe: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'space-between',
+    flexDirection: 'column',
   },
-  top: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.screen,
-    paddingTop: spacing.md,
+  /** Fills space so headline + controls sit at the bottom of the screen. */
+  topSpacer: { flex: 1, minHeight: 0 },
+  brandBlock: {
+    alignItems: 'flex-start',
+    width: '100%',
   },
-  brandLogo: {
-    width: 104,
-    height: 104,
-    marginBottom: spacing.lg,
+  /** Hero headline — intentionally large for the welcome screen. */
+  tagline: {
+    width: '100%',
+    fontSize: 32,
+    lineHeight: 40,
+    letterSpacing: -0.6,
   },
-  brand: { marginBottom: spacing.sm },
-  tagline: { textAlign: 'center', lineHeight: 24, maxWidth: 320 },
   bottom: {
+    flexShrink: 0,
     paddingHorizontal: spacing.screen,
     paddingBottom: spacing.md,
     gap: spacing.md,
     width: '100%',
   },
-  dots: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    gap: 8,
-    marginBottom: spacing.sm,
-  },
-  dot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-  },
-  dotOn: { backgroundColor: colors.accent, width: 22 },
-  dotOff: { backgroundColor: colors.textMuted, opacity: 0.45 },
   });
 }

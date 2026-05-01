@@ -7,6 +7,7 @@ import com.vibook.backend.entity.BusinessProfileStatus;
 import com.vibook.backend.entity.Category;
 import com.vibook.backend.entity.Governorate;
 import com.vibook.backend.entity.User;
+import com.vibook.backend.exception.BadRequestException;
 import com.vibook.backend.exception.NotFoundException;
 import com.vibook.backend.exception.UnauthorizedException;
 import com.vibook.backend.mapper.BusinessProfileMapper;
@@ -82,9 +83,52 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
                 return created;
             });
 
+        BusinessProfileStatus previousStatus = entity.getStatus();
         businessProfileMapper.updateEntity(entity, request, category, governorate);
+        if (previousStatus == BusinessProfileStatus.APPROVED) {
+            entity.setStatus(BusinessProfileStatus.DRAFT);
+            entity.setRejectionReason(null);
+        }
         BusinessProfile saved = businessProfileRepository.save(entity);
         return businessProfileMapper.toResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public BusinessProfileResponse submitMyProfileForReview() {
+        User user = getCurrentAuthenticatedUser();
+        BusinessProfile entity = businessProfileRepository
+            .findByUser(user)
+            .orElseThrow(() -> new NotFoundException("Business profile not found"));
+
+        if (entity.getStatus() != BusinessProfileStatus.DRAFT && entity.getStatus() != BusinessProfileStatus.REJECTED) {
+            throw new BadRequestException("Only draft or rejected profiles can be submitted for review");
+        }
+
+        validateReadyForReview(entity);
+
+        entity.setStatus(BusinessProfileStatus.PENDING_REVIEW);
+        entity.setRejectionReason(null);
+        BusinessProfile saved = businessProfileRepository.save(entity);
+        return businessProfileMapper.toResponse(saved);
+    }
+
+    private static void validateReadyForReview(BusinessProfile p) {
+        if (!org.springframework.util.StringUtils.hasText(p.getBusinessName())) {
+            throw new BadRequestException("Business name is required before submission");
+        }
+        if (p.getPrimaryCategory() == null) {
+            throw new BadRequestException("Primary category is required before submission");
+        }
+        if (p.getGovernorate() == null) {
+            throw new BadRequestException("Governorate is required before submission");
+        }
+        if (!org.springframework.util.StringUtils.hasText(p.getPhone()) && !org.springframework.util.StringUtils.hasText(p.getWorkEmail())) {
+            throw new BadRequestException("Work phone or work email is required before submission");
+        }
+        if (!org.springframework.util.StringUtils.hasText(p.getDescription())) {
+            throw new BadRequestException("Description is required before submission");
+        }
     }
 
     @Override

@@ -7,11 +7,13 @@ import com.vibook.backend.entity.BusinessEvent;
 import com.vibook.backend.entity.BusinessEventPhoto;
 import com.vibook.backend.entity.BusinessEventTimeSlot;
 import com.vibook.backend.entity.BusinessProfile;
+import com.vibook.backend.entity.BusinessProfileStatus;
 import com.vibook.backend.entity.Governorate;
 import com.vibook.backend.entity.RoleName;
 import com.vibook.backend.entity.Subcategory;
 import com.vibook.backend.entity.User;
 import com.vibook.backend.exception.BadRequestException;
+import com.vibook.backend.exception.ForbiddenException;
 import com.vibook.backend.exception.NotFoundException;
 import com.vibook.backend.exception.UnauthorizedException;
 import com.vibook.backend.mapper.BusinessEventMapper;
@@ -68,6 +70,10 @@ public class BusinessEventServiceImpl implements BusinessEventService {
         BusinessProfile profile = businessProfileRepository
             .findByUser(user)
             .orElseThrow(() -> new NotFoundException("Business profile not found"));
+
+        if (!isAdmin(user) && profile.getStatus() != BusinessProfileStatus.APPROVED) {
+            throw new ForbiddenException("Your business profile must be approved before you can create events");
+        }
 
         Subcategory subcategory = subcategoryRepository
             .findById(request.subcategoryId())

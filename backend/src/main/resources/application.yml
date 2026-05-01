@@ -24,6 +24,11 @@ vibook:
   demo:
     # Set to true to auto-create a sample CONFIRMED booking (first user + first event) for rating API tests.
     rating-data: false
+  # Dev-friendly CORS for Expo / local web. Tighten allowed-origin-patterns in production.
+  cors:
+    allowed-origin-patterns:
+      - "http://localhost:*"
+      - "http://127.0.0.1:*"
 
 app:
   upload:

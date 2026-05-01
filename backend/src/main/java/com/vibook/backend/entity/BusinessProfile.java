@@ -75,6 +75,10 @@ public class BusinessProfile {
     @Column(nullable = false, length = 32)
     private BusinessProfileStatus status = BusinessProfileStatus.DRAFT;
 
+    /** Set when an admin rejects the profile; cleared on resubmit / approve. */
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
     @Column(nullable = false)
     private Instant createdAt;
 

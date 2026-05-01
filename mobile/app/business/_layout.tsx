@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { nativeStackDrillInTransition } from '@/navigation/transitionPresets';
 import { useThemeColors } from '@/theme';
 
 export default function BusinessStackLayout() {
@@ -8,7 +9,7 @@ export default function BusinessStackLayout() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
-        animation: 'slide_from_right',
+        ...nativeStackDrillInTransition,
       }}
     />
   );

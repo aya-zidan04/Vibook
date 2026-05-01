@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -107,6 +108,23 @@ public class GlobalExceptionHandler {
             null
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(
+        DataIntegrityViolationException ex,
+        HttpServletRequest request
+    ) {
+        log.warn("Data integrity violation at {}: {}", request.getRequestURI(), ex.getMostSpecificCause().getMessage());
+        ErrorResponse response = new ErrorResponse(
+            Instant.now(),
+            HttpStatus.CONFLICT.value(),
+            "Conflict",
+            "Duplicate or invalid data constraint.",
+            request.getRequestURI(),
+            null
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

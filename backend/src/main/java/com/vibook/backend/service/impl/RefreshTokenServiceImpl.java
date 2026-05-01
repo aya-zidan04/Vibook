@@ -7,6 +7,7 @@ import com.vibook.backend.repository.RefreshTokenRepository;
 import com.vibook.backend.service.RefreshTokenService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,5 +43,24 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new UnauthorizedException("Refresh token is expired or revoked");
         }
         return refreshToken;
+    }
+
+    @Override
+    @Transactional
+    public void revokeRefreshToken(String token) {
+        refreshTokenRepository.findByToken(token.trim()).ifPresent(rt -> {
+            rt.setRevoked(true);
+            refreshTokenRepository.save(rt);
+        });
+    }
+
+    @Override
+    @Transactional
+    public void revokeAllRefreshTokensForUser(User user) {
+        List<RefreshToken> tokens = refreshTokenRepository.findAllByUser(user);
+        for (RefreshToken rt : tokens) {
+            rt.setRevoked(true);
+        }
+        refreshTokenRepository.saveAll(tokens);
     }
 }

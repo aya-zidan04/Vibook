@@ -3,6 +3,7 @@ import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BusinessTabBar } from '@/components/navigation/BusinessTabBar';
 import { useTranslation } from '@/i18n/useTranslation';
+import { bottomTabSoftCrossFade } from '@/navigation/transitionPresets';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import { useThemeColors } from '@/theme';
 
@@ -70,7 +71,11 @@ export default function BusinessDashboardLayout() {
   const opt = (name: string) => partnerTabOptions(name, t, colors);
 
   return (
-    <Tabs initialRouteName="home" tabBar={renderPartnerTabBar}>
+    <Tabs
+      initialRouteName="home"
+      tabBar={renderPartnerTabBar}
+      screenOptions={bottomTabSoftCrossFade}
+    >
       <Tabs.Screen name="home" options={opt('home')} />
       <Tabs.Screen name="events" options={opt('events')} />
       <Tabs.Screen name="bookings" options={opt('bookings')} />

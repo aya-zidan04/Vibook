@@ -9,7 +9,10 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +43,25 @@ public class PaymentMethodController {
     ) {
         requirePrincipal(principal);
         return ResponseEntity.ok(paymentMethodService.getMyPaymentMethods(principal.getUsername()));
+    }
+
+    @PatchMapping("/{id}/default")
+    public ResponseEntity<PaymentMethodResponse> setDefault(
+        @AuthenticationPrincipal AuthenticatedUser principal,
+        @PathVariable Long id
+    ) {
+        requirePrincipal(principal);
+        return ResponseEntity.ok(paymentMethodService.setDefaultPaymentMethod(principal.getUsername(), id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+        @AuthenticationPrincipal AuthenticatedUser principal,
+        @PathVariable Long id
+    ) {
+        requirePrincipal(principal);
+        paymentMethodService.deletePaymentMethod(principal.getUsername(), id);
+        return ResponseEntity.noContent().build();
     }
 
     private static void requirePrincipal(AuthenticatedUser principal) {

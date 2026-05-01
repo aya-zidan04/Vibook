@@ -31,7 +31,8 @@ public class BusinessProfileMapper {
             entity.getWebsite(),
             entity.getStatus(),
             entity.getCreatedAt(),
-            entity.getUpdatedAt()
+            entity.getUpdatedAt(),
+            entity.getRejectionReason()
         );
     }
 

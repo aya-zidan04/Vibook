@@ -20,6 +20,7 @@ public record BusinessProfileResponse(
     String website,
     BusinessProfileStatus status,
     Instant createdAt,
-    Instant updatedAt
+    Instant updatedAt,
+    String rejectionReason
 ) {
 }

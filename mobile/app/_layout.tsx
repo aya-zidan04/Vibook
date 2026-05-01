@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RtlLayout } from '@/components/layout/RtlLayout';
+import { nativeStackFadeTransition } from '@/navigation/transitionPresets';
 import { useThemeColors } from '@/theme';
 
 export default function RootLayout() {
@@ -17,7 +18,7 @@ export default function RootLayout() {
             screenOptions={{
               headerShown: false,
               contentStyle: { backgroundColor: colors.background },
-              animation: 'fade',
+              ...nativeStackFadeTransition,
             }}
           />
         </RtlLayout>

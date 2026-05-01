@@ -3,6 +3,7 @@ import { Platform, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n/useTranslation';
+import { bottomTabSoftCrossFade } from '@/navigation/transitionPresets';
 import { createShadows, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -17,6 +18,7 @@ export default function TabsLayout() {
       initialRouteName="explore"
       screenOptions={{
         headerShown: false,
+        ...bottomTabSoftCrossFade,
         tabBarStyle: [
           styles.tabBar,
           {

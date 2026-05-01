@@ -57,19 +57,35 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
-                // Public authentication endpoints
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
+                // Public authentication endpoints (logout accepts refresh token without access token)
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/v1/auth/register",
+                    "/api/v1/auth/login",
+                    "/api/v1/auth/refresh",
+                    "/api/v1/auth/logout"
+                ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/categories", "/api/v1/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/governorates", "/api/v1/governorates/**").permitAll()
-                // Public event view + ratings (authenticated users)
+                .requestMatchers(HttpMethod.POST, "/api/v1/governorates").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/governorates/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/governorates/**").hasRole("ADMIN")
+                // Event discovery + detail + ratings (authenticated — consistent with existing detail endpoint)
+                .requestMatchers(HttpMethod.GET, "/api/v1/events").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/events/*").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/events/*/rate").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/profile-images/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-logos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-banners/**").permitAll()
+                // Bookings
+                .requestMatchers("/api/v1/bookings/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/v1/business/bookings/**").hasAnyRole("USER", "ADMIN")
+                // Admin business onboarding
+                .requestMatchers("/api/v1/admin/business-profiles/**").hasRole("ADMIN")
                 // Business profile (owner)
                 .requestMatchers(HttpMethod.GET, "/api/v1/business-profile/me").hasRole("USER")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/business-profile/me").hasRole("USER")
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/business-profile/me/submit").hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/business-profile/me/logo").hasRole("USER")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/business-profile/me/logo").hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/business-profile/me/banner").hasRole("USER")
@@ -82,8 +98,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/me").hasRole("USER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/me/payment-methods").hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/users/me/payment-methods").hasRole("USER")
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/users/me/payment-methods/**").hasRole("USER")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/payment-methods/**").hasRole("USER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/users/me/profile-image").hasRole("USER")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/profile-image").hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout-all").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/*").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*").hasRole("ADMIN")

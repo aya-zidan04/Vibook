@@ -7,6 +7,8 @@ import com.vibook.backend.entity.User;
 import com.vibook.backend.repository.BookingRepository;
 import com.vibook.backend.repository.BusinessEventRepository;
 import com.vibook.backend.repository.UserRepository;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -37,12 +39,20 @@ public class RatingDemoDataConfigurer {
             BusinessEvent event = businessEventRepository
                 .findById(eventOpt.get().getId())
                 .orElse(eventOpt.get());
-            if (bookingRepository.existsByUserAndBusinessEvent(user, event)) {
+            if (
+                bookingRepository.existsByUserAndBusinessEventAndStatusIn(
+                    user,
+                    event,
+                    List.of(BookingStatus.CONFIRMED, BookingStatus.COMPLETED)
+                )
+            ) {
                 return;
             }
             Booking booking = new Booking();
             booking.setUser(user);
             booking.setBusinessEvent(event);
+            booking.setGuestsCount(1);
+            booking.setTotalPriceJod(event.getPriceJod() != null ? event.getPriceJod() : BigDecimal.ZERO);
             booking.setStatus(BookingStatus.CONFIRMED);
             bookingRepository.save(booking);
         };

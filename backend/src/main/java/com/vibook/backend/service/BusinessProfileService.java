@@ -17,4 +17,7 @@ public interface BusinessProfileService {
     BusinessProfileResponse uploadBanner(MultipartFile image);
 
     BusinessProfileResponse deleteBanner();
+
+    /** Moves {@link com.vibook.backend.entity.BusinessProfileStatus#DRAFT} or {@code REJECTED} to {@code PENDING_REVIEW}. */
+    BusinessProfileResponse submitMyProfileForReview();
 }

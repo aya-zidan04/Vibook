@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,23 @@ public class Booking {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
     private BusinessEvent businessEvent;
+
+    /** Optional; must belong to {@link #businessEvent} when set. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_slot_id")
+    private BusinessEventTimeSlot timeSlot;
+
+    @Column(name = "guests_count", nullable = false)
+    private int guestsCount = 1;
+
+    @Column(name = "total_price_jod", nullable = false, precision = 14, scale = 2)
+    private BigDecimal totalPriceJod = BigDecimal.ZERO;
+
+    @Column(length = 500)
+    private String note;
+
+    @Column(name = "cancel_reason", length = 500)
+    private String cancelReason;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)

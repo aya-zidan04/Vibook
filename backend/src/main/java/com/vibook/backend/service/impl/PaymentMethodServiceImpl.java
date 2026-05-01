@@ -76,6 +76,46 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
             .toList();
     }
 
+    @Override
+    @Transactional
+    public PaymentMethodResponse setDefaultPaymentMethod(String userEmail, Long paymentMethodId) {
+        User user = userRepository
+            .findByEmail(userEmail)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+        PaymentMethod target = paymentMethodRepository
+            .findByIdAndUser_Id(paymentMethodId, user.getId())
+            .orElseThrow(() -> new NotFoundException("Payment method not found"));
+        List<PaymentMethod> all = paymentMethodRepository.findByUserOrderByCreatedAtDesc(user);
+        for (PaymentMethod pm : all) {
+            pm.setDefault(pm.getId().equals(target.getId()));
+        }
+        paymentMethodRepository.saveAll(all);
+        return paymentMethodMapper.toResponse(
+            paymentMethodRepository.findByIdAndUser_Id(paymentMethodId, user.getId()).orElseThrow()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void deletePaymentMethod(String userEmail, Long paymentMethodId) {
+        User user = userRepository
+            .findByEmail(userEmail)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+        PaymentMethod target = paymentMethodRepository
+            .findByIdAndUser_Id(paymentMethodId, user.getId())
+            .orElseThrow(() -> new NotFoundException("Payment method not found"));
+        boolean wasDefault = target.isDefault();
+        paymentMethodRepository.delete(target);
+        if (wasDefault) {
+            List<PaymentMethod> remaining = paymentMethodRepository.findByUserOrderByCreatedAtDesc(user);
+            if (!remaining.isEmpty()) {
+                PaymentMethod next = remaining.get(0);
+                next.setDefault(true);
+                paymentMethodRepository.save(next);
+            }
+        }
+    }
+
     private static String detectBrand(String digitsOnly) {
         if (digitsOnly.isEmpty()) {
             return "CARD";

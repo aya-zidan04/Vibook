@@ -693,7 +693,7 @@ export const translations = {
       subtitle: 'Auth shell — Phase 2 wires forms & tokens here.',
     },
     entry: {
-      tagline: 'Events, dining, stays & experiences — curated for you.',
+      tagline: 'Because great moments deserve better planning',
       loginSignup: 'Log in / Sign up',
       browseFirst: 'Browse first',
     },
@@ -1491,7 +1491,7 @@ export const translations = {
       subtitle: 'هيكل تسجيل — المرحلة 2 تربط النماذج والرموز هنا.',
     },
     entry: {
-      tagline: 'فعاليات ومطاعم وإقامات وتجارب — مختارة لك.',
+      tagline: 'لأن اللحظات العظيمة تستحق تخطيطاً أفضل',
       loginSignup: 'تسجيل الدخول / إنشاء حساب',
       browseFirst: 'تصفح أولاً',
     },
