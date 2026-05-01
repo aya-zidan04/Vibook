@@ -9,6 +9,7 @@ com/vibook/backend/config/RoleSeederConfig.class
 com/vibook/backend/mapper/CategoryMapper.class
 com/vibook/backend/exception/ForbiddenException.class
 com/vibook/backend/dto/GovernorateRequest.class
+com/vibook/backend/controller/FavoriteController.class
 com/vibook/backend/service/impl/EventRatingServiceImpl.class
 com/vibook/backend/service/GovernorateService.class
 com/vibook/backend/repository/RefreshTokenRepository.class
@@ -36,14 +37,17 @@ com/vibook/backend/BackendApplication.class
 com/vibook/backend/entity/EventRating.class
 com/vibook/backend/entity/BusinessEventPhoto.class
 com/vibook/backend/entity/BusinessEvent.class
+com/vibook/backend/mapper/FavoriteMapper.class
 com/vibook/backend/dto/UpdateUserRequest.class
 com/vibook/backend/config/SecurityConfig.class
 com/vibook/backend/service/CategoryService.class
 com/vibook/backend/controller/CategoryController.class
+com/vibook/backend/service/FavoriteService.class
 com/vibook/backend/service/impl/AuthServiceImpl.class
 com/vibook/backend/dto/LogoutRequest.class
 com/vibook/backend/dto/SubcategoryResponse.class
 com/vibook/backend/service/ConsumerEventService.class
+com/vibook/backend/dto/FavoriteEventResponse.class
 com/vibook/backend/service/UserService.class
 com/vibook/backend/service/AdminBusinessProfileService.class
 com/vibook/backend/repository/BusinessEventRepository.class
@@ -57,6 +61,7 @@ com/vibook/backend/dto/BusinessProfileResponse.class
 com/vibook/backend/entity/Subcategory.class
 com/vibook/backend/entity/Governorate.class
 com/vibook/backend/dto/RegisterRequest.class
+com/vibook/backend/repository/FavoriteRepository.class
 com/vibook/backend/entity/RoleName.class
 com/vibook/backend/repository/BusinessProfileRepository.class
 com/vibook/backend/security/RestAuthenticationEntryPoint.class
@@ -76,6 +81,7 @@ com/vibook/backend/entity/User.class
 com/vibook/backend/repository/RoleRepository.class
 com/vibook/backend/service/impl/CategoryServiceImpl.class
 com/vibook/backend/mapper/BusinessProfileMapper.class
+com/vibook/backend/dto/FavoriteResponse.class
 com/vibook/backend/dto/PaymentMethodResponse.class
 com/vibook/backend/repository/UserRepository.class
 com/vibook/backend/controller/BookingController.class
@@ -84,6 +90,7 @@ com/vibook/backend/controller/AuthController.class
 com/vibook/backend/entity/BusinessProfileStatus.class
 com/vibook/backend/repository/BookingRepository.class
 com/vibook/backend/service/impl/ConsumerEventServiceImpl.class
+com/vibook/backend/service/impl/FavoriteServiceImpl.class
 com/vibook/backend/controller/BusinessEventController.class
 com/vibook/backend/dto/EventRatingRequest.class
 com/vibook/backend/config/CorsProperties.class
@@ -101,6 +108,7 @@ com/vibook/backend/repository/SubcategoryRepository.class
 com/vibook/backend/dto/BookingStatusUpdateRequest.class
 com/vibook/backend/service/impl/GovernorateServiceImpl.class
 com/vibook/backend/service/impl/AdminBusinessProfileServiceImpl.class
+com/vibook/backend/entity/Favorite.class
 com/vibook/backend/controller/PaymentMethodController.class
 com/vibook/backend/service/JwtService.class
 com/vibook/backend/dto/CategoryResponse.class
@@ -108,6 +116,7 @@ com/vibook/backend/entity/BusinessEventTimeSlot.class
 com/vibook/backend/dto/MessageResponse.class
 com/vibook/backend/security/JwtAuthenticationFilter.class
 com/vibook/backend/repository/BusinessEventTimeSlotRepository.class
+com/vibook/backend/dto/FavoriteStatusResponse.class
 com/vibook/backend/controller/AdminBusinessProfileController.class
 com/vibook/backend/dto/BusinessProfileUpsertRequest.class
 com/vibook/backend/service/AuthService.class

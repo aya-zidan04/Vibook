@@ -17,6 +17,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/BusinessProfileController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/CategoryController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/EventRatingController.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/FavoriteController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/GovernorateController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/PaymentMethodController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/UserController.java
@@ -35,6 +36,9 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/ErrorResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/EventRatingRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/EventRatingResponse.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/FavoriteEventResponse.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/FavoriteResponse.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/FavoriteStatusResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/GovernorateRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/GovernorateResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/LoginRequest.java
@@ -57,6 +61,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/entity/BusinessProfileStatus.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/entity/Category.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/entity/EventRating.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/entity/Favorite.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/entity/Governorate.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/entity/PaymentMethod.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/entity/RefreshToken.java
@@ -75,6 +80,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/mapper/BusinessProfileMapper.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/mapper/CategoryMapper.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/mapper/EventRatingMapper.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/mapper/FavoriteMapper.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/mapper/GovernorateMapper.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/mapper/PaymentMethodMapper.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/mapper/UserMapper.java
@@ -84,6 +90,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/BusinessProfileRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/CategoryRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/EventRatingRepository.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/FavoriteRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/GovernorateRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/PaymentMethodRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/RefreshTokenRepository.java
@@ -102,6 +109,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/CategoryService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/ConsumerEventService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/EventRatingService.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/FavoriteService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/GovernorateService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/JwtService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/PaymentMethodService.java
@@ -116,6 +124,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/CategoryServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/ConsumerEventServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/EventRatingServiceImpl.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/FavoriteServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/GovernorateServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/JwtServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/PaymentMethodServiceImpl.java

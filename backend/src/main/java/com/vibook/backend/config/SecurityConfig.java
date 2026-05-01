@@ -80,6 +80,8 @@ public class SecurityConfig {
                 // Bookings
                 .requestMatchers("/api/v1/bookings/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/business/bookings/**").hasAnyRole("USER", "ADMIN")
+                // Consumer favorites / wishlist
+                .requestMatchers("/api/v1/favorites/**").hasAnyRole("USER", "ADMIN")
                 // Admin business onboarding
                 .requestMatchers("/api/v1/admin/business-profiles/**").hasRole("ADMIN")
                 // Business profile (owner)
