@@ -56,7 +56,7 @@ export default function CheckoutScreen() {
                   {draft.metaLine}
                 </AppText>
               ) : null}
-              <AppText variant="meta" color="textMuted" style={{ textTransform: 'capitalize' }}>
+              <AppText variant="label" color="textMuted" style={{ textTransform: 'capitalize' }}>
                 {draft.vertical}
               </AppText>
             </View>
@@ -97,7 +97,7 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
       <AppText variant="body" color="textSecondary">
         {label}
       </AppText>
-      <AppText variant={bold ? 'price' : 'bodyMedium'} color="text">
+      <AppText variant={bold ? 'price' : 'body-em'} color="text">
         {value}
       </AppText>
     </View>
@@ -106,7 +106,7 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   shell: { flex: 1, paddingHorizontal: spacing.screen },
   scroll: { flex: 1 },
   content: { paddingBottom: spacing.xxxl, gap: spacing.lg },
@@ -115,7 +115,7 @@ function createStyles(colors: ThemeColors) {
     flexDirection: 'row',
     gap: spacing.md,
     padding: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     borderRadius: radii.xl,
     borderWidth: 1,
     borderColor: colors.border,

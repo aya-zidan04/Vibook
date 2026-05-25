@@ -8,6 +8,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { chevronForwardTrailing } from '@/utils/rtl';
+import { textAlignStart } from '@/utils/rtlText';
 
 type Props = {
   label: string;
@@ -42,11 +43,7 @@ export function GovernorateSelectField({
 
   return (
     <View style={styles.wrap}>
-      <AppText
-        variant="caption"
-        color="text"
-        style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}
-      >
+      <AppText variant="label" color="text" style={{ textAlign: textAlignStart(isRTL) }}>
         {label}
       </AppText>
       <Pressable
@@ -67,7 +64,7 @@ export function GovernorateSelectField({
         <AppText
           variant="body"
           color="text"
-          style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}
+          style={[styles.value, { textAlign: textAlignStart(isRTL) }]}
           numberOfLines={1}
         >
           {displayLabel}
@@ -89,7 +86,6 @@ export function GovernorateSelectField({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     wrap: { gap: spacing.xs, marginBottom: spacing.md },
-    label: { fontWeight: '600' },
     field: {
       flexDirection: 'row',
       alignItems: 'center',

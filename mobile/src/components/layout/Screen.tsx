@@ -1,8 +1,6 @@
 import { ReactNode, useMemo } from 'react';
 import { ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeColors } from '@/theme';
-import type { ThemeColors } from '@/theme/palettes';
 import { spacing } from '@/theme';
 
 type Props = {
@@ -21,12 +19,11 @@ export function Screen({
   edges = ['top', 'left', 'right'],
   header,
 }: Props) {
-  const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(), []);
 
   const headerBlock =
     header != null ? (
-      <View style={[styles.headerChrome, { backgroundColor: colors.background }]}>{header}</View>
+      <View style={styles.headerChrome}>{header}</View>
     ) : null;
 
   if (scroll) {
@@ -61,11 +58,11 @@ export function Screen({
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles() {
   return StyleSheet.create({
     safe: {
       flex: 1,
-      backgroundColor: colors.background,
+      backgroundColor: 'transparent',
     },
     flex: { flex: 1 },
     headerChrome: {

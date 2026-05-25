@@ -1,18 +1,17 @@
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
-import { DetailHeader } from '@/components/layout/DetailHeader';
-import { Screen } from '@/components/layout/Screen';
+import { PremiumScreen } from '@/components/sheet/PremiumScreen';
+import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useMockUser } from '@/hooks/useMockUser';
 import { TIER_TO_PLAN_ID, getPlanById } from '@/services/mock';
 import type { User } from '@/types';
-import { radii, spacing, useThemeColors } from '@/theme';
-import type { ThemeColors } from '@/theme/palettes';
+import { spacing, useThemeColors } from '@/theme';
 
 const TIER_LABEL_KEY: Record<User['membershipTier'], string> = {
   standard: 'membership.tierStandard',
@@ -22,7 +21,7 @@ const TIER_LABEL_KEY: Record<User['membershipTier'], string> = {
 
 export default function MembershipScreen() {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createPremiumSheetStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const { user } = useMockUser();
@@ -32,9 +31,11 @@ export default function MembershipScreen() {
   const mockPlan = getPlanById(planId);
 
   return (
-    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('membership.title')} />}>
+    <PremiumScreen title={t('membership.title')}>
       <LinearGradient colors={[colors.primaryMuted, 'transparent']} style={styles.hero}>
-        <Ionicons name="diamond-outline" size={36} color={colors.accent} style={styles.heroIcon} />
+        <View style={[styles.iconCircle, { alignSelf: 'flex-start', marginBottom: spacing.xs }]}>
+          <Ionicons name="diamond-outline" size={28} color={colors.accent} />
+        </View>
         <AppText variant="overline" color="accent">
           {t('membership.currentLabel')}
         </AppText>
@@ -47,14 +48,14 @@ export default function MembershipScreen() {
       </LinearGradient>
 
       {mockPlan ? (
-        <View style={styles.perks}>
+        <View style={[styles.insetCard, { gap: spacing.md }]}>
           <AppText variant="h3" color="text">
             {t('membership.perksIntro')}
           </AppText>
           {mockPlan.benefitKeys.map((key) => (
-            <View key={key} style={styles.perkRow}>
+            <View key={key} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
               <Ionicons name="checkmark-circle" size={20} color={colors.accent} />
-              <AppText variant="body" color="textSecondary" style={styles.perkTxt}>
+              <AppText variant="body" color="textSecondary" style={{ flex: 1, lineHeight: 22 }}>
                 {t(key)}
               </AppText>
             </View>
@@ -62,31 +63,7 @@ export default function MembershipScreen() {
         </View>
       ) : null}
 
-      <PrimaryButton title={t('membership.compareCta')} onPress={() => router.push('/membership/plans')} />
-    </Screen>
+      <PrimaryButton sheet title={t('membership.compareCta')} onPress={() => router.push('/membership/plans')} />
+    </PremiumScreen>
   );
-}
-
-function createStyles(colors: ThemeColors) {
-  return StyleSheet.create({
-    pad: { paddingTop: spacing.md, gap: spacing.lg },
-    hero: {
-      padding: spacing.xl,
-      borderRadius: radii.xxl,
-      borderWidth: 1,
-      borderColor: colors.border,
-      gap: spacing.sm,
-    },
-    heroIcon: { marginBottom: spacing.xs },
-    perks: {
-      padding: spacing.lg,
-      borderRadius: radii.xl,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      gap: spacing.md,
-    },
-    perkRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-    perkTxt: { flex: 1, lineHeight: 22 },
-  });
 }

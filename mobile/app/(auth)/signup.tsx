@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField, PasswordToggleIcon } from '@/components/auth/AuthTextField';
@@ -92,7 +92,7 @@ export default function SignupScreen() {
     })();
   };
 
-  const btnFull = { borderRadius: radii.lg, width: '100%' as const };
+  const btnFull = { width: '100%' as const };
 
   return (
     <Screen scroll edges={['top', 'right', 'left', 'bottom']} contentStyle={styles.scroll}>
@@ -168,10 +168,10 @@ export default function SignupScreen() {
         textInputStyle={styles.phoneInput}
         leftSlot={
           <View style={styles.phonePrefix}>
-            <AppText variant="bodyMedium" style={styles.flag}>
+            <AppText variant="h2">
               🇯🇴
             </AppText>
-            <AppText variant="bodyMedium" color="textSecondary">
+            <AppText variant="body-em" color="textSecondary">
               +962
             </AppText>
             <View style={styles.phoneSep} />
@@ -188,17 +188,27 @@ export default function SignupScreen() {
         <View style={[styles.checkbox, terms && styles.checkboxOn]}>
           {terms ? <Ionicons name="checkmark" size={16} color={colors.text} /> : null}
         </View>
-        <Text style={styles.termsText}>
+        <AppText variant="caption" color="textSecondary" style={styles.termsText}>
           {t('auth.agreePrefix')}{' '}
-          <Text style={styles.link} onPress={() => Alert.alert(t('auth.termsMockTitle'), t('auth.termsMockBody'))}>
+          <AppText
+            variant="caption"
+            color="accent"
+            style={styles.link}
+            onPress={() => Alert.alert(t('auth.termsMockTitle'), t('auth.termsMockBody'))}
+          >
             {t('auth.terms')}
-          </Text>{' '}
+          </AppText>{' '}
           {t('auth.and')}{' '}
-          <Text style={styles.link} onPress={() => Alert.alert(t('auth.privacy'), t('auth.termsMockBody'))}>
+          <AppText
+            variant="caption"
+            color="accent"
+            style={styles.link}
+            onPress={() => Alert.alert(t('auth.privacy'), t('auth.termsMockBody'))}
+          >
             {t('auth.privacy')}
-          </Text>
+          </AppText>
           .
-        </Text>
+        </AppText>
       </Pressable>
 
       <PrimaryButton
@@ -246,7 +256,6 @@ function createStyles(colors: ThemeColors) {
   },
   title: {
     marginBottom: spacing.xl,
-    letterSpacing: -0.3,
   },
   nameRow: {
     flexDirection: 'row',
@@ -260,10 +269,7 @@ function createStyles(colors: ThemeColors) {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingLeft: spacing.sm,
-  },
-  flag: {
-    fontSize: 20,
+    paddingStart: spacing.sm,
   },
   phoneSep: {
     width: 1,
@@ -299,9 +305,6 @@ function createStyles(colors: ThemeColors) {
   },
   termsText: {
     flex: 1,
-    color: colors.textSecondary,
-    fontSize: 14,
-    lineHeight: 22,
   },
   link: {
     color: colors.accent,

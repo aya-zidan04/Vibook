@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { UserResponse } from '@/api/types';
+import { resolveApiBaseUrl } from '@/api/resolveApiBaseUrl';
 
 const TOKEN_KEY = 'vibook_admin_access_token';
 const USER_KEY = 'vibook_admin_user';
@@ -34,24 +35,7 @@ export function setStoredUser(user: UserResponse | null): void {
   }
 }
 
-/**
- * Resolves API root. Must end with `/api/v1` to match Spring controllers.
- * - If unset: `/api/v1` (same origin — use Vite proxy in dev).
- * - If set to `http://host:8080` without path, `/api/v1` is appended automatically.
- */
-function resolveApiBaseUrl(): string {
-  const raw = import.meta.env.VITE_API_BASE_URL?.trim();
-  if (!raw) {
-    return '/api/v1';
-  }
-  let base = raw.replace(/\/+$/, '');
-  if (!base.endsWith('/api/v1')) {
-    base = `${base}/api/v1`;
-  }
-  return base;
-}
-
-const baseURL = resolveApiBaseUrl();
+const baseURL = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 if (import.meta.env.DEV) {
   console.info('[admin-web] API base URL:', baseURL);

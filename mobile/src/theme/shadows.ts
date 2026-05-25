@@ -1,43 +1,41 @@
 import { Platform, ViewStyle } from 'react-native';
-import { darkPalette } from './palettes';
-import type { ThemeColors } from './palettes';
+import { darkTheme, lightTheme, themeForMode, type ThemeShadowTokens } from './designSystem';
+import { darkPalette, type ThemeColors } from './palettes';
+import type { ColorScheme } from '@/store/themeStore';
 
-const ios = (
-  opacity: number,
-  radius: number,
-  y: number,
-  elevation: number,
-  color?: string,
-): ViewStyle =>
-  Platform.select({
+function tokenToViewStyle(t: ThemeShadowTokens['sm']): ViewStyle {
+  return Platform.select({
     ios: {
-      shadowColor: color ?? '#000000',
-      shadowOffset: { width: 0, height: y },
-      shadowOpacity: opacity,
-      shadowRadius: radius,
+      shadowColor: t.color,
+      shadowOffset: { width: 0, height: t.offsetY },
+      shadowOpacity: t.opacity,
+      shadowRadius: t.radius,
     },
-    android: { elevation },
-    default: { elevation },
-  }) ?? { elevation };
+    android: { elevation: t.elevation },
+    default: { elevation: t.elevation },
+  }) ?? { elevation: t.elevation };
+}
 
 export function createShadows(colors: ThemeColors) {
   const isLight = colors.bgRgb.r > 200;
-  const cardShadow = isLight ? '#2A1F24' : colors.text;
+  const tokens = isLight ? lightTheme.shadows : darkTheme.shadows;
 
   return {
-    sm: ios(0.14, 10, 4, 3, cardShadow),
-    md: ios(0.18, 16, 8, 6, colors.glowPrimary),
-    lg: ios(0.22, 24, 12, 10, cardShadow),
-    glow: {
-      ...ios(0.35, 20, 0, 8, colors.primary),
-    },
+    sm: tokenToViewStyle(tokens.sm),
+    md: tokenToViewStyle(tokens.md),
+    lg: tokenToViewStyle(tokens.lg),
+    glow: tokenToViewStyle(tokens.glow),
     tabBar: {
-      ...ios(0.22, 12, -4, 12, cardShadow),
+      ...tokenToViewStyle(tokens.sm),
       borderTopWidth: Platform.OS === 'ios' ? 0.5 : 0,
       borderTopColor: colors.border,
     },
   } as const;
 }
 
-/** Default (dark) shadows for modules that cannot access hooks. Prefer `createShadows(useThemeColors())`. */
+/** Default shadows (dark) for non-hook contexts. */
 export const shadows = createShadows(darkPalette);
+
+export function shadowTokensFor(scheme: ColorScheme): ThemeShadowTokens {
+  return themeForMode(scheme).shadows;
+}

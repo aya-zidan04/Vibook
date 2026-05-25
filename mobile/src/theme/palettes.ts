@@ -1,126 +1,92 @@
 /**
- * Semantic color tokens for dark (default) and light themes.
- * Keep keys in sync when adding new UI surfaces.
+ * Runtime semantic palette for React Native components.
+ * Built from {@link designSystem} — do not hardcode hex values in screens.
  */
 
-export type ThemeColors = {
+import { brand, darkTheme, lightTheme, paletteAccentPink, type SemanticColors } from './designSystem';
+import { APP_BACKGROUND_BASE } from './appBackground';
+import type { ColorScheme } from '@/store/themeStore';
+
+export type ThemeColors = SemanticColors & {
+  /** @deprecated Use `textPrimary` — kept for AppText `color="text"`. */
+  text: string;
+  backgroundElevated: string;
+  surfaceHover: string;
+  surfaceMuted: string;
+  sectionSurface: string;
+  sheetSurface: string;
+  primaryMuted: string;
+  primaryDark: string;
+  accentDeep: string;
+  /** @deprecated Prefer `accentBg`. */
+  accentMuted: string;
+  secondary: string;
+  secondaryMuted: string;
+  textOnPrimary: string;
+  overlay: string;
+  overlayLight: string;
+  favorite: string;
+  accentPink: string;
+  glowPrimary: string;
+  glowAccent: string;
+  glowPlum: string;
+  glowTerracotta: string;
+  borderCream: string;
+  bgRgb: { r: number; g: number; b: number };
   terracotta: string;
   burntSienna: string;
   cream: string;
   plum: string;
   beige: string;
-  primary: string;
-  primaryLight: string;
-  primaryMuted: string;
-  primaryDark: string;
-  accent: string;
-  accentDeep: string;
-  accentMuted: string;
-  secondary: string;
-  secondaryMuted: string;
-  background: string;
-  backgroundElevated: string;
-  surface: string;
-  surfaceHover: string;
-  surfaceMuted: string;
-  border: string;
-  borderLight: string;
-  text: string;
-  textSecondary: string;
-  textMuted: string;
-  /** Text on primary CTA (always light for contrast). */
-  textOnPrimary: string;
-  overlay: string;
-  overlayLight: string;
-  success: string;
-  warning: string;
-  error: string;
-  favorite: string;
-  glowPrimary: string;
-  glowAccent: string;
-  /** RGB for image fade overlays matching `background`. */
-  bgRgb: { r: number; g: number; b: number };
 };
 
-/** Primary ramp: softer terracotta (same hue, higher lightness, slightly peach). */
-const PRIMARY = '#C4896C';
-const PRIMARY_LIGHT = '#D5A892';
-const PRIMARY_DARK = '#B9724C';
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const n = parseInt(full, 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
 
-export const darkPalette: ThemeColors = {
-  terracotta: PRIMARY,
-  burntSienna: '#A35A40',
-  cream: '#F7EFE7',
-  plum: '#5B3B4B',
-  beige: '#D7C2A8',
-  primary: PRIMARY,
-  primaryLight: PRIMARY_LIGHT,
-  primaryMuted: 'rgba(196, 137, 108, 0.28)',
-  primaryDark: PRIMARY_DARK,
-  accent: PRIMARY_LIGHT,
-  accentDeep: '#4A3345',
-  accentMuted: 'rgba(196, 137, 108, 0.2)',
-  secondary: '#D7C2A8',
-  secondaryMuted: 'rgba(215, 194, 168, 0.22)',
-  background: '#5B3B4B',
-  backgroundElevated: '#685464',
-  surface: '#766070',
-  surfaceHover: '#816A7B',
-  surfaceMuted: '#8A7485',
-  border: '#958894',
-  borderLight: '#A89796',
-  text: '#F7EFE7',
-  textSecondary: '#D7C2A8',
-  textMuted: '#B5A89A',
-  textOnPrimary: '#F7EFE7',
-  overlay: 'rgba(45, 30, 40, 0.65)',
-  overlayLight: 'rgba(45, 30, 40, 0.38)',
-  success: PRIMARY,
-  warning: PRIMARY_LIGHT,
-  error: '#A35A40',
-  favorite: PRIMARY,
-  glowPrimary: 'rgba(196, 137, 108, 0.42)',
-  glowAccent: 'rgba(215, 194, 168, 0.32)',
-  bgRgb: { r: 91, g: 59, b: 75 },
-};
+export function semanticToThemeColors(c: SemanticColors, mode: ColorScheme): ThemeColors {
+  const isLight = mode === 'light';
+  const ambientBase = APP_BACKGROUND_BASE;
+  return {
+    ...c,
+    text: c.textPrimary,
+    backgroundElevated: isLight ? brand.white : c.card,
+    surfaceHover: isLight ? '#F1F5F9' : '#243552',
+    surfaceMuted: isLight ? '#EEF2F6' : '#101828',
+    sectionSurface: isLight ? 'rgba(247, 239, 231, 0.55)' : brand.darkSection,
+    sheetSurface: 'rgba(255, 255, 255, 0.92)',
+    primaryMuted: isLight ? 'rgba(22, 198, 255, 0.12)' : 'rgba(22, 198, 255, 0.18)',
+    primaryDark: '#0EA5D4',
+    accentDeep: brand.navy,
+    accentMuted: c.accentBg,
+    secondary: brand.skyBlue,
+    secondaryMuted: isLight ? 'rgba(22, 198, 255, 0.14)' : 'rgba(22, 198, 255, 0.12)',
+    textOnPrimary: brand.white,
+    overlay: isLight ? 'rgba(8, 17, 31, 0.5)' : 'rgba(8, 17, 31, 0.78)',
+    overlayLight: isLight ? 'rgba(8, 17, 31, 0.28)' : 'rgba(8, 17, 31, 0.48)',
+    favorite: c.accent,
+    accentPink: paletteAccentPink(mode),
+    glowPrimary: isLight ? 'rgba(22, 198, 255, 0.26)' : 'rgba(22, 198, 255, 0.34)',
+    glowAccent: isLight ? 'rgba(255, 111, 174, 0.28)' : 'rgba(255, 111, 174, 0.38)',
+    glowPlum: isLight ? 'rgba(91, 59, 75, 0.12)' : 'rgba(91, 59, 75, 0.22)',
+    glowTerracotta: isLight ? 'rgba(196, 137, 108, 0.18)' : 'rgba(196, 137, 108, 0.22)',
+    borderCream: isLight ? 'rgba(247, 239, 231, 0.9)' : brand.darkBorderCream,
+    bgRgb: hexToRgb(ambientBase),
+    terracotta: brand.terracotta,
+    burntSienna: c.error,
+    cream: '#F7EFE7',
+    plum: brand.plum,
+    beige: c.borderLight,
+  };
+}
 
-export const lightPalette: ThemeColors = {
-  terracotta: PRIMARY,
-  burntSienna: '#A35A40',
-  cream: '#F7EFE7',
-  plum: '#3D2A32',
-  beige: '#8B735A',
-  primary: PRIMARY,
-  primaryLight: PRIMARY_LIGHT,
-  primaryMuted: 'rgba(196, 137, 108, 0.18)',
-  primaryDark: PRIMARY_DARK,
-  accent: '#B88368',
-  accentDeep: '#5B3B4B',
-  accentMuted: 'rgba(196, 137, 108, 0.14)',
-  secondary: '#C4A990',
-  secondaryMuted: 'rgba(196, 169, 144, 0.35)',
-  background: '#F4EFEA',
-  backgroundElevated: '#FFFFFF',
-  surface: '#FFFFFF',
-  surfaceHover: '#EFE8E2',
-  surfaceMuted: '#E8E0DA',
-  border: '#DDD4CC',
-  borderLight: '#EAE3DD',
-  text: '#2A1F24',
-  textSecondary: '#5C4D55',
-  textMuted: '#8A7B82',
-  textOnPrimary: '#F7EFE7',
-  overlay: 'rgba(30, 22, 26, 0.45)',
-  overlayLight: 'rgba(30, 22, 26, 0.2)',
-  success: '#2E7D4A',
-  warning: '#C9946A',
-  error: '#A35A40',
-  favorite: PRIMARY,
-  glowPrimary: 'rgba(196, 137, 108, 0.28)',
-  glowAccent: 'rgba(196, 169, 144, 0.45)',
-  bgRgb: { r: 244, g: 239, b: 234 },
-};
+export const lightPalette: ThemeColors = semanticToThemeColors(lightTheme.colors, 'light');
+export const darkPalette: ThemeColors = semanticToThemeColors(darkTheme.colors, 'dark');
 
+/** Fade into the ambient canvas base (hero images, PDP headers). */
 export function fadeFromBackground(colors: ThemeColors, alpha: number): string {
   const { r, g, b } = colors.bgRgb;
   return `rgba(${r},${g},${b},${alpha})`;

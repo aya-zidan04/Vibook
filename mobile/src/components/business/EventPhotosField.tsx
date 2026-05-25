@@ -57,7 +57,7 @@ export function EventPhotosField({
 
   return (
     <View style={styles.wrap}>
-      <AppText variant="caption" color="text" style={styles.label}>
+      <AppText variant="label" color="text">
         {label}
       </AppText>
       <View style={[styles.card, { borderColor: colors.borderLight, backgroundColor: colors.surfaceMuted }]}>
@@ -97,7 +97,7 @@ export function EventPhotosField({
         </ScrollView>
       </View>
       {uris.length === 0 ? (
-        <AppText variant="meta" color="textMuted" style={styles.hintBelow}>
+        <AppText variant="label" color="textMuted" style={styles.hintBelow}>
           {hint}
         </AppText>
       ) : null}
@@ -111,7 +111,6 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.xs,
       marginBottom: spacing.md,
     },
-    label: { fontWeight: '600' },
     card: {
       borderRadius: radii.xl,
       borderWidth: 1,

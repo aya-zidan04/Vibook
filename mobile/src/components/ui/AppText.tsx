@@ -1,11 +1,16 @@
-import { Text, TextProps } from 'react-native';
+import { Text, TextProps, TextStyle } from 'react-native';
 import { useLocaleStore } from '@/store/localeStore';
 import { useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { typography, type TypographyVariant } from '@/theme/typography';
+import {
+  fontFamilyForWeight,
+  resolveTypographyVariant,
+  typography,
+  type TypographyVariant,
+} from '@/theme/typography';
 
 type Props = TextProps & {
-  variant?: TypographyVariant;
+  variant?: TypographyVariant | 'body-em' | 'meta' | 'price';
   color?: keyof ThemeColors | string;
 };
 
@@ -21,11 +26,24 @@ export function AppText({ variant = 'body', color = 'text', style, children, ...
   const colors = useThemeColors();
   const locale = useLocaleStore((s) => s.locale);
   const resolved = resolveTextColor(colors, color);
-
-  const writingDirection = locale === 'ar' ? 'rtl' : 'ltr';
+  const isRTL = locale === 'ar';
+  const key = resolveTypographyVariant(variant);
+  const token = typography[key];
+  const fontFamily = fontFamilyForWeight(locale, token.fontWeight ?? '400');
 
   return (
-    <Text style={[typography[variant], { color: resolved, writingDirection }, style]} {...rest}>
+    <Text
+      style={[
+        token,
+        {
+          color: resolved,
+          fontFamily,
+          writingDirection: isRTL ? 'rtl' : 'ltr',
+        },
+        style,
+      ]}
+      {...rest}
+    >
       {children}
     </Text>
   );

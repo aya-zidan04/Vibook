@@ -5,7 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField } from '@/components/auth/AuthTextField';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
+import { textAlignStart } from '@/utils/rtlText';
+import { useLocaleStore } from '@/store/localeStore';
 import { radii, spacing, useThemeColors } from '@/theme';
+import { inputTextStyle } from '@/theme/typography';
 import type { ThemeColors } from '@/theme/palettes';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -87,11 +90,12 @@ export function BusinessIconMultiline({
   const colors = useThemeColors();
   const styles = useMemo(() => createMultilineStyles(colors), [colors]);
   const { isRTL } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
   const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.wrap}>
-      <AppText variant="caption" color="text" style={styles.label}>
+      <AppText variant="label" color="text">
         {label}
       </AppText>
       <View style={[styles.row, focused && { borderColor: colors.primary, borderWidth: 1.5 }]}>
@@ -109,10 +113,11 @@ export function BusinessIconMultiline({
           onBlur={() => setFocused(false)}
           style={[
             styles.input,
+            inputTextStyle(locale),
             {
               color: colors.text,
               minHeight,
-              textAlign: isRTL ? 'right' : 'left',
+              textAlign: textAlignStart(isRTL),
               writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
             },
           ]}
@@ -138,7 +143,6 @@ function createMultilineStyles(colors: ThemeColors) {
       gap: spacing.xs,
       marginBottom: spacing.md,
     },
-    label: { fontWeight: '600' },
     row: {
       flexDirection: 'row',
       alignItems: 'flex-start',
@@ -157,7 +161,6 @@ function createMultilineStyles(colors: ThemeColors) {
       flex: 1,
       paddingVertical: spacing.xs,
       paddingEnd: spacing.sm,
-      fontSize: 16,
     },
   });
 }

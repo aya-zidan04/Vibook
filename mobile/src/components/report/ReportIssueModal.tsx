@@ -13,6 +13,7 @@ import { ApiError } from '@/api/http';
 import { submitModerationReport } from '@/api/reportsApi';
 import type { ModerationReportType } from '@/api/types';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
+import { AppBackground } from '@/components/ui/AppBackground';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { radii, spacing, useThemeColors } from '@/theme';
@@ -100,7 +101,8 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
-      <View style={styles.wrap}>
+      <AppBackground>
+        <View style={styles.wrap}>
         <Pressable style={styles.backdrop} onPress={handleClose} accessibilityRole="button" />
         <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
         <View style={styles.handle} />
@@ -122,7 +124,7 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
                   accessibilityRole="button"
                   accessibilityState={{ selected: on }}
                 >
-                  <AppText variant="bodyMedium" color="text">
+                  <AppText variant="body-em" color="text">
                     {reasonLabel(v)}
                   </AppText>
                 </Pressable>
@@ -155,7 +157,8 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
           <SecondaryButton title={t('common.cancel')} onPress={handleClose} style={styles.cancel} />
         </ScrollView>
         </View>
-      </View>
+        </View>
+      </AppBackground>
     </Modal>
   );
 }
@@ -168,11 +171,11 @@ function createStyles(colors: ThemeColors) {
     },
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0,0,0,0.45)',
+      backgroundColor: 'rgba(255, 247, 251, 0.35)',
     },
     sheet: {
       maxHeight: '88%',
-      backgroundColor: colors.background,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
       borderTopLeftRadius: radii.xl,
       borderTopRightRadius: radii.xl,
       paddingHorizontal: spacing.screen,
@@ -192,10 +195,10 @@ function createStyles(colors: ThemeColors) {
     reasonList: { gap: spacing.xs, marginTop: spacing.sm },
     reasonRow: {
       padding: spacing.md,
-      borderRadius: radii.lg,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.border,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
     },
     reasonRowOn: {
       borderColor: colors.primary,
@@ -208,7 +211,7 @@ function createStyles(colors: ThemeColors) {
       borderRadius: radii.lg,
       padding: spacing.md,
       color: colors.text,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       textAlignVertical: 'top',
     },
     err: { marginTop: spacing.xs },

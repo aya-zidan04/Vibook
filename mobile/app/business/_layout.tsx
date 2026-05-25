@@ -41,7 +41,7 @@ export default function BusinessStackLayout() {
 
   if (!gateReady) {
     return (
-      <View style={[styles.boot, { backgroundColor: colors.background }]}>
+      <View style={[styles.boot, { backgroundColor: 'transparent' }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -51,7 +51,7 @@ export default function BusinessStackLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: 'transparent' },
         ...nativeStackDrillInTransition,
       }}
     />

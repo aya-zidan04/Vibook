@@ -17,7 +17,7 @@ export function paletteFor(scheme: ColorScheme): ThemeColors {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      colorScheme: 'dark',
+      colorScheme: 'light',
       setColorScheme: (colorScheme) => set({ colorScheme }),
     }),
     {

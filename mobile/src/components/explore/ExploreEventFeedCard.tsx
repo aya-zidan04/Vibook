@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import type { EventItem } from '@/types';
-import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import { createShadows, fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -77,7 +77,7 @@ export function ExploreEventFeedCard({
           <AppText variant="caption" color="textMuted">
             {t('common.from')}
           </AppText>
-          <AppText variant="price" color="accent">
+          <AppText variant="h3" color="accent">
             {price}
           </AppText>
         </View>
@@ -87,15 +87,18 @@ export function ExploreEventFeedCard({
 }
 
 function createStyles(colors: ThemeColors) {
+  const shadows = createShadows(colors);
+  const isLight = colors.bgRgb.r > 200;
   return StyleSheet.create({
     card: {
       flexDirection: 'row',
       borderRadius: radii.xl,
       overflow: 'hidden',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
+      backgroundColor: colors.card,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
       marginBottom: spacing.md,
+      ...(isLight ? shadows.sm : shadows.md),
     },
     thumbWrap: {
       width: 120,

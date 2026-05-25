@@ -52,7 +52,7 @@ export default function ConfirmationScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   inner: { flex: 1, paddingHorizontal: spacing.screen, justifyContent: 'center', gap: spacing.lg },
   iconWrap: { alignItems: 'center' },
   title: { textAlign: 'center' },
@@ -61,7 +61,7 @@ function createStyles(colors: ThemeColors) {
     alignSelf: 'stretch',
     alignItems: 'center',
     padding: spacing.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.border,

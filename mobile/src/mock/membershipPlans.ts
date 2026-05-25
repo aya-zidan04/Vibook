@@ -1,13 +1,13 @@
 import type { User } from '@/types';
 
-export type MembershipPlanId = 'basic' | 'premium' | 'vip';
+export type MembershipPlanId = 'basic' | 'premium';
 
 export type MembershipPlan = {
   id: MembershipPlanId;
   priceMonthly: number;
   priceYearly: number;
   currency: string;
-  /** Highlighted comparison card (middle tier). */
+  /** Highlighted comparison card (recommended tier). */
   recommended: boolean;
   benefitKeys: readonly string[];
 };
@@ -39,27 +39,13 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       'membership.benefit.premium4',
     ],
   },
-  {
-    id: 'vip',
-    priceMonthly: 14.99,
-    priceYearly: 139.99,
-    currency: 'USD',
-    recommended: false,
-    benefitKeys: [
-      'membership.benefit.vip1',
-      'membership.benefit.vip2',
-      'membership.benefit.vip3',
-      'membership.benefit.vip4',
-      'membership.benefit.vip5',
-    ],
-  },
 ];
 
 /** Maps app membership tier (profile) to subscription plan for mock comparisons. */
 export const TIER_TO_PLAN_ID: Record<User['membershipTier'], MembershipPlanId> = {
   standard: 'basic',
   gold: 'premium',
-  platinum: 'vip',
+  platinum: 'premium',
 };
 
 export function getPlanById(id: MembershipPlanId): MembershipPlan | undefined {

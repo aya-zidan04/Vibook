@@ -73,7 +73,7 @@ export default function PaymentScreen() {
             {t('payment.sim')}
           </AppText>
           <View style={styles.fakeCard}>
-            <AppText variant="meta" color="textMuted">
+            <AppText variant="label" color="textMuted">
               {t('payment.cardNumber')}
             </AppText>
             <AppText variant="h3" color="text">
@@ -81,28 +81,28 @@ export default function PaymentScreen() {
             </AppText>
             <View style={styles.fakeRow}>
               <View>
-                <AppText variant="meta" color="textMuted">
+                <AppText variant="label" color="textMuted">
                   {t('payment.expires')}
                 </AppText>
-                <AppText variant="bodyMedium" color="text">
+                <AppText variant="body-em" color="text">
                   12 / 28
                 </AppText>
               </View>
               <View>
-                <AppText variant="meta" color="textMuted">
+                <AppText variant="label" color="textMuted">
                   {t('payment.cvv')}
                 </AppText>
-                <AppText variant="bodyMedium" color="text">
+                <AppText variant="body-em" color="text">
                   •••
                 </AppText>
               </View>
             </View>
           </View>
           <View style={styles.summary}>
-            <AppText variant="bodyMedium" color="text">
+            <AppText variant="body-em" color="text">
               {draft.title}
             </AppText>
-            <AppText variant="price" color="accent">
+            <AppText variant="h3" color="accent">
               {formatMoney(total, draft.currency)}
             </AppText>
           </View>
@@ -123,14 +123,14 @@ export default function PaymentScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-    safe: { flex: 1, backgroundColor: colors.background },
+    safe: { flex: 1, backgroundColor: 'transparent' },
     shell: { flex: 1, paddingHorizontal: spacing.screen },
     scroll: { flex: 1 },
     content: { paddingBottom: spacing.xxxl, gap: spacing.lg },
     empty: { marginVertical: spacing.lg },
     fakeCard: {
       padding: spacing.lg,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       borderRadius: radii.xl,
       borderWidth: 1,
       borderColor: colors.border,
@@ -142,7 +142,7 @@ function createStyles(colors: ThemeColors) {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: spacing.md,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       borderRadius: radii.lg,
       borderWidth: 1,
       borderColor: colors.border,

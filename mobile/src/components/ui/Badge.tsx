@@ -15,13 +15,15 @@ const BADGE_KEYS: Record<BadgeTone, `badge.${BadgeTone}`> = {
   exclusive: 'badge.exclusive',
 };
 
-function tonesFor(colors: ThemeColors): Record<BadgeTone, { bg: string; fg: keyof ThemeColors }> {
+function tonesFor(
+  colors: ThemeColors,
+): Record<BadgeTone, { bg: string; fg: keyof ThemeColors; border?: string }> {
   return {
-    popular: { bg: colors.secondaryMuted, fg: 'secondary' },
-    limited: { bg: colors.accentMuted, fg: 'accent' },
+    popular: { bg: colors.accentBg, fg: 'accentText', border: colors.accentBorder },
+    limited: { bg: colors.accentBg, fg: 'accentText', border: colors.accentBorder },
     new: { bg: colors.primaryMuted, fg: 'primary' },
-    soldFast: { bg: 'rgba(163, 90, 64, 0.22)', fg: 'error' },
-    exclusive: { bg: 'rgba(185, 114, 76, 0.28)', fg: 'primary' },
+    soldFast: { bg: colors.accentBg, fg: 'accentText', border: colors.accentBorder },
+    exclusive: { bg: colors.accentBg, fg: 'accentText', border: colors.accentBorder },
   };
 }
 
@@ -36,8 +38,14 @@ export function Badge({ tone }: Props) {
   const { t, isRTL } = useTranslation();
   const styles = useMemo(() => makeStyles(), []);
   return (
-    <View style={[styles.wrap, { backgroundColor: style.bg }]}>
-      <AppText variant="meta" color={style.fg} style={[styles.txt, isRTL && styles.txtRtl]}>
+    <View
+      style={[
+        styles.wrap,
+        { backgroundColor: style.bg },
+        style.border ? { borderWidth: 1, borderColor: style.border } : null,
+      ]}
+    >
+      <AppText variant="label" color={style.fg} style={[styles.txt, isRTL && styles.txtRtl]}>
         {t(BADGE_KEYS[tone])}
       </AppText>
     </View>
@@ -53,10 +61,8 @@ const makeStyles = () =>
       alignSelf: 'flex-start',
     },
     txt: {
-      fontSize: 10,
       textTransform: 'uppercase',
       letterSpacing: 0.6,
-      fontWeight: '700',
     },
     txtRtl: {
       textTransform: 'none',

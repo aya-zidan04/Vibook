@@ -19,6 +19,9 @@ import type { CategoryResponse, ErrorResponse, GovernorateResponse } from '@/api
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
+import { useLocaleStore } from '@/store/localeStore';
+import { inputTextStyle } from '@/theme/typography';
+import { textAlignStart } from '@/utils/rtlText';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import { isValidEmail } from '@/utils/authValidation';
 import { resolveGovernorateId } from '@/utils/resolveGovernorateId';
@@ -44,6 +47,7 @@ export default function BusinessJoinScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t, isRTL } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const submitApplication = useBusinessHubStore((s) => s.submitApplication);
   const syncBusinessApprovalFromApi = useBusinessHubStore((s) => s.syncBusinessApprovalFromApi);
@@ -200,7 +204,7 @@ export default function BusinessJoinScreen() {
         autoCapitalize="words"
       />
       {errors.companyName ? (
-        <AppText variant="meta" color="error" style={styles.inlineErr}>
+        <AppText variant="label" color="error" style={styles.inlineErr}>
           {errors.companyName}
         </AppText>
       ) : null}
@@ -218,7 +222,7 @@ export default function BusinessJoinScreen() {
         autoCorrect={false}
       />
       {errors.email ? (
-        <AppText variant="meta" color="error" style={styles.inlineErr}>
+        <AppText variant="label" color="error" style={styles.inlineErr}>
           {errors.email}
         </AppText>
       ) : null}
@@ -235,7 +239,7 @@ export default function BusinessJoinScreen() {
         autoCapitalize="none"
       />
       {errors.phone ? (
-        <AppText variant="meta" color="error" style={styles.inlineErr}>
+        <AppText variant="label" color="error" style={styles.inlineErr}>
           {errors.phone}
         </AppText>
       ) : null}
@@ -257,16 +261,16 @@ export default function BusinessJoinScreen() {
         sheetTitle={t('businessHub.profileCategorySheet')}
       />
       {errors.category ? (
-        <AppText variant="meta" color="error" style={styles.inlineErr}>
+        <AppText variant="label" color="error" style={styles.inlineErr}>
           {errors.category}
         </AppText>
       ) : null}
 
       <View style={styles.msgBlock}>
-        <AppText variant="caption" color="text" style={styles.msgLabel}>
+        <AppText variant="label" color="text">
           {t('businessJoin.message')}
         </AppText>
-        <AppText variant="meta" color="textMuted" style={styles.optional}>
+        <AppText variant="label" color="textMuted" style={styles.optional}>
           {t('businessJoin.messageOptional')}
         </AppText>
         <TextInput
@@ -280,14 +284,15 @@ export default function BusinessJoinScreen() {
           multiline
           numberOfLines={5}
           textAlignVertical="top"
-          textAlign={isRTL ? 'right' : 'left'}
+          textAlign={textAlignStart(isRTL)}
           style={[
             styles.msgInput,
+            inputTextStyle(locale),
             { writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr' },
           ]}
         />
         {errors.message ? (
-          <AppText variant="meta" color="error" style={styles.inlineErr}>
+          <AppText variant="label" color="error" style={styles.inlineErr}>
             {errors.message}
           </AppText>
         ) : null}
@@ -317,7 +322,6 @@ function createStyles(colors: ThemeColors) {
     pad: { paddingTop: spacing.md, gap: 0, paddingBottom: spacing.xxxl },
     inlineErr: { marginTop: -spacing.sm, marginBottom: spacing.sm },
     msgBlock: { marginBottom: spacing.md, gap: 6 },
-    msgLabel: { fontWeight: '600' },
     optional: { marginBottom: 2 },
     msgInput: {
       borderWidth: 1,
@@ -327,7 +331,6 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: spacing.sm,
       color: colors.text,
       backgroundColor: colors.surface,
-      fontSize: 16,
       minHeight: 120,
     },
     bannerErr: { marginBottom: spacing.sm, lineHeight: 22 },

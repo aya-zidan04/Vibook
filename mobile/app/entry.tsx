@@ -18,6 +18,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import { textAlignStart } from '@/utils/rtlText';
 
 /** Time between automatic slide advances (manual swipe still uses native momentum). */
 const AUTO_MS = 3800;
@@ -119,7 +120,7 @@ export default function AppEntryScreen() {
     router.push('/login');
   };
 
-  const btnShape = { borderRadius: radii.lg, width: '100%' as const };
+  const btnShape = { width: '100%' as const };
 
   return (
     <View style={styles.root}>
@@ -175,7 +176,7 @@ export default function AppEntryScreen() {
             <AppText
               variant="display"
               color="textSecondary"
-              style={[styles.tagline, { textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.tagline, { textAlign: textAlignStart(isRTL) }]}
             >
               {t('entry.tagline')}
             </AppText>
@@ -190,7 +191,7 @@ export default function AppEntryScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+  root: { flex: 1, backgroundColor: 'transparent' },
   /** Position + outsets applied in JSX via `bleedStyle` for edge-to-edge photos. */
   carousel: {},
   carouselList: { flex: 1 },
@@ -204,12 +205,8 @@ function createStyles(colors: ThemeColors) {
     alignItems: 'flex-start',
     width: '100%',
   },
-  /** Hero headline — intentionally large for the welcome screen. */
   tagline: {
     width: '100%',
-    fontSize: 32,
-    lineHeight: 40,
-    letterSpacing: -0.6,
   },
   bottom: {
     flexShrink: 0,

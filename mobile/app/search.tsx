@@ -89,7 +89,7 @@ export default function SearchScreen() {
             onPress={() => setSeg(key)}
             style={[styles.segBtn, seg === key && styles.segOn]}
           >
-            <AppText variant="meta" color={seg === key ? 'text' : 'textMuted'}>
+            <AppText variant="label" color={seg === key ? 'text' : 'textMuted'}>
               {t(labelKey)}
             </AppText>
           </Pressable>
@@ -184,7 +184,7 @@ export default function SearchScreen() {
 
       <Pressable style={styles.filterFab} onPress={() => router.push('/filters')}>
         <Ionicons name="options" size={22} color={colors.text} />
-        <AppText variant="meta" color="text">
+        <AppText variant="label" color="text">
           {t('common.filters')}
         </AppText>
       </Pressable>
@@ -222,7 +222,7 @@ function ResultRow({
         <AppText variant="caption" color="textMuted">
           {meta}
         </AppText>
-        <AppText variant="price" color="accent" style={styles.price}>
+        <AppText variant="h3" color="accent" style={styles.price}>
           {price}
         </AppText>
       </View>

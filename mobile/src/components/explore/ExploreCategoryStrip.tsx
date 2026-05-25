@@ -55,7 +55,7 @@ export function ExploreCategoryStrip({
               color={selectedCategoryId === c.id ? colors.textOnPrimary : colors.primary}
             />
             <AppText
-              variant="bodyMedium"
+              variant="body-em"
               color={selectedCategoryId === c.id ? 'textOnPrimary' : 'text'}
               style={styles.mainChipLabel}
             >
@@ -81,7 +81,7 @@ export function ExploreCategoryStrip({
                 accessibilityLabel={locale === 'ar' ? s.nameAr : s.name}
                 style={[styles.subChip, active && styles.subChipActive]}
               >
-                <AppText variant="caption" color={active ? 'textOnPrimary' : 'textSecondary'}>
+                <AppText variant="caption" color={active ? 'accentText' : 'textSecondary'}>
                   {locale === 'ar' ? s.nameAr : s.name}
                 </AppText>
               </AnimatedChip>
@@ -160,7 +160,7 @@ function createStyles(colors: ThemeColors) {
       borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.borderLight,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       minHeight: 44,
     },
     mainChipLabel: {
@@ -186,8 +186,8 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.surfaceMuted,
     },
     subChipActive: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
+      backgroundColor: colors.accentBg,
+      borderColor: colors.accentBorder,
     },
   });
 }

@@ -1,27 +1,20 @@
 import { useMemo, useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, ScrollView, TextInput, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
-import { DetailHeader } from '@/components/layout/DetailHeader';
-import { Screen } from '@/components/layout/Screen';
+import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MOCK_VOUCHERS } from '@/services/mock';
 import { useLocaleStore } from '@/store/localeStore';
 import type { Voucher } from '@/types';
-import { radii, spacing, useThemeColors } from '@/theme';
-import type { ThemeColors } from '@/theme/palettes';
+import { useThemeColors } from '@/theme';
 
 export default function VouchersScreen() {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createPremiumSheetStyles(colors), [colors]);
   const { t, locale } = useTranslation();
   const [extra, setExtra] = useState<Voucher[]>([]);
   const [code, setCode] = useState('');
@@ -61,8 +54,8 @@ export default function VouchersScreen() {
   };
 
   return (
-    <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('vouchers.title')} />}>
-      <View style={styles.redeemBox}>
+    <PremiumScreen title={t('vouchers.title')}>
+      <View style={[styles.insetCard, { gap: 12 }]}>
         <AppText variant="caption" color="textMuted">
           {t('vouchers.redeemLabel')}
         </AppText>
@@ -75,8 +68,9 @@ export default function VouchersScreen() {
           autoCorrect={false}
           style={styles.input}
         />
-        <PrimaryButton title={t('vouchers.redeemCta')} onPress={() => void redeem()} loading={redeemBusy} />
+        <PrimaryButton sheet title={t('vouchers.redeemCta')} onPress={() => void redeem()} loading={redeemBusy} />
       </View>
+
       {displayList.length === 0 ? (
         <EmptyState
           icon="pricetag-outline"
@@ -84,13 +78,13 @@ export default function VouchersScreen() {
           description={t('vouchers.emptyDesc')}
         />
       ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalCards}>
           {displayList.map((v) => (
-            <VoucherCard key={v.id} v={v} locale={locale} styles={styles} />
+            <VoucherCard key={v.id} v={v} locale={locale} styles={styles} t={t} />
           ))}
         </ScrollView>
       )}
-    </Screen>
+    </PremiumScreen>
   );
 }
 
@@ -98,12 +92,13 @@ function VoucherCard({
   v,
   locale,
   styles,
+  t,
 }: {
   v: Voucher;
   locale: 'en' | 'ar';
-  styles: ReturnType<typeof createStyles>;
+  styles: ReturnType<typeof createPremiumSheetStyles>;
+  t: (k: string) => string;
 }) {
-  const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const displayCurrency = useLocaleStore((s) => s.currency);
   const title = locale === 'ar' && v.titleAr ? v.titleAr : v.title;
@@ -111,9 +106,10 @@ function VoucherCard({
     v.discountType === 'percent'
       ? t('vouchers.offPercent').replace('{n}', String(v.discountValue))
       : formatMoney(v.discountValue, displayCurrency);
+
   return (
-    <View style={[styles.card, v.redeemed && styles.cardRedeemed]}>
-      <AppText variant="meta" color="accent">
+    <View style={[styles.voucherCard, v.redeemed && { opacity: 0.75 }]}>
+      <AppText variant="label" color="accent">
         {v.code}
       </AppText>
       <AppText variant="h3" color="text" numberOfLines={2}>
@@ -127,40 +123,4 @@ function VoucherCard({
       </AppText>
     </View>
   );
-}
-
-function createStyles(colors: ThemeColors) {
-  return StyleSheet.create({
-    pad: { paddingTop: spacing.md, gap: spacing.md },
-    redeemBox: {
-      gap: spacing.sm,
-      padding: spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: radii.xl,
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginBottom: spacing.sm,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: radii.lg,
-      paddingHorizontal: spacing.md,
-      paddingVertical: 12,
-      color: colors.text,
-      backgroundColor: colors.backgroundElevated,
-    },
-    card: {
-      width: 220,
-      marginEnd: spacing.md,
-      padding: spacing.lg,
-      backgroundColor: colors.surface,
-      borderRadius: radii.xl,
-      borderWidth: 1,
-      borderColor: colors.border,
-      gap: 8,
-      marginBottom: spacing.lg,
-    },
-    cardRedeemed: { opacity: 0.75 },
-  });
 }

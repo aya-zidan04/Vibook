@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:vibook_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+app:
+  jwt:
+    secret: bXktc3VwZXItc2VjcmV0LWtleS1mb3Itdmlib29rLWp3dC1zaWduaW5nLXRva2Vucy0xMjM0NTY3ODkw
+    expiration-ms: 3600000

@@ -27,6 +27,7 @@ import type { BusinessEventRecord } from '@/types/businessHub';
 import { businessEventResponseToRecord, photoUrlsForApi } from '@/utils/businessHubMappers';
 import { resolveGovernorateId } from '@/utils/resolveGovernorateId';
 import { resolveSubcategoryIdForHubCategory } from '@/utils/resolveHubSubcategory';
+import { textAlignStart } from '@/utils/rtlText';
 
 type EventCategoryOption = {
   id: string;
@@ -454,7 +455,7 @@ export default function BusinessEventEditorScreen() {
         autoCapitalize="none"
         autoCorrect={false}
       />
-      <AppText variant="caption" color="text" style={styles.ticketsSectionLabel}>
+      <AppText variant="label" color="text" style={styles.ticketsSectionLabel}>
         {t('businessHub.fieldTicketsSection')}
       </AppText>
       {ticketRows.map((row, index) => (
@@ -538,7 +539,7 @@ export default function BusinessEventEditorScreen() {
           <View style={[styles.switchIcon, { backgroundColor: colors.primaryMuted }]}>
             <Ionicons name="eye-off-outline" size={18} color={colors.primary} />
           </View>
-          <AppText variant="bodyMedium" color="text">
+          <AppText variant="body-em" color="text">
             {t('businessHub.fieldHidden')}
           </AppText>
         </View>
@@ -586,7 +587,7 @@ export default function BusinessEventEditorScreen() {
                 <View style={[styles.sheetIconWrap, { backgroundColor: colors.primaryMuted, borderRadius: 10 }]}>
                   <Ionicons name={group.icon} size={16} color={colors.primary} />
                 </View>
-                <AppText variant="bodyMedium" color="text" style={styles.sheetLabel}>
+                <AppText variant="body-em" color="text" style={styles.sheetLabel}>
                   {locale === 'ar' ? group.nameAr : group.nameEn}
                 </AppText>
               </View>
@@ -667,7 +668,7 @@ export default function BusinessEventEditorScreen() {
             <View style={styles.sheetIconWrap}>
               <Ionicons name="time-outline" size={18} color={colors.primary} />
             </View>
-            <AppText variant="bodyMedium" color="text" style={styles.sheetLabel}>
+            <AppText variant="body-em" color="text" style={styles.sheetLabel}>
               {slot}
             </AppText>
             <Ionicons name="checkmark-circle" size={21} color={colors.accent} />
@@ -700,7 +701,7 @@ export default function BusinessEventEditorScreen() {
               <View style={styles.sheetIconWrap}>
                 <Ionicons name="time-outline" size={18} color={colors.primary} />
               </View>
-              <AppText variant="bodyMedium" color="text" style={styles.sheetLabel}>
+              <AppText variant="body-em" color="text" style={styles.sheetLabel}>
                 {opt}
               </AppText>
               {selected ? (
@@ -821,7 +822,7 @@ function CalendarDateSheet({
             >
               <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
             </Pressable>
-            <AppText variant="bodyMedium" color="text">
+            <AppText variant="body-em" color="text">
               {monthLabel}
             </AppText>
             <Pressable
@@ -835,7 +836,7 @@ function CalendarDateSheet({
           <View style={styles.calendarWeekRow}>
             {weekdayLabels.map((w) => (
               <View key={w} style={styles.calendarWeekCell}>
-                <AppText variant="meta" color="textMuted">
+                <AppText variant="label" color="textMuted">
                   {w}
                 </AppText>
               </View>
@@ -898,7 +899,7 @@ function PickerField({
 
   return (
     <View style={styles.pickerWrap}>
-      <AppText variant="caption" color="text" style={styles.pickerLabel}>
+      <AppText variant="label" color="text">
         {label}
       </AppText>
       {errorText ? (
@@ -923,7 +924,7 @@ function PickerField({
         <AppText
           variant="body"
           color={value.trim() ? 'text' : 'textMuted'}
-          style={[styles.pickerValue, { textAlign: isRTL ? 'right' : 'left' }]}
+          style={[styles.pickerValue, { textAlign: textAlignStart(isRTL) }]}
           numberOfLines={1}
         >
           {value.trim() || placeholder || ''}
@@ -996,7 +997,7 @@ function parseStoredTimes(raw: string): string[] {
 function createStyles() {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
-    ticketsSectionLabel: { fontWeight: '600', marginBottom: -4 },
+    ticketsSectionLabel: { marginBottom: -4 },
     ticketCard: {
       borderRadius: radii.xl,
       borderWidth: 1,
@@ -1034,7 +1035,6 @@ function createStyles() {
       justifyContent: 'center',
     },
     pickerWrap: { gap: spacing.xs, marginBottom: spacing.md },
-    pickerLabel: { fontWeight: '600' },
     pickerFieldError: { marginBottom: 2 },
     pickerRow: {
       minHeight: 54,
@@ -1067,7 +1067,7 @@ function createStyles() {
       paddingBottom: spacing.xxxl,
       maxHeight: '62%',
     },
-    modalTitle: { marginBottom: spacing.md, letterSpacing: 0.8 },
+    modalTitle: { marginBottom: spacing.md },
     modalList: { flexGrow: 0 },
     calendarHeadRow: {
       flexDirection: 'row',
@@ -1115,14 +1115,14 @@ function createStyles() {
     sheetRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      borderRadius: radii.lg,
+      borderRadius: radii.full,
       borderWidth: 1,
       paddingVertical: 12,
       paddingHorizontal: spacing.md,
       marginBottom: spacing.xs,
       gap: spacing.sm,
     },
-    sheetRowSelected: { borderColor: '#A56B4A' },
+    sheetRowSelected: { borderColor: '#00C2FF' },
     sheetRowPressed: { opacity: 0.9 },
     sheetIconWrap: { width: 28, alignItems: 'center', justifyContent: 'center' },
     sheetLabel: { flex: 1 },
@@ -1157,7 +1157,7 @@ function createStyles() {
       gap: 6,
     },
     categoryChipSelected: {
-      borderColor: '#A56B4A',
+      borderColor: '#00C2FF',
     },
     categoryChipLabel: {
       lineHeight: 16,

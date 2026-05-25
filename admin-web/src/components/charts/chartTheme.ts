@@ -1,13 +1,17 @@
+/** Chart palette — aligned with mobile `designSystem` (blue primary, pink accent). */
 export const chartColors = {
-  terracotta: '#c4896c',
-  plum: '#5b3b4b',
-  plumLight: '#8a6b7a',
-  success: '#2e7d4a',
-  warning: '#c9946a',
-  error: '#a35a40',
-  draft: '#8a7b82',
-  grid: '#eae3dd',
-  axis: '#5c4d55',
+  terracotta: '#00C2FF',
+  plum: '#111827',
+  plumLight: '#33D6FF',
+  accent: '#FF4D8D',
+  accentSoft: '#FF70A6',
+  accentLight: '#FFE3EE',
+  success: '#059669',
+  warning: '#D97706',
+  error: '#DC2626',
+  draft: '#6B7280',
+  grid: '#EEF2F6',
+  axis: '#4B5563',
 };
 
 export const statusBarColors: Record<string, string> = {
@@ -17,4 +21,10 @@ export const statusBarColors: Record<string, string> = {
   DRAFT: chartColors.draft,
 };
 
-export const pieColors = [chartColors.success, chartColors.warning, chartColors.error, chartColors.draft];
+export const pieColors = [
+  chartColors.success,
+  chartColors.accent,
+  chartColors.warning,
+  chartColors.terracotta,
+  chartColors.draft,
+];

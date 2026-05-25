@@ -6,11 +6,11 @@
     "orientation": "portrait",
     "icon": "./assets/vibook-wordmark.png",
     "scheme": "vibook",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/vibook-wordmark.png",
       "resizeMode": "contain",
-      "backgroundColor": "#5B3B4B"
+      "backgroundColor": "#0A0D14"
     },
     "ios": {
       "supportsTablet": true,
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/vibook-wordmark.png",
-        "backgroundColor": "#5B3B4B"
+        "backgroundColor": "#0A0D14"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,

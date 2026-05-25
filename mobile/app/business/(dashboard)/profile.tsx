@@ -22,7 +22,10 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useBusinessHubStore } from '@/store/businessHubStore';
-import { createShadows, radii, spacing, useThemeColors } from '@/theme';
+import { useLocaleStore } from '@/store/localeStore';
+import { createShadows, fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import { inputTextStyle } from '@/theme/typography';
+import { textAlignStart } from '@/utils/rtlText';
 import type { ThemeColors } from '@/theme/palettes';
 import { pickGalleryImage } from '@/utils/pickGalleryImage';
 
@@ -43,6 +46,7 @@ export default function BusinessProfileScreen() {
   const styles = useMemo(() => createStyles(colors, sh), [colors, sh]);
   const insets = useSafeAreaInsets();
   const { t, isRTL } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
   const profile = useBusinessHubStore((s) => s.profile);
   const updateProfile = useBusinessHubStore((s) => s.updateProfile);
 
@@ -143,7 +147,7 @@ export default function BusinessProfileScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.root, { backgroundColor: colors.background }]}
+      style={[styles.root, { backgroundColor: 'transparent' }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
@@ -165,7 +169,7 @@ export default function BusinessProfileScreen() {
             >
               <Image source={{ uri: coverSrc }} style={StyleSheet.absoluteFill} contentFit="cover" />
               <LinearGradient
-                colors={['rgba(0,0,0,0.15)', 'transparent', colors.overlayLight, colors.background]}
+                colors={['rgba(0,0,0,0.15)', 'transparent', colors.overlayLight, fadeFromBackground(colors, 1)]}
                 locations={[0, 0.35, 0.72, 1]}
                 style={StyleSheet.absoluteFill}
               />
@@ -194,7 +198,11 @@ export default function BusinessProfileScreen() {
               onChangeText={setDisplayName}
               placeholder={t('businessHub.profileNamePlaceholder')}
               placeholderTextColor={colors.textMuted}
-              style={[styles.heroName, { color: colors.text, textAlign: isRTL ? 'right' : 'center' }]}
+              style={[
+                styles.heroName,
+                inputTextStyle(locale, 'h1'),
+                { color: colors.text, textAlign: isRTL ? 'right' : 'center' },
+              ]}
             />
             <TextInput
               value={tagline}
@@ -203,6 +211,7 @@ export default function BusinessProfileScreen() {
               placeholderTextColor={colors.textMuted}
               style={[
                 styles.heroTagline,
+                inputTextStyle(locale),
                 { color: colors.textSecondary, textAlign: isRTL ? 'right' : 'center' },
               ]}
             />
@@ -260,10 +269,10 @@ export default function BusinessProfileScreen() {
 
             <View style={styles.descBoxWrap}>
               <View style={styles.descLabelRow}>
-                <AppText variant="caption" color="text" style={styles.labelStrong}>
+                <AppText variant="label" color="text">
                   {t('businessHub.profileDescription')}
                 </AppText>
-                <AppText variant="meta" color="textMuted">
+                <AppText variant="label" color="textMuted">
                   {t('businessHub.profileCharCount')
                     .replace('{n}', String(description.length))
                     .replace('{max}', String(DESC_MAX))}
@@ -284,14 +293,18 @@ export default function BusinessProfileScreen() {
                   textAlignVertical="top"
                   onFocus={() => setDescFocused(true)}
                   onBlur={() => setDescFocused(false)}
-                  textAlign={isRTL ? 'right' : 'left'}
                   style={[
                     styles.descInput,
-                    { color: colors.text, writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr' },
+                    inputTextStyle(locale),
+                    {
+                      color: colors.text,
+                      textAlign: textAlignStart(isRTL),
+                      writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
+                    },
                   ]}
                 />
               </View>
-              <AppText variant="meta" color="textMuted" style={styles.previewHint}>
+              <AppText variant="label" color="textMuted" style={styles.previewHint}>
                 {t('businessHub.profilePreviewHint')}
               </AppText>
             </View>
@@ -376,7 +389,7 @@ export default function BusinessProfileScreen() {
         {toast ? (
           <View style={[styles.toastInline, sh.sm, { borderColor: colors.borderLight }]}>
             <Ionicons name="checkmark-circle" size={22} color={colors.success} />
-            <AppText variant="bodyMedium" color="text" style={styles.toastText}>
+            <AppText variant="body-em" color="text" style={styles.toastText}>
               {toast}
             </AppText>
           </View>
@@ -412,7 +425,7 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       borderRadius: 52,
       borderWidth: 4,
       padding: 3,
-      backgroundColor: colors.background,
+      backgroundColor: 'transparent',
       ...sh.md,
     },
     avatarImg: {
@@ -432,14 +445,9 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       gap: spacing.xs,
     },
     heroName: {
-      fontSize: 26,
-      fontWeight: '700',
-      letterSpacing: -0.3,
       paddingVertical: 4,
     },
     heroTagline: {
-      fontSize: 16,
-      lineHeight: 22,
       paddingVertical: 2,
     },
     heroLead: {
@@ -464,7 +472,6 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       gap: 4,
     },
     fieldTight: { marginBottom: spacing.sm },
-    labelStrong: { fontWeight: '600' },
     descBoxWrap: { gap: spacing.xs, marginTop: spacing.xs },
     descLabelRow: {
       flexDirection: 'row',
@@ -481,12 +488,10 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       minHeight: 148,
     },
     descInput: {
-      fontSize: 16,
-      lineHeight: 24,
       minHeight: 120,
     },
     previewHint: { marginTop: 4, lineHeight: 18 },
-    saveFull: { width: '100%', borderRadius: radii.lg },
+    saveFull: { width: '100%' },
     toastInline: {
       marginTop: spacing.md,
       marginHorizontal: spacing.screen,

@@ -143,15 +143,15 @@ export default function BookingDetailScreen() {
       <AppText variant="body" color="textSecondary">
         {formatDateShort(booking.startsAt, locale)} · {cityLine}
       </AppText>
-      <AppText variant="meta" color="textMuted" style={styles.mt}>
+      <AppText variant="label" color="textMuted" style={styles.mt}>
         {t('bookingDetail.status')}: {t(STATUS_KEYS[displayStatus])}
       </AppText>
       {booking.totalPaid > 0 ? (
-        <AppText variant="price" color="accent" style={styles.mt}>
+        <AppText variant="h3" color="accent" style={styles.mt}>
           {formatMoney(booking.totalPaid, booking.currency)}
         </AppText>
       ) : (
-        <AppText variant="bodyMedium" color="warning" style={styles.mt}>
+        <AppText variant="body-em" color="warning" style={styles.mt}>
           {t('booking.paymentDue')}
         </AppText>
       )}
@@ -167,7 +167,7 @@ export default function BookingDetailScreen() {
           onPress={confirmCancel}
           style={({ pressed }) => [styles.cancelPress, pressed && { opacity: 0.7 }]}
         >
-          <AppText variant="bodyMedium" color="error">
+          <AppText variant="body-em" color="error">
             {t('bookingDetail.cancelBooking')}
           </AppText>
         </Pressable>
@@ -178,7 +178,7 @@ export default function BookingDetailScreen() {
           style={({ pressed }) => [styles.reportPress, pressed && { opacity: 0.7 }]}
           accessibilityRole="button"
         >
-          <AppText variant="bodyMedium" color="accent">
+          <AppText variant="body-em" color="accent">
             {t('report.bookingAction')}
           </AppText>
         </Pressable>
@@ -219,7 +219,7 @@ function Row({
         <AppText variant="caption" color="textMuted">
           {label}
         </AppText>
-        <AppText variant="bodyMedium" color="text">
+        <AppText variant="body-em" color="text">
           {value}
         </AppText>
       </View>

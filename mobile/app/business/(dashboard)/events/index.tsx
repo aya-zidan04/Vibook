@@ -31,14 +31,14 @@ export default function BusinessEventsIndexScreen() {
           onPress={() => router.push(`/business/events/${item.id}`)}
           style={({ pressed }) => [styles.cardMain, pressed && styles.pressed]}
         >
-          <AppText variant="bodyMedium" color="text">
+          <AppText variant="body-em" color="text">
             {item.title.trim() || t('businessHub.eventUntitled')}
           </AppText>
           <AppText variant="caption" color="textSecondary">
             {t('businessHub.eventMeta').replace('{price}', priceLabel).replace('{cap}', capLabel)}
           </AppText>
           {item.hidden ? (
-            <AppText variant="meta" color="textMuted">
+            <AppText variant="label" color="textMuted">
               {t('businessHub.eventHidden')}
             </AppText>
           ) : null}

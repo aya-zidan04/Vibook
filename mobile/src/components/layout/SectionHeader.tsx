@@ -24,7 +24,7 @@ export function SectionHeader({ title, subtitle, actionLabel, onActionPress }: P
       </View>
       {actionLabel && onActionPress ? (
         <Pressable onPress={onActionPress} hitSlop={10}>
-          <AppText variant="bodyMedium" color="accent">
+          <AppText variant="body-em" color="accent">
             {actionLabel}
           </AppText>
         </Pressable>

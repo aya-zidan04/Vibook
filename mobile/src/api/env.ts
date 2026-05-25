@@ -7,7 +7,7 @@ let loggedApiUrl = false;
  */
 export function getApiBaseUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL?.trim();
-  if (!loggedApiUrl) {
+  if (!loggedApiUrl && typeof __DEV__ !== 'undefined' && __DEV__) {
     loggedApiUrl = true;
     console.log('API URL:', process.env.EXPO_PUBLIC_API_URL);
   }

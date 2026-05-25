@@ -36,7 +36,7 @@ function createBarStyles(colors: ThemeColors) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: colors.backgroundElevated,
+      backgroundColor: colors.sheetSurface,
       borderTopWidth: 1,
       borderTopColor: colors.border,
       paddingHorizontal: spacing.screen,

@@ -83,7 +83,7 @@ export default function FavoritesTabScreen() {
         <AppText variant="caption" color="textMuted" style={styles.mockNote}>
           {t('favorites.backendSignInHint')}
         </AppText>
-        <PrimaryButton title={t('auth.loginCta')} onPress={() => router.push('/login')} />
+        <PrimaryButton sheet title={t('auth.loginCta')} onPress={() => router.push('/login')} />
       </Screen>
     );
   }
@@ -132,13 +132,13 @@ export default function FavoritesTabScreen() {
           >
             <Image source={{ uri: e.imageUrl }} style={styles.thumb} contentFit="cover" />
             <View style={{ flex: 1, gap: 4 }}>
-              <AppText variant="bodyMedium" color="text" numberOfLines={2}>
+              <AppText variant="body-em" color="text" numberOfLines={2}>
                 {e.title}
               </AppText>
               <AppText variant="caption" color="textMuted" numberOfLines={2}>
                 {cityLine}
               </AppText>
-              <AppText variant="price" color="accent">
+              <AppText variant="h3" color="accent">
                 {t('common.from')} {formatMoney(e.priceFrom, e.currency)}
               </AppText>
             </View>
@@ -163,7 +163,7 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       gap: spacing.md,
       padding: spacing.md,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: colors.border,

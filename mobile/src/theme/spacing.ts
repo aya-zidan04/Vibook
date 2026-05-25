@@ -19,3 +19,11 @@ export const radii = {
   xxl: 28,
   full: 9999,
 } as const;
+
+/** Pill-shaped CTAs (capsule ends) — used by PrimaryButton / SecondaryButton. */
+export const buttonMetrics = {
+  borderRadius: radii.full,
+  minHeight: 52,
+  paddingVertical: 14,
+  paddingHorizontal: spacing.xxl,
+} as const;

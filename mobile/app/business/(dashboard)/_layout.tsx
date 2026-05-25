@@ -55,7 +55,7 @@ function partnerTabOptions(
   return {
     headerShown: false,
     title,
-    tabBarActiveTintColor: colors.accent,
+    tabBarActiveTintColor: colors.primary,
     tabBarInactiveTintColor: colors.textMuted,
     tabBarShowLabel: true,
     tabBarIcon,

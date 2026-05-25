@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppBackground } from '@/components/ui/AppBackground';
 import { AppText } from '@/components/ui/AppText';
 import type { City } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
@@ -38,7 +39,8 @@ export function CityPickerSheet({
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <View style={styles.modalRoot}>
+      <AppBackground>
+        <View style={styles.modalRoot}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityRole="button" />
         <View style={styles.sheet}>
           <AppText variant="overline" color="textMuted" style={styles.sheetTitle}>
@@ -71,7 +73,7 @@ export function CityPickerSheet({
                   ]}
                 >
                   <AppText
-                    variant="bodyMedium"
+                    variant="body-em"
                     color="text"
                     style={[styles.optionLabel, selected && styles.optionLabelSelected]}
                   >
@@ -87,7 +89,8 @@ export function CityPickerSheet({
             })}
           </ScrollView>
         </View>
-      </View>
+        </View>
+      </AppBackground>
     </Modal>
   );
 }
@@ -100,10 +103,10 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     },
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: colors.overlay,
+      backgroundColor: 'rgba(255, 247, 251, 0.35)',
     },
     sheet: {
-      backgroundColor: colors.surface,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
       borderTopLeftRadius: radii.xxl,
       borderTopRightRadius: radii.xxl,
       paddingTop: spacing.lg,
@@ -115,7 +118,6 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     },
     sheetTitle: {
       marginBottom: spacing.md,
-      letterSpacing: 0.8,
     },
     sheetList: {
       flexGrow: 0,
@@ -130,7 +132,7 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
       justifyContent: 'space-between',
       paddingVertical: 14,
       paddingHorizontal: spacing.md,
-      borderRadius: radii.lg,
+      borderRadius: radii.full,
       marginBottom: spacing.xs,
       backgroundColor: colors.backgroundElevated,
       borderWidth: 1,

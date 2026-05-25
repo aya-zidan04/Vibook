@@ -26,7 +26,7 @@ export function SearchBar({
       accessibilityLabel="Search"
     >
       <Ionicons name="search" size={22} color={colors.primary} />
-      <AppText variant="bodyMedium" color="textMuted" style={styles.ph}>
+      <AppText variant="body-em" color="textMuted" style={styles.ph}>
         {placeholder}
       </AppText>
       <Ionicons name="options-outline" size={20} color={colors.textMuted} />

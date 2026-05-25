@@ -8,8 +8,7 @@ export function dtoTierToUi(tier: string): User['membershipTier'] {
 }
 
 export function uiTierRank(tier: User['membershipTier']): number {
-  if (tier === 'platinum') return 2;
-  if (tier === 'gold') return 1;
+  if (tier === 'gold' || tier === 'platinum') return 1;
   return 0;
 }
 

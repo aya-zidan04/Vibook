@@ -103,7 +103,7 @@ export default function BusinessApplicationPendingScreen() {
         <AppText variant="caption" color="textMuted">
           {t('businessHub.pendingSummary')}
         </AppText>
-        <AppText variant="bodyMedium" color="text">
+        <AppText variant="body-em" color="text">
           {displayName}
         </AppText>
       </View>

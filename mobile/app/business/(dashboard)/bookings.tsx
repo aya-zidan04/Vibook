@@ -76,7 +76,7 @@ export default function BusinessBookingsScreen() {
               }}
               style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
             >
-              <AppText variant="bodyMedium" color="text">
+              <AppText variant="body-em" color="text">
                 {item.listingTitle}
               </AppText>
               <AppText variant="caption" color="textSecondary">
@@ -87,7 +87,7 @@ export default function BusinessBookingsScreen() {
                   {labelFor(item.status)}
                 </AppText>
               </View>
-              <AppText variant="meta" color="textMuted">
+              <AppText variant="label" color="textMuted">
                 {t('businessHub.bookingTapCycle')}
               </AppText>
             </Pressable>

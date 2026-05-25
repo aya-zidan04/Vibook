@@ -18,7 +18,17 @@ export default function FiltersScreen() {
   const router = useRouter();
   const { t, locale } = useTranslation();
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<Set<string>>(() => new Set());
+  const [selectedQuick, setSelectedQuick] = useState<Set<string>>(() => new Set());
   const CHIPS = ['filters.chipTonight', 'filters.chipBudget', 'filters.chipFamily', 'filters.chipOutdoor'] as const;
+
+  const toggleQuick = (key: string) => {
+    setSelectedQuick((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   const toggleCategory = (id: string) => {
     setSelectedCategoryIds((prev) => {
@@ -52,15 +62,17 @@ export default function FiltersScreen() {
       </View>
       <View style={styles.chips}>
         {CHIPS.map((key) => (
-          <Pressable key={key} style={styles.chip}>
-            <AppText variant="caption" color="textSecondary">
-              {t(key)}
-            </AppText>
-          </Pressable>
+          <CategoryChip
+            key={key}
+            label={t(key)}
+            variant="accent"
+            selected={selectedQuick.has(key)}
+            onPress={() => toggleQuick(key)}
+          />
         ))}
       </View>
       <Pressable style={styles.done} onPress={() => router.back()}>
-        <AppText variant="bodyMedium" color="accent">
+        <AppText variant="body-em" color="accentText">
           {t('filters.done')}
         </AppText>
       </Pressable>
@@ -74,14 +86,6 @@ function createStyles(colors: ThemeColors) {
     refBlock: { gap: spacing.sm },
     refTitle: { marginBottom: spacing.xs },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-    chip: {
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      borderRadius: radii.full,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
     done: { alignSelf: 'flex-end', paddingVertical: spacing.md },
   });
 }

@@ -33,7 +33,7 @@ export function BusinessLineChart({ data }: { data: TimeSeriesPointResponse[] })
             }}
             labelStyle={{ fontWeight: 700 }}
           />
-          <Line type="monotone" dataKey="count" name="New businesses" stroke={chartColors.plum} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+          <Line type="monotone" dataKey="count" name="New businesses" stroke={chartColors.accent} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

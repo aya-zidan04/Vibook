@@ -4,8 +4,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
-import { DetailHeader } from '@/components/layout/DetailHeader';
-import { Screen } from '@/components/layout/Screen';
+import { PremiumScreen } from '@/components/sheet/PremiumScreen';
+import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useMockUser } from '@/hooks/useMockUser';
@@ -21,25 +21,16 @@ import type { ThemeColors } from '@/theme/palettes';
 const RANK: Record<MembershipPlanId, number> = {
   basic: 0,
   premium: 1,
-  vip: 2,
 };
 
 function planNameKey(id: MembershipPlanId): string {
-  switch (id) {
-    case 'basic':
-      return 'membership.plan.basic';
-    case 'premium':
-      return 'membership.plan.premium';
-    case 'vip':
-      return 'membership.plan.vip';
-    default:
-      return 'membership.plan.basic';
-  }
+  return id === 'premium' ? 'membership.plan.premium' : 'membership.plan.basic';
 }
 
 export default function MembershipPlansScreen() {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const sheetStyles = useMemo(() => createPremiumSheetStyles(colors), [colors]);
+  const styles = useMemo(() => createPlanStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
@@ -54,38 +45,34 @@ export default function MembershipPlansScreen() {
   };
 
   return (
-    <Screen
-      scroll
-      contentStyle={styles.pad}
-      header={<DetailHeader title={t('membership.plansTitle')} />}
-    >
-      <AppText variant="body" color="textSecondary" style={styles.intro}>
+    <PremiumScreen title={t('membership.plansTitle')}>
+      <AppText variant="body" color="textSecondary" style={{ lineHeight: 22 }}>
         {t('membership.plansSubtitle')}
       </AppText>
 
-      <View style={styles.billingRow}>
+      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <Pressable
           onPress={() => setYearly(false)}
-          style={[styles.billingChip, !yearly && styles.billingChipOn]}
+          style={[sheetStyles.billingChip, !yearly && sheetStyles.billingChipOn]}
         >
-          <AppText variant="bodyMedium" color={!yearly ? 'text' : 'textMuted'}>
+          <AppText variant="body-em" color={!yearly ? 'text' : 'textMuted'}>
             {t('membership.billingMonthly')}
           </AppText>
         </Pressable>
         <Pressable
           onPress={() => setYearly(true)}
-          style={[styles.billingChip, yearly && styles.billingChipOn]}
+          style={[sheetStyles.billingChip, yearly && sheetStyles.billingChipOn]}
         >
-          <AppText variant="bodyMedium" color={yearly ? 'text' : 'textMuted'}>
+          <AppText variant="body-em" color={yearly ? 'text' : 'textMuted'}>
             {t('membership.billingYearly')}
           </AppText>
-          <AppText variant="caption" color="accent" style={styles.yearlyHint}>
+          <AppText variant="caption" color="accent" style={{ marginTop: 2 }}>
             {t('membership.yearlyHint')}
           </AppText>
         </Pressable>
       </View>
 
-      <View style={styles.cards}>
+      <View style={{ gap: spacing.xl, paddingVertical: spacing.xs }}>
         {MEMBERSHIP_PLANS.map((plan) => (
           <MockPlanCard
             key={plan.id}
@@ -94,6 +81,7 @@ export default function MembershipPlansScreen() {
             currentMockRank={currentMockRank}
             currentMockId={currentMockId}
             colors={colors}
+            sheetStyles={sheetStyles}
             styles={styles}
             t={t}
             formatMoney={formatMoney}
@@ -102,8 +90,8 @@ export default function MembershipPlansScreen() {
         ))}
       </View>
 
-      <SecondaryButton title={t('common.back')} onPress={() => router.back()} />
-    </Screen>
+      <SecondaryButton sheet title={t('common.back')} onPress={() => router.back()} />
+    </PremiumScreen>
   );
 }
 
@@ -113,6 +101,7 @@ function MockPlanCard({
   currentMockRank,
   currentMockId,
   colors,
+  sheetStyles,
   styles,
   t,
   formatMoney,
@@ -123,7 +112,8 @@ function MockPlanCard({
   currentMockRank: number;
   currentMockId: MembershipPlanId;
   colors: ThemeColors;
-  styles: ReturnType<typeof createStyles>;
+  sheetStyles: ReturnType<typeof createPremiumSheetStyles>;
+  styles: ReturnType<typeof createPlanStyles>;
   t: (k: string) => string;
   formatMoney: (n: number, c: string) => string;
   onPlanAction: (plan: MembershipPlan) => void;
@@ -143,24 +133,24 @@ function MockPlanCard({
   return (
     <View
       style={[
-        styles.card,
+        sheetStyles.planCard,
         plan.recommended && styles.cardRecommended,
         isCurrent && styles.cardCurrent,
       ]}
     >
       {plan.recommended ? (
         <View style={styles.bestBadge}>
-          <AppText variant="meta" color="text" style={styles.bestBadgeTxt}>
+          <AppText variant="label" color="text" style={styles.bestBadgeTxt}>
             {t('membership.bestValue')}
           </AppText>
         </View>
       ) : null}
-      <View style={styles.cardHead}>
+      <View style={{ gap: spacing.xs }}>
         <AppText variant="h2" color="text">
           {t(planNameKey(plan.id))}
         </AppText>
-        <View style={styles.priceRow}>
-          <AppText variant="price" color="accent">
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, flexWrap: 'wrap' }}>
+          <AppText variant="h3" color="accent">
             {formatMoney(price, plan.currency)}
           </AppText>
           <AppText variant="caption" color="textMuted">
@@ -168,11 +158,11 @@ function MockPlanCard({
           </AppText>
         </View>
       </View>
-      <View style={styles.benefits}>
+      <View style={{ gap: spacing.sm }}>
         {plan.benefitKeys.map((key) => (
-          <View key={key} style={styles.benefitRow}>
+          <View key={key} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
             <Ionicons name="checkmark-done" size={18} color={colors.accent} />
-            <AppText variant="body" color="textSecondary" style={styles.benefitTxt}>
+            <AppText variant="body" color="textSecondary" style={{ flex: 1, lineHeight: 22 }}>
               {t(key)}
             </AppText>
           </View>
@@ -180,54 +170,22 @@ function MockPlanCard({
       </View>
       {isCurrent ? (
         <View style={styles.currentPill}>
-          <AppText variant="bodyMedium" color="accent">
+          <AppText variant="body-em" color="accent">
             {ctaTitle}
           </AppText>
         </View>
       ) : (
-        <PrimaryButton title={ctaTitle} onPress={() => onPlanAction(plan)} style={styles.cta} />
+        <PrimaryButton sheet title={ctaTitle} onPress={() => onPlanAction(plan)} style={{ marginTop: spacing.sm }} />
       )}
     </View>
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createPlanStyles(colors: ThemeColors) {
   return StyleSheet.create({
-    pad: { paddingTop: spacing.md, gap: spacing.lg },
-    intro: { lineHeight: 22 },
-    billingRow: { flexDirection: 'row', gap: spacing.sm },
-    billingChip: {
-      flex: 1,
-      paddingVertical: 12,
-      paddingHorizontal: spacing.md,
-      borderRadius: radii.full,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-      alignItems: 'center',
-      gap: 2,
-    },
-    billingChipOn: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primaryMuted,
-    },
-    yearlyHint: { marginTop: 2 },
-    cards: { gap: spacing.lg },
-    card: {
-      padding: spacing.lg,
-      borderRadius: radii.xxl,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.backgroundElevated,
-      gap: spacing.md,
-    },
     cardRecommended: {
       borderColor: colors.primary,
       borderWidth: 2,
-      shadowColor: colors.glowPrimary,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
     },
     cardCurrent: {
       borderColor: colors.accent,
@@ -239,21 +197,17 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: 4,
       borderRadius: radii.xs,
     },
-    bestBadgeTxt: { fontWeight: '700', fontSize: 10, letterSpacing: 0.6 },
-    cardHead: { gap: spacing.xs },
-    priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, flexWrap: 'wrap' },
-    benefits: { gap: spacing.sm },
-    benefitRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-    benefitTxt: { flex: 1, lineHeight: 22 },
-    cta: { marginTop: spacing.sm },
+    bestBadgeTxt: { letterSpacing: 0.6 },
     currentPill: {
       marginTop: spacing.sm,
       paddingVertical: 14,
       borderRadius: radii.full,
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.accent,
       alignItems: 'center',
       backgroundColor: colors.accentMuted,
+      minHeight: 58,
+      justifyContent: 'center',
     },
   });
 }

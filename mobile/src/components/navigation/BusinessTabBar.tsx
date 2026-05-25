@@ -90,7 +90,7 @@ export function BusinessTabBar({ state, descriptors, navigation, insets }: Botto
         ]}
       >
         <View style={styles.iconSlot}>{icon}</View>
-        <AppText variant="meta" numberOfLines={1} ellipsizeMode="tail" style={[styles.label, { color: tint }]}>
+        <AppText variant="label" numberOfLines={1} ellipsizeMode="tail" style={[styles.label, { color: tint }]}>
           {label}
         </AppText>
       </Pressable>
@@ -111,7 +111,7 @@ export function BusinessTabBar({ state, descriptors, navigation, insets }: Botto
         {
           width: '100%',
           alignSelf: 'stretch',
-          backgroundColor: colors.backgroundElevated,
+          backgroundColor: colors.sheetSurface,
           borderTopColor: colors.border,
           paddingBottom: Math.max(insets.bottom, 10),
           direction: 'ltr',
@@ -169,8 +169,6 @@ function createBarStyles() {
     cellPressed: { opacity: 0.88 },
     iconSlot: { height: 26, alignItems: 'center', justifyContent: 'center' },
     label: {
-      fontSize: 10,
-      fontWeight: '700',
       letterSpacing: 0.02,
       textAlign: 'center',
       width: '100%',

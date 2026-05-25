@@ -6,6 +6,7 @@ export const translations = {
     tabs: {
       explore: 'Explore',
       booking: 'Booking',
+      resell: 'Resell',
       favorites: 'Favorites',
       me: 'Me',
     },
@@ -25,6 +26,7 @@ export const translations = {
       brandDisplay: 'Vibook',
       splashTagline: 'Events, dining, stays & more',
       a11yGoBack: 'Go back',
+      a11yClose: 'Close',
       error: 'Something went wrong',
       loading: 'Loading…',
       retry: 'Try again',
@@ -156,6 +158,15 @@ export const translations = {
       statusPending: 'Pending',
       statusCancelled: 'Cancelled',
     },
+    resell: {
+      title: 'Resell',
+      subtitle: 'List tickets you can’t use or find deals from other guests.',
+      emptyTitle: 'No listings yet',
+      emptyBody: 'When resell is live, you can post tickets from your bookings or browse offers here.',
+      signInTitle: 'Sign in to resell',
+      signInBody: 'Log in to list tickets from your bookings or shop guest listings.',
+      browseCta: 'View my bookings',
+    },
     favorites: {
       title: 'Favorites',
       subtitle: 'Saved for you — tap a card to open details.',
@@ -174,6 +185,8 @@ export const translations = {
       emptyBackend: 'No favorites yet. Tap the heart on an event in Explore.',
     },
     me: {
+      guestAccountLead: 'Log in to manage your bookings, favorites, and more.',
+      guestAuthCta: 'Log in or Sign up',
       expires: 'Exp.',
       editProfile: 'Edit profile',
       bookings: 'Bookings',
@@ -309,7 +322,6 @@ export const translations = {
       plan: {
         basic: 'Basic',
         premium: 'Premium',
-        vip: 'VIP',
       },
       benefit: {
         basic1: 'Member newsletter & curated picks',
@@ -319,11 +331,6 @@ export const translations = {
         premium2: 'Early access to high-demand tickets',
         premium3: '10% off dining, stays & packages',
         premium4: 'Priority support',
-        vip1: 'Everything in Premium',
-        vip2: 'Exclusive events & partner previews',
-        vip3: '15% off across eligible listings',
-        vip4: 'Complimentary concierge session (mock)',
-        vip5: 'VIP line & fastest rebooking',
       },
     },
     business: {
@@ -565,6 +572,7 @@ export const translations = {
     },
     notifications: {
       title: 'Notifications',
+      recent: 'Recent',
       n1Title: 'Booking confirmed',
       n1Body: 'Amman Summer Sound — Jul 18',
       n2Title: 'Price drop',
@@ -841,6 +849,7 @@ export const translations = {
     tabs: {
       explore: 'استكشف',
       booking: 'الحجوزات',
+      resell: 'إعادة البيع',
       favorites: 'المفضلة',
       me: 'أنا',
     },
@@ -860,6 +869,7 @@ export const translations = {
       brandDisplay: 'Vibook',
       splashTagline: 'فعاليات، مطاعم، إقامات وأكثر',
       a11yGoBack: 'رجوع',
+      a11yClose: 'إغلاق',
       error: 'حدث خطأ',
       loading: 'جاري التحميل…',
       retry: 'إعادة المحاولة',
@@ -991,6 +1001,15 @@ export const translations = {
       statusPending: 'معلّق',
       statusCancelled: 'ملغاة',
     },
+    resell: {
+      title: 'إعادة البيع',
+      subtitle: 'اعرض تذاكر لا تستخدمها أو ابحث عن عروض من ضيوف آخرين.',
+      emptyTitle: 'لا عروض بعد',
+      emptyBody: 'عند تفعيل إعادة البيع يمكنك نشر تذاكر من حجوزاتك أو تصفح العروض هنا.',
+      signInTitle: 'سجّل الدخول لإعادة البيع',
+      signInBody: 'سجّل الدخول لعرض تذاكر من حجوزاتك أو شراء عروض الضيوف.',
+      browseCta: 'عرض حجوزاتي',
+    },
     favorites: {
       title: 'المفضلة',
       subtitle: 'محفوظ لك — اضغط على بطاقة للتفاصيل.',
@@ -1009,6 +1028,8 @@ export const translations = {
       emptyBackend: 'لا مفضلات بعد. اضغط القلب على فعالية في الاستكشاف.',
     },
     me: {
+      guestAccountLead: 'سجّل الدخول لإدارة حجوزاتك ومفضلتك والمزيد.',
+      guestAuthCta: 'تسجيل الدخول أو إنشاء حساب',
       expires: 'ينتهي',
       editProfile: 'تعديل الملف',
       bookings: 'الحجوزات',
@@ -1144,7 +1165,6 @@ export const translations = {
       plan: {
         basic: 'أساسية',
         premium: 'بريميوم',
-        vip: 'VIP',
       },
       benefit: {
         basic1: 'نشرة للأعضاء وتصفّيات مختارة',
@@ -1154,11 +1174,6 @@ export const translations = {
         premium2: 'وصول مبكر لتذاكر الطلب العالي',
         premium3: 'خصم ١٠٪ على المطاعم والإقامة والباقات',
         premium4: 'دعم أسبقية',
-        vip1: 'كل مزايا البريميوم',
-        vip2: 'فعاليات حصرية ومعاينات شركاء',
-        vip3: 'خصم ١٥٪ على العروض المؤهّلة',
-        vip4: 'جلسة كونسييرج مجّانية (تجريبي)',
-        vip5: 'خط VIP وإعادة حجز أسرع',
       },
     },
     business: {
@@ -1399,6 +1414,7 @@ export const translations = {
     },
     notifications: {
       title: 'الإشعارات',
+      recent: 'الأخيرة',
       n1Title: 'تأكيد الحجز',
       n1Body: 'أصوات عمّان الصيفية — 18 يوليو',
       n2Title: 'انخفاض السعر',
@@ -1420,6 +1436,7 @@ export const translations = {
       signInTitle: 'سجّل الدخول لعرض المحفظة',
       signInDesc: 'يُحمّل رصيد محفظتك من الخادم عند تسجيل الدخول.',
       loadError: 'تعذّر تحميل المحفظة.',
+      retry: 'إعادة المحاولة',
     },
     vouchers: {
       title: 'القسائم',

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigationContainerRef, useRouter } from 'expo-router';
+import { AppBackground } from '@/components/ui/AppBackground';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
@@ -72,23 +72,22 @@ export default function SplashScreen() {
   }, [hydrated, router, navRef]);
 
   return (
-    <LinearGradient
-      colors={[colors.background, colors.backgroundElevated, colors.background]}
-      style={styles.root}
-    >
-      <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
-      <AppText variant="display" color="text" style={styles.brand}>
-        {t('common.brandDisplay')}
-      </AppText>
-      <AppText variant="body" color="textMuted" style={styles.tag}>
-        {t('common.splashTagline')}
-      </AppText>
-      <ActivityIndicator color={colors.primary} size="large" style={styles.loader} />
-    </LinearGradient>
+    <AppBackground>
+      <View style={styles.root}>
+        <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
+        <AppText variant="display" color="text" style={styles.brand}>
+          {t('common.brandDisplay')}
+        </AppText>
+        <AppText variant="body" color="textSecondary" style={styles.tag}>
+          {t('common.splashTagline')}
+        </AppText>
+        <ActivityIndicator color={colors.primary} size="large" style={styles.loader} />
+      </View>
+    </AppBackground>
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(_colors: ThemeColors) {
   return StyleSheet.create({
     root: {
       flex: 1,

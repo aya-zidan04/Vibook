@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AuthTextField } from '@/components/auth/AuthTextField';
-import { DetailHeader } from '@/components/layout/DetailHeader';
-import { Screen } from '@/components/layout/Screen';
+import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { addPaymentMethod } from '@/api/paymentMethodsApi';
@@ -20,7 +19,6 @@ function formatGroupsOf4(digits: string): string {
 }
 
 export default function AddPaymentMethodScreen() {
-  const styles = useMemo(() => createStyles(), []);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -92,13 +90,8 @@ export default function AddPaymentMethodScreen() {
   };
 
   return (
-    <Screen
-      scroll
-      contentStyle={styles.pad}
-      edges={['top', 'left', 'right', 'bottom']}
-      header={<DetailHeader title={t('paymentMethods.addAnother')} />}
-    >
-      <AppText variant="caption" color="textMuted" style={styles.intro}>
+    <PremiumScreen title={t('paymentMethods.addAnother')}>
+      <AppText variant="caption" color="textMuted" style={{ lineHeight: 20 }}>
         {t('paymentMethods.addCardMockNote')}
       </AppText>
 
@@ -117,8 +110,8 @@ export default function AddPaymentMethodScreen() {
         placeholder={t('paymentMethods.phCardholder')}
         autoCapitalize="words"
       />
-      <View style={styles.row2}>
-        <View style={styles.half}>
+      <View style={row2}>
+        <View style={half}>
           <AuthTextField
             label={t('paymentMethods.fieldExpiry')}
             value={expiry}
@@ -128,7 +121,7 @@ export default function AddPaymentMethodScreen() {
             autoCorrect={false}
           />
         </View>
-        <View style={styles.half}>
+        <View style={half}>
           <AuthTextField
             label={t('paymentMethods.fieldCvc')}
             value={cvc}
@@ -141,16 +134,10 @@ export default function AddPaymentMethodScreen() {
         </View>
       </View>
 
-      <PrimaryButton title={t('paymentMethods.saveCard')} onPress={submit} />
-    </Screen>
+      <PrimaryButton sheet title={t('paymentMethods.saveCard')} onPress={submit} />
+    </PremiumScreen>
   );
 }
 
-function createStyles() {
-  return StyleSheet.create({
-    pad: { paddingTop: spacing.md, gap: spacing.md },
-    intro: { lineHeight: 20, marginBottom: -spacing.xs },
-    row2: { flexDirection: 'row', gap: spacing.sm },
-    half: { flex: 1 },
-  });
-}
+const row2 = { flexDirection: 'row' as const, gap: spacing.sm };
+const half = { flex: 1 };

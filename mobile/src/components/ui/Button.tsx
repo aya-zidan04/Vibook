@@ -1,9 +1,16 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View, ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppText } from '@/components/ui/AppText';
-import { useThemeColors } from '@/theme';
+import { useButtonVariants, useThemeColors, useThemeGradients } from '@/theme';
+import type { ThemeButtons } from '@/theme/designSystem';
 import type { ThemeColors } from '@/theme/palettes';
-import { radii, spacing } from '@/theme';
+import { buttonMetrics, createShadows, spacing } from '@/theme';
+
+/** Enforce capsule shape when screens pass extra `style` on buttons. */
+export const pillButtonStyle: ViewStyle = {
+  borderRadius: buttonMetrics.borderRadius,
+};
 
 type BaseProps = {
   title: string;
@@ -11,30 +18,63 @@ type BaseProps = {
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
+  /** Taller sheet CTAs; same pill radius as default. */
+  sheet?: boolean;
 };
 
-export function PrimaryButton({ title, onPress, disabled, loading, style }: BaseProps) {
+function buttonShape(style?: ViewStyle, sheet?: boolean): ViewStyle {
+  const { borderRadius: _radius, ...rest } = style ?? {};
+  return {
+    ...buttonMetrics,
+    ...(sheet ? { minHeight: 58 } : null),
+    ...rest,
+    borderRadius: buttonMetrics.borderRadius,
+  };
+}
+
+export function PrimaryButton({ title, onPress, disabled, loading, style, sheet }: BaseProps) {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const gradients = useThemeGradients();
+  const buttons = useButtonVariants();
+  const styles = useMemo(() => createStyles(colors, buttons), [colors, buttons]);
+  const sheetShadow = sheet ? createShadows(colors).sm : undefined;
+  const shape = buttonShape(style, sheet);
   const off = disabled || loading;
+  const variant = buttons.primary;
+
+  const inner = loading ? (
+    <ActivityIndicator color={variant.textColor} />
+  ) : (
+    <AppText variant="body-em" style={{ color: variant.textColor }}>
+      {title}
+    </AppText>
+  );
+
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
       disabled={off}
       style={({ pressed }) => [
-        styles.primary,
-        pressed && !off && styles.primaryPressed,
+        style?.width != null && { width: style.width },
+        style?.alignSelf != null && { alignSelf: style.alignSelf },
+        pressed && !off && { opacity: variant.pressedOpacity },
         off && styles.disabled,
-        style,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator color={colors.textOnPrimary} />
+      {variant.useGradient && !off ? (
+        <LinearGradient
+          colors={[...gradients.button]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.primary, shape, sheetShadow]}
+        >
+          {inner}
+        </LinearGradient>
       ) : (
-        <AppText variant="bodyMedium" style={styles.primaryLabel}>
-          {title}
-        </AppText>
+        <View style={[styles.primary, shape, sheetShadow, { backgroundColor: variant.backgroundColor }]}>
+          {inner}
+        </View>
       )}
     </Pressable>
   );
@@ -45,9 +85,15 @@ export function SecondaryButton({
   onPress,
   disabled,
   style,
+  sheet,
 }: Omit<BaseProps, 'loading'>) {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const buttons = useButtonVariants();
+  const styles = useMemo(() => createStyles(colors, buttons), [colors, buttons]);
+  const variant = buttons.secondary;
+  const sheetShadow = sheet ? createShadows(colors).sm : undefined;
+  const shape = buttonShape(style, sheet);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -55,48 +101,33 @@ export function SecondaryButton({
       disabled={disabled}
       style={({ pressed }) => [
         styles.secondary,
-        pressed && !disabled && styles.secondaryPressed,
+        shape,
+        sheetShadow,
+        {
+          backgroundColor: variant.backgroundColor,
+          borderColor: variant.borderColor,
+          borderWidth: variant.borderWidth,
+        },
+        pressed && !disabled && { opacity: variant.pressedOpacity },
         disabled && styles.disabled,
-        style,
       ]}
     >
-      <AppText variant="bodyMedium" color="primary">
+      <AppText variant="body-em" style={{ color: variant.textColor }}>
         {title}
       </AppText>
     </Pressable>
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(_colors: ThemeColors, _buttons: ThemeButtons) {
   return StyleSheet.create({
     primary: {
-      backgroundColor: colors.primary,
-      paddingVertical: 14,
-      paddingHorizontal: spacing.xxl,
-      borderRadius: radii.full,
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: 52,
-    },
-    primaryPressed: {
-      opacity: 0.88,
-    },
-    primaryLabel: {
-      color: colors.textOnPrimary,
-      fontWeight: '600',
     },
     secondary: {
-      borderWidth: 1.5,
-      borderColor: colors.borderLight,
-      paddingVertical: 14,
-      paddingHorizontal: spacing.xxl,
-      borderRadius: radii.full,
       alignItems: 'center',
-      minHeight: 52,
-      backgroundColor: colors.surface,
-    },
-    secondaryPressed: {
-      backgroundColor: colors.surfaceHover,
+      justifyContent: 'center',
     },
     disabled: {
       opacity: 0.45,

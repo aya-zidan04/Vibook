@@ -158,7 +158,7 @@ export default function EditProfileScreen() {
               <Ionicons name="pencil" size={18} color={colors.accent} />
             </Pressable>
           </View>
-          <AppText variant="meta" color="textMuted" style={styles.heroNote}>
+          <AppText variant="label" color="textMuted" style={styles.heroNote}>
             {t('editProfile.note')}
           </AppText>
           {user.avatarUrl ? (
@@ -201,10 +201,10 @@ export default function EditProfileScreen() {
         textInputStyle={styles.phoneInput}
         leftSlot={
           <View style={styles.phonePrefix}>
-            <AppText variant="bodyMedium" style={styles.flag}>
+            <AppText variant="h2">
               🇯🇴
             </AppText>
-            <AppText variant="bodyMedium" color="textSecondary">
+            <AppText variant="body-em" color="textSecondary">
               +962
             </AppText>
             <View style={styles.phoneSep} />
@@ -299,7 +299,6 @@ function createStyles(colors: ThemeColors) {
       gap: 8,
       paddingStart: spacing.sm,
     },
-    flag: { fontSize: 20 },
     phoneSep: {
       width: 1,
       height: 26,

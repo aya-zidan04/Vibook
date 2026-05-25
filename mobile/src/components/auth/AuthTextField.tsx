@@ -5,7 +5,10 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
+import { textAlignStart } from '@/utils/rtlText';
+import { useLocaleStore } from '@/store/localeStore';
 import { radii, spacing, useThemeColors } from '@/theme';
+import { inputTextStyle } from '@/theme/typography';
 import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
@@ -51,11 +54,12 @@ export function AuthTextField({
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { isRTL } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
   const [rowFocused, setRowFocused] = useState(false);
 
   return (
     <View style={[styles.wrap, wrapperStyle]}>
-      <AppText variant="caption" color="text" style={styles.label}>
+      <AppText variant="label" color="text">
         {label}
       </AppText>
       <View
@@ -83,8 +87,9 @@ export function AuthTextField({
           onBlur={() => setRowFocused(false)}
           style={[
             styles.input,
+            inputTextStyle(locale),
             {
-              textAlign: isRTL ? 'right' : 'left',
+              textAlign: textAlignStart(isRTL),
               writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
             },
             textInputStyle,
@@ -93,7 +98,7 @@ export function AuthTextField({
         {rightSlot ? <View style={styles.right}>{rightSlot}</View> : null}
       </View>
       {helper ? (
-        <AppText variant="meta" color="textMuted" style={styles.helper}>
+        <AppText variant="label" color="textMuted" style={styles.helper}>
           {helper}
         </AppText>
       ) : null}
@@ -119,7 +124,6 @@ export function PasswordToggleIcon({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     wrap: { gap: spacing.xs, marginBottom: spacing.md },
-    label: { fontWeight: '600' },
     fieldRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -135,10 +139,9 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       color: colors.text,
-      fontSize: 16,
     },
     left: { paddingStart: spacing.sm },
     right: { paddingEnd: spacing.sm },
-    helper: { lineHeight: 18, marginTop: 2 },
+    helper: { marginTop: 2 },
   });
 }

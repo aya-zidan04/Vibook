@@ -37,7 +37,7 @@ export function BookingsLineChart({ data }: { data: TimeSeriesPointResponse[] })
             type="monotone"
             dataKey="count"
             name="New bookings"
-            stroke={chartColors.plum}
+            stroke={chartColors.accentSoft}
             strokeWidth={2.5}
             dot={false}
             activeDot={{ r: 5 }}

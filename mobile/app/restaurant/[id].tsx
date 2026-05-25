@@ -96,7 +96,7 @@ export default function RestaurantDetailScreen() {
         <View style={styles.hero}>
           <Image source={{ uri: r.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
           <LinearGradient
-            colors={[fadeFromBackground(colors, 0.3), colors.background]}
+            colors={[fadeFromBackground(colors, 0.3), fadeFromBackground(colors, 1)]}
             style={StyleSheet.absoluteFill}
           />
           <DetailHeader />
@@ -111,7 +111,7 @@ export default function RestaurantDetailScreen() {
           </AppText>
           <View style={styles.row}>
             <Ionicons name="star" size={16} color={colors.warning} />
-            <AppText variant="bodyMedium" color="textSecondary">
+            <AppText variant="body-em" color="textSecondary">
               {formatDecimalForLocale(r.rating, locale, 1)} ({formatIntForLocale(r.reviewCount, locale)}+{' '}
               {t('restaurant.reviewsPlus')})
             </AppText>
@@ -126,7 +126,7 @@ export default function RestaurantDetailScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.slots}>
             {SLOTS.map((s) => (
               <Pressable key={s} onPress={() => setSlot(s)} style={[styles.slot, slot === s && styles.slotOn]}>
-                <AppText variant="meta" color={slot === s ? 'text' : 'textMuted'}>
+                <AppText variant="label" color={slot === s ? 'text' : 'textMuted'}>
                   {s}
                 </AppText>
               </Pressable>
@@ -154,7 +154,7 @@ export default function RestaurantDetailScreen() {
             <AppText variant="caption" color="textMuted">
               {t('restaurant.holdFee')}
             </AppText>
-            <AppText variant="price" color="text">
+            <AppText variant="h3" color="text">
               {formatMoney(fee + 15, checkoutCurrency)}
             </AppText>
           </View>
@@ -167,7 +167,7 @@ export default function RestaurantDetailScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   content: { paddingBottom: 120 },
   hero: { height: 240 },
   body: { padding: spacing.screen, gap: spacing.sm },
@@ -183,7 +183,7 @@ function createStyles(colors: ThemeColors) {
     borderWidth: 1,
     borderColor: colors.border,
     marginEnd: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
   },
   slotOn: { borderColor: colors.primary, backgroundColor: colors.primaryMuted },
   qty: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
@@ -195,7 +195,7 @@ function createStyles(colors: ThemeColors) {
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
   },
   cta: { flex: 1, maxWidth: 220 },
   });

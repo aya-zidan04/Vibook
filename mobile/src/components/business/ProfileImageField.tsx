@@ -46,7 +46,7 @@ export function ProfileImageField({
 
   return (
     <View style={styles.wrap}>
-      <AppText variant="caption" color="text" style={styles.label}>
+      <AppText variant="label" color="text">
         {label}
       </AppText>
       <Pressable
@@ -92,7 +92,6 @@ function buildStyles(colors: ThemeColors, variant: 'banner' | 'logo') {
   const banner = variant === 'banner';
   return StyleSheet.create({
     wrap: { gap: spacing.xs, marginBottom: spacing.md },
-    label: { fontWeight: '600' },
     previewOuter: {
       borderRadius: radii.xl,
       borderWidth: 1,

@@ -20,8 +20,10 @@ export function EmptyState({ icon, title, description, actionLabel, onAction }: 
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.iconCircle}>
-        <Ionicons name={icon} size={32} color={colors.primary} />
+      <View style={styles.iconRing}>
+        <View style={styles.iconCircle}>
+          <Ionicons name={icon} size={32} color={colors.accent} />
+        </View>
       </View>
       <AppText variant="h3" color="text" style={styles.title}>
         {title}
@@ -43,14 +45,24 @@ function createStyles(colors: ThemeColors) {
       paddingVertical: spacing.xxxl,
       paddingHorizontal: spacing.xxl,
     },
+    iconRing: {
+      width: 88,
+      height: 88,
+      borderRadius: 44,
+      backgroundColor: colors.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.lg,
+    },
     iconCircle: {
       width: 72,
       height: 72,
       borderRadius: 36,
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.accentBg,
+      borderWidth: 1,
+      borderColor: colors.accentBorder,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: spacing.lg,
     },
     title: { textAlign: 'center', marginBottom: spacing.sm },
     desc: { textAlign: 'center', lineHeight: 22 },

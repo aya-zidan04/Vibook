@@ -9,13 +9,14 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useBusinessHubStore } from '@/store/businessHubStore';
-import { radii, spacing, useThemeColors } from '@/theme';
+import { createShadows, radii, spacing, useThemeColors, useThemeGradients } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 const BENEFIT_ICONS = ['people-outline', 'trending-up-outline', 'megaphone-outline'] as const;
 
 export default function BusinessIntroScreen() {
   const colors = useThemeColors();
+  const gradients = useThemeGradients();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
@@ -33,8 +34,13 @@ export default function BusinessIntroScreen() {
 
   return (
     <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('business.title')} />}>
-      <LinearGradient colors={[colors.accentMuted, 'transparent']} style={styles.hero}>
-        <AppText variant="overline" color="accent">
+      <LinearGradient
+        colors={[...gradients.hero]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
+        <AppText variant="overline" color="accentText">
           {t('business.kicker')}
         </AppText>
         <AppText variant="h1" color="text" style={styles.headline}>
@@ -75,24 +81,28 @@ export default function BusinessIntroScreen() {
 }
 
 function createStyles(colors: ThemeColors) {
+  const sh = createShadows(colors);
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.lg, paddingBottom: spacing.xxxl },
     hero: {
       padding: spacing.xl,
-      borderRadius: radii.xxl,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: radii.xl,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.accentBorder,
+      overflow: 'hidden',
       gap: spacing.sm,
+      ...sh.sm,
     },
     headline: { lineHeight: 34 },
     grid: { gap: spacing.md },
     benefitCard: {
       padding: spacing.lg,
       borderRadius: radii.xl,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
+      backgroundColor: colors.card,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
       gap: spacing.sm,
+      ...sh.md,
     },
     iconWrap: {
       width: 48,

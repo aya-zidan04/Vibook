@@ -4,14 +4,18 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n/useTranslation';
 import { bottomTabSoftCrossFade } from '@/navigation/transitionPresets';
+import { useLocaleStore } from '@/store/localeStore';
 import { createShadows, useThemeColors } from '@/theme';
+import { tabBarLabelTextStyle } from '@/theme/typography';
 import type { ThemeColors } from '@/theme/palettes';
 
-/** Tab bar stays LTR so Explore → Booking → Favorites → Me always read left-to-right, even when app UI is Arabic (RTL). */
+/** Tab bar stays LTR: Explore → Booking → Resell → Favorites → Me (even when app UI is RTL). */
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
   const colors = useThemeColors();
   const styles = useMemo(() => createTabStyles(colors), [colors]);
+  const tabLabelStyle = useMemo(() => tabBarLabelTextStyle(locale), [locale]);
 
   return (
     <Tabs
@@ -27,9 +31,9 @@ export default function TabsLayout() {
             direction: 'ltr',
           },
         ],
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: styles.tabLabel,
+        tabBarLabelStyle: tabLabelStyle,
         tabBarItemStyle: styles.tabItem,
         tabBarShowLabel: true,
       }}
@@ -55,10 +59,25 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="resell"
+        options={{
+          title: t('tabs.resell'),
+          tabBarAccessibilityLabel: t('tabs.resell'),
+          tabBarIcon: ({ color, focused, size }) => (
+            <Ionicons
+              name={focused ? 'swap-horizontal' : 'swap-horizontal-outline'}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="favorites"
         options={{
           title: t('tabs.favorites'),
           tabBarAccessibilityLabel: t('tabs.favorites'),
+          tabBarActiveTintColor: colors.accent,
           tabBarIcon: ({ color, focused, size }) => (
             <Ionicons name={focused ? 'heart' : 'heart-outline'} size={size} color={color} />
           ),
@@ -81,15 +100,9 @@ function createTabStyles(colors: ThemeColors) {
   const sh = createShadows(colors);
   return StyleSheet.create({
     tabBar: {
-      backgroundColor: colors.backgroundElevated,
+      backgroundColor: colors.sheetSurface,
       paddingTop: 8,
       ...sh.tabBar,
-    },
-    tabLabel: {
-      fontSize: 11,
-      fontWeight: '600',
-      letterSpacing: 0.15,
-      marginTop: 2,
     },
     tabItem: {
       paddingVertical: 4,

@@ -89,7 +89,7 @@ export default function StayDetailScreen() {
           </AppText>
           <View style={styles.row}>
             <Ionicons name="star" size={16} color={colors.warning} />
-            <AppText variant="bodyMedium" color="textSecondary">
+            <AppText variant="body-em" color="textSecondary">
               {formatDecimalForLocale(h.rating, locale, 1)} {t('stay.guestRating')}
             </AppText>
           </View>
@@ -119,7 +119,7 @@ export default function StayDetailScreen() {
             <AppText variant="caption" color="textMuted">
               {nights} {t('stay.nights')}
             </AppText>
-            <AppText variant="price" color="text">
+            <AppText variant="h3" color="text">
               {formatMoney(total + fees, h.currency)}
             </AppText>
           </View>
@@ -132,7 +132,7 @@ export default function StayDetailScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   content: { paddingBottom: 120 },
   hero: { width: '100%', height: 260 },
   pad: { padding: spacing.screen, gap: spacing.sm },
@@ -144,7 +144,7 @@ function createStyles(colors: ThemeColors) {
     paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderRadius: radii.full,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
   },

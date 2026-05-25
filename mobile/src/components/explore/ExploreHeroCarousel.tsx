@@ -44,7 +44,7 @@ export function ExploreHeroCarousel({ slides }: Props) {
             />
             <View style={styles.copy}>
               {s.eyebrow ? (
-                <AppText variant="overline" color="accent" style={styles.slideEyebrow}>
+                <AppText variant="overline" color="accentText" style={styles.slideEyebrow}>
                   {s.eyebrow}
                 </AppText>
               ) : null}
@@ -65,9 +65,14 @@ export function ExploreHeroCarousel({ slides }: Props) {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     slideEyebrow: {
-      fontSize: 14,
-      lineHeight: 18,
-      letterSpacing: 1.1,
+      alignSelf: 'flex-start',
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: radii.sm,
+      backgroundColor: colors.accentBg,
+      borderWidth: 1,
+      borderColor: colors.accentBorder,
+      overflow: 'hidden',
     },
     section: { marginBottom: spacing.xl },
     list: {
@@ -80,7 +85,7 @@ function createStyles(colors: ThemeColors) {
       height: CARD_H,
       borderRadius: radii.xl,
       overflow: 'hidden',
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
     },

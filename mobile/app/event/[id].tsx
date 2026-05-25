@@ -24,7 +24,7 @@ import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { useLocaleStore } from '@/store/localeStore';
-import { radii, spacing, useThemeColors } from '@/theme';
+import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import type { ModerationReportType } from '@/api/types';
 import { ReportIssueModal } from '@/components/report/ReportIssueModal';
@@ -144,7 +144,7 @@ export default function EventDetailScreen() {
         >
           <View style={styles.hero}>
             <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
-            <LinearGradient colors={['transparent', colors.background]} style={StyleSheet.absoluteFill} />
+            <LinearGradient colors={['transparent', fadeFromBackground(colors, 1)]} style={StyleSheet.absoluteFill} />
             <View style={styles.heroHeader}>
               <DetailHeader
                 right={
@@ -163,7 +163,7 @@ export default function EventDetailScreen() {
             </AppText>
             <View style={styles.row}>
               <Ionicons name="star" size={16} color={colors.warning} />
-              <AppText variant="bodyMedium" color="textSecondary">
+              <AppText variant="body-em" color="textSecondary">
                 {formatDecimalForLocale(event.rating, locale, 1)} · {formatIntForLocale(event.reviewCount, locale)}{' '}
                 {t('event.reviewsWord')}
               </AppText>
@@ -230,7 +230,7 @@ export default function EventDetailScreen() {
                     style={[styles.tier, tierId === tier.id && styles.tierOn]}
                   >
                     <View style={{ flex: 1 }}>
-                      <AppText variant="bodyMedium" color="text">
+                      <AppText variant="body-em" color="text">
                         {tier.name}
                       </AppText>
                       {subtitle ? (
@@ -239,7 +239,7 @@ export default function EventDetailScreen() {
                         </AppText>
                       ) : null}
                     </View>
-                    <AppText variant="price" color="accent">
+                    <AppText variant="h3" color="accent">
                       {formatMoney(tier.price, tier.currency)}
                     </AppText>
                   </Pressable>
@@ -252,7 +252,7 @@ export default function EventDetailScreen() {
             )}
 
             <View style={styles.qtyRow}>
-              <AppText variant="bodyMedium" color="text">
+              <AppText variant="body-em" color="text">
                 {t('event.quantity')}
               </AppText>
               <View style={styles.qtyBtns}>
@@ -283,7 +283,7 @@ export default function EventDetailScreen() {
               <AppText variant="caption" color="textMuted">
                 {t('event.total')}
               </AppText>
-              <AppText variant="price" color="text">
+              <AppText variant="h3" color="text">
                 {formatMoney(lineTotal + fees, currency)}
               </AppText>
             </View>
@@ -319,7 +319,7 @@ function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; lab
         <AppText variant="caption" color="textMuted">
           {label}
         </AppText>
-        <AppText variant="bodyMedium" color="text">
+        <AppText variant="body-em" color="text">
           {value}
         </AppText>
       </View>
@@ -329,8 +329,8 @@ function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; lab
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  root: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
+  root: { flex: 1, backgroundColor: 'transparent' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 120 },
   hero: { height: 280 },
@@ -340,7 +340,7 @@ function createStyles(colors: ThemeColors) {
   title: { marginTop: spacing.xs },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     borderRadius: radii.xl,
     padding: spacing.md,
     borderWidth: 1,
@@ -352,7 +352,7 @@ function createStyles(colors: ThemeColors) {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     padding: spacing.md,
     borderRadius: radii.lg,
     borderWidth: 1,
@@ -383,7 +383,7 @@ function createStyles(colors: ThemeColors) {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',

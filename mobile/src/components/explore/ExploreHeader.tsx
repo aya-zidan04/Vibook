@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AppText } from '@/components/ui/AppText';
 import { CityPickerSheet } from '@/components/forms/CityPickerSheet';
 import { GovernoratePickerSheet } from '@/components/forms/GovernoratePickerSheet';
 import { JORDAN_GOVERNORATES } from '@/constants/jordanGovernorates';
@@ -10,13 +11,11 @@ import { useLocaleStore } from '@/store/localeStore';
 import { useReferenceStore } from '@/store/referenceStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import { textAlignStart } from '@/utils/rtlText';
 
 type Props = {
-  /** Plain wordmark (e.g. `t('common.brandDisplay')`). */
   brandLabel: string;
   onSearch: () => void;
-  onLanguageCurrency: () => void;
-  a11yLanguageCurrency: string;
   a11ySearch: string;
 };
 
@@ -24,13 +23,11 @@ type Props = {
 export function ExploreHeader({
   brandLabel,
   onSearch,
-  onLanguageCurrency,
-  a11yLanguageCurrency,
   a11ySearch,
 }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { t, locale } = useTranslation();
+  const { t, locale, isRTL } = useTranslation();
   const regionStored = useLocaleStore((s) => s.regionLabel);
   const setRegionLabel = useLocaleStore((s) => s.setRegionLabel);
   const selectedCityId = useAppStore((s) => s.selectedCityId);
@@ -75,12 +72,11 @@ export function ExploreHeader({
 
   return (
     <View style={styles.bar}>
-      <View style={styles.left}>
-        <View style={styles.brandBlock}>
-          <Text style={styles.wordmark} numberOfLines={1}>
-            {brandLabel}
-          </Text>
-        </View>
+      <AppText variant="h2" color="text" numberOfLines={1} style={styles.wordmark}>
+        {brandLabel}
+      </AppText>
+
+      <View style={styles.right}>
         <Pressable
           onPress={() => setPickerOpen(true)}
           style={({ pressed }) => [styles.regionBtn, pressed && styles.pressed]}
@@ -89,22 +85,17 @@ export function ExploreHeader({
           accessibilityLabel={t('explore.a11yGovernorate')}
           accessibilityState={{ expanded: pickerOpen }}
         >
-          <Text style={styles.regionText} numberOfLines={1}>
+          <AppText
+            variant="body-em"
+            color="text"
+            numberOfLines={1}
+            style={[styles.regionText, { textAlign: textAlignStart(isRTL) }]}
+          >
             {regionDisplay}
-          </Text>
+          </AppText>
           <Ionicons name="chevron-down" size={14} color={colors.text} />
         </Pressable>
-      </View>
 
-      <View style={styles.right}>
-        <Pressable
-          onPress={onLanguageCurrency}
-          style={({ pressed }) => [styles.iconHit, pressed && styles.pressed]}
-          accessibilityLabel={a11yLanguageCurrency}
-          hitSlop={12}
-        >
-          <Ionicons name="globe-outline" size={24} color={colors.text} />
-        </Pressable>
         <Pressable
           onPress={onSearch}
           style={({ pressed }) => [styles.iconHit, pressed && styles.pressed]}
@@ -145,51 +136,37 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      backgroundColor: colors.background,
+      backgroundColor: 'transparent',
       paddingHorizontal: 20,
-      paddingVertical: 14,
-    },
-    left: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 14,
-      flexShrink: 1,
-      minWidth: 0,
-    },
-    brandBlock: {
-      flexShrink: 1,
-      minWidth: 0,
-      gap: 2,
+      paddingTop: 14,
+      paddingBottom: 14,
+      marginBottom: spacing.lg,
     },
     wordmark: {
-      color: colors.text,
-      fontSize: 20,
-      fontWeight: '600',
-      letterSpacing: -0.3,
+      flexShrink: 1,
+      minWidth: 0,
+      marginEnd: spacing.md,
+    },
+    right: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      flexShrink: 0,
     },
     regionBtn: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 4,
       paddingVertical: 4,
-      flexShrink: 1,
-      minWidth: 0,
+      maxWidth: 140,
     },
     regionText: {
-      color: colors.text,
-      fontSize: 15,
-      fontWeight: '500',
       textDecorationLine: 'underline',
       textDecorationColor: colors.textSecondary,
       flexShrink: 1,
     },
-    right: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 20,
-      flexShrink: 0,
-    },
     iconHit: {
+      flexShrink: 0,
       padding: 4,
     },
     pressed: { opacity: 0.65 },

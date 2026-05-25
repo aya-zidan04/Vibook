@@ -52,10 +52,10 @@ function Tile({
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.tileInner}>
-        <AppText variant="meta" color="accent">
+        <AppText variant="label" color="accentText" style={styles.kindLabel}>
           {tile.kindLabel}
         </AppText>
-        <AppText variant="bodyMedium" color="text" numberOfLines={variant === 'compact' ? 2 : 3}>
+        <AppText variant="body-em" color="text" numberOfLines={variant === 'compact' ? 2 : 3}>
           {tile.title}
         </AppText>
         {variant !== 'compact' ? (
@@ -73,7 +73,7 @@ function tileStyles(colors: ThemeColors) {
     tile: {
       borderRadius: radii.xl,
       overflow: 'hidden',
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -85,6 +85,16 @@ function tileStyles(colors: ThemeColors) {
       bottom: 0,
       padding: spacing.md,
       gap: 4,
+    },
+    kindLabel: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 3,
+      borderRadius: radii.sm,
+      backgroundColor: colors.accentBg,
+      borderWidth: 1,
+      borderColor: colors.accentBorder,
+      overflow: 'hidden',
     },
   });
 }

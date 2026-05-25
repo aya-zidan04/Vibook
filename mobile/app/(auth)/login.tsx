@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { AuthSheetLayout } from '@/components/auth/AuthSheetLayout';
 import { AuthTextField, PasswordToggleIcon } from '@/components/auth/AuthTextField';
-import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -13,11 +12,19 @@ import { ApiError } from '@/api/http';
 import { useAppStore } from '@/store/appStore';
 import { useSessionStore } from '@/store/sessionStore';
 import { canSubmitLogin } from '@/utils/authValidation';
-import { ltrNavigationChrome } from '@/utils/navigationChrome';
-import { colors, radii, spacing } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+
+export const options: NativeStackNavigationOptions = {
+  presentation: 'transparentModal',
+  animation: 'slide_from_bottom',
+  gestureEnabled: true,
+  contentStyle: { backgroundColor: 'transparent' },
+};
 
 export default function LoginScreen() {
   const router = useRouter();
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,29 +63,14 @@ export default function LoginScreen() {
     })();
   };
 
-  const browseWithoutAccount = () => {
-    setGuest(true);
-    setAuthenticated(false);
-    setHasCompletedOnboarding(true);
-    router.replace('/(tabs)/explore');
-  };
-
   const onResetPassword = () => {
     /* mock — no server */
   };
 
-  const btnFull = { borderRadius: radii.lg, width: '100%' as const };
+  const btnFull = { width: '100%' as const };
 
   return (
-    <Screen scroll edges={['top', 'right', 'left', 'bottom']} contentStyle={styles.scroll}>
-      <View style={ltrNavigationChrome}>
-        <View style={styles.grabber} accessibilityLabel="Sheet handle" />
-
-        <Pressable onPress={close} style={styles.closeRow} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
-          <Ionicons name="close" size={28} color={colors.text} />
-        </Pressable>
-      </View>
-
+    <AuthSheetLayout onClose={close}>
       <AppText variant="h1" color="text" style={styles.title}>
         {t('auth.loginToBrand')}
       </AppText>
@@ -110,42 +102,18 @@ export default function LoginScreen() {
         </AppText>
       </Pressable>
 
-      <PrimaryButton title={t('auth.loginCta')} onPress={onLogin} disabled={!canLogin || busy} style={btnFull} />
+      <PrimaryButton sheet title={t('auth.loginCta')} onPress={onLogin} disabled={!canLogin || busy} style={btnFull} />
 
-      <View style={styles.divider} />
+      <View style={[styles.divider, { borderTopColor: colors.border }]} />
 
-      <SecondaryButton title={t('auth.createAccountCta')} onPress={() => router.push('/signup')} style={btnFull} />
-
-      <Pressable onPress={browseWithoutAccount} style={styles.browseLink}>
-        <AppText variant="caption" color="textMuted" style={styles.browseText}>
-          {t('auth.browseFirstLink')}
-        </AppText>
-      </Pressable>
-    </Screen>
+      <SecondaryButton sheet title={t('auth.createAccountCta')} onPress={() => router.push('/signup')} style={btnFull} />
+    </AuthSheetLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xxxl,
-  },
-  grabber: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.borderLight,
-    alignSelf: 'center',
-    marginBottom: spacing.md,
-    opacity: 0.85,
-  },
-  closeRow: {
-    alignSelf: 'flex-start',
-    marginBottom: spacing.lg,
-  },
   title: {
     marginBottom: spacing.xl,
-    letterSpacing: -0.3,
   },
   resetWrap: {
     alignSelf: 'flex-start',
@@ -155,16 +123,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
     marginVertical: spacing.lg,
-  },
-  browseLink: {
-    alignSelf: 'center',
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  browseText: {
-    textDecorationLine: 'underline',
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
 });

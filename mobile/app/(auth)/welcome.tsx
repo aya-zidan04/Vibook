@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
@@ -23,31 +22,23 @@ export default function WelcomeScreen() {
 
   return (
     <Screen edges={['top', 'bottom', 'left', 'right']}>
-      <LinearGradient colors={[colors.background, colors.backgroundElevated]} style={styles.gradient}>
-        <View style={styles.content}>
-          <Image source={BRAND_LOGO} style={styles.logo} contentFit="contain" accessibilityIgnoresInvertColors />
-          <AppText variant="display" color="text" style={styles.title}>
-            {t('common.brandDisplay')}
-          </AppText>
-          <AppText variant="body" color="textSecondary" style={styles.sub}>
-            {t('welcome.subtitle')}
-          </AppText>
-          <PrimaryButton title={t('welcome.continue')} onPress={() => router.replace('/(tabs)/explore' as never)} />
-          <SecondaryButton title={t('entry.loginSignup')} onPress={() => router.push('/login')} />
-        </View>
-      </LinearGradient>
+      <View style={styles.content}>
+        <Image source={BRAND_LOGO} style={styles.logo} contentFit="contain" accessibilityIgnoresInvertColors />
+        <AppText variant="display" color="text" style={styles.title}>
+          {t('common.brandDisplay')}
+        </AppText>
+        <AppText variant="body" color="textSecondary" style={styles.sub}>
+          {t('welcome.subtitle')}
+        </AppText>
+        <PrimaryButton title={t('welcome.continue')} onPress={() => router.replace('/(tabs)/explore' as never)} />
+        <SecondaryButton title={t('entry.loginSignup')} onPress={() => router.push('/login')} />
+      </View>
     </Screen>
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(_colors: ThemeColors) {
   return StyleSheet.create({
-    gradient: {
-      flex: 1,
-      borderRadius: radii.xxl,
-      margin: spacing.md,
-      overflow: 'hidden',
-    },
     content: {
       flex: 1,
       justifyContent: 'center',

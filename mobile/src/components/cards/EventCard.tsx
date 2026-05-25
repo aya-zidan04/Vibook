@@ -59,7 +59,7 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
           </View>
         ) : null}
         <Pressable
-          style={styles.fav}
+          style={[styles.fav, isFav && styles.favActive]}
           onPress={() => void toggleFavorite('event', event.id)}
           hitSlop={10}
           accessibilityRole="button"
@@ -68,7 +68,7 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
           <Ionicons
             name={isFav ? 'heart' : 'heart-outline'}
             size={18}
-            color={colors.text}
+            color={isFav ? colors.accent : colors.textOnPrimary}
           />
         </Pressable>
       </View>
@@ -80,12 +80,12 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
           {formatDateShort(event.startAt, locale)} · {event.venueName}
         </AppText>
         <View style={styles.row}>
-          <AppText variant="price" color="accent">
+          <AppText variant="h3" color="accent">
             {formatMoney(event.priceFrom, event.currency)}
           </AppText>
           <View style={styles.rating}>
-            <Ionicons name="star" size={14} color={colors.warning} />
-            <AppText variant="meta" color="textSecondary">
+            <Ionicons name="star" size={14} color={colors.accent} />
+            <AppText variant="label" color="textSecondary">
               {formatDecimalForLocale(event.rating, locale, 1)}
             </AppText>
           </View>
@@ -98,7 +98,7 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
 function createStyles(colors: ThemeColors, wide: boolean) {
   return StyleSheet.create({
     card: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       borderRadius: radii.xl,
       overflow: 'hidden',
       borderWidth: 1,
@@ -132,9 +132,14 @@ function createStyles(colors: ThemeColors, wide: boolean) {
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: colors.overlay,
+      backgroundColor: 'rgba(17, 24, 39, 0.45)',
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    favActive: {
+      backgroundColor: colors.accentBg,
+      borderWidth: 1,
+      borderColor: colors.accentBorder,
     },
     body: {
       padding: spacing.md,

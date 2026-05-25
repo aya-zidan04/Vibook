@@ -14,7 +14,7 @@ import { bookingBucketsLast7Days, eventBucketsNext7Days } from '@/utils/dashboar
 import { chevronForwardTrailing } from '@/utils/rtl';
 import { createShadows, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { fadeFromBackground } from '@/theme/palettes';
+import { useThemeGradients } from '@/theme';
 
 function startOfTodayMs(): number {
   const d = new Date();
@@ -31,6 +31,7 @@ function eventIsUpcoming(e: BusinessEventRecord): boolean {
 
 export default function BusinessDashboardHomeScreen() {
   const colors = useThemeColors();
+  const gradients = useThemeGradients();
   const sh = useMemo(() => createShadows(colors), [colors]);
   const styles = useMemo(() => createStyles(colors, sh), [colors, sh]);
   const router = useRouter();
@@ -158,7 +159,7 @@ export default function BusinessDashboardHomeScreen() {
   return (
     <Screen scroll contentStyle={styles.screenPad}>
       <LinearGradient
-        colors={[colors.plum, colors.primaryDark, fadeFromBackground(colors, 0.95)]}
+        colors={[...gradients.hero]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.hero, sh.lg]}
@@ -172,7 +173,7 @@ export default function BusinessDashboardHomeScreen() {
           {businessName}
         </AppText>
         <View style={[styles.pulseLine, { backgroundColor: colors.primaryMuted }]}>
-          <AppText variant="bodyMedium" style={styles.heroDynamic}>
+          <AppText variant="body-em" style={styles.heroDynamic}>
             {dynamicMessage}
           </AppText>
         </View>
@@ -182,10 +183,10 @@ export default function BusinessDashboardHomeScreen() {
               values={booking7d}
               colors={colors}
               maxHeight={12}
-              barColor={colors.cream}
+              barColor={colors.textOnPrimary}
             />
           </View>
-          <AppText variant="meta" style={styles.heroTrendLabel}>
+          <AppText variant="label" style={styles.heroTrendLabel}>
             {t('businessHub.dashVizTrend')}
           </AppText>
         </View>
@@ -196,7 +197,7 @@ export default function BusinessDashboardHomeScreen() {
         />
       </LinearGradient>
 
-      <AppText variant="caption" color="textMuted" style={styles.sectionEyebrow}>
+      <AppText variant="overline" color="textMuted" style={styles.sectionEyebrow}>
         {t('businessHub.dashAtAGlance')}
       </AppText>
       <View style={[styles.statsRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
@@ -226,7 +227,7 @@ export default function BusinessDashboardHomeScreen() {
                 >
                   <Ionicons name={s.icon} size={20} color={urgent ? colors.warning : colors.primary} />
                 </View>
-                <AppText variant="bodyMedium" color="text" style={styles.statValueCompact}>
+                <AppText variant="body-em" color="text" style={styles.statValueCompact}>
                   {s.value}
                 </AppText>
                 {urgent ? (
@@ -247,7 +248,7 @@ export default function BusinessDashboardHomeScreen() {
                   <MicroBars values={booking7d} colors={colors} maxHeight={26} />
                 </View>
               )}
-              <AppText variant="meta" color="textSecondary" numberOfLines={1} style={styles.statLabel}>
+              <AppText variant="label" color="textSecondary" numberOfLines={1} style={styles.statLabel}>
                 {s.label}
               </AppText>
             </Pressable>
@@ -255,7 +256,7 @@ export default function BusinessDashboardHomeScreen() {
         })}
       </View>
 
-      <AppText variant="caption" color="textMuted" style={styles.sectionEyebrow}>
+      <AppText variant="overline" color="textMuted" style={styles.sectionEyebrow}>
         {t('businessHub.dashSectionAttention')}
       </AppText>
       <View style={[styles.attentionCard, { borderColor: colors.borderLight, backgroundColor: colors.surface }, sh.md]}>
@@ -270,13 +271,13 @@ export default function BusinessDashboardHomeScreen() {
         >
           <View style={[styles.attentionVizRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <View style={[styles.attentionVizCol, styles.attentionVizColGrow]}>
-              <AppText variant="meta" color="textMuted" numberOfLines={1}>
+              <AppText variant="label" color="textMuted" numberOfLines={1}>
                 {t('businessHub.dashVizBookings7d')}
               </AppText>
               <MicroBars values={booking7d} colors={colors} maxHeight={24} />
             </View>
             <View style={[styles.attentionVizCol, styles.attentionVizColGrow]}>
-              <AppText variant="meta" color="textMuted" numberOfLines={1}>
+              <AppText variant="label" color="textMuted" numberOfLines={1}>
                 {t('businessHub.dashVizSchedule7d')}
               </AppText>
               <MicroBars values={events7d} colors={colors} maxHeight={24} barColor={colors.accent} />
@@ -286,7 +287,7 @@ export default function BusinessDashboardHomeScreen() {
         {attentionBlocks.length === 0 ? (
           <View style={styles.attentionEmpty}>
             <Ionicons name="checkmark-done-circle-outline" size={36} color={colors.success} />
-            <AppText variant="bodyMedium" color="textSecondary" style={styles.attentionEmptyText}>
+            <AppText variant="body-em" color="textSecondary" style={styles.attentionEmptyText}>
               {t('businessHub.dashAttentionNone')}
             </AppText>
           </View>
@@ -320,7 +321,7 @@ export default function BusinessDashboardHomeScreen() {
                 />
               </View>
               <View style={styles.attentionCopy}>
-                <AppText variant="bodyMedium" color="text">
+                <AppText variant="body-em" color="text">
                   {b.title}
                 </AppText>
                 <AppText variant="caption" color="textMuted" numberOfLines={2}>
@@ -333,7 +334,7 @@ export default function BusinessDashboardHomeScreen() {
         )}
       </View>
 
-      <AppText variant="caption" color="textMuted" style={styles.sectionEyebrow}>
+      <AppText variant="overline" color="textMuted" style={styles.sectionEyebrow}>
         {t('businessHub.dashSectionActivity')}
       </AppText>
       <View style={[styles.activityCard, { borderColor: colors.borderLight, backgroundColor: colors.surfaceMuted }, sh.sm]}>
@@ -355,7 +356,7 @@ export default function BusinessDashboardHomeScreen() {
               <AppText variant="caption" color="text" numberOfLines={2}>
                 {row.title}
               </AppText>
-              <AppText variant="meta" color="textMuted">
+              <AppText variant="label" color="textMuted">
                 {row.meta}
               </AppText>
             </View>
@@ -393,11 +394,11 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       justifyContent: 'space-between',
     },
     heroKicker: {
-      color: colors.cream,
+      color: colors.textOnPrimary,
       opacity: 0.85,
     },
     heroBusinessName: {
-      color: colors.cream,
+      color: colors.textOnPrimary,
       letterSpacing: -0.6,
       lineHeight: 34,
     },
@@ -408,7 +409,7 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       borderRadius: radii.lg,
     },
     heroDynamic: {
-      color: colors.cream,
+      color: colors.textOnPrimary,
       lineHeight: 22,
     },
     heroCta: {
@@ -423,15 +424,13 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       paddingHorizontal: spacing.xs,
     },
     heroTrendLabel: {
-      color: colors.cream,
+      color: colors.textOnPrimary,
       opacity: 0.72,
       letterSpacing: 0.3,
     },
     sectionEyebrow: {
       marginTop: spacing.md,
-      letterSpacing: 1.1,
       textTransform: 'uppercase',
-      fontWeight: '600',
     },
     statsRow: {
       gap: spacing.sm,
@@ -463,17 +462,11 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
     statValueCompact: {
       flex: 1,
       textAlign: 'center',
-      fontWeight: '600',
     },
     statVizBox: {
       minHeight: 30,
       justifyContent: 'flex-end',
       gap: 4,
-    },
-    statVizHint: {
-      fontSize: 10,
-      lineHeight: 14,
-      textAlign: 'center',
     },
     statLabel: {
       textAlign: 'center',

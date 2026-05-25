@@ -98,7 +98,7 @@ export default function PackageDetailScreen() {
             <AppText variant="caption" color="textMuted">
               {t('package.from')}
             </AppText>
-            <AppText variant="price" color="text">
+            <AppText variant="h3" color="text">
               {formatMoney(total + fees, p.currency)}
             </AppText>
           </View>
@@ -111,7 +111,7 @@ export default function PackageDetailScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   content: { paddingBottom: 120 },
   hero: { width: '100%', height: 240 },
   pad: { padding: spacing.screen, gap: spacing.sm },

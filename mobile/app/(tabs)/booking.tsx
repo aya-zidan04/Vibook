@@ -196,7 +196,7 @@ export default function BookingTabScreen() {
           accessibilityLabel={t('booking.qr')}
         >
           <Ionicons name="qr-code-outline" size={22} color={colors.accent} />
-          <AppText variant="meta" color="textSecondary">
+          <AppText variant="label" color="textSecondary">
             {t('booking.qr')}
           </AppText>
         </Pressable>
@@ -207,7 +207,7 @@ export default function BookingTabScreen() {
           accessibilityLabel={t('booking.calendar')}
         >
           <Ionicons name="calendar-outline" size={22} color={colors.accent} />
-          <AppText variant="meta" color="textSecondary">
+          <AppText variant="label" color="textSecondary">
             {t('booking.calendar')}
           </AppText>
         </Pressable>
@@ -218,7 +218,7 @@ export default function BookingTabScreen() {
           accessibilityLabel={t('booking.ticket')}
         >
           <Ionicons name="download-outline" size={22} color={colors.accent} />
-          <AppText variant="meta" color="textSecondary">
+          <AppText variant="label" color="textSecondary">
             {t('booking.ticket')}
           </AppText>
         </Pressable>
@@ -257,16 +257,16 @@ function BookingCard({
           {formatDateShort(booking.startsAt, locale)} · {cityLine}
         </AppText>
         {booking.totalPaid > 0 ? (
-          <AppText variant="price" color="accent" style={styles.price}>
+          <AppText variant="h3" color="accent" style={styles.price}>
             {formatMoney(booking.totalPaid, booking.currency)}
           </AppText>
         ) : (
-          <AppText variant="meta" color="warning">
+          <AppText variant="label" color="warning">
             {t('booking.paymentDue')}
           </AppText>
         )}
         <View style={styles.detailBtn}>
-          <AppText variant="meta" color="accent">
+          <AppText variant="label" color="accent">
             {t('common.details')}
           </AppText>
           <Ionicons name={chevronForwardTrailing()} size={16} color={colors.accent} />
@@ -289,7 +289,7 @@ function StatusPill({ status }: { status: Booking['status'] }) {
   const m = map[status];
   return (
     <View style={[styles.pill, { borderColor: m.c }]}>
-      <AppText variant="meta" style={{ color: m.c }}>
+      <AppText variant="label" style={{ color: m.c }}>
         {t(m.labelKey)}
       </AppText>
     </View>
@@ -305,7 +305,7 @@ function createStyles(colors: ThemeColors) {
     pastEmpty: { paddingVertical: spacing.md, paddingHorizontal: spacing.sm },
     card: {
       flexDirection: 'row',
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       borderRadius: radii.xl,
       overflow: 'hidden',
       borderWidth: 1,
@@ -331,8 +331,8 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       gap: 6,
       padding: spacing.md,
-      backgroundColor: colors.surface,
-      borderRadius: radii.lg,
+      backgroundColor: colors.card,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.border,
       minWidth: 96,

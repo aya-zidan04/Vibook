@@ -1,45 +1,64 @@
 /**
- * Vibook admin theme — aligned with mobile `src/theme/palettes.ts` (light palette + brand ramp).
+ * Vibook admin theme — aligned with mobile `src/theme/designSystem.ts`.
+ * Light Coolors: #111827 · #00C2FF · #FF4D8D · #F4F7FB · #FFFFFF
+ * Dark Coolors:  #F9FAFB · #33D6FF · #FF70A6 · #0A0D14 · #161B26
  */
 :root {
-  /* Brand ramp (shared dark/light) */
-  --vb-terracotta: #c4896c;
-  --vb-terracotta-light: #d5a892;
-  --vb-terracotta-dark: #b9724c;
-  --vb-burnt-sienna: #a35a40;
-  --vb-cream: #f7efe7;
-  --vb-plum: #5b3b4b;
-  --vb-plum-deep: #3d2a32;
-  --vb-beige: #c4a990;
+  --vb-navy: #111827;
+  --vb-blue: #00c2ff;
+  --vb-blue-light: #33d6ff;
+  --vb-blue-dark: #0099cc;
+  --vb-pink: #ff4d8d;
+  --vb-pink-soft: #ff70a6;
+  --vb-pink-light: #ffe3ee;
+  --vb-pink-bg: #fff0f6;
+  --vb-pink-border: #ffb3cf;
+  --vb-pink-text: #ff4d8d;
+  --vb-white: #ffffff;
+  --vb-light-gray: #f4f7fb;
+  --vb-light-surface: #f9fafb;
 
-  /* Light surfaces (primary admin chrome) */
-  --vb-bg: #f4efea;
-  --vb-bg-elevated: #ffffff;
-  --vb-surface: #ffffff;
-  --vb-surface-hover: #efe8e2;
-  --vb-surface-muted: #e8e0da;
-  --vb-border: #ddd4cc;
-  --vb-border-light: #eae3dd;
+  --vb-bg: var(--vb-light-gray);
+  --vb-bg-elevated: var(--vb-white);
+  --vb-surface: var(--vb-white);
+  --vb-surface-hover: var(--vb-light-surface);
+  --vb-surface-muted: var(--vb-light-gray);
+  --vb-card: var(--vb-white);
+  --vb-border: #e5e7eb;
+  --vb-border-light: #eef2f6;
 
-  --vb-text: #2a1f24;
-  --vb-text-secondary: #5c4d55;
-  --vb-text-muted: #8a7b82;
-  --vb-text-on-primary: #f7efe7;
+  --vb-text: var(--vb-navy);
+  --vb-text-secondary: #4b5563;
+  --vb-text-muted: #6b7280;
+  --vb-text-on-primary: var(--vb-white);
 
-  --vb-success: #2e7d4a;
-  --vb-warning: #c9946a;
-  --vb-error: #a35a40;
+  --vb-primary: var(--vb-blue);
+  --vb-primary-muted: rgba(0, 194, 255, 0.14);
+  --vb-accent: var(--vb-pink);
+  --vb-accent-soft: var(--vb-pink-soft);
+  --vb-accent-light: var(--vb-pink-light);
+  --vb-accent-bg: var(--vb-pink-bg);
+  --vb-accent-border: var(--vb-pink-border);
+  --vb-accent-text: var(--vb-pink-text);
+  --vb-accent-muted: var(--vb-accent-bg);
 
-  --vb-glow-primary: rgba(196, 137, 108, 0.28);
-  --vb-glow-accent: rgba(196, 169, 144, 0.45);
-  --vb-primary-muted: rgba(196, 137, 108, 0.18);
+  --vb-success: #059669;
+  --vb-warning: #d97706;
+  --vb-error: #dc2626;
 
-  /* Radii / spacing (from mobile spacing.ts + radii) */
+  --vb-glow-primary: rgba(0, 194, 255, 0.22);
+  --vb-glow-accent: rgba(255, 77, 141, 0.28);
+
+  --vb-gradient-primary: linear-gradient(135deg, var(--vb-blue) 0%, var(--vb-blue-light) 100%);
+  --vb-gradient-pink: linear-gradient(135deg, var(--vb-pink) 0%, var(--vb-pink-soft) 100%);
+  --vb-gradient-hero: linear-gradient(145deg, var(--vb-navy) 0%, #1e3a5f 45%, var(--vb-blue) 100%);
+
   --vb-radius-xs: 6px;
   --vb-radius-sm: 10px;
   --vb-radius-md: 14px;
   --vb-radius-lg: 18px;
   --vb-radius-xl: 22px;
+  --vb-radius-full: 9999px;
 
   --vb-space-xs: 4px;
   --vb-space-sm: 8px;
@@ -49,20 +68,44 @@
   --vb-space-xxl: 24px;
   --vb-space-xxxl: 32px;
 
-  /* Typography */
   --vb-font: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --vb-font-ar: 'Tajawal', 'Noto Sans Arabic', system-ui, sans-serif;
   --vb-display-weight: 800;
   --vb-heading-weight: 700;
   --vb-body-weight: 400;
 
-  /* Shadows (web adaptation of mobile card shadow) */
-  --vb-shadow-sm: 0 1px 2px rgba(42, 31, 36, 0.06), 0 4px 12px rgba(42, 31, 36, 0.06);
-  --vb-shadow-md: 0 4px 8px rgba(42, 31, 36, 0.08), 0 12px 28px rgba(91, 59, 75, 0.1);
-  --vb-shadow-lg: 0 8px 16px rgba(42, 31, 36, 0.1), 0 20px 40px rgba(91, 59, 75, 0.12);
+  /* Typography scale — matches mobile src/theme/typography.ts */
+  --vb-text-display: 2rem;
+  --vb-text-h1: 1.625rem;
+  --vb-text-h2: 1.25rem;
+  --vb-text-h3: 1.0625rem;
+  --vb-text-body: 0.9375rem;
+  --vb-text-body-lg: 1rem;
+  --vb-text-caption: 0.8125rem;
+  --vb-text-label: 0.75rem;
+  --vb-lh-display: 2.5rem;
+  --vb-lh-h1: 2rem;
+  --vb-lh-h2: 1.625rem;
+  --vb-lh-h3: 1.5rem;
+  --vb-lh-body: 1.375rem;
+  --vb-lh-caption: 1.125rem;
+  --vb-lh-label: 1rem;
 
-  /* Layout */
+  --vb-shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06), 0 4px 12px rgba(17, 24, 39, 0.06);
+  --vb-shadow-md: 0 4px 8px rgba(17, 24, 39, 0.08), 0 12px 28px rgba(0, 194, 255, 0.1);
+  --vb-shadow-lg: 0 8px 16px rgba(17, 24, 39, 0.1), 0 20px 40px rgba(17, 24, 39, 0.12);
+
   --vb-sidebar-width: 260px;
   --vb-topbar-height: 64px;
+
+  --vb-terracotta: var(--vb-blue);
+  --vb-terracotta-light: var(--vb-blue-light);
+  --vb-terracotta-dark: var(--vb-blue-dark);
+  --vb-plum: var(--vb-navy);
+  --vb-plum-deep: #0a0d14;
+  --vb-cream: var(--vb-white);
+  --vb-beige: var(--vb-border-light);
+  --vb-burnt-sienna: var(--vb-error);
 }
 
 *,
@@ -76,8 +119,13 @@ html {
   font-size: 16px;
   line-height: 1.5;
   color: var(--vb-text);
-  background: var(--vb-bg);
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 45%, #f4f7fb 100%);
+  background-color: var(--vb-bg);
   -webkit-font-smoothing: antialiased;
+}
+
+html[dir='rtl'] {
+  font-family: var(--vb-font-ar);
 }
 
 body {
@@ -89,22 +137,18 @@ body {
   min-height: 100vh;
 }
 
-/* Subtle page background gradient (warm, Vibook) */
 .vb-page-bg {
   min-height: 100vh;
-  background:
-    radial-gradient(1200px 600px at 100% -10%, rgba(196, 137, 108, 0.12), transparent 55%),
-    radial-gradient(900px 500px at -10% 20%, rgba(91, 59, 75, 0.08), transparent 50%),
-    linear-gradient(180deg, var(--vb-bg) 0%, #efe8e2 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 45%, #f4f7fb 100%);
 }
 
 a {
-  color: var(--vb-terracotta-dark);
+  color: var(--vb-blue-dark);
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--vb-burnt-sienna);
+  color: var(--vb-blue);
 }
 
 button {
@@ -112,7 +156,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--vb-terracotta);
+  outline: 2px solid var(--vb-blue);
   outline-offset: 2px;
 }
 
@@ -121,9 +165,10 @@ button {
 }
 
 .vb-overline {
-  font-size: 11px;
+  font-size: var(--vb-text-label);
   font-weight: 600;
-  letter-spacing: 0.08em;
+  line-height: var(--vb-lh-label);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--vb-text-muted);
 }

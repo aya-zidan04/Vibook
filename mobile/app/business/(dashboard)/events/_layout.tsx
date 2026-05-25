@@ -8,7 +8,7 @@ export default function EventsStackLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: 'transparent' },
         ...nativeStackDrillInTransition,
       }}
     />

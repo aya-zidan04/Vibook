@@ -20,10 +20,11 @@ import { useTranslation } from '@/i18n/useTranslation';
 import type { CatalogRouter } from '@/services/catalog/mapCatalog';
 import type { ExploreMainCategory, ExploreSubcategory } from '@/mock/exploreCategories';
 import { businessEventSummaryToEventItem } from '@/services/api/eventMap';
+import { MOCK_EVENTS } from '@/services/mock';
 import { useAppStore } from '@/store/appStore';
 import { useReferenceStore } from '@/store/referenceStore';
 import type { EventItem } from '@/types';
-import { spacing, useThemeColors } from '@/theme';
+import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 function promoFromEvents(events: EventItem[], router: CatalogRouter, t: (k: string) => string): {
@@ -152,7 +153,7 @@ export default function ExploreScreen() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setApiEvents([]);
+      setApiEvents(MOCK_EVENTS);
       setLoadingFeed(false);
       return;
     }
@@ -223,8 +224,6 @@ export default function ExploreScreen() {
         <ExploreHeader
           brandLabel={t('common.brandDisplay')}
           onSearch={() => router.push('/search')}
-          onLanguageCurrency={() => router.push('/language-currency')}
-          a11yLanguageCurrency={t('explore.a11yLanguageCurrency')}
           a11ySearch={t('common.search')}
         />
 
@@ -234,7 +233,7 @@ export default function ExploreScreen() {
           style={styles.scrollView}
         >
           <View style={styles.sectionHead}>
-            <AppText variant="overline" color="accent" style={styles.heroEyebrow}>
+            <AppText variant="overline" color="accentText" style={styles.heroEyebrow}>
               {t('explore.heroEyebrow')}
             </AppText>
             <AppText variant="h1" color="text">
@@ -304,17 +303,7 @@ export default function ExploreScreen() {
           </View>
 
           <View style={styles.feed}>
-            {!isAuthenticated ? (
-              <View style={styles.emptyCard}>
-                <AppText variant="h3" color="text">
-                  {t('explore.guestEventsTitle')}
-                </AppText>
-                <AppText variant="caption" color="textSecondary" style={styles.emptyBody}>
-                  {t('explore.guestEventsBody')}
-                </AppText>
-                <PrimaryButton title={t('auth.loginCta')} onPress={() => router.push('/login')} style={styles.emptyCta} />
-              </View>
-            ) : loadingFeed ? (
+            {loadingFeed ? (
               <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.xl }} />
             ) : apiEvents.length > 0 ? (
               apiEvents.map((e) => (
@@ -353,14 +342,19 @@ export default function ExploreScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     heroEyebrow: {
-      fontSize: 14,
-      lineHeight: 18,
-      letterSpacing: 1.1,
+      alignSelf: 'flex-start',
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: radii.sm,
+      backgroundColor: colors.accentBg,
+      borderWidth: 1,
+      borderColor: colors.accentBorder,
+      overflow: 'hidden',
     },
-    safe: { flex: 1, backgroundColor: colors.background },
+    safe: { flex: 1, backgroundColor: 'transparent' },
     root: { flex: 1 },
     scrollView: { flex: 1 },
-    scroll: { paddingBottom: spacing.xxxl },
+    scroll: { paddingTop: spacing.sm, paddingBottom: spacing.xxxl },
     sectionHead: {
       paddingHorizontal: spacing.screen,
       marginBottom: spacing.md,
@@ -374,7 +368,7 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 18,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       padding: spacing.lg,
       alignItems: 'center',
       gap: spacing.sm,

@@ -56,7 +56,7 @@ export default function OrganizerScreen() {
         <View style={styles.cover}>
           <Image source={{ uri: org.coverUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
           <LinearGradient
-            colors={[fadeFromBackground(colors, 0.2), colors.background]}
+            colors={[fadeFromBackground(colors, 0.2), fadeFromBackground(colors, 1)]}
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.coverHeader}>
@@ -72,12 +72,12 @@ export default function OrganizerScreen() {
               </AppText>
               <View style={styles.row}>
                 <Ionicons name="star" size={16} color={colors.warning} />
-                <AppText variant="bodyMedium" color="textSecondary">
+                <AppText variant="body-em" color="textSecondary">
                   {formatDecimalForLocale(org.rating, locale, 1)} · {formatIntForLocale(org.reviewCount, locale)}{' '}
                   {t('event.reviewsWord')}
                 </AppText>
                 {org.verified ? (
-                  <AppText variant="meta" color="accent">
+                  <AppText variant="label" color="accent">
                     {' '}
                     · {t('organizer.verifiedBadge')}
                   </AppText>
@@ -96,13 +96,13 @@ export default function OrganizerScreen() {
             <Pressable key={e.id} style={styles.eventRow} onPress={() => router.push(`/event/${e.id}`)}>
               <Image source={{ uri: e.imageUrl }} style={styles.eventImg} contentFit="cover" />
               <View style={{ flex: 1, gap: 4 }}>
-                <AppText variant="bodyMedium" color="text" numberOfLines={2}>
+                <AppText variant="body-em" color="text" numberOfLines={2}>
                   {e.title}
                 </AppText>
                 <AppText variant="caption" color="textMuted">
                   {[e.venueName, getCityName(e.cityId, locale)].filter(Boolean).join(' · ')}
                 </AppText>
-                <AppText variant="price" color="accent">
+                <AppText variant="h3" color="accent">
                   {t('common.from')} {formatMoney(e.priceFrom, e.currency)}
                 </AppText>
               </View>
@@ -117,7 +117,7 @@ export default function OrganizerScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   content: { paddingBottom: spacing.xxxl },
   cover: { height: 200 },
   coverHeader: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm },
@@ -132,7 +132,7 @@ function createStyles(colors: ThemeColors) {
     alignItems: 'center',
     gap: spacing.md,
     padding: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     borderRadius: radii.xl,
     borderWidth: 1,
     borderColor: colors.border,
