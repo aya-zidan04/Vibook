@@ -9,17 +9,13 @@ import {
 } from 'recharts';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 import type { TimeSeriesPointResponse } from '@/api/types';
+import { formatChartDay } from '@/components/charts/chartFormat';
 import { chartColors } from '@/components/charts/chartTheme';
-
-function formatDay(iso: string) {
-  const d = new Date(iso + 'T12:00:00Z');
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
 
 export function UsersLineChart({ data }: { data: TimeSeriesPointResponse[] }) {
   const { t } = useAdminI18n();
   const safe = data ?? [];
-  const chartData = safe.map((p) => ({ ...p, label: formatDay(p.date) }));
+  const chartData = safe.map((p) => ({ ...p, label: formatChartDay(p.date) }));
   return (
     <div className="vb-chart-wrap vb-animate-in">
       <ResponsiveContainer width="100%" height={260}>

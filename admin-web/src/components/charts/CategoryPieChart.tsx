@@ -1,11 +1,17 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import type { NameCountResponse } from '@/api/types';
 import { pieColors } from '@/components/charts/chartTheme';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 
 export function CategoryPieChart({ data }: { data: NameCountResponse[] }) {
+  const { t } = useAdminI18n();
   const rows = data ?? [];
   if (!rows.length) {
-    return <p className="vb-muted" style={{ padding: '2rem', textAlign: 'center' }}>No category data yet.</p>;
+    return (
+      <p className="vb-muted" style={{ padding: '2rem', textAlign: 'center' }}>
+        {t('dashboard.topCategoriesEmpty')}
+      </p>
+    );
   }
   return (
     <div className="vb-chart-wrap vb-animate-in">

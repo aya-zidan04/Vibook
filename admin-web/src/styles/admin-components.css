@@ -1624,6 +1624,21 @@ html[dir='rtl'] .vb-sidebar {
   margin-top: 2px;
 }
 
+html[dir='rtl'] .vb-timeline li {
+  padding-left: 0;
+  padding-right: var(--vb-space-xl);
+}
+
+html[dir='rtl'] .vb-timeline li::before {
+  left: auto;
+  right: 5px;
+}
+
+html[dir='rtl'] .vb-timeline__dot {
+  left: auto;
+  right: 0;
+}
+
 /* Table selection */
 .vb-table tbody tr.vb-table-row--selected {
   background: var(--vb-hover-row-selected);

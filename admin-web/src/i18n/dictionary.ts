@@ -52,7 +52,7 @@ export const translations = {
       unauthorized: 'Session expired. Please sign in again.',
       forbidden: 'You do not have permission for this action.',
       notFound: 'The requested resource was not found.',
-      signInFailed: 'Sign-in failed. Please try again.',
+      accessDenied: 'Access denied. An administrator account is required.',
     },
     routes: {
       dashboard: 'Dashboard',
@@ -141,6 +141,14 @@ export const translations = {
       invalidDesc: 'Check the URL.',
       notFound: 'Report unavailable',
       notFoundDesc: 'Not found.',
+      types: {
+        booking: 'Booking',
+        event: 'Event',
+        user: 'User',
+        rating: 'Rating',
+        businessProfile: 'Business profile',
+        other: 'Other',
+      },
     },
     settings: {
       title: 'Settings',
@@ -663,7 +671,7 @@ export const translations = {
       unauthorized: 'انتهت الجلسة. يرجى تسجيل الدخول مجدداً.',
       forbidden: 'ليس لديك صلاحية لهذا الإجراء.',
       notFound: 'المورد المطلوب غير موجود.',
-      signInFailed: 'فشل تسجيل الدخول. حاول مرة أخرى.',
+      accessDenied: 'تم رفض الوصول. يلزم حساب مسؤول.',
     },
     routes: {
       dashboard: 'لوحة التحكم',
@@ -752,6 +760,14 @@ export const translations = {
       invalidDesc: 'تحقق من الرابط.',
       notFound: 'البلاغ غير متاح',
       notFoundDesc: 'غير موجود.',
+      types: {
+        booking: 'حجز',
+        event: 'فعالية',
+        user: 'مستخدم',
+        rating: 'تقييم',
+        businessProfile: 'ملف عمل',
+        other: 'أخرى',
+      },
     },
     settings: {
       title: 'الإعدادات',

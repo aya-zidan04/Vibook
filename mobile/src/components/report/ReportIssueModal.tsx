@@ -18,15 +18,11 @@ import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-
-const REASON_VALUES = [
-  'Spam or misleading content',
-  'Harassment or abuse',
-  'Safety concern',
-  'Fraud or scam',
-  'Stolen content / copyright',
-  'Other',
-] as const;
+import {
+  REPORT_REASON_CODES,
+  REPORT_REASON_I18N_KEYS,
+  type ReportReasonCode,
+} from '@/components/report/reportReasonCodes';
 
 export type ReportIssueModalProps = {
   visible: boolean;
@@ -42,26 +38,15 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const [reason, setReason] = useState<string>(REASON_VALUES[0]);
+  const [reasonCode, setReasonCode] = useState<ReportReasonCode>(REPORT_REASON_CODES[0]);
   const [details, setDetails] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const reasonLabel = (value: string) => {
-    const i = REASON_VALUES.indexOf(value as (typeof REASON_VALUES)[number]);
-    const keys = [
-      'report.reasons.spam',
-      'report.reasons.abuse',
-      'report.reasons.safety',
-      'report.reasons.fraud',
-      'report.reasons.ip',
-      'report.reasons.other',
-    ] as const;
-    return i >= 0 ? t(keys[i]) : value;
-  };
+  const reasonLabel = (code: ReportReasonCode) => t(REPORT_REASON_I18N_KEYS[code]);
 
   const reset = () => {
-    setReason(REASON_VALUES[0]);
+    setReasonCode(REPORT_REASON_CODES[0]);
     setDetails('');
     setError(null);
     setLoading(false);
@@ -84,7 +69,7 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
         await submitModerationReport({
           targetType,
           targetId: targetType === 'OTHER' ? undefined : targetId,
-          reason,
+          reason: t(REPORT_REASON_I18N_KEYS[reasonCode]),
           description: details.trim() || null,
         });
         reset();
@@ -113,18 +98,18 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
             {t('report.reasonLabel')}
           </AppText>
           <View style={styles.reasonList}>
-            {REASON_VALUES.map((v) => {
-              const on = reason === v;
+            {REPORT_REASON_CODES.map((code) => {
+              const on = reasonCode === code;
               return (
                 <Pressable
-                  key={v}
-                  onPress={() => setReason(v)}
+                  key={code}
+                  onPress={() => setReasonCode(code)}
                   style={[styles.reasonRow, on && styles.reasonRowOn]}
                   accessibilityRole="button"
                   accessibilityState={{ selected: on }}
                 >
                   <AppText variant="body-em" color="text">
-                    {reasonLabel(v)}
+                    {reasonLabel(code)}
                   </AppText>
                 </Pressable>
               );

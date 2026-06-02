@@ -24,23 +24,10 @@ import { textAlignStart } from '@/utils/rtlText';
 const AUTO_MS = 3800;
 
 const SLIDES = [
-  {
-    key: 'events',
-    uri: 'https://images.unsplash.com/photo-1540039155733-5bb30b53a388?w=1400&q=85&auto=format&fit=crop',
-  },
-  {
-    key: 'restaurants',
-    uri: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1400&q=85&auto=format&fit=crop',
-  },
-  {
-    key: 'travel',
-    uri: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1400&q=85&auto=format&fit=crop',
-  },
-  {
-    key: 'experiences',
-    uri: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=1400&q=85&auto=format&fit=crop',
-  },
-];
+  { key: 'welcome-01', source: require('../assets/entry/entry_welcome_01.png') },
+  { key: 'welcome-02', source: require('../assets/entry/entry_welcome_02.png') },
+  { key: 'welcome-03', source: require('../assets/entry/entry_welcome_03.png') },
+] as const;
 
 export default function AppEntryScreen() {
   const colors = useThemeColors();
@@ -146,7 +133,7 @@ export default function AppEntryScreen() {
           })}
           renderItem={({ item }) => (
             <Image
-              source={{ uri: item.uri }}
+              source={item.source}
               style={{ width: pageW, height: pageH }}
               contentFit="cover"
               priority="high"

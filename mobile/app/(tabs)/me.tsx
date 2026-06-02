@@ -386,6 +386,7 @@ function createStyles(colors: ThemeColors, isLight: boolean) {
     menuLabel: { flex: 1 },
     version: {
       textAlign: 'center',
+      marginTop: spacing.xxl,
       marginBottom: spacing.xxxl,
     },
   });

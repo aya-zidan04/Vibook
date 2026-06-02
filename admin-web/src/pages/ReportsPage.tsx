@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
+import { moderationReportTypeLabel } from '@/utils/moderationReportLabels';
 
 type Tab = 'moderation' | 'problems';
 
@@ -183,7 +184,7 @@ export function ReportsPage() {
                         <td>
                           <Link to={`/users?userId=${r.reporterUserId}`}>{r.reporterEmail}</Link>
                         </td>
-                        <td>{r.type}</td>
+                        <td>{moderationReportTypeLabel(r.type, t)}</td>
                         <td>
                           {tHref && r.targetId != null ? (
                             <Link to={tHref}>#{r.targetId}</Link>

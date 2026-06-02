@@ -5,6 +5,7 @@ import { AuthContext } from '@/auth/authContext';
 import { login as loginRequest } from '@/api/adminApi';
 import { getStoredToken, getStoredUser, setStoredToken, setStoredUser } from '@/api/client';
 import type { RoleName, UserResponse } from '@/api/types';
+import { ADMIN_ACCESS_DENIED } from '@/auth/authErrors';
 
 function hasAdminRole(roles: RoleName[] | undefined): boolean {
   return roles?.includes('ROLE_ADMIN') ?? false;
@@ -19,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (email: string, password: string) => {
       const data = await loginRequest(email.trim(), password);
       if (!hasAdminRole(data.user?.roles)) {
-        throw new Error('Access denied: admin role required.');
+        throw new Error(ADMIN_ACCESS_DENIED);
       }
       setStoredToken(data.token);
       setStoredUser(data.user);

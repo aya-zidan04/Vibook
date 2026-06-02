@@ -1,3 +1,5 @@
+import { translations } from '@/i18n/dictionary';
+
 export type AdminLocale = 'en' | 'ar';
 
 const STORAGE_KEY = 'vibook_admin_locale';
@@ -40,6 +42,7 @@ export function applyDocumentLocale(loc: AdminLocale) {
   const root = document.documentElement;
   root.lang = loc;
   root.dir = loc === 'ar' ? 'rtl' : 'ltr';
+  document.title = translations[loc].routes.default;
 }
 
 applyDocumentLocale(locale);

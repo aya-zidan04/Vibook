@@ -82,9 +82,18 @@ export default function FiltersScreen() {
           {t('filters.categoriesFromCatalog')}
         </AppText>
         {exploreCategories.length === 0 ? (
-          <AppText variant="caption" color="textMuted">
-            {refStatus === 'loading' ? t('common.loading') : t('filters.noCategories')}
-          </AppText>
+          <View style={styles.emptyCategories}>
+            <AppText variant="caption" color="textMuted">
+              {refStatus === 'loading' ? t('common.loading') : t('filters.noCategories')}
+            </AppText>
+            {refStatus === 'error' ? (
+              <Pressable onPress={() => void loadReferenceData()} hitSlop={8}>
+                <AppText variant="label" color="primaryLight">
+                  {t('filters.retryReference')}
+                </AppText>
+              </Pressable>
+            ) : null}
+          </View>
         ) : (
           <View style={styles.chips}>
             {exploreCategories.map((c) => (
@@ -147,6 +156,7 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md },
     refBlock: { gap: spacing.sm },
+    emptyCategories: { gap: spacing.sm },
     refTitle: { marginBottom: spacing.xs },
     subGroup: { gap: spacing.sm, marginTop: spacing.xs },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },

@@ -14,7 +14,8 @@ const SPLASH_MS = 2200;
 const BRAND_LOGO = require('../assets/vibook-wordmark.png');
 
 /**
- * First screen on cold start: brand splash, then entry (welcome carousel) or main tabs.
+ * First screen on cold start: brand splash, then `/entry` (welcome).
+ * Tabs are only reached after Browse First, login, or signup — never from splash.
  */
 export default function SplashScreen() {
   const router = useRouter();
@@ -44,13 +45,8 @@ export default function SplashScreen() {
 
     const go = () => {
       if (!navRef.isReady()) return false;
-      const done = useAppStore.getState().hasCompletedOnboarding;
-      if (!done) {
-        router.replace('/entry');
-        return true;
-      }
       splashTimer = setTimeout(() => {
-        router.replace('/(tabs)/explore');
+        router.replace('/entry');
       }, SPLASH_MS);
       return true;
     };

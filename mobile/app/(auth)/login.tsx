@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthScreenLayout } from '@/components/auth/AuthScreenLayout';
 import { AuthTextField, PasswordToggleIcon } from '@/components/auth/AuthTextField';
-import { BusinessFieldIconSlot } from '@/components/business/businessFieldRow';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -84,18 +82,13 @@ export default function LoginScreen() {
         autoCapitalize="none"
         autoCorrect={false}
         technicalInput
-        leftSlot={
-          <BusinessFieldIconSlot>
-            <Ionicons name="mail-outline" size={20} color={colors.primary} />
-          </BusinessFieldIconSlot>
-        }
       />
 
       <AuthTextField
         label={t('auth.password')}
         value={password}
         onChangeText={setPassword}
-        placeholder="••••••••"
+        placeholder={t('auth.passwordMaskPlaceholder')}
         secureTextEntry={!showPassword}
         autoCapitalize="none"
         autoCorrect={false}

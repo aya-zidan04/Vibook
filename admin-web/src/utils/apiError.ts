@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ADMIN_ACCESS_DENIED } from '@/auth/authErrors';
 import { getAdminLocale } from '@/i18n/localeStore';
 import { translations } from '@/i18n/dictionary';
 
@@ -39,6 +40,7 @@ export function getFriendlyErrorMessage(err: unknown, fallback: string): string 
   }
   if (err instanceof Error && err.message) {
     if (import.meta.env.DEV) console.warn(err);
+    if (err.message === ADMIN_ACCESS_DENIED) return errText('errors.accessDenied');
     return err.message;
   }
   return fallback;

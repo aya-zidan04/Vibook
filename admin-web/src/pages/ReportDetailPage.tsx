@@ -16,6 +16,7 @@ import { useToast } from '@/components/ui/useToast';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
+import { moderationReportTypeLabel } from '@/utils/moderationReportLabels';
 
 function reportTargetHref(r: AdminModerationReportResponse): string | null {
   if (r.targetId == null) return null;
@@ -168,7 +169,7 @@ export function ReportDetailPage() {
               <Link to={`/users?userId=${row.reporterUserId}`}>{row.reporterEmail}</Link>
             </dd>
             <dt>{t('moderationReportDetail.type')}</dt>
-            <dd>{row.type}</dd>
+            <dd>{moderationReportTypeLabel(row.type, t)}</dd>
             <dt>{t('moderationReportDetail.target')}</dt>
             <dd>
               {targetHref ? (

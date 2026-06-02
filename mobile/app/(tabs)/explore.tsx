@@ -26,7 +26,6 @@ import {
   subcategoriesFromApi,
 } from '@/utils/categoryLabels';
 import { businessEventSummaryToEventItem } from '@/services/api/eventMap';
-import { MOCK_EVENTS } from '@/services/mock';
 import { useAppStore } from '@/store/appStore';
 import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
 import { localizedCityLabel } from '@/utils/governorateLabels';
@@ -203,7 +202,7 @@ export default function ExploreScreen() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setApiEvents(MOCK_EVENTS);
+      setApiEvents([]);
       setLoadingFeed(false);
       return;
     }
@@ -289,6 +288,22 @@ export default function ExploreScreen() {
           </View>
 
           {heroSlides.length > 0 ? <ExploreHeroCarousel slides={heroSlides} /> : null}
+
+          {!isAuthenticated ? (
+            <View style={[styles.guestBanner, styles.padH]}>
+              <AppText variant="h3" color="text">
+                {t('explore.guestEventsTitle')}
+              </AppText>
+              <AppText variant="body" color="textSecondary" style={styles.guestBannerBody}>
+                {t('explore.guestEventsBody')}
+              </AppText>
+              <PrimaryButton
+                title={t('auth.loginCta')}
+                onPress={() => router.push('/login')}
+                style={styles.guestBannerCta}
+              />
+            </View>
+          ) : null}
 
           {promo ? (
             <>
@@ -410,6 +425,17 @@ function createStyles(colors: ThemeColors) {
       marginTop: 2,
     },
     horizontalPad: { paddingHorizontal: spacing.screen },
+    guestBanner: {
+      marginBottom: spacing.lg,
+      padding: spacing.lg,
+      borderRadius: radii.xl,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      gap: spacing.sm,
+    },
+    guestBannerBody: { lineHeight: 22 },
+    guestBannerCta: { marginTop: spacing.sm, alignSelf: 'stretch' },
     feed: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm },
     emptyCard: {
       marginTop: spacing.xs,
