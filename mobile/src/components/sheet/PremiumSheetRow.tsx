@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
-import { chevronForwardTrailing } from '@/utils/rtl';
 import { useThemeColors } from '@/theme';
 
 type Props = {
@@ -43,7 +42,7 @@ export function PremiumSheetRow({
 
   const defaultTrailing =
     onPress && showChevron && !trailing ? (
-      <Ionicons name={chevronForwardTrailing()} size={20} color={colors.textMuted} />
+      <NavigationChevronForward size={20} color={colors.chevron} />
     ) : null;
 
   const body = children ?? (
@@ -52,7 +51,7 @@ export function PremiumSheetRow({
         {title}
       </AppText>
       {subtitle ? (
-        <AppText variant="caption" color="textMuted" numberOfLines={2}>
+        <AppText variant="caption" color="rowDescription" numberOfLines={2}>
           {subtitle}
         </AppText>
       ) : null}

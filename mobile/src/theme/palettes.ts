@@ -3,8 +3,9 @@
  * Built from {@link designSystem} — do not hardcode hex values in screens.
  */
 
-import { brand, darkTheme, lightTheme, paletteAccentPink, type SemanticColors } from './designSystem';
-import { APP_BACKGROUND_BASE } from './appBackground';
+import { brand, darkTheme, lightTheme, paletteAccent, type SemanticColors } from './designSystem';
+import { appBackgroundBaseFor } from './appBackground';
+import { darkColors as darkSw, darkMix, lightColors as lightSw } from './paletteColors';
 import type { ColorScheme } from '@/store/themeStore';
 
 export type ThemeColors = SemanticColors & {
@@ -38,6 +39,8 @@ export type ThemeColors = SemanticColors & {
   cream: string;
   plum: string;
   beige: string;
+  /** Semi-opaque chip on media (e.g. favorite button on event cards). */
+  iconOverlay: string;
 };
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -49,37 +52,38 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 
 export function semanticToThemeColors(c: SemanticColors, mode: ColorScheme): ThemeColors {
   const isLight = mode === 'light';
-  const ambientBase = APP_BACKGROUND_BASE;
+  const ambientBase = appBackgroundBaseFor(mode);
   return {
     ...c,
     text: c.textPrimary,
-    backgroundElevated: isLight ? brand.white : c.card,
-    surfaceHover: isLight ? '#F1F5F9' : '#243552',
-    surfaceMuted: isLight ? '#EEF2F6' : '#101828',
-    sectionSurface: isLight ? 'rgba(247, 239, 231, 0.55)' : brand.darkSection,
-    sheetSurface: 'rgba(255, 255, 255, 0.92)',
-    primaryMuted: isLight ? 'rgba(22, 198, 255, 0.12)' : 'rgba(22, 198, 255, 0.18)',
-    primaryDark: '#0EA5D4',
-    accentDeep: brand.navy,
+    backgroundElevated: isLight ? lightSw.white : darkMix.cardElevated,
+    surfaceHover: isLight ? lightSw.pastelSage : darkMix.cardHover,
+    surfaceMuted: isLight ? lightSw.softMint : darkMix.canvasDeep,
+    sectionSurface: isLight ? lightSw.softMint : brand.darkSection,
+    sheetSurface: isLight ? lightSw.white : darkMix.sheet,
+    primaryMuted: isLight ? 'rgba(74, 88, 65, 0.14)' : darkMix.limeMuted18,
+    primaryDark: isLight ? lightSw.limeGreen : darkSw.paleYellow,
+    accentDeep: isLight ? lightSw.textPrimary : darkSw.charcoal,
     accentMuted: c.accentBg,
-    secondary: brand.skyBlue,
-    secondaryMuted: isLight ? 'rgba(22, 198, 255, 0.14)' : 'rgba(22, 198, 255, 0.12)',
-    textOnPrimary: brand.white,
-    overlay: isLight ? 'rgba(8, 17, 31, 0.5)' : 'rgba(8, 17, 31, 0.78)',
-    overlayLight: isLight ? 'rgba(8, 17, 31, 0.28)' : 'rgba(8, 17, 31, 0.48)',
-    favorite: c.accent,
-    accentPink: paletteAccentPink(mode),
-    glowPrimary: isLight ? 'rgba(22, 198, 255, 0.26)' : 'rgba(22, 198, 255, 0.34)',
-    glowAccent: isLight ? 'rgba(255, 111, 174, 0.28)' : 'rgba(255, 111, 174, 0.38)',
-    glowPlum: isLight ? 'rgba(91, 59, 75, 0.12)' : 'rgba(91, 59, 75, 0.22)',
-    glowTerracotta: isLight ? 'rgba(196, 137, 108, 0.18)' : 'rgba(196, 137, 108, 0.22)',
-    borderCream: isLight ? 'rgba(247, 239, 231, 0.9)' : brand.darkBorderCream,
+    secondary: isLight ? lightSw.grassGreen : darkSw.lightGray,
+    secondaryMuted: isLight ? 'rgba(139, 194, 73, 0.12)' : darkMix.charcoalWash18,
+    textOnPrimary: darkSw.black,
+    overlay: isLight ? 'rgba(0, 0, 0, 0.45)' : darkMix.overlay,
+    overlayLight: isLight ? 'rgba(0, 0, 0, 0.25)' : darkMix.overlayLight,
+    favorite: c.primary,
+    accentPink: paletteAccent(mode),
+    glowPrimary: isLight ? 'rgba(167, 220, 43, 0.12)' : darkMix.limeGlow10,
+    glowAccent: isLight ? 'rgba(240, 251, 69, 0.1)' : darkMix.limeGlowEdge,
+    glowPlum: isLight ? 'rgba(74, 88, 65, 0.12)' : darkMix.charcoalWash6,
+    glowTerracotta: isLight ? 'rgba(139, 194, 73, 0.1)' : darkMix.limeGlow1,
+    borderCream: isLight ? lightSw.sageBorder : brand.darkBorderCream,
     bgRgb: hexToRgb(ambientBase),
-    terracotta: brand.terracotta,
+    terracotta: c.primary,
     burntSienna: c.error,
-    cream: '#F7EFE7',
-    plum: brand.plum,
+    cream: lightSw.paleBone,
+    plum: isLight ? lightSw.grassGreen : darkSw.charcoal,
     beige: c.borderLight,
+    iconOverlay: isLight ? 'rgba(74, 88, 65, 0.45)' : 'rgba(0, 0, 0, 0.45)',
   };
 }
 

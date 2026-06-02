@@ -5,10 +5,12 @@ import { useAuth } from '@/auth/useAuth';
 import { VibookBrandMark } from '@/components/branding/VibookBrandMark';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 
 export function LoginPage() {
   const { isAuthenticated, login } = useAuth();
+  const { t } = useAdminI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(getFriendlyErrorMessage(err, 'Sign-in failed. Please try again.'));
+      setError(getFriendlyErrorMessage(err, t('login.failed')));
     } finally {
       setLoading(false);
     }
@@ -36,13 +38,13 @@ export function LoginPage() {
       <div className="vb-login__card vb-animate-in">
         <header className="vb-login__header">
           <VibookBrandMark size={96} label="" className="vb-login__mark" />
-          <h1 className="vb-login__title">Vibook Admin</h1>
-          <p className="vb-login__sub">Sign in with your administrator account</p>
+          <h1 className="vb-login__title">{t('login.title')}</h1>
+          <p className="vb-login__sub">{t('login.subtitle')}</p>
         </header>
 
         <form className="vb-login__form" onSubmit={(e) => void onSubmit(e)}>
           <Input
-            label="Email"
+            label={t('login.email')}
             type="email"
             name="email"
             autoComplete="username"
@@ -51,7 +53,7 @@ export function LoginPage() {
             required
           />
           <Input
-            label="Password"
+            label={t('login.password')}
             type="password"
             name="password"
             autoComplete="current-password"
@@ -60,8 +62,8 @@ export function LoginPage() {
             required
           />
           {error ? <p className="vb-login__error">{error}</p> : null}
-          <Button variant="primary" type="submit" disabled={loading} className="vb-login__submit">
-            {loading ? 'Signing in…' : 'Sign in'}
+          <Button type="submit" variant="primary" disabled={loading} style={{ width: '100%' }}>
+            {loading ? t('login.submitting') : t('login.submit')}
           </Button>
         </form>
       </div>

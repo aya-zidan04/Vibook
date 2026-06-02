@@ -1,19 +1,21 @@
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import type { NameCountResponse } from '@/api/types';
 import { chartColors, statusBarColors } from '@/components/charts/chartTheme';
 
-const STATUS_LABEL: Record<string, string> = {
-  APPROVED: 'Approved',
-  PENDING_REVIEW: 'Pending',
-  REJECTED: 'Rejected',
-  DRAFT: 'Draft',
+const STATUS_KEY: Record<string, string> = {
+  APPROVED: 'status.approved',
+  PENDING_REVIEW: 'status.pendingReview',
+  REJECTED: 'status.rejected',
+  DRAFT: 'status.draft',
 };
 
 export function StatusBarChart({ data }: { data: NameCountResponse[] }) {
+  const { t } = useAdminI18n();
   const safe = data ?? [];
   const chartData = safe.map((row) => ({
     ...row,
-    label: STATUS_LABEL[row.name] ?? row.name,
+    label: STATUS_KEY[row.name] ? t(STATUS_KEY[row.name]) : row.name,
   }));
   return (
     <div className="vb-chart-wrap vb-animate-in">
@@ -29,7 +31,7 @@ export function StatusBarChart({ data }: { data: NameCountResponse[] }) {
               boxShadow: 'var(--vb-shadow-sm)',
             }}
           />
-          <Bar dataKey="count" name="Profiles" radius={[6, 6, 0, 0]} maxBarSize={48}>
+          <Bar dataKey="count" name={t('charts.profiles')} radius={[6, 6, 0, 0]} maxBarSize={48}>
             {chartData.map((entry) => (
               <Cell key={entry.name} fill={statusBarColors[entry.name] ?? chartColors.terracotta} />
             ))}

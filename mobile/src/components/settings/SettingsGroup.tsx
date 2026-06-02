@@ -41,7 +41,7 @@ function createGroupStyles(colors: ThemeColors) {
     },
     rowPressed: { opacity: 0.88 },
     rowSelected: {
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.iconContainerBg,
     },
     rowAccentSelected: {
       backgroundColor: colors.accentMuted,
@@ -50,7 +50,7 @@ function createGroupStyles(colors: ThemeColors) {
       width: 40,
       height: 40,
       borderRadius: 12,
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.iconContainerBg,
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,

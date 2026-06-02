@@ -71,7 +71,7 @@ export default function BusinessEventsIndexScreen() {
           accessibilityRole="button"
           accessibilityLabel={item.hidden ? t('businessHub.eventShowPublic') : t('businessHub.eventHidePublic')}
         >
-          <AppText variant="caption" color="accent">
+          <AppText variant="caption" color="primaryLight">
             {item.hidden ? t('businessHub.eventShowPublic') : t('businessHub.eventHidePublic')}
           </AppText>
         </Pressable>

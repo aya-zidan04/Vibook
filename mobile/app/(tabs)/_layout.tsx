@@ -3,25 +3,30 @@ import { Platform, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n/useTranslation';
+import { transparentTabScreenOptions } from '@/navigation/navigationCanvas';
 import { bottomTabSoftCrossFade } from '@/navigation/transitionPresets';
 import { useLocaleStore } from '@/store/localeStore';
 import { createShadows, useThemeColors } from '@/theme';
+import { useThemeStore } from '@/store/themeStore';
 import { tabBarLabelTextStyle } from '@/theme/typography';
 import type { ThemeColors } from '@/theme/palettes';
 
-/** Tab bar stays LTR: Explore → Booking → Resell → Favorites → Me (even when app UI is RTL). */
+/** Tab bar stays LTR: Explore → Booking → Favorites → Me (even when app UI is RTL). */
 export default function TabsLayout() {
   const { t } = useTranslation();
   const locale = useLocaleStore((s) => s.locale);
   const colors = useThemeColors();
+  const colorScheme = useThemeStore((s) => s.colorScheme);
   const styles = useMemo(() => createTabStyles(colors), [colors]);
   const tabLabelStyle = useMemo(() => tabBarLabelTextStyle(locale), [locale]);
 
   return (
     <Tabs
+      key={locale}
       initialRouteName="explore"
       screenOptions={{
         headerShown: false,
+        ...transparentTabScreenOptions,
         ...bottomTabSoftCrossFade,
         tabBarStyle: [
           styles.tabBar,
@@ -32,7 +37,7 @@ export default function TabsLayout() {
           },
         ],
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarInactiveTintColor: colorScheme === 'light' ? colors.tabInactive : colors.textMuted,
         tabBarLabelStyle: tabLabelStyle,
         tabBarItemStyle: styles.tabItem,
         tabBarShowLabel: true,
@@ -59,25 +64,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="resell"
-        options={{
-          title: t('tabs.resell'),
-          tabBarAccessibilityLabel: t('tabs.resell'),
-          tabBarIcon: ({ color, focused, size }) => (
-            <Ionicons
-              name={focused ? 'swap-horizontal' : 'swap-horizontal-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="favorites"
         options={{
           title: t('tabs.favorites'),
           tabBarAccessibilityLabel: t('tabs.favorites'),
-          tabBarActiveTintColor: colors.accent,
           tabBarIcon: ({ color, focused, size }) => (
             <Ionicons name={focused ? 'heart' : 'heart-outline'} size={size} color={color} />
           ),

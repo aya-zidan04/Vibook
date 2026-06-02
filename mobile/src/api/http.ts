@@ -137,7 +137,7 @@ export async function apiFetch<T>(path: string, options: ApiRequestOptions = {})
     if (res.status === 401 && auth) {
       await clearTokens();
     }
-    throw new ApiError(res.status, parsed, msg || 'Request failed');
+    throw new ApiError(res.status, parsed, msg || `http_${res.status}`);
   }
 
   return parsed as T;

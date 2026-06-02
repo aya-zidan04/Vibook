@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { fetchMyBusinessProfile } from '@/api/businessProfileApi';
+import { transparentStackScreenOptions } from '@/navigation/navigationCanvas';
 import { nativeStackDrillInTransition } from '@/navigation/transitionPresets';
 import { useAppStore } from '@/store/appStore';
 import { useBusinessHubStore } from '@/store/businessHubStore';
@@ -51,7 +52,7 @@ export default function BusinessStackLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: 'transparent' },
+        ...transparentStackScreenOptions,
         ...nativeStackDrillInTransition,
       }}
     />

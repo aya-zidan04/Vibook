@@ -2,20 +2,6 @@ export type BusinessProfileStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'R
 
 export type RoleName = 'ROLE_USER' | 'ROLE_BUSINESS' | 'ROLE_ADMIN';
 
-export type AdminActivityAction =
-  | 'APPROVE_BUSINESS_PROFILE'
-  | 'REJECT_BUSINESS_PROFILE'
-  | 'BULK_APPROVE_BUSINESS_PROFILES'
-  | 'BULK_REJECT_BUSINESS_PROFILES'
-  | 'UPDATE_BUSINESS_NOTES'
-  | 'CREATE_CATEGORY'
-  | 'UPDATE_CATEGORY'
-  | 'DELETE_CATEGORY'
-  | 'UPDATE_GOVERNORATE_STATUS'
-  | 'UPDATE_USER_ROLES'
-  | 'ENABLE_USER'
-  | 'DISABLE_USER';
-
 export type UserResponse = {
   id: number;
   firstName: string;
@@ -104,17 +90,6 @@ export type SpringPage<T> = {
   totalPages: number;
   number: number;
   size: number;
-};
-
-export type AdminActivityLogResponse = {
-  id: number;
-  adminUserId: number;
-  adminEmail: string;
-  action: AdminActivityAction;
-  entityType: string;
-  entityId: number;
-  details: string | null;
-  createdAt: string;
 };
 
 export type CategoryResponse = {
@@ -257,4 +232,17 @@ export type AdminModerationReportResponse = {
   createdAt: string;
   updatedAt: string;
   resolvedAt: string | null;
+};
+
+export type UserReportStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
+
+export type AdminUserReportResponse = {
+  id: number;
+  userId: number;
+  userEmail: string;
+  subject: string;
+  message: string;
+  status: UserReportStatus;
+  createdAt: string;
+  updatedAt: string;
 };

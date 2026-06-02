@@ -7,7 +7,7 @@ export const JORDAN_GOVERNORATES = [
   { slug: 'ajloun', en: 'Ajloun', ar: 'عجلون' },
   { slug: 'jerash', en: 'Jerash', ar: 'جرش' },
   { slug: 'mafraq', en: 'Mafraq', ar: 'المفرق' },
-  { slug: 'amman', en: 'Amman', ar: 'عمان' },
+  { slug: 'amman', en: 'Amman', ar: 'عمّان' },
   { slug: 'zarqa', en: 'Zarqa', ar: 'الزرقاء' },
   { slug: 'balqa', en: 'Balqa', ar: 'البلقاء' },
   { slug: 'madaba', en: 'Madaba', ar: 'مادبا' },

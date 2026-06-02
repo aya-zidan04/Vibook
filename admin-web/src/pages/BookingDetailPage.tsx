@@ -8,10 +8,12 @@ import { BookingStatusBadge } from '@/components/ui/Badge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
 
 export function BookingDetailPage() {
+  const { t } = useAdminI18n();
   const { id: idParam } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -34,7 +36,7 @@ export function BookingDetailPage() {
         const b = await fetchAdminBooking(id);
         if (!c) setRow(b);
       } catch (e) {
-        if (!c) setError(getFriendlyErrorMessage(e, 'Could not load booking.'));
+        if (!c) setError(getFriendlyErrorMessage(e, t('bookingDetail.loadError')));
       } finally {
         if (!c) setLoading(false);
       }
@@ -42,24 +44,24 @@ export function BookingDetailPage() {
     return () => {
       c = true;
     };
-  }, [id, valid]);
+  }, [id, valid, t]);
 
   async function run() {
     if (!dialog || !valid) return;
     setBusy(true);
     try {
       if (dialog === 'cancel') {
-        const b = await cancelAdminBooking(id, 'Admin override');
+        const b = await cancelAdminBooking(id, t('bookings.adminOverrideReason'));
         setRow(b);
-        showToast('Booking cancelled.', 'success');
+        showToast(t('bookingDetail.cancelledToast'), 'success');
       } else {
         const b = await completeAdminBooking(id);
         setRow(b);
-        showToast('Marked completed.', 'success');
+        showToast(t('bookingDetail.completedToast'), 'success');
       }
       setDialog(null);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Action failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('bookings.actionFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -68,7 +70,7 @@ export function BookingDetailPage() {
   if (!valid) {
     return (
       <div className="vb-page">
-        <EmptyState title="Invalid booking" description="Check the URL." decor />
+        <EmptyState title={t('bookingDetail.invalid')} description={t('bookingDetail.invalidDesc')} decor />
       </div>
     );
   }
@@ -84,8 +86,12 @@ export function BookingDetailPage() {
   if (error || !row) {
     return (
       <div className="vb-page">
-        <EmptyState title="Booking unavailable" description={error ?? 'Not found.'} decor />
-        <Link to="/bookings">← Back</Link>
+        <EmptyState
+          title={t('bookingDetail.unavailable')}
+          description={error ?? t('bookingDetail.notFound')}
+          decor
+        />
+        <Link to="/bookings">{t('bookingDetail.back')}</Link>
       </div>
     );
   }
@@ -93,9 +99,9 @@ export function BookingDetailPage() {
   return (
     <div className="vb-page vb-animate-in">
       <Button variant="ghost" size="sm" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-        ← Back
+        {t('bookingDetail.back')}
       </Button>
-      <h1 style={{ marginTop: 0 }}>Booking #{row.id}</h1>
+      <h1 style={{ marginTop: 0 }}>{t('bookingDetail.title', { id: row.id })}</h1>
       <div style={{ marginBottom: 16 }}>
         <BookingStatusBadge status={row.status} />
       </div>
@@ -103,63 +109,63 @@ export function BookingDetailPage() {
       {row.status !== 'CANCELLED' && row.status !== 'COMPLETED' ? (
         <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
           <Button variant="dangerOutline" onClick={() => setDialog('cancel')}>
-            Cancel (admin)
+            {t('bookingDetail.cancelAdmin')}
           </Button>
           <Button variant="primary" onClick={() => setDialog('complete')}>
-            Mark completed
+            {t('bookingDetail.markCompleted')}
           </Button>
         </div>
       ) : null}
 
       <div className="vb-detail-sections">
         <Card padding="lg">
-          <CardHeader title="Guest & event" />
+          <CardHeader title={t('bookingDetail.guestEvent')} />
           <dl className="vb-dl">
-            <dt>User</dt>
+            <dt>{t('bookingDetail.user')}</dt>
             <dd>
               <Link to={`/users?userId=${row.userId}`}>{row.userEmail}</Link>
             </dd>
-            <dt>Event</dt>
+            <dt>{t('bookingDetail.event')}</dt>
             <dd>
-              <Link to={`/events/${row.eventId}`}>{row.eventTitle ?? '—'}</Link>
+              <Link to={`/events/${row.eventId}`}>{row.eventTitle ?? t('common.dash')}</Link>
             </dd>
-            <dt>Business</dt>
-            <dd>{row.businessName ?? '—'}</dd>
-            <dt>Event date</dt>
+            <dt>{t('bookingDetail.business')}</dt>
+            <dd>{row.businessName ?? t('common.dash')}</dd>
+            <dt>{t('bookingDetail.eventDate')}</dt>
             <dd>{row.eventDate}</dd>
-            <dt>Time slot</dt>
-            <dd>{row.timeSlotLabel ?? '—'}</dd>
-            <dt>Guests</dt>
+            <dt>{t('bookingDetail.timeSlot')}</dt>
+            <dd>{row.timeSlotLabel ?? t('common.dash')}</dd>
+            <dt>{t('bookingDetail.guests')}</dt>
             <dd>{row.guestsCount}</dd>
           </dl>
         </Card>
         <Card padding="lg">
-          <CardHeader title="Payment & notes" />
+          <CardHeader title={t('bookingDetail.paymentNotes')} />
           <dl className="vb-dl">
-            <dt>Total</dt>
-            <dd>{row.totalPriceJod} JOD</dd>
-            <dt>Note</dt>
-            <dd>{row.note ?? '—'}</dd>
-            <dt>Cancel reason</dt>
-            <dd>{row.cancelReason ?? '—'}</dd>
+            <dt>{t('bookingDetail.total')}</dt>
+            <dd>{t('bookingDetail.totalJod', { amount: row.totalPriceJod })}</dd>
+            <dt>{t('bookingDetail.note')}</dt>
+            <dd>{row.note ?? t('common.dash')}</dd>
+            <dt>{t('bookingDetail.cancelReason')}</dt>
+            <dd>{row.cancelReason ?? t('common.dash')}</dd>
           </dl>
         </Card>
         <Card padding="lg">
-          <CardHeader title="Status timeline" />
+          <CardHeader title={t('bookingDetail.statusTimeline')} />
           <ul className="vb-timeline">
             <li>
               <span className="vb-timeline__dot" />
-              <div className="vb-timeline__label">Created</div>
+              <div className="vb-timeline__label">{t('bookingDetail.created')}</div>
               <div className="vb-timeline__time">{formatDateTime(row.createdAt)}</div>
             </li>
             <li>
               <span className="vb-timeline__dot" />
-              <div className="vb-timeline__label">Last updated</div>
+              <div className="vb-timeline__label">{t('bookingDetail.lastUpdated')}</div>
               <div className="vb-timeline__time">{formatDateTime(row.updatedAt)}</div>
             </li>
             <li>
               <span className="vb-timeline__dot" />
-              <div className="vb-timeline__label">Current status</div>
+              <div className="vb-timeline__label">{t('bookingDetail.currentStatus')}</div>
               <div className="vb-timeline__time">
                 <BookingStatusBadge status={row.status} />
               </div>
@@ -170,9 +176,9 @@ export function BookingDetailPage() {
 
       <ConfirmDialog
         open={dialog === 'cancel'}
-        title="Cancel booking"
-        message="Cancel this booking as admin?"
-        confirmLabel="Cancel"
+        title={t('bookingDetail.cancelTitle')}
+        message={t('bookingDetail.cancelMsg')}
+        confirmLabel={t('bookingDetail.cancelConfirm')}
         danger
         loading={busy}
         onConfirm={() => void run()}
@@ -180,9 +186,9 @@ export function BookingDetailPage() {
       />
       <ConfirmDialog
         open={dialog === 'complete'}
-        title="Complete booking"
-        message="Mark this booking completed?"
-        confirmLabel="Complete"
+        title={t('bookingDetail.completeTitle')}
+        message={t('bookingDetail.completeMsg')}
+        confirmLabel={t('bookingDetail.completeConfirm')}
         loading={busy}
         onConfirm={() => void run()}
         onCancel={() => setDialog(null)}

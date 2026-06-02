@@ -5,10 +5,15 @@ import { AppText } from '@/components/ui/AppText';
 import { BusinessCategoryPickerSheet } from '@/components/forms/BusinessCategoryPickerSheet';
 import { partnerCategoryRowForStored } from '@/constants/businessPartnerCategories';
 import { useTranslation } from '@/i18n/useTranslation';
-import { radii, spacing, useThemeColors } from '@/theme';
+import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { chevronForwardTrailing } from '@/utils/rtl';
-import { textAlignStart } from '@/utils/rtlText';
+import {
+  BusinessFieldIconSlot,
+  BusinessFieldPickerValue,
+  businessLeadingIconRowStyle,
+  businessFieldRowStyle,
+} from '@/components/business/businessFieldRow';
+import { formAlignStyle } from '@/utils/rtlText';
 
 type Props = {
   label: string;
@@ -35,31 +40,35 @@ export function BusinessPartnerCategorySelectField({ label, valueEn, onChangeEn,
 
   return (
     <View style={styles.wrap}>
-      <AppText variant="label" color="text" style={{ textAlign: textAlignStart(isRTL) }}>
+      <AppText variant="label" color="text" style={formAlignStyle(isRTL)}>
         {label}
       </AppText>
       <Pressable
         onPress={() => setOpen(true)}
-        style={({ pressed }) => [styles.field, pressed && styles.pressed]}
+        style={({ pressed }) => [
+          styles.field,
+          businessLeadingIconRowStyle,
+          businessFieldRowStyle(colors),
+          pressed && styles.pressed,
+        ]}
         accessibilityRole="button"
         accessibilityLabel={label}
       >
-        <View style={[styles.iconSlot, { backgroundColor: colors.primaryMuted }]}>
+        <BusinessFieldIconSlot>
           <Ionicons
             name={row?.icon ?? 'pricetag-outline'}
             size={20}
             color={colors.primary}
           />
-        </View>
-        <AppText
-          variant="body"
-          color={row || valueEn.trim() ? 'text' : 'textMuted'}
-          style={[styles.value, { textAlign: textAlignStart(isRTL) }]}
-          numberOfLines={1}
+        </BusinessFieldIconSlot>
+        <BusinessFieldPickerValue
+          locale={locale}
+          isRTL={isRTL}
+          color={row || valueEn.trim() ? colors.text : colors.placeholder}
+          alignStyle={formAlignStyle(isRTL)}
         >
           {displayLabel}
-        </AppText>
-        <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
+        </BusinessFieldPickerValue>
       </Pressable>
 
       <BusinessCategoryPickerSheet
@@ -77,25 +86,9 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     wrap: { gap: spacing.xs, marginBottom: spacing.md },
     field: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.surfaceMuted,
-      borderRadius: radii.xl,
-      borderWidth: 1,
-      borderColor: colors.borderLight,
-      minHeight: 54,
-      paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.sm,
       gap: spacing.sm,
+      paddingHorizontal: spacing.sm,
     },
-    iconSlot: {
-      width: 40,
-      height: 40,
-      borderRadius: radii.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    value: { flex: 1, minWidth: 0 },
     pressed: { opacity: 0.88 },
   });
 }

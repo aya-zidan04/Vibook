@@ -13,13 +13,23 @@ import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 
 type Dialog = null | { type: 'cancel' | 'complete'; row: AdminBookingResponse };
 
 const STATUS_OPTIONS: Array<BookingStatus | 'ALL'> = ['ALL', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'];
 
+const STATUS_LABEL_KEY: Record<BookingStatus | 'ALL', string> = {
+  ALL: 'filters.all',
+  PENDING: 'bookingStatus.pending',
+  CONFIRMED: 'bookingStatus.confirmed',
+  COMPLETED: 'bookingStatus.completed',
+  CANCELLED: 'bookingStatus.cancelled',
+};
+
 export function BookingsPage() {
+  const { t } = useAdminI18n();
   const { headerSearch } = useAdminChrome();
   const { showToast } = useToast();
   const [rows, setRows] = useState<AdminBookingResponse[]>([]);
@@ -63,11 +73,11 @@ export function BookingsPage() {
       setRows(data.content);
       setTotalPages(data.totalPages);
     } catch (e) {
-      setError(getFriendlyErrorMessage(e, 'Could not load bookings.'));
+      setError(getFriendlyErrorMessage(e, t('bookings.loadError')));
     } finally {
       setLoading(false);
     }
-  }, [status, businessId, dateFrom, dateTo, headerSearch, page]);
+  }, [status, businessId, dateFrom, dateTo, headerSearch, page, t]);
 
   useEffect(() => {
     void load();
@@ -78,16 +88,16 @@ export function BookingsPage() {
     setBusy(true);
     try {
       if (dialog.type === 'cancel') {
-        await cancelAdminBooking(dialog.row.id, 'Admin override');
-        showToast('Booking cancelled.', 'success');
+        await cancelAdminBooking(dialog.row.id, t('bookings.adminOverrideReason'));
+        showToast(t('bookings.cancelledToast'), 'success');
       } else {
         await completeAdminBooking(dialog.row.id);
-        showToast('Marked completed.', 'success');
+        showToast(t('bookings.completedToast'), 'success');
       }
       setDialog(null);
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Action failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('bookings.actionFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -96,7 +106,7 @@ export function BookingsPage() {
   if (error) {
     return (
       <div className="vb-page">
-        <EmptyState title="Bookings unavailable" description={error} decor />
+        <EmptyState title={t('bookings.unavailable')} description={error} decor />
       </div>
     );
   }
@@ -105,7 +115,7 @@ export function BookingsPage() {
     <div className="vb-page vb-animate-in">
       <div className="vb-toolbar">
         <div className="vb-toolbar__field">
-          <label htmlFor="bk-status">Status</label>
+          <label htmlFor="bk-status">{t('filters.status')}</label>
           <select
             id="bk-status"
             className="vb-input"
@@ -117,13 +127,13 @@ export function BookingsPage() {
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {s === 'ALL' ? 'All' : s.charAt(0) + s.slice(1).toLowerCase()}
+                {t(STATUS_LABEL_KEY[s])}
               </option>
             ))}
           </select>
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="bk-biz">Business</label>
+          <label htmlFor="bk-biz">{t('filters.business')}</label>
           <select
             id="bk-biz"
             className="vb-input"
@@ -133,7 +143,7 @@ export function BookingsPage() {
               setBusinessId(e.target.value === '' ? '' : Number(e.target.value));
             }}
           >
-            <option value="">All</option>
+            <option value="">{t('filters.all')}</option>
             {businesses.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.businessName}
@@ -142,7 +152,7 @@ export function BookingsPage() {
           </select>
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="bk-from">Event from</label>
+          <label htmlFor="bk-from">{t('filters.eventFrom')}</label>
           <input
             id="bk-from"
             type="date"
@@ -155,7 +165,7 @@ export function BookingsPage() {
           />
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="bk-to">Event to</label>
+          <label htmlFor="bk-to">{t('filters.eventTo')}</label>
           <input
             id="bk-to"
             type="date"
@@ -174,7 +184,16 @@ export function BookingsPage() {
           <table className="vb-table">
             <thead>
               <tr>
-                {['ID', 'User', 'Event', 'Business', 'Date', 'Status', 'Amount', 'Actions'].map((h) => (
+                {[
+                  t('table.id'),
+                  t('table.user'),
+                  t('table.event'),
+                  t('table.business'),
+                  t('eventDetail.date'),
+                  t('table.status'),
+                  t('table.amount'),
+                  t('table.actions'),
+                ].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -191,21 +210,21 @@ export function BookingsPage() {
           </table>
         </div>
       ) : rows.length === 0 ? (
-        <EmptyState title="No bookings" description="Adjust filters or search." decor />
+        <EmptyState title={t('bookings.noBookings')} description={t('bookings.noBookingsDesc')} decor />
       ) : (
         <>
           <div className="vb-table-wrap">
             <table className="vb-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>User</th>
-                  <th>Event</th>
-                  <th>Business</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Amount</th>
-                  <th>Actions</th>
+                  <th>{t('table.id')}</th>
+                  <th>{t('table.user')}</th>
+                  <th>{t('table.event')}</th>
+                  <th>{t('table.business')}</th>
+                  <th>{t('eventDetail.date')}</th>
+                  <th>{t('table.status')}</th>
+                  <th>{t('table.amount')}</th>
+                  <th>{t('table.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -216,30 +235,28 @@ export function BookingsPage() {
                       <Link to={`/users?userId=${r.userId}`}>{r.userEmail}</Link>
                     </td>
                     <td>
-                      <Link to={`/events/${r.eventId}`}>{r.eventTitle ?? '—'}</Link>
+                      <Link to={`/events/${r.eventId}`}>{r.eventTitle ?? t('common.dash')}</Link>
                     </td>
-                    <td>{r.businessName ?? '—'}</td>
+                    <td>{r.businessName ?? t('common.dash')}</td>
                     <td>{r.eventDate}</td>
                     <td>
                       <BookingStatusBadge status={r.status} />
                     </td>
-                    <td>
-                      {r.totalPriceJod} JOD
-                    </td>
+                    <td>{t('bookings.amountJod', { amount: r.totalPriceJod })}</td>
                     <td>
                       <div className="vb-table-actions">
                         <Link to={`/bookings/${r.id}`}>
                           <Button variant="secondary" size="sm">
-                            View
+                            {t('table.view')}
                           </Button>
                         </Link>
                         {r.status !== 'CANCELLED' && r.status !== 'COMPLETED' ? (
                           <>
                             <Button variant="dangerOutline" size="sm" onClick={() => setDialog({ type: 'cancel', row: r })}>
-                              Cancel
+                              {t('bookings.cancelBtn')}
                             </Button>
                             <Button variant="primary" size="sm" onClick={() => setDialog({ type: 'complete', row: r })}>
-                              Complete
+                              {t('bookings.completeBtn')}
                             </Button>
                           </>
                         ) : null}
@@ -251,11 +268,9 @@ export function BookingsPage() {
             </table>
           </div>
           <div className="vb-pagination">
-            <span>
-              Page {page + 1} of {Math.max(1, totalPages)}
-            </span>
+            <span>{t('common.pageOf', { n: page + 1, total: Math.max(1, totalPages) })}</span>
             <Button variant="secondary" size="sm" disabled={page <= 0} onClick={() => setPage((p) => p - 1)}>
-              Previous
+              {t('common.previous')}
             </Button>
             <Button
               variant="secondary"
@@ -263,7 +278,7 @@ export function BookingsPage() {
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next
+              {t('common.next')}
             </Button>
           </div>
         </>
@@ -271,9 +286,9 @@ export function BookingsPage() {
 
       <ConfirmDialog
         open={dialog?.type === 'cancel'}
-        title="Cancel booking"
-        message={`Cancel booking #${dialog?.type === 'cancel' ? dialog.row.id : ''}?`}
-        confirmLabel="Cancel booking"
+        title={t('bookings.cancelTitle')}
+        message={t('bookings.cancelMsg', { id: dialog?.type === 'cancel' ? dialog.row.id : '' })}
+        confirmLabel={t('bookings.cancelConfirm')}
         danger
         loading={busy}
         onConfirm={() => void runDialog()}
@@ -281,9 +296,9 @@ export function BookingsPage() {
       />
       <ConfirmDialog
         open={dialog?.type === 'complete'}
-        title="Complete booking"
-        message={`Mark booking #${dialog?.type === 'complete' ? dialog.row.id : ''} as completed?`}
-        confirmLabel="Mark completed"
+        title={t('bookings.completeTitle')}
+        message={t('bookings.completeMsg', { id: dialog?.type === 'complete' ? dialog.row.id : '' })}
+        confirmLabel={t('bookings.completeConfirm')}
         loading={busy}
         onConfirm={() => void runDialog()}
         onCancel={() => setDialog(null)}

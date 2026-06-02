@@ -15,12 +15,15 @@ import { EventVisibilityBadge } from '@/components/ui/Badge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
+import { localizedGovernorateName } from '@/utils/governorateLabels';
 import { formatDateTime } from '@/utils/format';
 
 type Dialog = null | 'delete' | 'hide' | 'show';
 
 export function EventDetailPage() {
+  const { t, locale } = useAdminI18n();
   const { id: idParam } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -48,7 +51,7 @@ export function EventDetailPage() {
           setNotes(d.adminNotes ?? '');
         }
       } catch (e) {
-        if (!c) setError(getFriendlyErrorMessage(e, 'Could not load event.'));
+        if (!c) setError(getFriendlyErrorMessage(e, t('eventDetail.loadError')));
       } finally {
         if (!c) setLoading(false);
       }
@@ -56,18 +59,18 @@ export function EventDetailPage() {
     return () => {
       c = true;
     };
-  }, [id, valid]);
+  }, [id, valid, t]);
 
   async function saveNotes() {
     if (!valid) return;
     setNotesSaving(true);
     try {
       await updateAdminEventNotes(id, notes);
-      showToast('Notes saved.', 'success');
+      showToast(t('eventDetail.notesSaved'), 'success');
       const d = await fetchAdminEventDetail(id);
       setData(d);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Could not save notes.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('eventDetail.notesSaveFailed')), 'error');
     } finally {
       setNotesSaving(false);
     }
@@ -79,22 +82,22 @@ export function EventDetailPage() {
     try {
       if (dialog === 'delete') {
         await deleteAdminEvent(id);
-        showToast('Event deleted.', 'success');
+        showToast(t('eventDetail.deletedToast'), 'success');
         navigate('/events');
         return;
       }
       if (dialog === 'hide') {
         const ev = await hideAdminEvent(id);
-        showToast('Event hidden.', 'success');
+        showToast(t('eventDetail.hiddenToast'), 'success');
         setData({ event: ev, adminNotes: data.adminNotes });
       } else {
         const ev = await showAdminEvent(id);
-        showToast('Event shown.', 'success');
+        showToast(t('eventDetail.shownToast'), 'success');
         setData({ event: ev, adminNotes: data.adminNotes });
       }
       setDialog(null);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Action failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('events.actionFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -103,7 +106,7 @@ export function EventDetailPage() {
   if (!valid) {
     return (
       <div className="vb-page">
-        <EmptyState title="Invalid event" description="Check the URL." decor />
+        <EmptyState title={t('eventDetail.invalid')} description={t('eventDetail.invalidDesc')} decor />
       </div>
     );
   }
@@ -119,8 +122,12 @@ export function EventDetailPage() {
   if (error || !data) {
     return (
       <div className="vb-page">
-        <EmptyState title="Event unavailable" description={error ?? 'Not found.'} decor />
-        <Link to="/events">← Back to events</Link>
+        <EmptyState
+          title={t('eventDetail.unavailable')}
+          description={error ?? t('eventDetail.notFound')}
+          decor
+        />
+        <Link to="/events">{t('eventDetail.backToEvents')}</Link>
       </div>
     );
   }
@@ -131,33 +138,36 @@ export function EventDetailPage() {
     <div className="vb-page vb-animate-in">
       <div style={{ marginBottom: 'var(--vb-space-md)' }}>
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-          ← Back
+          {t('eventDetail.back')}
         </Button>
       </div>
 
       <div className="vb-detail-head">
         <div className="vb-detail-title" style={{ flex: 1 }}>
-          <h1 style={{ marginBottom: 8 }}>{ev.title ?? 'Untitled event'}</h1>
+          <h1 style={{ marginBottom: 8 }}>{ev.title ?? t('eventDetail.untitled')}</h1>
           <EventVisibilityBadge status={ev.hidden ? 'HIDDEN' : 'VISIBLE'} />
           <p className="vb-muted" style={{ marginTop: 'var(--vb-space-md)' }}>
             {ev.businessProfileId ? (
-              <Link to={`/business-profiles/${ev.businessProfileId}`}>Business profile #{ev.businessProfileId}</Link>
+              <Link to={`/business-profiles/${ev.businessProfileId}`}>
+                {t('eventDetail.businessProfileLink', { id: ev.businessProfileId })}
+              </Link>
             ) : null}
             {' · '}
-            {ev.categoryName ?? 'Category'} · {ev.governorateName ?? 'Governorate'}
+            {ev.categoryName ?? t('dashboard.categoryFallback')} ·{' '}
+            {localizedGovernorateName(ev.governorateName, locale) || t('dashboard.governorateFallback')}
           </p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 'var(--vb-space-lg)' }}>
             {ev.hidden ? (
               <Button variant="primary" onClick={() => setDialog('show')}>
-                Show event
+                {t('eventDetail.showEvent')}
               </Button>
             ) : (
               <Button variant="secondary" onClick={() => setDialog('hide')}>
-                Hide event
+                {t('eventDetail.hideEvent')}
               </Button>
             )}
             <Button variant="dangerOutline" onClick={() => setDialog('delete')}>
-              Delete
+              {t('eventDetail.delete')}
             </Button>
           </div>
         </div>
@@ -190,51 +200,56 @@ export function EventDetailPage() {
 
       <div className="vb-detail-sections">
         <Card padding="lg">
-          <CardHeader title="Ratings summary" />
+          <CardHeader title={t('eventDetail.ratingsSummary')} />
           <p style={{ margin: 0 }}>
-            <strong>{ev.averageRating.toFixed(2)}</strong> avg · {ev.reviewCount} reviews
+            <strong>
+              {t('eventDetail.ratingsAvg', {
+                avg: ev.averageRating.toFixed(2),
+                count: ev.reviewCount,
+              })}
+            </strong>
           </p>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Schedule & capacity" />
+          <CardHeader title={t('eventDetail.schedule')} />
           <dl className="vb-dl">
-            <dt>Date</dt>
+            <dt>{t('eventDetail.date')}</dt>
             <dd>{ev.eventDate}</dd>
-            <dt>Time slots</dt>
-            <dd>{ev.timeSlots?.length ? ev.timeSlots.join(', ') : '—'}</dd>
-            <dt>Price</dt>
+            <dt>{t('eventDetail.timeSlots')}</dt>
+            <dd>{ev.timeSlots?.length ? ev.timeSlots.join(', ') : t('common.dash')}</dd>
+            <dt>{t('eventDetail.price')}</dt>
             <dd>
               {ev.priceJod} {ev.currency}
             </dd>
-            <dt>Capacity</dt>
-            <dd>{ev.capacityGuests} guests</dd>
-            <dt>Created</dt>
+            <dt>{t('eventDetail.capacity')}</dt>
+            <dd>{t('eventDetail.guests', { count: ev.capacityGuests })}</dd>
+            <dt>{t('eventDetail.created')}</dt>
             <dd>{formatDateTime(ev.createdAt)}</dd>
-            <dt>Updated</dt>
+            <dt>{t('eventDetail.updated')}</dt>
             <dd>{formatDateTime(ev.updatedAt)}</dd>
           </dl>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Description" />
-          <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{ev.description ?? '—'}</p>
+          <CardHeader title={t('eventDetail.description')} />
+          <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{ev.description ?? t('common.dash')}</p>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Admin notes" subtitle="Internal only." />
+          <CardHeader title={t('eventDetail.adminNotes')} subtitle={t('eventDetail.adminNotesSubtitle')} />
           <textarea className="vb-modal__textarea" value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} />
           <Button variant="primary" size="sm" disabled={notesSaving} onClick={() => void saveNotes()}>
-            {notesSaving ? 'Saving…' : 'Save notes'}
+            {notesSaving ? t('common.saving') : t('eventDetail.saveNotes')}
           </Button>
         </Card>
       </div>
 
       <ConfirmDialog
         open={dialog === 'delete'}
-        title="Delete event"
-        message="Permanently delete this event?"
-        confirmLabel="Delete"
+        title={t('eventDetail.deleteTitle')}
+        message={t('eventDetail.deleteMsg')}
+        confirmLabel={t('events.deleteConfirm')}
         danger
         loading={busy}
         onConfirm={() => void runAction()}
@@ -242,18 +257,18 @@ export function EventDetailPage() {
       />
       <ConfirmDialog
         open={dialog === 'hide'}
-        title="Hide event"
-        message="Hide this listing from consumers?"
-        confirmLabel="Hide"
+        title={t('eventDetail.hideTitle')}
+        message={t('eventDetail.hideMsg')}
+        confirmLabel={t('events.hideConfirm')}
         loading={busy}
         onConfirm={() => void runAction()}
         onCancel={() => setDialog(null)}
       />
       <ConfirmDialog
         open={dialog === 'show'}
-        title="Show event"
-        message="Make this listing visible again?"
-        confirmLabel="Show"
+        title={t('eventDetail.showTitle')}
+        message={t('eventDetail.showMsg')}
+        confirmLabel={t('events.showConfirm')}
         loading={busy}
         onConfirm={() => void runAction()}
         onCancel={() => setDialog(null)}

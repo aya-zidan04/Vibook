@@ -22,12 +22,15 @@ import {
 } from '@/api/businessEventsApi';
 import { listActiveGovernorates } from '@/api/governoratesApi';
 import { refreshBusinessHubLists } from '@/services/businessHubSync';
-import { radii, spacing, useThemeColors } from '@/theme';
+import { radii, spacing, useThemeColors, type ThemeColors } from '@/theme';
 import type { BusinessEventRecord } from '@/types/businessHub';
 import { businessEventResponseToRecord, photoUrlsForApi } from '@/utils/businessHubMappers';
 import { resolveGovernorateId } from '@/utils/resolveGovernorateId';
 import { resolveSubcategoryIdForHubCategory } from '@/utils/resolveHubSubcategory';
-import { textAlignStart } from '@/utils/rtlText';
+import { leadingIconRowStyle, textAlignStart } from '@/utils/rtlText';
+import { NavigationChevronPrev, NavigationChevronNext } from '@/components/ui/NavigationChevron';
+import { navigationRowStyle } from '@/utils/rtl';
+import { formatEventTimeSlotLabel } from '@/utils/formatEventTimeSlot';
 
 type EventCategoryOption = {
   id: string;
@@ -95,7 +98,7 @@ export default function BusinessEventEditorScreen() {
   const id = (paramId && String(paramId).length > 0 ? String(paramId) : segmentId) || '';
   const isNew = id === 'new';
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(), []);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t, locale } = useTranslation();
   const numericEdit = !isNew && !!id && /^\d+$/.test(String(id));
@@ -420,7 +423,7 @@ export default function BusinessEventEditorScreen() {
         icon="calendar-outline"
         label={t('businessHub.fieldDate')}
         value={date}
-        placeholder="YYYY-MM-DD"
+        placeholder={t('businessHub.fieldDatePh')}
         onPress={() => {
           const base = parseIsoDate(date) ?? new Date();
           base.setDate(1);
@@ -433,8 +436,8 @@ export default function BusinessEventEditorScreen() {
       <PickerField
         icon="time-outline"
         label={t('businessHub.fieldTime')}
-        value={selectedTimeSlots.join(', ')}
-        placeholder="12:00 PM"
+        value={selectedTimeSlots.map((s) => formatEventTimeSlotLabel(s, locale)).join(', ')}
+        placeholder={t('businessHub.fieldTimePh')}
         errorText={timeSlotsError ? t('businessHub.eventValidationTime') : undefined}
         onPress={() => setTimeSheetOpen(true)}
         trailingIcon="chevron-down"
@@ -479,7 +482,7 @@ export default function BusinessEventEditorScreen() {
                   setTicketRows((prev) => (prev.length <= 1 ? prev : prev.filter((r) => r.key !== row.key)))
                 }
               >
-                <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
+                <Ionicons name="trash-outline" size={20} color={colors.icon} />
               </Pressable>
             ) : null}
           </View>
@@ -669,9 +672,9 @@ export default function BusinessEventEditorScreen() {
               <Ionicons name="time-outline" size={18} color={colors.primary} />
             </View>
             <AppText variant="body-em" color="text" style={styles.sheetLabel}>
-              {slot}
+              {formatEventTimeSlotLabel(slot, locale)}
             </AppText>
-            <Ionicons name="checkmark-circle" size={21} color={colors.accent} />
+            <Ionicons name="checkmark-circle" size={21} color={colors.primaryLight} />
           </Pressable>
         ))}
         {EVENT_TIME_OPTIONS.map((opt) => {
@@ -702,10 +705,10 @@ export default function BusinessEventEditorScreen() {
                 <Ionicons name="time-outline" size={18} color={colors.primary} />
               </View>
               <AppText variant="body-em" color="text" style={styles.sheetLabel}>
-                {opt}
+                {formatEventTimeSlotLabel(opt, locale)}
               </AppText>
               {selected ? (
-                <Ionicons name="checkmark-circle" size={21} color={colors.accent} />
+                <Ionicons name="checkmark-circle" size={21} color={colors.primaryLight} />
               ) : (
                 <View style={[styles.sheetRadio, { borderColor: colors.borderLight }]} />
               )}
@@ -773,7 +776,8 @@ function CalendarDateSheet({
   onSelectDate: (isoDate: string) => void;
 }) {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(), []);
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const isRTL = locale === 'ar';
   const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
   const monthLabel = monthStart.toLocaleDateString(locale === 'ar' ? 'ar-JO' : 'en-US', {
     month: 'long',
@@ -815,12 +819,12 @@ function CalendarDateSheet({
             {title}
           </AppText>
 
-          <View style={styles.calendarHeadRow}>
+          <View style={[styles.calendarHeadRow, navigationRowStyle(isRTL)]}>
             <Pressable
               onPress={() => onChangeMonth(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))}
               style={styles.calendarNavBtn}
             >
-              <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
+              <NavigationChevronPrev size={18} color={colors.icon} />
             </Pressable>
             <AppText variant="body-em" color="text">
               {monthLabel}
@@ -829,7 +833,7 @@ function CalendarDateSheet({
               onPress={() => onChangeMonth(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))}
               style={styles.calendarNavBtn}
             >
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              <NavigationChevronNext size={18} color={colors.icon} />
             </Pressable>
           </View>
 
@@ -894,7 +898,7 @@ function PickerField({
   trailingIcon?: keyof typeof Ionicons.glyphMap;
 }) {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(), []);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { isRTL } = useTranslation();
 
   return (
@@ -911,6 +915,7 @@ function PickerField({
         onPress={onPress}
         style={({ pressed }) => [
           styles.pickerRow,
+          leadingIconRowStyle,
           {
             borderColor: colors.borderLight,
             backgroundColor: colors.surfaceMuted,
@@ -929,7 +934,7 @@ function PickerField({
         >
           {value.trim() || placeholder || ''}
         </AppText>
-        <Ionicons name={trailingIcon} size={18} color={colors.textMuted} />
+        <Ionicons name={trailingIcon} size={18} color={colors.icon} />
       </Pressable>
     </View>
   );
@@ -947,7 +952,7 @@ function BottomListSheet({
   children: ReactNode;
 }) {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(), []);
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.modalRoot}>
@@ -994,7 +999,7 @@ function parseStoredTimes(raw: string): string[] {
   return out;
 }
 
-function createStyles() {
+function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
     ticketsSectionLabel: { marginBottom: -4 },
@@ -1040,7 +1045,6 @@ function createStyles() {
       minHeight: 54,
       borderRadius: radii.xl,
       borderWidth: 1,
-      flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.sm,
       paddingVertical: spacing.sm,
@@ -1122,7 +1126,7 @@ function createStyles() {
       marginBottom: spacing.xs,
       gap: spacing.sm,
     },
-    sheetRowSelected: { borderColor: '#00C2FF' },
+    sheetRowSelected: { borderColor: colors.primary },
     sheetRowPressed: { opacity: 0.9 },
     sheetIconWrap: { width: 28, alignItems: 'center', justifyContent: 'center' },
     sheetLabel: { flex: 1 },
@@ -1157,7 +1161,7 @@ function createStyles() {
       gap: 6,
     },
     categoryChipSelected: {
-      borderColor: '#00C2FF',
+      borderColor: colors.primary,
     },
     categoryChipLabel: {
       lineHeight: 16,

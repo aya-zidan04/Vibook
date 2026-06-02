@@ -9,7 +9,7 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { createBooking } from '@/api/bookingsApi';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -57,8 +57,7 @@ export default function PaymentScreen() {
       setDraft(null);
       router.replace('/confirmation');
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : t('common.error');
-      Alert.alert(t('payment.title'), msg);
+      Alert.alert(t('payment.title'), mapApiError(e, t));
     } finally {
       setBusy(false);
     }
@@ -102,7 +101,7 @@ export default function PaymentScreen() {
             <AppText variant="body-em" color="text">
               {draft.title}
             </AppText>
-            <AppText variant="h3" color="accent">
+            <AppText variant="h3" color="primaryLight">
               {formatMoney(total, draft.currency)}
             </AppText>
           </View>

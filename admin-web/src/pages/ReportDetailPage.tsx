@@ -13,6 +13,7 @@ import { ReportStatusBadge } from '@/components/ui/Badge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
 
@@ -36,6 +37,7 @@ function reportTargetHref(r: AdminModerationReportResponse): string | null {
 }
 
 export function ReportDetailPage() {
+  const { t } = useAdminI18n();
   const { id: idParam } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -64,7 +66,7 @@ export function ReportDetailPage() {
           setNotes(r.adminNotes ?? '');
         }
       } catch (e) {
-        if (!c) setError(getFriendlyErrorMessage(e, 'Could not load report.'));
+        if (!c) setError(getFriendlyErrorMessage(e, t('moderationReportDetail.loadError')));
       } finally {
         if (!c) setLoading(false);
       }
@@ -72,7 +74,7 @@ export function ReportDetailPage() {
     return () => {
       c = true;
     };
-  }, [id, valid]);
+  }, [id, valid, t]);
 
   async function runResolve() {
     if (!valid) return;
@@ -80,10 +82,10 @@ export function ReportDetailPage() {
     try {
       const r = await resolveAdminReport(id, notes.trim() || null);
       setRow(r);
-      showToast('Report resolved.', 'success');
+      showToast(t('moderationReportDetail.resolvedToast'), 'success');
       setConfirmResolve(false);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Could not resolve.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('moderationReportDetail.resolveFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -95,10 +97,10 @@ export function ReportDetailPage() {
     try {
       const r = await reviewAdminReport(id, notes.trim() || null);
       setRow(r);
-      showToast('Marked as reviewed.', 'success');
+      showToast(t('moderationReportDetail.reviewedToast'), 'success');
       setConfirmReview(false);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Could not update.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('moderationReportDetail.updateFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -110,10 +112,10 @@ export function ReportDetailPage() {
     try {
       const r = await dismissAdminReport(id, notes.trim() || null);
       setRow(r);
-      showToast('Report dismissed.', 'success');
+      showToast(t('moderationReportDetail.dismissedToast'), 'success');
       setConfirmDismiss(false);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Could not dismiss.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('moderationReportDetail.dismissFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -122,7 +124,7 @@ export function ReportDetailPage() {
   if (!valid) {
     return (
       <div className="vb-page">
-        <EmptyState title="Invalid report" description="Check the URL." decor />
+        <EmptyState title={t('moderationReportDetail.invalid')} description={t('moderationReportDetail.invalidDesc')} decor />
       </div>
     );
   }
@@ -138,8 +140,8 @@ export function ReportDetailPage() {
   if (error || !row) {
     return (
       <div className="vb-page">
-        <EmptyState title="Report unavailable" description={error ?? 'Not found.'} decor />
-        <Link to="/reports">← Back</Link>
+        <EmptyState title={t('moderationReportDetail.unavailable')} description={error ?? t('moderationReportDetail.notFound')} decor />
+        <Link to="/reports">{t('common.back')}</Link>
       </div>
     );
   }
@@ -150,75 +152,77 @@ export function ReportDetailPage() {
   return (
     <div className="vb-page vb-animate-in">
       <Button variant="ghost" size="sm" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-        ← Back
+        {t('common.back')}
       </Button>
-      <h1 style={{ marginTop: 0 }}>Report #{row.id}</h1>
+      <h1 style={{ marginTop: 0 }}>{t('moderationReportDetail.title', { id: row.id })}</h1>
       <div style={{ marginBottom: 16 }}>
         <ReportStatusBadge status={row.status} />
       </div>
 
       <div className="vb-detail-sections">
         <Card padding="lg">
-          <CardHeader title="Summary" />
+          <CardHeader title={t('moderationReportDetail.summary')} />
           <dl className="vb-dl">
-            <dt>Reporter</dt>
+            <dt>{t('moderationReportDetail.reporter')}</dt>
             <dd>
               <Link to={`/users?userId=${row.reporterUserId}`}>{row.reporterEmail}</Link>
             </dd>
-            <dt>Type</dt>
+            <dt>{t('moderationReportDetail.type')}</dt>
             <dd>{row.type}</dd>
-            <dt>Target</dt>
+            <dt>{t('moderationReportDetail.target')}</dt>
             <dd>
               {targetHref ? (
                 <Link to={targetHref}>
-                  {row.targetId != null ? `Open related record #${row.targetId}` : 'Open related view'}
+                  {row.targetId != null
+                    ? t('moderationReportDetail.openRelated', { id: row.targetId })
+                    : t('moderationReportDetail.openRelatedView')}
                 </Link>
               ) : row.targetId != null ? (
                 `#${row.targetId}`
               ) : (
-                '—'
+                t('common.dash')
               )}
             </dd>
-            <dt>Reason</dt>
+            <dt>{t('moderationReportDetail.reason')}</dt>
             <dd style={{ whiteSpace: 'pre-wrap' }}>{row.reason}</dd>
             {row.description ? (
               <>
-                <dt>Details</dt>
+                <dt>{t('moderationReportDetail.details')}</dt>
                 <dd style={{ whiteSpace: 'pre-wrap' }}>{row.description}</dd>
               </>
             ) : null}
-            <dt>Created</dt>
+            <dt>{t('moderationReportDetail.created')}</dt>
             <dd>{formatDateTime(row.createdAt)}</dd>
-            <dt>Updated</dt>
+            <dt>{t('moderationReportDetail.updated')}</dt>
             <dd>{formatDateTime(row.updatedAt)}</dd>
             {row.resolvedAt ? (
               <>
-                <dt>Closed</dt>
+                <dt>{t('moderationReportDetail.closed')}</dt>
                 <dd>{formatDateTime(row.resolvedAt)}</dd>
               </>
             ) : null}
           </dl>
         </Card>
         <Card padding="lg">
-          <CardHeader title="Admin notes" />
+          <CardHeader title={t('moderationReportDetail.adminNotes')} />
           <textarea className="vb-modal__textarea" value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} />
           {canAct ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
               {row.status === 'OPEN' ? (
                 <Button variant="secondary" onClick={() => setConfirmReview(true)}>
-                  Mark reviewed
+                  {t('moderationReportDetail.markReviewed')}
                 </Button>
               ) : null}
               <Button variant="secondary" onClick={() => setConfirmDismiss(true)}>
-                Dismiss
+                {t('moderationReportDetail.dismiss')}
               </Button>
               <Button variant="primary" onClick={() => setConfirmResolve(true)}>
-                Resolve
+                {t('moderationReportDetail.resolve')}
               </Button>
             </div>
           ) : (
             <p className="vb-muted" style={{ margin: 0 }}>
-              This report is closed.
+              {t('moderationReportDetail.closedMsg')}
             </p>
           )}
         </Card>
@@ -226,27 +230,27 @@ export function ReportDetailPage() {
 
       <ConfirmDialog
         open={confirmResolve}
-        title="Resolve report"
-        message="Mark this report as resolved with the notes above?"
-        confirmLabel="Resolve"
+        title={t('moderationReportDetail.resolveTitle')}
+        message={t('moderationReportDetail.resolveMsg')}
+        confirmLabel={t('moderationReportDetail.resolve')}
         loading={busy}
         onConfirm={() => void runResolve()}
         onCancel={() => setConfirmResolve(false)}
       />
       <ConfirmDialog
         open={confirmReview}
-        title="Mark as reviewed"
-        message="Set status to reviewed and save the notes above?"
-        confirmLabel="Mark reviewed"
+        title={t('moderationReportDetail.reviewTitle')}
+        message={t('moderationReportDetail.reviewMsg')}
+        confirmLabel={t('moderationReportDetail.reviewConfirm')}
         loading={busy}
         onConfirm={() => void runReview()}
         onCancel={() => setConfirmReview(false)}
       />
       <ConfirmDialog
         open={confirmDismiss}
-        title="Dismiss report"
-        message="Dismiss this report as not actionable? You can still add notes above."
-        confirmLabel="Dismiss"
+        title={t('moderationReportDetail.dismissTitle')}
+        message={t('moderationReportDetail.dismissMsg')}
+        confirmLabel={t('moderationReportDetail.dismiss')}
         loading={busy}
         onConfirm={() => void runDismiss()}
         onCancel={() => setConfirmDismiss(false)}

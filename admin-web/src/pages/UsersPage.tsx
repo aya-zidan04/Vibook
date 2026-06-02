@@ -4,11 +4,10 @@ import { useAuth } from '@/auth/useAuth';
 import {
   disableUserAccount,
   enableUserAccount,
-  fetchActivityLog,
   fetchAllUsers,
   updateUserRoles,
 } from '@/api/adminApi';
-import type { AdminActivityLogResponse, UserResponse } from '@/api/types';
+import type { UserResponse } from '@/api/types';
 import { useAdminChrome } from '@/components/layout/useAdminChrome';
 import { RoleBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -16,7 +15,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/useToast';
-import { activityActionLabel } from '@/utils/activityLogLabel';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { formatDateTime, formatFullName } from '@/utils/format';
 import { formatRoles } from '@/utils/pageTitle';
@@ -26,6 +25,7 @@ type RoleFilter = 'ALL' | 'ADMIN' | 'BUSINESS' | 'USER_ONLY';
 type StatusFilter = 'ALL' | 'ACTIVE' | 'DISABLED';
 
 export function UsersPage() {
+  const { t } = useAdminI18n();
   const { user: currentUser } = useAuth();
   const { headerSearch } = useAdminChrome();
   const { showToast } = useToast();
@@ -37,8 +37,6 @@ export function UsersPage() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [detailUser, setDetailUser] = useState<UserResponse | null>(null);
-  const [detailLog, setDetailLog] = useState<AdminActivityLogResponse[]>([]);
-  const [detailLoading, setDetailLoading] = useState(false);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [confirmDisable, setConfirmDisable] = useState<UserResponse | null>(null);
 
@@ -49,7 +47,7 @@ export function UsersPage() {
       const data = await fetchAllUsers();
       setRows(data);
     } catch (e) {
-      setError(getFriendlyErrorMessage(e, 'Could not load users.'));
+      setError(getFriendlyErrorMessage(e, t('users.loadError')));
     } finally {
       setLoading(false);
     }
@@ -73,28 +71,6 @@ export function UsersPage() {
       setSearchParams(next, { replace: true });
     }
   }, [openUserIdParam, rows, searchParams, setSearchParams]);
-
-  useEffect(() => {
-    if (!detailUser) {
-      setDetailLog([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      setDetailLoading(true);
-      try {
-        const page = await fetchActivityLog({ page: 0, size: 25, entityType: 'USER', entityId: detailUser.id });
-        if (!cancelled) setDetailLog(page.content);
-      } catch {
-        if (!cancelled) setDetailLog([]);
-      } finally {
-        if (!cancelled) setDetailLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [detailUser]);
 
   const filtered = useMemo(() => {
     let list = rows;
@@ -125,9 +101,9 @@ export function UsersPage() {
     try {
       const updated = await updateUserRoles(u.id, withAdminRole(u.roles, nextAdmin));
       mergeUser(updated);
-      showToast(nextAdmin ? 'User promoted to admin.' : 'Admin role removed.', 'success');
+      showToast(nextAdmin ? t('users.promoted') : t('users.demoted'), 'success');
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Could not update roles.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('users.rolesFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -138,9 +114,9 @@ export function UsersPage() {
     try {
       const updated = await enableUserAccount(u.id);
       mergeUser(updated);
-      showToast('User enabled.', 'success');
+      showToast(t('users.enabled'), 'success');
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Enable failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('users.enableFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -152,10 +128,10 @@ export function UsersPage() {
     try {
       await disableUserAccount(confirmDisable.id);
       mergeUser({ ...confirmDisable, enabled: false });
-      showToast('User disabled.', 'success');
+      showToast(t('users.disabledToast'), 'success');
       setConfirmDisable(null);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Disable failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('users.disableFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -166,7 +142,7 @@ export function UsersPage() {
   if (error) {
     return (
       <div className="vb-page">
-        <EmptyState title="Users unavailable" description={error} decor />
+        <EmptyState title={t('users.unavailable')} description={error} decor />
       </div>
     );
   }
@@ -178,7 +154,7 @@ export function UsersPage() {
           <table className="vb-table">
             <thead>
               <tr>
-                {['Name', 'Email', 'Roles', 'Status', 'Created', 'Actions'].map((h) => (
+                {[t('users.name'), t('users.email'), t('users.roles'), t('users.status'), t('users.created'), t('users.actions')].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -202,41 +178,41 @@ export function UsersPage() {
     <div className="vb-page">
       <div className="vb-toolbar">
         <div className="vb-toolbar__field">
-          <label htmlFor="uf-role">Role</label>
+          <label htmlFor="uf-role">{t('users.role')}</label>
           <select
             id="uf-role"
             className="vb-input"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as RoleFilter)}
           >
-            <option value="ALL">All roles</option>
-            <option value="ADMIN">Admin</option>
-            <option value="BUSINESS">Business</option>
-            <option value="USER_ONLY">User (non-admin)</option>
+            <option value="ALL">{t('users.allRoles')}</option>
+            <option value="ADMIN">{t('users.roleAdmin')}</option>
+            <option value="BUSINESS">{t('users.roleBusiness')}</option>
+            <option value="USER_ONLY">{t('users.roleUserOnly')}</option>
           </select>
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="uf-status">Status</label>
+          <label htmlFor="uf-status">{t('users.status')}</label>
           <select
             id="uf-status"
             className="vb-input"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
           >
-            <option value="ALL">All</option>
-            <option value="ACTIVE">Active</option>
-            <option value="DISABLED">Disabled</option>
+            <option value="ALL">{t('users.allStatus')}</option>
+            <option value="ACTIVE">{t('users.active')}</option>
+            <option value="DISABLED">{t('users.disabled')}</option>
           </select>
         </div>
       </div>
 
       {filtered.length === 0 ? (
         <EmptyState
-          title="No users found"
+          title={t('users.noUsers')}
           description={
             headerSearch.trim() || roleFilter !== 'ALL' || statusFilter !== 'ALL'
-              ? 'Try adjusting filters or search.'
-              : 'There are no registered users in the database.'
+              ? t('users.noUsersFilter')
+              : t('users.noUsersEmpty')
           }
           decor
         />
@@ -245,12 +221,9 @@ export function UsersPage() {
           <table className="vb-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
+                {[t('users.name'), t('users.email'), t('users.roles'), t('users.status'), t('users.created'), t('users.actions')].map((h) => (
+                  <th key={h}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -265,14 +238,14 @@ export function UsersPage() {
                   </td>
                   <td>
                     <span className={`vb-badge ${u.enabled ? 'vb-badge--approved' : 'vb-badge--rejected'}`}>
-                      {u.enabled ? 'Active' : 'Disabled'}
+                      {u.enabled ? t('users.active') : t('users.disabled')}
                     </span>
                   </td>
                   <td>{formatDateTime(u.createdAt)}</td>
                   <td>
                     <div className="vb-table-actions">
                       <Button variant="secondary" size="sm" onClick={() => setDetailUser(u)}>
-                        Details
+                        {t('users.details')}
                       </Button>
                       {!isSelf(u) ? (
                         userIsAdmin(u.roles) ? (
@@ -282,7 +255,7 @@ export function UsersPage() {
                             disabled={busyId === u.id}
                             onClick={() => void toggleAdmin(u)}
                           >
-                            Remove admin
+                            {t('users.removeAdmin')}
                           </Button>
                         ) : (
                           <Button
@@ -291,7 +264,7 @@ export function UsersPage() {
                             disabled={busyId === u.id}
                             onClick={() => void toggleAdmin(u)}
                           >
-                            Make admin
+                            {t('users.makeAdmin')}
                           </Button>
                         )
                       ) : null}
@@ -303,12 +276,12 @@ export function UsersPage() {
                             disabled={busyId === u.id}
                             onClick={() => setConfirmDisable(u)}
                           >
-                            Disable
+                            {t('users.disable')}
                           </Button>
                         ) : null
                       ) : (
                         <Button variant="primary" size="sm" disabled={busyId === u.id} onClick={() => void enableUser(u)}>
-                          Enable
+                          {t('users.enable')}
                         </Button>
                       )}
                     </div>
@@ -329,51 +302,32 @@ export function UsersPage() {
         {detailUser ? (
           <>
             <dl className="vb-dl">
-              <dt>Email</dt>
+              <dt>{t('users.email')}</dt>
               <dd>{detailUser.email}</dd>
-              <dt>Phone</dt>
-              <dd>{detailUser.phone ?? '—'}</dd>
-              <dt>Roles</dt>
+              <dt>{t('users.phone')}</dt>
+              <dd>{detailUser.phone ?? t('common.dash')}</dd>
+              <dt>{t('users.roles')}</dt>
               <dd>
                 <RoleBadge label={formatRoles(detailUser.roles)} />
               </dd>
-              <dt>Status</dt>
-              <dd>{detailUser.enabled ? 'Active' : 'Disabled'}</dd>
-              <dt>Joined</dt>
+              <dt>{t('users.status')}</dt>
+              <dd>{detailUser.enabled ? t('users.active') : t('users.disabled')}</dd>
+              <dt>{t('users.joined')}</dt>
               <dd>{formatDateTime(detailUser.createdAt)}</dd>
-              <dt>Updated</dt>
+              <dt>{t('users.updated')}</dt>
               <dd>{formatDateTime(detailUser.updatedAt)}</dd>
             </dl>
-            <h4 style={{ margin: 'var(--vb-space-xl) 0 var(--vb-space-sm)' }}>Recent admin activity</h4>
-            {detailLoading ? (
-              <div className="vb-skeleton" style={{ height: 60 }} />
-            ) : detailLog.length === 0 ? (
-              <p className="vb-muted" style={{ margin: 0 }}>
-                No logged actions for this user yet.
-              </p>
-            ) : (
-              <ul className="vb-rank-list">
-                {detailLog.map((e) => (
-                  <li key={e.id}>
-                    <div>
-                      <div className="vb-rank-list__name">{activityActionLabel(e.action)}</div>
-                      <div className="vb-muted" style={{ fontSize: '0.8125rem' }}>
-                        {e.adminEmail} · {formatDateTime(e.createdAt)}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
           </>
         ) : null}
       </Modal>
 
       <ConfirmDialog
         open={confirmDisable != null}
-        title="Disable user"
-        message={`Disable “${confirmDisable ? formatFullName(confirmDisable.firstName, confirmDisable.lastName) : ''}”? They will not be able to sign in.`}
-        confirmLabel="Disable account"
+        title={t('users.disableTitle')}
+        message={t('users.disableMsg', {
+          name: confirmDisable ? formatFullName(confirmDisable.firstName, confirmDisable.lastName) : '',
+        })}
+        confirmLabel={t('users.disableConfirm')}
         onConfirm={() => void runDisable()}
         onCancel={() => setConfirmDisable(null)}
         danger

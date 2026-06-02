@@ -58,6 +58,7 @@ export type SubcategoryResponse = {
 
 export type GovernorateResponse = {
   id: number;
+  /** English canonical name from database. */
   name: string;
   displayOrder: number;
   active: boolean;
@@ -201,6 +202,12 @@ export type ModerationReportCreatedResponse = {
   targetType: ModerationReportType;
   targetId: number | null;
   status: string;
+  createdAt: string;
+};
+
+export type UserReportCreatedResponse = {
+  id: number;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
   createdAt: string;
 };
 

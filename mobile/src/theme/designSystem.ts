@@ -1,62 +1,60 @@
 /**
- * Vibook design system — premium booking platform tokens.
- * Blue = primary CTAs · Pink = emotional accent (favorites, badges, highlights).
+ * Vibook design system — semantic tokens built from {@link paletteColors}.
+ * Green/yellow brand · light mint canvas · dark cinematic night canvas.
  */
 
 import { radii, spacing } from './spacing';
 import { typography } from './typography';
+import { darkColors as darkSw, darkMix, darkButtonGradient, lightColors as lightSw } from './paletteColors';
 
-/**
- * Brand palette.
- * Cyan primary CTAs · pink emotional accent · pink-wash ambient canvas.
- */
+/** @deprecated Legacy alias — prefer `lightSw` / `darkSw` from `./paletteColors`. */
 export const brand = {
-  navy: '#111827',
-  navyDeep: '#08111F',
-  plum: '#5B3B4B',
-  terracotta: '#C4896C',
-  cyan: '#16C6FF',
-  blue: '#00C2FF',
-  pink: '#FF4D8D',
-  pinkSoft: '#FF6FAE',
-  pinkLight: '#FFE3EE',
-  pinkBg: '#FFF0F6',
-  pinkBorder: '#FFB3CF',
-  /** @deprecated Use `paletteAccentPink(mode)` — light `#FF4D8D`, dark `#FF70A6`. */
-  pinkText: '#FF4D8D',
-  lightGray: '#FFF7FB',
-  lightText: '#F9FAFB',
-  white: '#FFFFFF',
-  lightSurface: '#FFFFFF',
-  creamTint: 'rgba(247, 239, 231, 0.05)',
-  /** Screen canvas (light). */
-  meshBase: '#F4F7FB',
-  /** @deprecated Use `ambientPresetFor` from `./ambient`. */
+  navy: lightSw.black,
+  navyDeep: darkSw.black,
+  plum: darkSw.charcoal,
+  terracotta: lightSw.grassGreen,
+  cyan: lightSw.limeGreen,
+  blue: lightSw.limeGreen,
+  pink: lightSw.neonYellow,
+  pinkSoft: darkSw.neonLime,
+  pinkLight: lightSw.softMint,
+  pinkBg: lightSw.pastelSage,
+  pinkBorder: lightSw.mintOffWhite,
+  pinkText: lightSw.neonYellow,
+  lightGray: lightSw.paleBone,
+  lightText: darkSw.white,
+  white: darkSw.white,
+  lightSurface: lightSw.softMint,
+  creamTint: 'rgba(233, 240, 221, 0.55)',
+  meshBase: lightSw.paleBone,
   ambientLight: {
-    base: '#F4F7FB',
-    vertical: ['#FFFFFF', '#FFF0F6', '#F4F7FB'] as const,
+    base: lightSw.paleBone,
+    vertical: [lightSw.paleBone, lightSw.softMint, lightSw.pastelSage] as const,
     locations: [0, 0.45, 1] as const,
   },
-  /** @deprecated Use `ambientPresetFor` from `./ambient`. */
   ambientDark: {
-    base: '#08111F',
-    vertical: ['#08111F', '#111827', '#152238'] as const,
+    base: darkSw.black,
+    vertical: [darkSw.black, darkMix.charcoalWash6, darkSw.black] as const,
     locations: [0, 0.5, 1] as const,
   },
-  skyBlue: '#33D6FF',
-  darkBackground: '#08111F',
-  darkSurface: '#162238',
-  darkElevated: '#1E2F48',
-  darkSheet: '#131D2E',
-  darkBorderCyan: 'rgba(22, 198, 255, 0.28)',
-  darkBorderPink: 'rgba(255, 111, 174, 0.24)',
-  darkBorderCream: 'rgba(247, 239, 231, 0.1)',
-  darkSection: 'rgba(247, 239, 231, 0.05)',
+  skyBlue: lightSw.grassGreen,
+  darkBackground: darkSw.black,
+  darkSurface: darkSw.charcoal,
+  darkElevated: darkMix.cardElevated,
+  darkSheet: darkMix.sheet,
+  darkBorderCyan: darkMix.limeBorder32,
+  darkBorderPink: darkMix.whiteBorder8,
+  darkBorderCream: darkMix.whiteBorder6,
+  darkSection: darkMix.charcoalWash6,
 } as const;
 
-/** Coolors pink — `#FF4D8D` light · `#FF6FAE` dark. */
+/** Mode accent highlight — dark mode uses brand lime sparingly. */
 export function paletteAccentPink(mode: 'light' | 'dark'): string {
-  return mode === 'light' ? brand.pink : brand.pinkSoft;
+  return mode === 'light' ? lightSw.neonYellow : darkSw.neonLime;
+}
+
+export function paletteAccent(mode: 'light' | 'dark'): string {
+  return paletteAccentPink(mode);
 }
 
 export type SemanticColors = {
@@ -74,11 +72,21 @@ export type SemanticColors = {
   textPrimary: string;
   textSecondary: string;
   textMuted: string;
+  icon: string;
+  disabled: string;
+  placeholder: string;
+  emptyStateIcon: string;
+  chevron: string;
+  rowDescription: string;
+  iconContainerBg: string;
   border: string;
   borderLight: string;
   success: string;
   warning: string;
   error: string;
+  errorBg: string;
+  errorBorder: string;
+  tabInactive: string;
 };
 
 export type ThemeGradients = {
@@ -125,84 +133,105 @@ export type AppTheme = {
   buttons: ThemeButtons;
 };
 
-const lightColors: SemanticColors = {
-  background: brand.lightGray,
-  surface: 'rgba(255, 255, 255, 0.92)',
-  card: 'rgba(255, 255, 255, 0.96)',
-  primary: brand.cyan,
-  primaryLight: brand.skyBlue,
-  accent: paletteAccentPink('light'),
-  accentSoft: '#FF8AB8',
-  accentLight: brand.pinkLight,
-  accentBg: 'rgba(255, 77, 141, 0.1)',
-  accentBorder: 'rgba(255, 77, 141, 0.32)',
-  accentText: paletteAccentPink('light'),
-  textPrimary: brand.navy,
-  textSecondary: '#4B5563',
-  textMuted: '#6B7280',
-  border: 'rgba(22, 198, 255, 0.2)',
-  borderLight: 'rgba(255, 111, 174, 0.18)',
-  success: '#059669',
-  warning: '#D97706',
-  error: '#DC2626',
+const lightSemantic: SemanticColors = {
+  background: lightSw.paleBone,
+  surface: lightSw.white,
+  card: lightSw.white,
+  primary: lightSw.limeGreen,
+  primaryLight: lightSw.grassGreen,
+  accent: lightSw.neonYellow,
+  accentSoft: lightSw.grassGreen,
+  accentLight: lightSw.softMint,
+  accentBg: 'rgba(139, 194, 73, 0.12)',
+  accentBorder: lightSw.pastelSage,
+  accentText: lightSw.textPrimary,
+  textPrimary: lightSw.textPrimary,
+  textSecondary: lightSw.textSecondary,
+  textMuted: lightSw.textMuted,
+  icon: lightSw.icon,
+  disabled: lightSw.disabled,
+  placeholder: lightSw.placeholder,
+  emptyStateIcon: lightSw.emptyStateIcon,
+  chevron: lightSw.chevron,
+  rowDescription: lightSw.rowDescription,
+  iconContainerBg: lightSw.iconContainerBg,
+  border: lightSw.sageBorder,
+  borderLight: lightSw.pastelSage,
+  success: '#2E7D32',
+  warning: '#B45309',
+  error: '#D92D20',
+  errorBg: '#FFF1F0',
+  errorBorder: '#F3B3AE',
+  tabInactive: lightSw.tabInactive,
 };
 
-const darkColors: SemanticColors = {
-  background: brand.darkBackground,
-  surface: brand.darkSurface,
-  card: brand.darkElevated,
-  primary: brand.cyan,
-  primaryLight: brand.skyBlue,
-  accent: paletteAccentPink('dark'),
-  accentSoft: '#FF9BC1',
-  accentLight: '#FFD1E3',
-  accentBg: 'rgba(255, 111, 174, 0.14)',
-  accentBorder: 'rgba(255, 111, 174, 0.4)',
-  accentText: paletteAccentPink('dark'),
-  textPrimary: brand.lightText,
-  textSecondary: '#9CA3AF',
-  textMuted: '#6B7280',
-  border: brand.darkBorderCyan,
-  borderLight: brand.darkBorderPink,
-  success: '#34D399',
-  warning: '#FBBF24',
+const darkSemantic: SemanticColors = {
+  background: darkSw.black,
+  surface: darkMix.canvasDeep,
+  card: darkSw.charcoal,
+  primary: darkSw.neonLime,
+  primaryLight: darkSw.paleYellow,
+  accent: darkSw.neonLime,
+  accentSoft: darkSw.paleYellow,
+  accentLight: darkMix.cardElevated,
+  accentBg: darkMix.limeMuted12,
+  accentBorder: darkMix.limeBorder32,
+  accentText: darkSw.black,
+  textPrimary: darkSw.white,
+  textSecondary: darkSw.lightGray,
+  textMuted: darkMix.textMuted,
+  icon: darkSw.lightGray,
+  disabled: darkMix.textMuted,
+  placeholder: darkMix.textMuted,
+  emptyStateIcon: darkSw.lightGray,
+  chevron: darkMix.textMuted,
+  rowDescription: darkMix.textMuted,
+  iconContainerBg: darkMix.limeMuted18,
+  border: darkMix.whiteBorder8,
+  borderLight: darkMix.whiteBorder6,
+  success: '#4ADE80',
+  warning: darkSw.brightYellow,
   error: '#F87171',
+  errorBg: 'rgba(248, 113, 113, 0.15)',
+  errorBorder: '#F87171',
+  tabInactive: darkMix.textMuted,
 };
 
 const lightShadows: ThemeShadowTokens = {
-  sm: { color: brand.navy, opacity: 0.06, radius: 8, offsetY: 2, elevation: 2 },
-  md: { color: brand.navy, opacity: 0.1, radius: 16, offsetY: 6, elevation: 4 },
-  lg: { color: brand.navy, opacity: 0.14, radius: 24, offsetY: 12, elevation: 8 },
-  glow: { color: brand.blue, opacity: 0.28, radius: 20, offsetY: 0, elevation: 6 },
-  glowAccent: { color: brand.pink, opacity: 0.32, radius: 18, offsetY: 0, elevation: 5 },
+  sm: { color: lightSw.black, opacity: 0.06, radius: 8, offsetY: 2, elevation: 2 },
+  md: { color: lightSw.black, opacity: 0.1, radius: 16, offsetY: 6, elevation: 4 },
+  lg: { color: lightSw.black, opacity: 0.14, radius: 24, offsetY: 12, elevation: 8 },
+  glow: { color: lightSw.limeGreen, opacity: 0.16, radius: 20, offsetY: 0, elevation: 6 },
+  glowAccent: { color: lightSw.neonYellow, opacity: 0.14, radius: 18, offsetY: 0, elevation: 5 },
 };
 
 const darkShadows: ThemeShadowTokens = {
-  sm: { color: '#000000', opacity: 0.42, radius: 12, offsetY: 5, elevation: 4 },
-  md: { color: brand.cyan, opacity: 0.2, radius: 20, offsetY: 10, elevation: 7 },
-  lg: { color: '#000000', opacity: 0.52, radius: 32, offsetY: 16, elevation: 12 },
-  glow: { color: brand.cyan, opacity: 0.38, radius: 24, offsetY: 0, elevation: 8 },
-  glowAccent: { color: brand.pinkSoft, opacity: 0.45, radius: 20, offsetY: 0, elevation: 7 },
+  sm: { color: darkSw.black, opacity: 0.6, radius: 14, offsetY: 6, elevation: 4 },
+  md: { color: darkSw.black, opacity: 0.7, radius: 22, offsetY: 10, elevation: 7 },
+  lg: { color: darkSw.black, opacity: 0.78, radius: 34, offsetY: 16, elevation: 12 },
+  glow: { color: darkSw.neonLime, opacity: 0.024, radius: 20, offsetY: 0, elevation: 6 },
+  glowAccent: { color: darkSw.neonLime, opacity: 0.016, radius: 16, offsetY: 0, elevation: 5 },
 };
 
 const lightGradients: ThemeGradients = {
-  primary: [brand.cyan, brand.skyBlue],
-  pinkGradient: [paletteAccentPink('light'), '#FF8AB8'],
-  hero: [brand.white, brand.pinkBg, brand.lightGray],
-  button: [brand.cyan, brand.skyBlue],
-  cardOverlay: ['transparent', 'rgba(17, 24, 39, 0.82)'],
+  primary: [lightSw.limeGreen, lightSw.grassGreen],
+  pinkGradient: [lightSw.neonYellow, lightSw.limeGreen],
+  hero: [lightSw.paleBone, lightSw.softMint, lightSw.mintOffWhite],
+  button: [lightSw.grassGreen, lightSw.limeGreen],
+  cardOverlay: ['transparent', 'rgba(0, 0, 0, 0.72)'],
 };
 
 const darkGradients: ThemeGradients = {
-  primary: [brand.cyan, brand.skyBlue],
-  pinkGradient: [paletteAccentPink('dark'), '#FF9BC1'],
-  hero: [brand.navyDeep, brand.plum, brand.darkSurface],
-  button: ['#0EA5D4', brand.cyan],
-  cardOverlay: ['transparent', 'rgba(8, 17, 31, 0.9)'],
+  primary: darkButtonGradient(),
+  pinkGradient: darkButtonGradient(),
+  hero: [darkSw.black, darkMix.canvasDeep, darkSw.charcoal],
+  button: darkButtonGradient(),
+  cardOverlay: ['transparent', darkMix.overlay],
 };
 
 function buildButtons(c: SemanticColors, mode: 'light' | 'dark'): ThemeButtons {
-  const onPrimary = brand.white;
+  const onPrimary = mode === 'light' ? lightSw.textPrimary : darkSw.black;
+  const isDark = mode === 'dark';
   return {
     primary: {
       backgroundColor: c.primary,
@@ -213,10 +242,10 @@ function buildButtons(c: SemanticColors, mode: 'light' | 'dark'): ThemeButtons {
       useGradient: true,
     },
     secondary: {
-      backgroundColor: mode === 'light' ? c.card : c.surface,
-      borderColor: c.primary,
+      backgroundColor: isDark ? c.card : c.card,
+      borderColor: isDark ? c.border : c.primary,
       borderWidth: 1.5,
-      textColor: c.primary,
+      textColor: isDark ? c.textPrimary : c.primary,
       pressedOpacity: 0.92,
     },
     ghost: {
@@ -234,8 +263,8 @@ function buildButtons(c: SemanticColors, mode: 'light' | 'dark'): ThemeButtons {
       pressedOpacity: 0.9,
     },
     destructive: {
-      backgroundColor: mode === 'light' ? '#FEE2E2' : 'rgba(248, 113, 113, 0.15)',
-      borderColor: c.error,
+      backgroundColor: mode === 'light' ? c.errorBg : 'rgba(248, 113, 113, 0.15)',
+      borderColor: c.errorBorder,
       borderWidth: 1,
       textColor: c.error,
       pressedOpacity: 0.9,
@@ -245,24 +274,24 @@ function buildButtons(c: SemanticColors, mode: 'light' | 'dark'): ThemeButtons {
 
 export const lightTheme: AppTheme = {
   mode: 'light',
-  colors: lightColors,
+  colors: lightSemantic,
   spacing,
   radii,
   typography,
   shadows: lightShadows,
   gradients: lightGradients,
-  buttons: buildButtons(lightColors, 'light'),
+  buttons: buildButtons(lightSemantic, 'light'),
 };
 
 export const darkTheme: AppTheme = {
   mode: 'dark',
-  colors: darkColors,
+  colors: darkSemantic,
   spacing,
   radii,
   typography,
   shadows: darkShadows,
   gradients: darkGradients,
-  buttons: buildButtons(darkColors, 'dark'),
+  buttons: buildButtons(darkSemantic, 'dark'),
 };
 
 export function themeForMode(mode: 'light' | 'dark'): AppTheme {
@@ -294,3 +323,5 @@ export const colorUsageGuide = {
     accent: 'Notification badge, secondary chart series, highlight cards',
   },
 } as const;
+
+export { lightColors as lightPaletteSwatches, darkColors as darkPaletteSwatches } from './paletteColors';

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { useTranslation } from '@/i18n/useTranslation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -24,7 +25,8 @@ export function AppHeader({
   onAvatarPress,
 }: Props) {
   const colors = useThemeColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { t, isRTL } = useTranslation();
+  const styles = useMemo(() => createStyles(colors, isRTL), [colors, isRTL]);
 
   return (
     <View style={styles.row}>
@@ -33,28 +35,28 @@ export function AppHeader({
           {greeting}
         </AppText>
         <Pressable onPress={onCityPress} style={styles.cityRow} hitSlop={8}>
-          <Ionicons name="location" size={16} color={colors.accent} />
+          <Ionicons name="location" size={16} color={colors.primaryLight} />
           <AppText variant="h3" color="text" numberOfLines={1} style={styles.city}>
             {cityLabel}
           </AppText>
-          <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
+          <Ionicons name="chevron-down" size={16} color={colors.icon} />
         </Pressable>
       </View>
       <View style={styles.actions}>
         <Pressable
           style={styles.iconBtn}
           onPress={onNotifPress ?? (() => {})}
-          accessibilityLabel="Notifications"
+          accessibilityLabel={t('common.a11yNotifications')}
         >
-          <Ionicons name="notifications-outline" size={22} color={colors.text} />
+          <Ionicons name="notifications-outline" size={22} color={colors.icon} />
           <View style={styles.dot} />
         </Pressable>
-        <Pressable onPress={onAvatarPress} accessibilityLabel="Profile">
+        <Pressable onPress={onAvatarPress} accessibilityLabel={t('common.a11yProfile')}>
           {avatarUrl ? (
             <Image source={{ uri: avatarUrl }} style={styles.avatar} contentFit="cover" />
           ) : (
             <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Ionicons name="person" size={22} color={colors.textMuted} />
+              <Ionicons name="person" size={22} color={colors.icon} />
             </View>
           )}
         </Pressable>
@@ -63,23 +65,23 @@ export function AppHeader({
   );
 }
 
-function createStyles(colors: ThemeColors) {
+function createStyles(colors: ThemeColors, isRTL: boolean) {
   return StyleSheet.create({
     row: {
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       marginBottom: spacing.lg,
     },
     left: { flex: 1, marginEnd: spacing.md },
     cityRow: {
-      flexDirection: 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       gap: 6,
       marginTop: 2,
     },
-    city: { flexShrink: 1 },
-    actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    city: { flexShrink: 1, textAlign: isRTL ? 'right' : 'left' },
+    actions: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: spacing.sm },
     iconBtn: {
       width: 44,
       height: 44,

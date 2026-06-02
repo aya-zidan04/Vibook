@@ -8,12 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
 import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
+import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
-import { chevronForwardTrailing } from '@/utils/rtl';
 import { useOrganizerPdp } from '@/hooks/useCatalogPdp';
 import { getCityName } from '@/services/mock';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
@@ -77,7 +77,7 @@ export default function OrganizerScreen() {
                   {t('event.reviewsWord')}
                 </AppText>
                 {org.verified ? (
-                  <AppText variant="label" color="accent">
+                  <AppText variant="label" color="primaryLight">
                     {' '}
                     · {t('organizer.verifiedBadge')}
                   </AppText>
@@ -102,11 +102,11 @@ export default function OrganizerScreen() {
                 <AppText variant="caption" color="textMuted">
                   {[e.venueName, getCityName(e.cityId, locale)].filter(Boolean).join(' · ')}
                 </AppText>
-                <AppText variant="h3" color="accent">
+                <AppText variant="h3" color="primaryLight">
                   {t('common.from')} {formatMoney(e.priceFrom, e.currency)}
                 </AppText>
               </View>
-              <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
+              <NavigationChevronForward size={18} color={colors.icon} />
             </Pressable>
           ))}
         </View>

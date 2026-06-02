@@ -1,17 +1,19 @@
-/** Chart palette — aligned with mobile `designSystem` (blue primary, pink accent). */
+import { chartPalette } from '@/theme/colors';
+
+/** Chart palette — uses CSS variables so light/dark theme tracks admin-theme.css. */
 export const chartColors = {
-  terracotta: '#00C2FF',
-  plum: '#111827',
-  plumLight: '#33D6FF',
-  accent: '#FF4D8D',
-  accentSoft: '#FF70A6',
-  accentLight: '#FFE3EE',
-  success: '#059669',
-  warning: '#D97706',
-  error: '#DC2626',
-  draft: '#6B7280',
-  grid: '#EEF2F6',
-  axis: '#4B5563',
+  terracotta: chartPalette.primary,
+  plum: chartPalette.text,
+  plumLight: chartPalette.primaryLight,
+  accent: chartPalette.accent,
+  accentSoft: chartPalette.accentSoft,
+  accentLight: chartPalette.accentLight,
+  success: chartPalette.success,
+  warning: chartPalette.warning,
+  error: chartPalette.error,
+  draft: chartPalette.draft,
+  grid: chartPalette.grid,
+  axis: chartPalette.axis,
 };
 
 export const statusBarColors: Record<string, string> = {

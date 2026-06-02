@@ -42,7 +42,7 @@ export default function AppearanceScreen() {
               selected={selected}
               title={t(opt.titleKey)}
               subtitle={t(opt.hintKey)}
-              icon={<Ionicons name={opt.icon} size={22} color={colors.primary} />}
+              icon={<Ionicons name={opt.icon} size={22} color={colors.primaryLight} />}
               onPress={() => setColorScheme(opt.scheme)}
               accessibilityLabel={t(opt.titleKey)}
               showChevron={false}

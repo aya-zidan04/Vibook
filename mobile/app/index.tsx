@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useNavigationContainerRef, useRouter } from 'expo-router';
-import { AppBackground } from '@/components/ui/AppBackground';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
@@ -72,18 +71,16 @@ export default function SplashScreen() {
   }, [hydrated, router, navRef]);
 
   return (
-    <AppBackground>
-      <View style={styles.root}>
-        <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
-        <AppText variant="display" color="text" style={styles.brand}>
-          {t('common.brandDisplay')}
-        </AppText>
-        <AppText variant="body" color="textSecondary" style={styles.tag}>
-          {t('common.splashTagline')}
-        </AppText>
-        <ActivityIndicator color={colors.primary} size="large" style={styles.loader} />
-      </View>
-    </AppBackground>
+    <View style={styles.root}>
+      <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
+      <AppText variant="display" color="text" style={styles.brand}>
+        {t('common.brandDisplay')}
+      </AppText>
+      <AppText variant="body" color="textSecondary" style={styles.tag}>
+        {t('common.splashTagline')}
+      </AppText>
+      <ActivityIndicator color={colors.primary} size="large" style={styles.loader} />
+    </View>
   );
 }
 

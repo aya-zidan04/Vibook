@@ -34,7 +34,7 @@ export function createPremiumSheetStyles(colors: ThemeColors) {
     },
     rowPressed: { opacity: 0.9 },
     rowSelected: {
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.iconContainerBg,
     },
     rowAccentSelected: {
       backgroundColor: colors.accentMuted,
@@ -43,7 +43,7 @@ export function createPremiumSheetStyles(colors: ThemeColors) {
       width: t.iconCircleSize,
       height: t.iconCircleSize,
       borderRadius: t.iconCircleRadius,
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.iconContainerBg,
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
@@ -132,6 +132,7 @@ export function createPremiumSheetStyles(colors: ThemeColors) {
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
       gap: spacing.sm,
+      overflow: 'hidden',
       ...shadows.sm,
     },
     billingChip: {
@@ -144,7 +145,7 @@ export function createPremiumSheetStyles(colors: ThemeColors) {
       backgroundColor: colors.card,
     },
     billingChipOn: {
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.iconContainerBg,
       borderColor: colors.primary,
     },
     planCard: {
@@ -178,7 +179,7 @@ export function createPremiumSheetStyles(colors: ThemeColors) {
       ...(isLight ? shadows.sm : shadows.md),
     },
     pickCardSelected: {
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.iconContainerBg,
       borderColor: colors.primary,
       borderWidth: 1.5,
     },
@@ -196,17 +197,6 @@ export function createPremiumSheetStyles(colors: ThemeColors) {
       borderRadius: 13,
       borderWidth: 2,
       borderColor: colors.borderLight,
-    },
-    contactRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.md,
-      padding: spacing.lg,
-      borderRadius: t.cardRadius,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
-      ...(isLight ? shadows.sm : shadows.md),
     },
   });
 }

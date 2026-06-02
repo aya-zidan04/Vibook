@@ -1,50 +1,76 @@
 import type { RoleName } from '@/api/types';
+import { getAdminLocale } from '@/i18n/localeStore';
+import { translations } from '@/i18n/dictionary';
 
-export function routeTitle(pathname: string): string {
+function routeKey(pathname: string): string {
   if (pathname.startsWith('/business-profiles/') && pathname !== '/business-profiles') {
-    return 'Business profile';
+    return 'routes.businessProfile';
   }
   if (pathname.startsWith('/events/') && pathname !== '/events') {
-    return 'Event';
+    return 'routes.event';
   }
   if (pathname.startsWith('/bookings/') && pathname !== '/bookings') {
-    return 'Booking';
+    return 'routes.booking';
+  }
+  if (pathname.startsWith('/reports/user/')) {
+    return 'routes.problemReport';
   }
   if (pathname.startsWith('/reports/') && pathname !== '/reports') {
-    return 'Report';
+    return 'routes.report';
   }
   switch (pathname) {
     case '/dashboard':
-      return 'Dashboard';
+      return 'routes.dashboard';
     case '/business-profiles':
-      return 'Business profiles';
+      return 'routes.businessProfiles';
     case '/users':
-      return 'Users';
+      return 'routes.users';
     case '/categories':
-      return 'Categories';
+      return 'routes.categories';
     case '/governorates':
-      return 'Governorates';
-    case '/activity-log':
-      return 'Activity log';
+      return 'routes.governorates';
     case '/events':
-      return 'Events';
+      return 'routes.events';
     case '/bookings':
-      return 'Bookings';
+      return 'routes.bookings';
     case '/ratings':
-      return 'Ratings';
+      return 'routes.ratings';
     case '/reports':
-      return 'Reports';
+      return 'routes.reports';
     case '/settings':
-      return 'Settings';
+      return 'routes.settings';
     default:
-      return 'Vibook Admin';
+      return 'routes.default';
   }
 }
 
+function tPath(path: string, locale: 'en' | 'ar'): string {
+  const parts = path.split('.');
+  let cur: unknown = translations[locale];
+  for (const p of parts) {
+    if (cur && typeof cur === 'object' && p in (cur as object)) {
+      cur = (cur as Record<string, unknown>)[p];
+    } else {
+      return path;
+    }
+  }
+  return typeof cur === 'string' ? cur : path;
+}
+
+export function routeTitle(pathname: string): string {
+  const locale = getAdminLocale();
+  return tPath(routeKey(pathname), locale);
+}
+
 export function formatRoles(roles: RoleName[] | undefined): string {
-  if (!roles?.length) return '—';
-  return roles
-    .map((r) => r.replace('ROLE_', '').toLowerCase())
-    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join(', ');
+  const locale = getAdminLocale();
+  const dash = locale === 'ar' ? '—' : '—';
+  if (!roles?.length) return dash;
+  const label = (role: RoleName): string => {
+    if (role === 'ROLE_ADMIN') return tPath('users.roleAdmin', locale);
+    if (role === 'ROLE_BUSINESS') return tPath('users.roleBusiness', locale);
+    if (role === 'ROLE_USER') return tPath('users.roleUser', locale);
+    return String(role).replace('ROLE_', '').toLowerCase();
+  };
+  return roles.map(label).join(', ');
 }

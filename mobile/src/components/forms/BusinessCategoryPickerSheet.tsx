@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppBackground } from '@/components/ui/AppBackground';
 import { AppText } from '@/components/ui/AppText';
 import { BUSINESS_PARTNER_CATEGORIES } from '@/constants/businessPartnerCategories';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -29,8 +28,7 @@ export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSe
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <AppBackground>
-        <View style={styles.modalRoot}>
+      <View style={styles.modalRoot}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityRole="button" />
         <View style={styles.sheet}>
           <AppText variant="overline" color="textMuted" style={styles.sheetTitle}>
@@ -81,7 +79,7 @@ export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSe
                     {partsLabel}
                   </AppText>
                   {selected ? (
-                    <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
+                    <Ionicons name="checkmark-circle" size={22} color={colors.primaryLight} />
                   ) : (
                     <View style={styles.radioOuter} />
                   )}
@@ -90,8 +88,7 @@ export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSe
             })}
           </ScrollView>
         </View>
-        </View>
-      </AppBackground>
+      </View>
     </Modal>
   );
 }
@@ -104,10 +101,10 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     },
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(255, 247, 251, 0.35)',
+      backgroundColor: colors.overlayLight,
     },
     sheet: {
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      backgroundColor: colors.sheetSurface,
       borderTopLeftRadius: radii.xxl,
       borderTopRightRadius: radii.xxl,
       paddingTop: spacing.lg,

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { normalizeGovernorateLabel } from '@/constants/jordanGovernorates';
+import { LOCALE_PERSIST_KEY } from '@/store/persistSnapshot';
 
 export type AppLocale = 'en' | 'ar';
 export type DisplayCurrency = 'USD' | 'JOD';
@@ -31,7 +32,7 @@ export const useLocaleStore = create<LocaleState>()(
       setRegionLabel: (regionLabel) => set({ regionLabel }),
     }),
     {
-      name: 'vibook-locale',
+      name: LOCALE_PERSIST_KEY,
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (s) => ({
         locale: s.locale,

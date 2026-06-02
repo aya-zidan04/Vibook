@@ -19,9 +19,6 @@ type AppState = {
   setAuthenticated: (v: boolean) => void;
   isGuest: boolean;
   setGuest: (v: boolean) => void;
-  /** Local preference; does not call the OS push API in this build. */
-  pushNotificationsEnabled: boolean;
-  setPushNotificationsEnabled: (v: boolean) => void;
   logout: () => void;
 };
 
@@ -36,8 +33,6 @@ export const useAppStore = create<AppState>()(
       setAuthenticated: (v) => set({ isAuthenticated: v }),
       isGuest: true,
       setGuest: (v) => set({ isGuest: v }),
-      pushNotificationsEnabled: true,
-      setPushNotificationsEnabled: (v) => set({ pushNotificationsEnabled: v }),
       logout: () => {
         void (async () => {
           const rt = getTokensSync()?.refreshToken;
@@ -72,7 +67,6 @@ export const useAppStore = create<AppState>()(
         selectedCityId: state.selectedCityId,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         isAuthenticated: state.isAuthenticated,
-        pushNotificationsEnabled: state.pushNotificationsEnabled,
       }),
     },
   ),

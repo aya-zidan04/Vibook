@@ -2,36 +2,27 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   approveBusinessProfile,
-  fetchActivityLog,
   fetchBusinessProfile,
   rejectBusinessProfile,
   updateBusinessProfileNotes,
 } from '@/api/adminApi';
 import { resolveMediaUrl } from '@/api/mediaUrl';
-import type { AdminActivityLogResponse, BusinessProfileResponse } from '@/api/types';
+import type { BusinessProfileResponse } from '@/api/types';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/Badge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
+import { localizedGovernorateName } from '@/utils/governorateLabels';
 import { formatDateTime } from '@/utils/format';
 
 type Dialog = null | 'approve' | 'reject';
 
-function parseRejectReasonFromLog(details: string | null): string | null {
-  if (!details) return null;
-  try {
-    const o = JSON.parse(details) as { reason?: string };
-    const r = o.reason?.trim();
-    return r || null;
-  } catch {
-    return null;
-  }
-}
-
 export function BusinessProfileDetailPage() {
+  const { t, locale } = useAdminI18n();
   const { id: idParam } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -39,7 +30,6 @@ export function BusinessProfileDetailPage() {
   const idValid = Number.isFinite(numericId);
 
   const [profile, setProfile] = useState<BusinessProfileResponse | null>(null);
-  const [rejectHistory, setRejectHistory] = useState<AdminActivityLogResponse[]>([]);
   const [notesDraft, setNotesDraft] = useState('');
   const [notesSaving, setNotesSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -55,18 +45,13 @@ export function BusinessProfileDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        const [data, logPage] = await Promise.all([
-          fetchBusinessProfile(numericId),
-          fetchActivityLog({ page: 0, size: 80, entityType: 'BUSINESS_PROFILE', entityId: numericId }),
-        ]);
+        const data = await fetchBusinessProfile(numericId);
         if (cancelled) return;
         setProfile(data);
         setNotesDraft(data.adminNotes ?? '');
-        const rejects = logPage.content.filter((e) => e.action === 'REJECT_BUSINESS_PROFILE');
-        setRejectHistory(rejects);
       } catch (e) {
         if (!cancelled) {
-          setError(getFriendlyErrorMessage(e, 'Could not load this profile.'));
+          setError(getFriendlyErrorMessage(e, t('businessProfileDetail.loadError')));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -75,7 +60,7 @@ export function BusinessProfileDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [numericId, idValid]);
+  }, [numericId, idValid, t]);
 
   async function saveNotes() {
     if (!profile) return;
@@ -83,9 +68,9 @@ export function BusinessProfileDetailPage() {
     try {
       const updated = await updateBusinessProfileNotes(profile.id, notesDraft);
       setProfile(updated);
-      showToast('Admin notes saved.', 'success');
+      showToast(t('businessProfileDetail.notesSaved'), 'success');
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Could not save notes.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('businessProfileDetail.notesSaveFailed')), 'error');
     } finally {
       setNotesSaving(false);
     }
@@ -97,10 +82,10 @@ export function BusinessProfileDetailPage() {
     try {
       const updated = await approveBusinessProfile(profile.id);
       setProfile(updated);
-      showToast('Profile approved.', 'success');
+      showToast(t('businessProfileDetail.approvedToast'), 'success');
       setDialog(null);
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Approve failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('businessProfiles.approveFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -112,18 +97,11 @@ export function BusinessProfileDetailPage() {
     try {
       const updated = await rejectBusinessProfile(profile.id, rejectReason.trim() || undefined);
       setProfile(updated);
-      showToast('Profile rejected.', 'success');
+      showToast(t('businessProfileDetail.rejectedToast'), 'success');
       setDialog(null);
       setRejectReason('');
-      const logPage = await fetchActivityLog({
-        page: 0,
-        size: 80,
-        entityType: 'BUSINESS_PROFILE',
-        entityId: profile.id,
-      });
-      setRejectHistory(logPage.content.filter((e) => e.action === 'REJECT_BUSINESS_PROFILE'));
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Reject failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('businessProfiles.rejectFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -132,8 +110,8 @@ export function BusinessProfileDetailPage() {
   if (!idValid) {
     return (
       <div className="vb-page">
-        <EmptyState title="Invalid profile" description="The link may be broken." decor />
-        <Link to="/business-profiles">← Back to list</Link>
+        <EmptyState title={t('businessProfileDetail.invalid')} description={t('businessProfileDetail.invalidDesc')} decor />
+        <Link to="/business-profiles">{t('businessProfileDetail.backToList')}</Link>
       </div>
     );
   }
@@ -156,8 +134,12 @@ export function BusinessProfileDetailPage() {
   if (error || !profile) {
     return (
       <div className="vb-page">
-        <EmptyState title="Profile unavailable" description={error ?? 'Not found.'} decor />
-        <Link to="/business-profiles">← Back to list</Link>
+        <EmptyState
+          title={t('businessProfileDetail.unavailable')}
+          description={error ?? t('businessProfileDetail.notFound')}
+          decor
+        />
+        <Link to="/business-profiles">{t('businessProfileDetail.backToList')}</Link>
       </div>
     );
   }
@@ -166,17 +148,17 @@ export function BusinessProfileDetailPage() {
   const bannerSrc = resolveMediaUrl(profile.bannerImageUrl);
 
   const timelineItems: { label: string; at: string | null | undefined }[] = [
-    { label: 'Created', at: profile.createdAt },
-    { label: 'Last updated', at: profile.updatedAt },
-    { label: 'Approved', at: profile.approvedAt },
-    { label: 'Rejected', at: profile.rejectedAt },
-  ].filter((t) => t.at);
+    { label: t('businessProfileDetail.created'), at: profile.createdAt },
+    { label: t('businessProfileDetail.lastUpdated'), at: profile.updatedAt },
+    { label: t('businessProfileDetail.approved'), at: profile.approvedAt },
+    { label: t('businessProfileDetail.rejected'), at: profile.rejectedAt },
+  ].filter((item) => item.at);
 
   return (
     <div className="vb-page">
       <div style={{ marginBottom: 'var(--vb-space-lg)' }}>
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-          ← Back
+          {t('businessProfileDetail.back')}
         </Button>
       </div>
 
@@ -196,7 +178,7 @@ export function BusinessProfileDetailPage() {
             className="vb-detail-logo vb-muted"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            No logo
+            {t('businessProfileDetail.noLogo')}
           </div>
         )}
         <div className="vb-detail-title">
@@ -208,7 +190,7 @@ export function BusinessProfileDetailPage() {
           {profile.status === 'PENDING_REVIEW' ? (
             <div style={{ display: 'flex', gap: 'var(--vb-space-sm)', marginTop: 'var(--vb-space-lg)' }}>
               <Button variant="primary" onClick={() => setDialog('approve')}>
-                Approve
+                {t('businessProfileDetail.approve')}
               </Button>
               <Button
                 variant="dangerOutline"
@@ -217,7 +199,7 @@ export function BusinessProfileDetailPage() {
                   setDialog('reject');
                 }}
               >
-                Reject
+                {t('businessProfileDetail.reject')}
               </Button>
             </div>
           ) : null}
@@ -225,133 +207,101 @@ export function BusinessProfileDetailPage() {
       </div>
 
       {profile.rejectionReason ? (
-        <Card
-          padding="md"
-          style={{
-            marginBottom: 'var(--vb-space-xl)',
-            background: 'rgba(163, 90, 64, 0.08)',
-            borderColor: 'rgba(163, 90, 64, 0.25)',
-          }}
-        >
-          <strong>Current rejection note:</strong> {profile.rejectionReason}
+        <Card padding="md" className="vb-callout vb-callout--warning">
+          <strong>{t('businessProfileDetail.rejectionNote')}</strong> {profile.rejectionReason}
         </Card>
       ) : null}
 
       <div className="vb-detail-sections">
         <Card padding="lg">
-          <CardHeader title="Timeline" subtitle="Key lifecycle timestamps for this profile." />
+          <CardHeader title={t('businessProfileDetail.timeline')} subtitle={t('businessProfileDetail.timelineSubtitle')} />
           <ul className="vb-timeline">
-            {timelineItems.map((t) => (
-              <li key={t.label}>
+            {timelineItems.map((item) => (
+              <li key={item.label}>
                 <span className="vb-timeline__dot" />
-                <div className="vb-timeline__label">{t.label}</div>
-                <div className="vb-timeline__time">{t.at ? formatDateTime(t.at) : '—'}</div>
+                <div className="vb-timeline__label">{item.label}</div>
+                <div className="vb-timeline__time">{item.at ? formatDateTime(item.at) : t('common.dash')}</div>
               </li>
             ))}
           </ul>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Admin notes" subtitle="Internal-only context for your team." />
+          <CardHeader title={t('businessProfileDetail.adminNotes')} subtitle={t('businessProfileDetail.adminNotesSubtitle')} />
           <label className="vb-field__label" htmlFor="admin-notes">
-            Notes
+            {t('businessProfileDetail.notes')}
           </label>
           <textarea
             id="admin-notes"
             className="vb-modal__textarea"
             value={notesDraft}
             onChange={(e) => setNotesDraft(e.target.value)}
-            placeholder="e.g. Followed up by phone, waiting on license upload…"
+            placeholder={t('businessProfileDetail.notesPlaceholder')}
             maxLength={4000}
           />
           <Button variant="primary" size="sm" disabled={notesSaving} onClick={() => void saveNotes()}>
-            {notesSaving ? 'Saving…' : 'Save notes'}
+            {notesSaving ? t('common.saving') : t('businessProfileDetail.saveNotes')}
           </Button>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Rejection history" subtitle="Recorded when admins rejected this profile." />
-          {rejectHistory.length === 0 ? (
-            <p className="vb-muted" style={{ margin: 0 }}>
-              No rejection events logged for this profile.
-            </p>
-          ) : (
-            <ul className="vb-timeline">
-              {rejectHistory.map((e) => (
-                <li key={e.id}>
-                  <span className="vb-timeline__dot" />
-                  <div className="vb-timeline__label">
-                    {formatDateTime(e.createdAt)} · {e.adminEmail}
-                  </div>
-                  <div className="vb-timeline__time">
-                    {parseRejectReasonFromLog(e.details) ?? (
-                      <span className="vb-muted">No reason captured</span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-
-        <Card padding="lg">
-          <CardHeader title="Basic information" subtitle="How this business presents itself." />
+          <CardHeader title={t('businessProfileDetail.basicInfo')} subtitle={t('businessProfileDetail.basicInfoSubtitle')} />
           <dl className="vb-dl">
-            <dt>Description</dt>
-            <dd>{profile.description ?? '—'}</dd>
-            <dt>Website</dt>
+            <dt>{t('businessProfileDetail.description')}</dt>
+            <dd>{profile.description ?? t('common.dash')}</dd>
+            <dt>{t('businessProfileDetail.website')}</dt>
             <dd>
               {profile.website ? (
                 <a href={profile.website} target="_blank" rel="noreferrer">
                   {profile.website}
                 </a>
               ) : (
-                '—'
+                t('common.dash')
               )}
             </dd>
-            <dt>Google Maps</dt>
+            <dt>{t('businessProfileDetail.googleMaps')}</dt>
             <dd>
               {profile.googleMapsUrl ? (
                 <a href={profile.googleMapsUrl} target="_blank" rel="noreferrer">
-                  Open map
+                  {t('businessProfileDetail.openMap')}
                 </a>
               ) : (
-                '—'
+                t('common.dash')
               )}
             </dd>
           </dl>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Contact" subtitle="How customers reach this business." />
+          <CardHeader title={t('businessProfileDetail.contact')} subtitle={t('businessProfileDetail.contactSubtitle')} />
           <dl className="vb-dl">
-            <dt>Phone</dt>
-            <dd>{profile.phone ?? '—'}</dd>
-            <dt>Work email</dt>
-            <dd>{profile.workEmail ?? '—'}</dd>
+            <dt>{t('table.phone')}</dt>
+            <dd>{profile.phone ?? t('common.dash')}</dd>
+            <dt>{t('table.workEmail')}</dt>
+            <dd>{profile.workEmail ?? t('common.dash')}</dd>
           </dl>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Category & location" />
+          <CardHeader title={t('businessProfileDetail.categoryLocation')} />
           <dl className="vb-dl">
-            <dt>Category</dt>
-            <dd>{profile.primaryCategoryName ?? '—'}</dd>
-            <dt>Governorate</dt>
-            <dd>{profile.governorateName ?? '—'}</dd>
+            <dt>{t('table.category')}</dt>
+            <dd>{profile.primaryCategoryName ?? t('common.dash')}</dd>
+            <dt>{t('table.governorate')}</dt>
+            <dd>{localizedGovernorateName(profile.governorateName, locale) || t('common.dash')}</dd>
           </dl>
         </Card>
 
         <Card padding="lg">
-          <CardHeader title="Owner" subtitle="Linked Vibook account." />
+          <CardHeader title={t('businessProfileDetail.owner')} subtitle={t('businessProfileDetail.ownerSubtitle')} />
           <dl className="vb-dl">
-            <dt>Account email</dt>
-            <dd>{profile.ownerEmail ?? '—'}</dd>
+            <dt>{t('businessProfileDetail.accountEmail')}</dt>
+            <dd>{profile.ownerEmail ?? t('common.dash')}</dd>
             {profile.ownerUserId != null ? (
               <>
-                <dt>Owner profile</dt>
+                <dt>{t('businessProfileDetail.ownerProfile')}</dt>
                 <dd>
-                  <Link to={`/users?userId=${profile.ownerUserId}`}>Open in Users</Link>
+                  <Link to={`/users?userId=${profile.ownerUserId}`}>{t('businessProfileDetail.openInUsers')}</Link>
                 </dd>
               </>
             ) : null}
@@ -361,9 +311,9 @@ export function BusinessProfileDetailPage() {
 
       <ConfirmDialog
         open={dialog === 'approve'}
-        title="Approve this profile?"
-        message={`Approve “${profile.businessName}”? The business will be marked approved in Vibook.`}
-        confirmLabel="Approve"
+        title={t('businessProfileDetail.approveTitle')}
+        message={t('businessProfileDetail.approveMsg', { name: profile.businessName })}
+        confirmLabel={t('businessProfileDetail.approve')}
         onConfirm={() => void runApprove()}
         onCancel={() => setDialog(null)}
         loading={busy}
@@ -371,9 +321,9 @@ export function BusinessProfileDetailPage() {
 
       <ConfirmDialog
         open={dialog === 'reject'}
-        title="Reject this profile?"
-        message="The owner will see a rejected status. You can include a short reason below."
-        confirmLabel="Reject profile"
+        title={t('businessProfileDetail.rejectTitle')}
+        message={t('businessProfileDetail.rejectMsg')}
+        confirmLabel={t('businessProfiles.rejectConfirm')}
         onConfirm={() => void runReject()}
         onCancel={() => {
           setDialog(null);
@@ -383,7 +333,7 @@ export function BusinessProfileDetailPage() {
         loading={busy}
       >
         <label className="vb-field__label" htmlFor="detail-reject-reason">
-          Reason (optional)
+          {t('businessProfiles.reasonOptional')}
         </label>
         <textarea
           id="detail-reject-reason"

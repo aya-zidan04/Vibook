@@ -18,6 +18,8 @@ import { useRestaurantPdp } from '@/hooks/useCatalogPdp';
 import { getCityName } from '@/services/mock';
 import { parseCatalogNumericId } from '@/services/catalog/mapCatalog';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
+import { formatEventTimeSlotLabel } from '@/utils/formatEventTimeSlot';
+import { EVENT_TIME_OPTIONS } from '@/constants/eventTimeSlots';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { useLocaleStore } from '@/store/localeStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
@@ -28,7 +30,8 @@ const BLURB_KEYS: Record<string, 'restaurant.blurbR1' | 'restaurant.blurbR2'> = 
   r2: 'restaurant.blurbR2',
 };
 
-const SLOTS = ['7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM', '9:00 PM'];
+/** Dinner slots — canonical EN labels for API; display localized via formatEventTimeSlotLabel. */
+const RESTAURANT_SLOTS = [38, 39, 40, 41, 42].map((i) => EVENT_TIME_OPTIONS[i]);
 
 export default function RestaurantDetailScreen() {
   const colors = useThemeColors();
@@ -41,7 +44,7 @@ export default function RestaurantDetailScreen() {
   const checkoutCurrency = useLocaleStore((s) => s.currency);
   const { restaurant: r, loading } = useRestaurantPdp(id);
   const [guests, setGuests] = useState(2);
-  const [slot, setSlot] = useState(SLOTS[2]);
+  const [slot, setSlot] = useState(RESTAURANT_SLOTS[2]);
 
   if (loading) {
     return (
@@ -124,10 +127,10 @@ export default function RestaurantDetailScreen() {
             {t('restaurant.time')}
           </AppText>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.slots}>
-            {SLOTS.map((s) => (
+            {RESTAURANT_SLOTS.map((s) => (
               <Pressable key={s} onPress={() => setSlot(s)} style={[styles.slot, slot === s && styles.slotOn]}>
                 <AppText variant="label" color={slot === s ? 'text' : 'textMuted'}>
-                  {s}
+                  {formatEventTimeSlotLabel(s, locale)}
                 </AppText>
               </Pressable>
             ))}

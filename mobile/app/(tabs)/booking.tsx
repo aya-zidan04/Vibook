@@ -10,7 +10,7 @@ import { AppText } from '@/components/ui/AppText';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { listMyBookings } from '@/api/bookingsApi';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { bookingResponseToBooking } from '@/services/api/bookingMap';
 import { useAppStore } from '@/store/appStore';
 import type { Booking } from '@/types';
@@ -18,7 +18,7 @@ import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import { googleCalendarEventUrl, primaryShortcutBooking } from '@/utils/bookingQuickActions';
 import { formatDateShort } from '@/utils/format';
-import { chevronForwardTrailing } from '@/utils/rtl';
+import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 
 export default function BookingTabScreen() {
   const colors = useThemeColors();
@@ -27,7 +27,7 @@ export default function BookingTabScreen() {
   const { t, locale } = useTranslation();
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown | null>(null);
 
   const load = useCallback(() => {
     if (!isAuthenticated) {
@@ -42,7 +42,7 @@ export default function BookingTabScreen() {
         setLoadError(null);
       } catch (e) {
         setBookings([]);
-        setLoadError(e instanceof ApiError ? e.message : t('common.error'));
+        setLoadError(e);
       }
     })();
   }, [isAuthenticated, t]);
@@ -138,7 +138,7 @@ export default function BookingTabScreen() {
         }
       >
         <AppText variant="body" color="textSecondary">
-          {loadError}
+          {mapApiError(loadError, t)}
         </AppText>
       </Screen>
     );
@@ -195,7 +195,7 @@ export default function BookingTabScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('booking.qr')}
         >
-          <Ionicons name="qr-code-outline" size={22} color={colors.accent} />
+          <Ionicons name="qr-code-outline" size={22} color={colors.icon} />
           <AppText variant="label" color="textSecondary">
             {t('booking.qr')}
           </AppText>
@@ -206,7 +206,7 @@ export default function BookingTabScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('booking.calendar')}
         >
-          <Ionicons name="calendar-outline" size={22} color={colors.accent} />
+          <Ionicons name="calendar-outline" size={22} color={colors.icon} />
           <AppText variant="label" color="textSecondary">
             {t('booking.calendar')}
           </AppText>
@@ -217,7 +217,7 @@ export default function BookingTabScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('booking.ticket')}
         >
-          <Ionicons name="download-outline" size={22} color={colors.accent} />
+          <Ionicons name="download-outline" size={22} color={colors.icon} />
           <AppText variant="label" color="textSecondary">
             {t('booking.ticket')}
           </AppText>
@@ -257,7 +257,7 @@ function BookingCard({
           {formatDateShort(booking.startsAt, locale)} · {cityLine}
         </AppText>
         {booking.totalPaid > 0 ? (
-          <AppText variant="h3" color="accent" style={styles.price}>
+          <AppText variant="h3" color="primaryLight" style={styles.price}>
             {formatMoney(booking.totalPaid, booking.currency)}
           </AppText>
         ) : (
@@ -266,10 +266,10 @@ function BookingCard({
           </AppText>
         )}
         <View style={styles.detailBtn}>
-          <AppText variant="label" color="accent">
+          <AppText variant="label" color="primary">
             {t('common.details')}
           </AppText>
-          <Ionicons name={chevronForwardTrailing()} size={16} color={colors.accent} />
+          <NavigationChevronForward size={16} color={colors.icon} />
         </View>
       </View>
     </Pressable>
@@ -281,8 +281,8 @@ function StatusPill({ status }: { status: Booking['status'] }) {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t } = useTranslation();
   const map = {
-    upcoming: { labelKey: 'booking.statusUpcoming', c: colors.accent },
-    past: { labelKey: 'booking.statusPast', c: colors.textMuted },
+    upcoming: { labelKey: 'booking.statusUpcoming', c: colors.primaryLight },
+    past: { labelKey: 'booking.statusPast', c: colors.disabled },
     cancelled: { labelKey: 'booking.statusCancelled', c: colors.error },
     pending_payment: { labelKey: 'booking.statusPending', c: colors.warning },
   };

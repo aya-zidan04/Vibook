@@ -1,6 +1,5 @@
 import { api } from '@/api/client';
 import type {
-  AdminActivityLogResponse,
   AdminAnalyticsSummaryResponse,
   AdminBookingResponse,
   AdminDashboardStatsResponse,
@@ -8,6 +7,7 @@ import type {
   AdminEventRatingResponse,
   AdminEventRowResponse,
   AdminModerationReportResponse,
+  AdminUserReportResponse,
   AuthResponse,
   BookingStatus,
   BusinessEventResponse,
@@ -34,23 +34,6 @@ export async function fetchDashboardStats(): Promise<AdminDashboardStatsResponse
 
 export async function fetchAnalyticsSummary(): Promise<AdminAnalyticsSummaryResponse> {
   const { data } = await api.get<AdminAnalyticsSummaryResponse>('/admin/analytics/summary');
-  return data;
-}
-
-export async function fetchActivityLog(params?: {
-  page?: number;
-  size?: number;
-  entityType?: string;
-  entityId?: number;
-}): Promise<SpringPage<AdminActivityLogResponse>> {
-  const { data } = await api.get<SpringPage<AdminActivityLogResponse>>('/admin/activity-log', {
-    params: {
-      page: params?.page ?? 0,
-      size: params?.size ?? 30,
-      entityType: params?.entityType,
-      entityId: params?.entityId,
-    },
-  });
   return data;
 }
 
@@ -381,3 +364,35 @@ export async function dismissAdminReport(id: number, adminNotes?: string | null)
   });
   return data;
 }
+
+/* —— User reports (Help Center) —— */
+
+export async function fetchAdminUserReportsPage(params?: {
+  page?: number;
+  size?: number;
+  sort?: string;
+}): Promise<SpringPage<AdminUserReportResponse>> {
+  const { data } = await api.get<SpringPage<AdminUserReportResponse>>('/admin/user-reports', {
+    params: {
+      page: params?.page ?? 0,
+      size: params?.size ?? 20,
+      sort: params?.sort ?? 'createdAt,desc',
+    },
+  });
+  return data;
+}
+
+export async function fetchAdminUserReport(id: number): Promise<AdminUserReportResponse> {
+  const { data } = await api.get<AdminUserReportResponse>(`/admin/user-reports/${id}`);
+  return data;
+}
+
+export async function updateAdminUserReportStatus(
+  id: number,
+  status: AdminUserReportResponse['status'],
+): Promise<AdminUserReportResponse> {
+  const { data } = await api.patch<AdminUserReportResponse>(`/admin/user-reports/${id}/status`, { status });
+  return data;
+}
+
+

@@ -10,7 +10,6 @@ export * from './hotels';
 export * from './packages';
 export * from './offers';
 export * from './bookings';
-export * from './notifications';
 export * from './vouchers';
 export * from './reviews';
 export * from './ticketTiers';

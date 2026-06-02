@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,32 +14,35 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField } from '@/components/auth/AuthTextField';
-import { ProfileImageField } from '@/components/business/ProfileImageField';
+import { JordanPhoneField } from '@/components/auth/JordanPhoneField';
+import {
+  BusinessFieldIconSlot,
+  businessFieldRowStyle,
+  businessHeroTaglineControlStyle,
+  businessHeroTitleControlStyle,
+  businessMultilineInputStyle,
+} from '@/components/business/businessFieldRow';
 import { BusinessIconTextField } from '@/components/business/BusinessFormField';
 import { BusinessPartnerCategorySelectField } from '@/components/forms/BusinessPartnerCategorySelectField';
 import { GovernorateSelectField } from '@/components/forms/GovernorateSelectField';
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { AppText } from '@/components/ui/AppText';
+import { HeroAmbientOverlay } from '@/components/ui/HeroAmbientOverlay';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import { useLocaleStore } from '@/store/localeStore';
 import { createShadows, fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
-import { inputTextStyle } from '@/theme/typography';
 import { textAlignStart } from '@/utils/rtlText';
 import type { ThemeColors } from '@/theme/palettes';
 import { pickGalleryImage } from '@/utils/pickGalleryImage';
+import { jordanLocalDigitsFromStored } from '@/utils/authValidation';
+import { normalizePhoneForApi } from '@/utils/profilePatch';
 
 const DEFAULT_COVER =
   'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1400&q=85&auto=format&fit=crop';
 const DESC_MAX = 800;
-
-const inputRowPremium = (colors: ThemeColors): object => ({
-  minHeight: 54,
-  borderRadius: radii.xl,
-  backgroundColor: colors.surfaceMuted,
-  borderColor: colors.borderLight,
-});
+const EDIT_ICON = 'pencil' as const;
 
 export default function BusinessProfileScreen() {
   const colors = useThemeColors();
@@ -55,7 +59,7 @@ export default function BusinessProfileScreen() {
   const [description, setDescription] = useState(profile.description);
   const [category, setCategory] = useState(profile.category);
   const [email, setEmail] = useState(profile.email);
-  const [phone, setPhone] = useState(profile.phone);
+  const [phoneLocal, setPhoneLocal] = useState(() => jordanLocalDigitsFromStored(profile.phone));
   const [governorateSlug, setGovernorateSlug] = useState<JordanGovernorateSlug>(profile.governorateSlug);
   const [mapsUrl, setMapsUrl] = useState(profile.mapsUrl);
   const [website, setWebsite] = useState(profile.website);
@@ -71,7 +75,7 @@ export default function BusinessProfileScreen() {
     setDescription(profile.description);
     setCategory(profile.category);
     setEmail(profile.email);
-    setPhone(profile.phone);
+    setPhoneLocal(jordanLocalDigitsFromStored(profile.phone));
     setGovernorateSlug(profile.governorateSlug);
     setMapsUrl(profile.mapsUrl);
     setWebsite(profile.website);
@@ -87,6 +91,10 @@ export default function BusinessProfileScreen() {
 
   const onDescChange = useCallback((text: string) => {
     setDescription(text.length > DESC_MAX ? text.slice(0, DESC_MAX) : text);
+  }, []);
+
+  const onPhoneChange = useCallback((text: string) => {
+    setPhoneLocal(text.replace(/\D/g, '').slice(0, 9));
   }, []);
 
   const permissionPick = useMemo(
@@ -115,8 +123,50 @@ export default function BusinessProfileScreen() {
     if (uri) setLogoUri(uri);
   }, [permissionPick.body, permissionPick.title]);
 
+  const showCoverActions = useCallback(() => {
+    const hasCustomCover = Boolean(coverImageUri.trim());
+    Alert.alert(t('businessHub.profileBannerLabel'), undefined, [
+      {
+        text: t('businessHub.profileChangePhoto'),
+        onPress: () => void pickBannerFromHero(),
+      },
+      ...(hasCustomCover
+        ? [
+            {
+              text: t('businessHub.profileRemovePhoto'),
+              style: 'destructive' as const,
+              onPress: () => setCoverImageUri(''),
+            },
+          ]
+        : []),
+      { text: t('common.cancel'), style: 'cancel' as const },
+    ]);
+  }, [coverImageUri, pickBannerFromHero, t]);
+
+  const showLogoActions = useCallback(() => {
+    const hasLogo = Boolean(logoUri.trim());
+    Alert.alert(t('businessHub.profileLogoLabel'), undefined, [
+      {
+        text: t('businessHub.profileChangePhoto'),
+        onPress: () => void pickLogoFromAvatar(),
+      },
+      ...(hasLogo
+        ? [
+            {
+              text: t('businessHub.profileRemovePhoto'),
+              style: 'destructive' as const,
+              onPress: () => setLogoUri(''),
+            },
+          ]
+        : []),
+      { text: t('common.cancel'), style: 'cancel' as const },
+    ]);
+  }, [logoUri, pickLogoFromAvatar, t]);
+
   const coverSrc = coverImageUri.trim() || DEFAULT_COVER;
-  const premiumRow = inputRowPremium(colors);
+  const hasCustomCover = Boolean(coverImageUri.trim());
+  const hasLogo = Boolean(logoUri.trim());
+  const premiumRow = businessFieldRowStyle(colors);
 
   const save = async () => {
     if (saving) return;
@@ -128,7 +178,7 @@ export default function BusinessProfileScreen() {
       description: description.trim(),
       category: category.trim(),
       email: email.trim(),
-      phone: phone.trim(),
+      phone: normalizePhoneForApi(phoneLocal),
       governorateSlug,
       mapsUrl: mapsUrl.trim(),
       website: website.trim(),
@@ -143,7 +193,14 @@ export default function BusinessProfileScreen() {
     fieldRowStyle: premiumRow,
     highlightOnFocus: true,
     wrapperStyle: styles.fieldTight,
+    technicalInput: true,
   } as const;
+
+  const fieldIcon = (name: keyof typeof Ionicons.glyphMap) => (
+    <BusinessFieldIconSlot>
+      <Ionicons name={name} size={20} color={colors.primary} />
+    </BusinessFieldIconSlot>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -164,8 +221,11 @@ export default function BusinessProfileScreen() {
             <Pressable
               style={StyleSheet.absoluteFill}
               onPress={() => void pickBannerFromHero()}
+              onLongPress={showCoverActions}
+              delayLongPress={320}
               accessibilityRole="button"
               accessibilityLabel={t('businessHub.profileTapHeroBanner')}
+              accessibilityHint={t('businessHub.profilePhotoActionsHint')}
             >
               <Image source={{ uri: coverSrc }} style={StyleSheet.absoluteFill} contentFit="cover" />
               <LinearGradient
@@ -173,22 +233,33 @@ export default function BusinessProfileScreen() {
                 locations={[0, 0.35, 0.72, 1]}
                 style={StyleSheet.absoluteFill}
               />
+              <HeroAmbientOverlay />
+              <View style={[styles.editBadge, styles.editBadgeCover]}>
+                <Ionicons name={EDIT_ICON} size={18} color={colors.text} />
+              </View>
             </Pressable>
           </View>
 
           <View style={[styles.avatarRing, { borderColor: colors.cream }]}>
             <Pressable
               onPress={() => void pickLogoFromAvatar()}
+              onLongPress={showLogoActions}
+              delayLongPress={320}
               accessibilityRole="button"
               accessibilityLabel={t('businessHub.profileTapAvatarLogo')}
+              accessibilityHint={t('businessHub.profilePhotoActionsHint')}
+              style={styles.avatarPressable}
             >
-              {logoUri.trim() ? (
+              {hasLogo ? (
                 <Image source={{ uri: logoUri.trim() }} style={styles.avatarImg} contentFit="cover" />
               ) : (
                 <View style={[styles.avatarImg, styles.avatarFallback]}>
-                  <Ionicons name="business" size={38} color={colors.primary} />
+                  <Ionicons name="business" size={38} color={colors.placeholder} />
                 </View>
               )}
+              <View style={[styles.editBadge, styles.editBadgeLogo]}>
+                <Ionicons name={EDIT_ICON} size={18} color={colors.text} />
+              </View>
             </Pressable>
           </View>
 
@@ -197,29 +268,29 @@ export default function BusinessProfileScreen() {
               value={displayName}
               onChangeText={setDisplayName}
               placeholder={t('businessHub.profileNamePlaceholder')}
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.placeholder}
               style={[
-                styles.heroName,
-                inputTextStyle(locale, 'h1'),
-                { color: colors.text, textAlign: isRTL ? 'right' : 'center' },
+                businessHeroTitleControlStyle(locale),
+                {
+                  color: colors.text,
+                  writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
+                },
               ]}
             />
             <TextInput
               value={tagline}
               onChangeText={setTagline}
               placeholder={t('businessHub.profileTaglinePlaceholder')}
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={colors.placeholder}
               style={[
-                styles.heroTagline,
-                inputTextStyle(locale),
-                { color: colors.textSecondary, textAlign: isRTL ? 'right' : 'center' },
+                businessHeroTaglineControlStyle(locale),
+                {
+                  color: colors.textSecondary,
+                  writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
+                },
               ]}
             />
-            <AppText
-              variant="caption"
-              color="textMuted"
-              style={[styles.heroLead, { textAlign: isRTL ? 'right' : 'center' }]}
-            >
+            <AppText variant="caption" color="textMuted" style={styles.heroLead}>
               {t('businessHub.profileLead')}
             </AppText>
           </View>
@@ -228,38 +299,11 @@ export default function BusinessProfileScreen() {
         <View style={styles.sectionStack}>
           <View style={styles.card}>
             <View style={styles.cardHead}>
-              <AppText variant="overline" color="accent">
+              <AppText variant="overline" color="primaryLight">
                 {t('businessHub.profileSectionPublic')}
-              </AppText>
-              <AppText variant="caption" color="textMuted">
-                {t('businessHub.profileSectionPublicSub')}
               </AppText>
             </View>
 
-            <ProfileImageField
-              label={t('businessHub.profileBannerLabel')}
-              uri={coverImageUri}
-              onUriChange={setCoverImageUri}
-              pickLabel={t('businessHub.profilePickPhoto')}
-              changeLabel={t('businessHub.profileChangePhoto')}
-              removeLabel={t('businessHub.profileRemovePhoto')}
-              permissionTitle={permissionPick.title}
-              permissionBody={permissionPick.body}
-              variant="banner"
-              aspect={[16, 9]}
-            />
-            <ProfileImageField
-              label={t('businessHub.profileLogoLabel')}
-              uri={logoUri}
-              onUriChange={setLogoUri}
-              pickLabel={t('businessHub.profilePickPhoto')}
-              changeLabel={t('businessHub.profileChangePhoto')}
-              removeLabel={t('businessHub.profileRemovePhoto')}
-              permissionTitle={permissionPick.title}
-              permissionBody={permissionPick.body}
-              variant="logo"
-              aspect={[1, 1]}
-            />
             <BusinessPartnerCategorySelectField
               label={t('businessHub.profileCategory')}
               valueEn={category}
@@ -272,7 +316,7 @@ export default function BusinessProfileScreen() {
                 <AppText variant="label" color="text">
                   {t('businessHub.profileDescription')}
                 </AppText>
-                <AppText variant="label" color="textMuted">
+                <AppText variant="label" color="textMuted" style={styles.descLabelCount}>
                   {t('businessHub.profileCharCount')
                     .replace('{n}', String(description.length))
                     .replace('{max}', String(DESC_MAX))}
@@ -288,14 +332,13 @@ export default function BusinessProfileScreen() {
                   value={description}
                   onChangeText={onDescChange}
                   placeholder={t('businessHub.profileDescriptionPh')}
-                  placeholderTextColor={colors.textMuted}
+                  placeholderTextColor={colors.placeholder}
                   multiline
                   textAlignVertical="top"
                   onFocus={() => setDescFocused(true)}
                   onBlur={() => setDescFocused(false)}
                   style={[
-                    styles.descInput,
-                    inputTextStyle(locale),
+                    businessMultilineInputStyle(locale),
                     {
                       color: colors.text,
                       textAlign: textAlignStart(isRTL),
@@ -304,15 +347,12 @@ export default function BusinessProfileScreen() {
                   ]}
                 />
               </View>
-              <AppText variant="label" color="textMuted" style={styles.previewHint}>
-                {t('businessHub.profilePreviewHint')}
-              </AppText>
             </View>
           </View>
 
           <View style={styles.card}>
             <View style={styles.cardHead}>
-              <AppText variant="overline" color="accent">
+              <AppText variant="overline" color="primaryLight">
                 {t('businessHub.profileSectionContact')}
               </AppText>
               <AppText variant="caption" color="textMuted">
@@ -326,23 +366,24 @@ export default function BusinessProfileScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
-              leftSlot={<Ionicons name="mail-outline" size={20} color={colors.textMuted} />}
+              leftSlot={fieldIcon('mail-outline')}
               {...fieldProps}
             />
-            <AuthTextField
+            <JordanPhoneField
               label={t('businessJoin.phone')}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-              leftSlot={<Ionicons name="call-outline" size={20} color={colors.textMuted} />}
-              {...fieldProps}
+              value={phoneLocal}
+              onChangeText={onPhoneChange}
+              placeholder={t('auth.phonePlaceholder')}
+              appearance="business"
+              fieldRowStyle={premiumRow}
+              highlightOnFocus
+              wrapperStyle={styles.fieldTight}
             />
           </View>
 
           <View style={styles.card}>
             <View style={styles.cardHead}>
-              <AppText variant="overline" color="accent">
+              <AppText variant="overline" color="primaryLight">
                 {t('businessHub.profileSectionLocation')}
               </AppText>
               <AppText variant="caption" color="textMuted">
@@ -364,6 +405,7 @@ export default function BusinessProfileScreen() {
               placeholder={t('businessHub.fieldMapsUrlPh')}
               autoCapitalize="none"
               autoCorrect={false}
+              {...fieldProps}
             />
             <AuthTextField
               label={t('businessHub.profileWebsite')}
@@ -371,7 +413,7 @@ export default function BusinessProfileScreen() {
               onChangeText={setWebsite}
               autoCapitalize="none"
               autoCorrect={false}
-              leftSlot={<Ionicons name="link-outline" size={20} color={colors.textMuted} />}
+              leftSlot={fieldIcon('globe-outline')}
               {...fieldProps}
             />
           </View>
@@ -420,13 +462,52 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       width: '100%',
       overflow: 'hidden',
     },
+    editBadge: {
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.15,
+          shadowRadius: 2,
+        },
+        android: { elevation: 4 },
+        default: {},
+      }),
+    },
+    editBadgeCover: {
+      position: 'absolute',
+      bottom: spacing.md,
+      left: spacing.md,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+    },
+    editBadgeLogo: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      zIndex: 2,
+    },
     avatarRing: {
       marginTop: -52,
       borderRadius: 52,
       borderWidth: 4,
       padding: 3,
       backgroundColor: 'transparent',
+      overflow: 'visible',
       ...sh.md,
+    },
+    avatarPressable: {
+      position: 'relative',
+      overflow: 'visible',
     },
     avatarImg: {
       width: 92,
@@ -434,7 +515,7 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       borderRadius: 46,
     },
     avatarFallback: {
-      backgroundColor: colors.primaryMuted,
+      backgroundColor: colors.card,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -443,17 +524,13 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       paddingHorizontal: spacing.screen,
       marginTop: spacing.md,
       gap: spacing.xs,
-    },
-    heroName: {
-      paddingVertical: 4,
-    },
-    heroTagline: {
-      paddingVertical: 2,
+      alignItems: 'center',
     },
     heroLead: {
       marginTop: spacing.sm,
       lineHeight: 18,
       paddingHorizontal: spacing.md,
+      textAlign: 'center',
     },
     sectionStack: {
       paddingHorizontal: spacing.screen,
@@ -468,15 +545,18 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       ...sh.sm,
     },
     cardHead: {
-      marginBottom: spacing.md,
+      marginBottom: spacing.lg,
       gap: 4,
     },
-    fieldTight: { marginBottom: spacing.sm },
+    fieldTight: { marginBottom: 0 },
     descBoxWrap: { gap: spacing.xs, marginTop: spacing.xs },
     descLabelRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+    },
+    descLabelCount: {
+      writingDirection: 'ltr',
     },
     descBox: {
       borderRadius: radii.xl,
@@ -487,10 +567,6 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       paddingVertical: spacing.md,
       minHeight: 148,
     },
-    descInput: {
-      minHeight: 120,
-    },
-    previewHint: { marginTop: 4, lineHeight: 18 },
     saveFull: { width: '100%' },
     toastInline: {
       marginTop: spacing.md,

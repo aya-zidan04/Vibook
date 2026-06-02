@@ -5,10 +5,16 @@ import { AppText } from '@/components/ui/AppText';
 import { GovernoratePickerSheet } from '@/components/forms/GovernoratePickerSheet';
 import { JORDAN_GOVERNORATES, type JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { useTranslation } from '@/i18n/useTranslation';
+import { governorateLabel } from '@/utils/governorateLabels';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { chevronForwardTrailing } from '@/utils/rtl';
-import { textAlignStart } from '@/utils/rtlText';
+import {
+  BusinessFieldIconSlot,
+  BusinessFieldPickerValue,
+  businessLeadingIconRowStyle,
+  businessFieldRowStyle,
+} from '@/components/business/businessFieldRow';
+import { formAlignStyle } from '@/utils/rtlText';
 
 type Props = {
   label: string;
@@ -35,41 +41,42 @@ export function GovernorateSelectField({
 }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { t, locale, isRTL } = useTranslation();
+  const { locale, isRTL } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const selectedEn = enNameForSlug(valueSlug);
-  const displayLabel = locale === 'ar' ? t(`explore.gov.${valueSlug}`) : selectedEn;
+  const displayLabel = governorateLabel(valueSlug, locale);
 
   return (
     <View style={styles.wrap}>
-      <AppText variant="label" color="text" style={{ textAlign: textAlignStart(isRTL) }}>
+      <AppText variant="label" color="text" style={formAlignStyle(isRTL)}>
         {label}
       </AppText>
       <Pressable
         onPress={() => setOpen(true)}
         style={({ pressed }) => [
           styles.field,
-          appearance === 'business' && styles.fieldBusiness,
+          appearance === 'business'
+            ? [businessLeadingIconRowStyle, businessFieldRowStyle(colors), styles.fieldBusiness]
+            : styles.fieldDefault,
           pressed && styles.pressed,
         ]}
         accessibilityRole="button"
         accessibilityLabel={label}
       >
         {appearance === 'business' ? (
-          <View style={[styles.iconSlot, { backgroundColor: colors.primaryMuted }]}>
+          <BusinessFieldIconSlot>
             <Ionicons name="map-outline" size={20} color={colors.primary} />
-          </View>
+          </BusinessFieldIconSlot>
         ) : null}
-        <AppText
-          variant="body"
-          color="text"
-          style={[styles.value, { textAlign: textAlignStart(isRTL) }]}
-          numberOfLines={1}
+        <BusinessFieldPickerValue
+          locale={locale}
+          isRTL={isRTL}
+          color={colors.text}
+          alignStyle={formAlignStyle(isRTL)}
         >
           {displayLabel}
-        </AppText>
-        <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
+        </BusinessFieldPickerValue>
       </Pressable>
 
       <GovernoratePickerSheet
@@ -87,32 +94,21 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     wrap: { gap: spacing.xs, marginBottom: spacing.md },
     field: {
+      gap: spacing.sm,
+    },
+    fieldDefault: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
       backgroundColor: colors.surface,
       borderRadius: radii.md,
       borderWidth: 1,
       borderColor: colors.border,
       minHeight: 52,
       paddingHorizontal: spacing.md,
-      gap: spacing.sm,
     },
     fieldBusiness: {
-      backgroundColor: colors.surfaceMuted,
-      borderRadius: radii.xl,
-      borderColor: colors.borderLight,
-      minHeight: 54,
       paddingHorizontal: spacing.sm,
     },
-    iconSlot: {
-      width: 40,
-      height: 40,
-      borderRadius: radii.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    value: { flex: 1 },
     pressed: { opacity: 0.88 },
   });
 }

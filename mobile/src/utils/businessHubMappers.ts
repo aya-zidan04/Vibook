@@ -5,6 +5,7 @@ import type {
   BusinessEventSummaryResponse,
 } from '@/api/types';
 import { JORDAN_GOVERNORATES, type JordanGovernorateSlug } from '@/constants/jordanGovernorates';
+import { backendGovernorateNameToSlug } from '@/utils/governorateLabels';
 import { resolveBackendMediaUrl } from '@/api/env';
 import type {
   BusinessBookingRecord,
@@ -18,6 +19,8 @@ const BACKEND_TO_MOBILE_GOV: Record<string, string> = {
 };
 
 export function governorateNameToSlug(name: string | null | undefined): JordanGovernorateSlug {
+  const slug = backendGovernorateNameToSlug(name);
+  if (slug) return slug;
   const n = (name ?? '').trim();
   if (!n) return 'amman';
   const mapped = BACKEND_TO_MOBILE_GOV[n] ?? n;

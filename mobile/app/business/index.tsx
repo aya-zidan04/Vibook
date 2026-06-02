@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { HeroAmbientOverlay } from '@/components/ui/HeroAmbientOverlay';
 import { PrimaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
@@ -34,12 +35,15 @@ export default function BusinessIntroScreen() {
 
   return (
     <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('business.title')} />}>
-      <LinearGradient
-        colors={[...gradients.hero]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.hero}
-      >
+      <View style={styles.hero}>
+        <LinearGradient
+          colors={[...gradients.hero]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+        <HeroAmbientOverlay />
         <AppText variant="overline" color="accentText">
           {t('business.kicker')}
         </AppText>
@@ -49,7 +53,7 @@ export default function BusinessIntroScreen() {
         <AppText variant="body" color="textSecondary">
           {t('business.body')}
         </AppText>
-      </LinearGradient>
+      </View>
 
       <AppText variant="h2" color="text">
         {t('business.benefitsTitle')}

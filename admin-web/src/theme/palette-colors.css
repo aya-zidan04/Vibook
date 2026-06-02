@@ -1,0 +1,69 @@
+/**
+ * Raw palette swatches — keep in sync with `colors.ts`.
+ * Do not use these directly in components; use semantic `--vb-*` tokens from `admin-theme.css`.
+ */
+
+:root {
+  /* Light mode */
+  --palette-light-neon-yellow: #f0fb45;
+  --palette-light-lime-green: #a7dc2b;
+  --palette-light-grass-green: #8bc249;
+  --palette-light-pale-bone: #f1f7e7;
+  --palette-light-soft-mint: #eef8e2;
+  --palette-light-pastel-sage: #e4efd4;
+  --palette-light-nav-sage: #e4efd4;
+  --palette-light-nav-sage-deep: #dde8cb;
+  --palette-light-mint-off-white: #eef8e2;
+  --palette-light-white: #ffffff;
+  --palette-light-charcoal: #1f1f1f;
+  --palette-light-gray-secondary: #5c5c5c;
+  --palette-light-gray-muted: #757575;
+  --palette-light-neutral-hover: #f5f5f5;
+  --palette-light-neutral-muted: #fafafa;
+  --palette-light-black: #000000;
+
+  /* Light-mode navigation chrome — structured sage (premium light admin) */
+  --palette-light-nav-sidebar-bg: #b0c19b;
+  --palette-light-nav-sidebar-hover: #bdc9ad;
+  --palette-light-nav-sidebar-active: rgba(255, 255, 255, 0.55);
+  --palette-light-nav-sidebar-text: #1f1f1f;
+  --palette-light-nav-sidebar-text-secondary: #3d4a38;
+  --palette-light-nav-sidebar-icon: #263322;
+  --palette-light-nav-header-bg: #c1d0b2;
+  --palette-light-nav-header-text: #1f1f1f;
+  --palette-light-nav-header-text-secondary: #4a5646;
+  --palette-light-nav-chrome-border: rgba(26, 35, 24, 0.16);
+  --palette-light-nav-sidebar-edge: rgba(26, 35, 24, 0.14);
+
+  /* Dark mode — 7 swatches from brand reference (left → right) */
+  --palette-dark-neon-lime: #c7fe1d;
+  --palette-dark-pale-yellow: #f2f862;
+  --palette-dark-bright-yellow: #fff30b;
+  --palette-dark-white: #fefefe;
+  --palette-dark-light-gray: #c1c1c1;
+  --palette-dark-charcoal: #404040;
+  --palette-dark-black: #000000;
+
+  /* Dark mixes — derived from palette only */
+  --palette-dark-canvas-deep: #0a0a0a;
+  --palette-dark-canvas-mid: #121212;
+  --palette-dark-canvas-shadow: #070707;
+  --palette-dark-card-hover: #4a4a4a;
+  --palette-dark-card-elevated: #484848;
+  --palette-dark-charcoal-wash-6: rgba(64, 64, 64, 0.06);
+  --palette-dark-charcoal-wash-32: rgba(64, 64, 64, 0.08);
+  --palette-dark-lime-glow-1: rgba(199, 254, 29, 0.01);
+  --palette-dark-lime-glow-edge: rgba(199, 254, 29, 0.012);
+  --palette-dark-lime-glow-7: rgba(199, 254, 29, 0.014);
+  --palette-dark-lime-muted-12: rgba(199, 254, 29, 0.12);
+  --palette-dark-lime-muted-18: rgba(199, 254, 29, 0.18);
+  --palette-dark-lime-border-32: rgba(199, 254, 29, 0.32);
+  --palette-dark-white-border-6: rgba(254, 254, 254, 0.06);
+  --palette-dark-white-border-8: rgba(254, 254, 254, 0.08);
+  --palette-dark-text-muted: rgba(193, 193, 193, 0.72);
+
+  /* Global page background — sync with mobile/src/theme/darkCanvas.ts */
+  --palette-page-bg-base: #0a0a0a;
+  --palette-page-bg: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%);
+  --palette-dark-page-bg: var(--palette-page-bg);
+}

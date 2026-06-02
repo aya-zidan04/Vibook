@@ -22,7 +22,7 @@ type Props = {
 
 export function EventCard({ event, onPress, variant = 'compact' }: Props) {
   const router = useRouter();
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const favKey = `event:${event.id}`;
   const isFav = useFavoritesStore((s) => !!s.keys[favKey]);
@@ -63,7 +63,7 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
           onPress={() => void toggleFavorite('event', event.id)}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel={isFav ? 'Remove from favorites' : 'Add to favorites'}
+          accessibilityLabel={isFav ? t('common.a11yRemoveFavorite') : t('common.a11yAddFavorite')}
         >
           <Ionicons
             name={isFav ? 'heart' : 'heart-outline'}
@@ -80,11 +80,11 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
           {formatDateShort(event.startAt, locale)} · {event.venueName}
         </AppText>
         <View style={styles.row}>
-          <AppText variant="h3" color="accent">
+          <AppText variant="h3" color="primaryLight">
             {formatMoney(event.priceFrom, event.currency)}
           </AppText>
           <View style={styles.rating}>
-            <Ionicons name="star" size={14} color={colors.accent} />
+            <Ionicons name="star" size={14} color={colors.primaryLight} />
             <AppText variant="label" color="textSecondary">
               {formatDecimalForLocale(event.rating, locale, 1)}
             </AppText>
@@ -132,7 +132,7 @@ function createStyles(colors: ThemeColors, wide: boolean) {
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: 'rgba(17, 24, 39, 0.45)',
+      backgroundColor: colors.iconOverlay,
       alignItems: 'center',
       justifyContent: 'center',
     },

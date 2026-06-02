@@ -42,14 +42,14 @@ export function StarRatingInput({ value, onChange, starSize = 32 }: StarRatingIn
             <Ionicons
               name={value >= i ? 'star' : 'star-outline'}
               size={starSize}
-              color={value >= i ? colors.accent : colors.textMuted}
+              color={value >= i ? colors.primaryLight : colors.disabled}
             />
           </Pressable>
         ))}
       </View>
       {value > 0 ? (
         <Pressable onPress={() => onChange(0)} hitSlop={8} accessibilityRole="button">
-          <AppText variant="label" color="accent" style={styles.clear}>
+          <AppText variant="label" color="primaryLight" style={styles.clear}>
             {t('rating.clear')}
           </AppText>
         </Pressable>
@@ -114,7 +114,7 @@ export function UserRatingBlock({
       />
       {onReportIssue != null && myRatingId != null ? (
         <Pressable onPress={onReportIssue} hitSlop={8} accessibilityRole="button">
-          <AppText variant="label" color="accent" style={styles.reportLink}>
+          <AppText variant="label" color="primaryLight" style={styles.reportLink}>
             {t('report.ratingAction')}
           </AppText>
         </Pressable>

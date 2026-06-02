@@ -63,7 +63,7 @@ export default function VouchersScreen() {
           value={code}
           onChangeText={setCode}
           placeholder={t('vouchers.codePlaceholder')}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.placeholder}
           autoCapitalize="characters"
           autoCorrect={false}
           style={styles.input}
@@ -109,7 +109,7 @@ function VoucherCard({
 
   return (
     <View style={[styles.voucherCard, v.redeemed && { opacity: 0.75 }]}>
-      <AppText variant="label" color="accent">
+      <AppText variant="label" color="primaryLight">
         {v.code}
       </AppText>
       <AppText variant="h3" color="text" numberOfLines={2}>

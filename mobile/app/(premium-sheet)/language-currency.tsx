@@ -4,8 +4,8 @@ import { AppText } from '@/components/ui/AppText';
 import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { PremiumSheetPickCard } from '@/components/sheet/PremiumSheetPickCard';
 import { useTranslation } from '@/i18n/useTranslation';
-import type { AppLocale, DisplayCurrency } from '@/store/localeStore';
-import { useLocaleStore } from '@/store/localeStore';
+import { reloadAppForLocaleChange } from '@/utils/reloadApp';
+import { useLocaleStore, type AppLocale, type DisplayCurrency } from '@/store/localeStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -15,13 +15,24 @@ const LANG_IDS: AppLocale[] = ['en', 'ar'];
 const CUR_IDS: DisplayCurrency[] = ['JOD', 'USD'];
 
 export default function LanguageCurrencyScreen() {
-  const tabStyles = useMemo(() => createTabStyles(useThemeColors()), []);
+  const colors = useThemeColors();
+  const tabStyles = useMemo(() => createTabStyles(colors), [colors]);
   const { t } = useTranslation();
   const locale = useLocaleStore((s) => s.locale);
   const currency = useLocaleStore((s) => s.currency);
+  const regionLabel = useLocaleStore((s) => s.regionLabel);
   const setLocale = useLocaleStore((s) => s.setLocale);
   const setCurrency = useLocaleStore((s) => s.setCurrency);
   const [tab, setTab] = useState<Tab>('language');
+  const [reloading, setReloading] = useState(false);
+
+  const onSelectLocale = (id: AppLocale) => {
+    if (id === locale || reloading) return;
+    const nextCurrency: DisplayCurrency = id === 'ar' ? 'JOD' : currency;
+    setLocale(id);
+    setReloading(true);
+    void reloadAppForLocaleChange(id, nextCurrency, regionLabel);
+  };
 
   const languageOptions = useMemo(
     () =>
@@ -69,7 +80,7 @@ export default function LanguageCurrencyScreen() {
                 title={opt.title}
                 subtitle={opt.subtitle}
                 selected={locale === opt.id}
-                onPress={() => setLocale(opt.id)}
+                onPress={() => onSelectLocale(opt.id)}
                 accessibilityLabel={opt.title}
                 writingDirection={opt.writingDirection}
               />

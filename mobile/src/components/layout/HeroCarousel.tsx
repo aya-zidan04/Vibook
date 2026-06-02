@@ -71,7 +71,7 @@ export function HeroCarousel({ slides, onSlidePress }: Props) {
                 colors={['transparent', fadeFromBackground(colors, 0.95)]}
                 style={styles.gradient}
               >
-                <AppText variant="overline" color="accent" style={styles.kicker}>
+                <AppText variant="overline" color="primaryLight" style={styles.kicker}>
                   Featured
                 </AppText>
                 <AppText variant="h2" color="text" numberOfLines={2}>

@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { persistThemeSnapshot, THEME_PERSIST_KEY } from '@/store/persistSnapshot';
 import { darkPalette, lightPalette, type ThemeColors } from '@/theme/palettes';
 
 export type ColorScheme = 'light' | 'dark';
@@ -18,10 +19,13 @@ export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
       colorScheme: 'light',
-      setColorScheme: (colorScheme) => set({ colorScheme }),
+      setColorScheme: (colorScheme) => {
+        set({ colorScheme });
+        void persistThemeSnapshot(colorScheme);
+      },
     }),
     {
-      name: 'vibook-theme',
+      name: THEME_PERSIST_KEY,
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (s) => ({ colorScheme: s.colorScheme }),
     },

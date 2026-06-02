@@ -1,4 +1,5 @@
-import type { BookingStatus, BusinessProfileStatus, ModerationReportStatus } from '@/api/types';
+import type { BookingStatus, BusinessProfileStatus, ModerationReportStatus, UserReportStatus } from '@/api/types';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 
 const statusTone: Record<BusinessProfileStatus, string> = {
   DRAFT: 'vb-badge--draft',
@@ -8,12 +9,15 @@ const statusTone: Record<BusinessProfileStatus, string> = {
 };
 
 export function StatusBadge({ status }: { status: BusinessProfileStatus }) {
+  const { t } = useAdminI18n();
   const label =
     status === 'PENDING_REVIEW'
-      ? 'Pending review'
+      ? t('status.pendingReview')
       : status === 'DRAFT'
-        ? 'Draft'
-        : status.charAt(0) + status.slice(1).toLowerCase();
+        ? t('status.draft')
+        : status === 'APPROVED'
+          ? t('status.approved')
+          : t('status.rejected');
   return <span className={`vb-badge ${statusTone[status]}`}>{label}</span>;
 }
 
@@ -22,10 +26,11 @@ export function RoleBadge({ label }: { label: string }) {
 }
 
 export function EventVisibilityBadge({ status }: { status: string }) {
+  const { t } = useAdminI18n();
   const s = status.toUpperCase();
   const hidden = s === 'HIDDEN';
   const draft = s === 'DRAFT';
-  const label = draft ? 'Draft' : hidden ? 'Hidden' : 'Visible';
+  const label = draft ? t('status.draft') : hidden ? t('status.hidden') : t('status.visible');
   const cls = draft ? 'vb-badge--pending' : hidden ? 'vb-badge--rejected' : 'vb-badge--approved';
   return <span className={`vb-badge ${cls}`}>{label}</span>;
 }
@@ -37,9 +42,16 @@ const bookingTone: Record<BookingStatus, string> = {
   CANCELLED: 'vb-badge--rejected',
 };
 
+const bookingLabelKey: Record<BookingStatus, string> = {
+  PENDING: 'bookingStatus.pending',
+  CONFIRMED: 'bookingStatus.confirmed',
+  COMPLETED: 'bookingStatus.completed',
+  CANCELLED: 'bookingStatus.cancelled',
+};
+
 export function BookingStatusBadge({ status }: { status: BookingStatus }) {
-  const label = status.charAt(0) + status.slice(1).toLowerCase();
-  return <span className={`vb-badge ${bookingTone[status]}`}>{label}</span>;
+  const { t } = useAdminI18n();
+  return <span className={`vb-badge ${bookingTone[status]}`}>{t(bookingLabelKey[status])}</span>;
 }
 
 const reportTone: Record<ModerationReportStatus, string> = {
@@ -50,11 +62,31 @@ const reportTone: Record<ModerationReportStatus, string> = {
 };
 
 export function ReportStatusBadge({ status }: { status: ModerationReportStatus }) {
+  const { t } = useAdminI18n();
   const label =
     status === 'REVIEWED'
-      ? 'Reviewed'
+      ? t('status.reviewed')
       : status === 'DISMISSED'
-        ? 'Dismissed'
-        : status.charAt(0) + status.slice(1).toLowerCase();
+        ? t('status.dismissed')
+        : status === 'RESOLVED'
+          ? t('status.resolved')
+          : t('status.open');
   return <span className={`vb-badge ${reportTone[status]}`}>{label}</span>;
+}
+
+const userReportTone: Record<UserReportStatus, string> = {
+  OPEN: 'vb-badge--pending',
+  IN_PROGRESS: 'vb-badge--neutral',
+  RESOLVED: 'vb-badge--approved',
+};
+
+export function UserReportStatusBadge({ status }: { status: UserReportStatus }) {
+  const { t } = useAdminI18n();
+  const label =
+    status === 'IN_PROGRESS'
+      ? t('status.inProgress')
+      : status === 'RESOLVED'
+        ? t('status.resolved')
+        : t('status.open');
+  return <span className={`vb-badge ${userReportTone[status]}`}>{label}</span>;
 }

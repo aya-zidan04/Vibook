@@ -1,0 +1,66 @@
+---
+description: Mobile app theme is locked — no light or dark color changes without explicit user approval
+globs: mobile/**/*
+alwaysApply: true
+---
+
+# Mobile app theme is LOCKED
+
+The Mobile app color system (light **and** dark) is **approved and frozen**. Do not redesign, retune, or refactor theme colors unless the user **explicitly** requests it.
+
+## Status
+
+- LOCKED
+- APPROVED
+- DO NOT MODIFY WITHOUT EXPLICIT USER APPROVAL
+
+## Protected (do not change)
+
+- Light mode palette
+- Dark mode palette
+- Theme tokens and semantic colors
+- Page / canvas background colors
+- Card and surface colors
+- Text, icon, chevron, placeholder, and disabled colors
+- Accent colors (`#A7DC2B`, `#8BC249`, `#F0FB45` usage rules)
+- Icon container backgrounds
+- Button colors
+- Borders, shadows, overlays, and gradients tied to the theme
+- Empty-state and row chrome tokens
+
+Protected sources:
+
+- `mobile/src/theme/paletteColors.ts`
+- `mobile/src/theme/designSystem.ts`
+- `mobile/src/theme/palettes.ts`
+- `mobile/src/theme/appBackground.ts`
+- `mobile/src/theme/ambient.ts`
+- `mobile/src/theme/darkCanvas.ts`
+- `mobile/src/theme/gradients.ts`
+- `mobile/src/theme/shadows.ts`
+- Any mobile component hardcoded `#` / `rgba()` color values used for theming
+
+## Required for all future Mobile UI work
+
+- Reuse existing theme tokens only (`useThemeColors()`, semantic keys on `ThemeColors`)
+- Never introduce new palette hex values without explicit approval
+- Never hardcode colors in screens or components — use theme tokens
+- Preserve the approved olive/sage light hierarchy and dark cinematic palette
+
+## Allowed without color approval
+
+- Bug fixes (non-color)
+- Layout, spacing, alignment, navigation structure
+- Logic, API, and data changes
+- Typography sizing (not color)
+- RTL / LTR behavior
+- Accessibility fixes that do not change theme tokens (ARIA, focus order)
+- New screens/features styled **only** with existing tokens
+
+## Before any Mobile color-related change
+
+1. **Stop and warn the user** that the change affects the approved mobile theme.
+2. **Do not proceed** until the user explicitly approves the color change.
+3. Prefer token reuse over new values; prefer layout/structure fixes over color tweaks.
+
+Treat the current Mobile light and dark themes as the design baseline.

@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { Redirect, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField } from '@/components/auth/AuthTextField';
+import { JordanPhoneField } from '@/components/auth/JordanPhoneField';
+import { BusinessFieldIconSlot, businessFieldRowStyle } from '@/components/business/businessFieldRow';
 import { BusinessPartnerCategorySelectField } from '@/components/forms/BusinessPartnerCategorySelectField';
 import { GovernorateSelectField } from '@/components/forms/GovernorateSelectField';
 import { AppText } from '@/components/ui/AppText';
@@ -14,8 +17,8 @@ import {
   upsertMyBusinessProfile,
 } from '@/api/businessProfileApi';
 import { listActiveGovernorates } from '@/api/governoratesApi';
-import { ApiError } from '@/api/http';
-import type { CategoryResponse, ErrorResponse, GovernorateResponse } from '@/api/types';
+import { mapApiError } from '@/utils/mapApiError';
+import type { CategoryResponse, GovernorateResponse } from '@/api/types';
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
@@ -45,6 +48,7 @@ type FieldKey = 'companyName' | 'email' | 'phone' | 'category' | 'message';
 export default function BusinessJoinScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const premiumRow = useMemo(() => businessFieldRowStyle(colors), [colors]);
   const router = useRouter();
   const { t, isRTL } = useTranslation();
   const locale = useLocaleStore((s) => s.locale);
@@ -162,21 +166,7 @@ export default function BusinessJoinScreen() {
       syncBusinessApprovalFromApi(submitted);
       router.replace('/business/application-pending');
     } catch (e) {
-      if (e instanceof ApiError) {
-        const body = e.body as ErrorResponse | undefined;
-        const fe = body?.fieldErrors;
-        if (fe && typeof fe === 'object') {
-          const vals = Object.values(fe).filter(Boolean) as string[];
-          if (vals.length > 0) {
-            setSubmitError(vals[0]);
-            setBusy(false);
-            return;
-          }
-        }
-        setSubmitError(body?.message ?? e.message ?? t('businessJoin.errSubmit'));
-      } else {
-        setSubmitError(t('businessJoin.errSubmit'));
-      }
+      setSubmitError(mapApiError(e, t));
     } finally {
       setBusy(false);
     }
@@ -220,6 +210,12 @@ export default function BusinessJoinScreen() {
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        technicalInput
+        leftSlot={
+          <BusinessFieldIconSlot>
+            <Ionicons name="mail-outline" size={20} color={colors.primary} />
+          </BusinessFieldIconSlot>
+        }
       />
       {errors.email ? (
         <AppText variant="label" color="error" style={styles.inlineErr}>
@@ -227,7 +223,7 @@ export default function BusinessJoinScreen() {
         </AppText>
       ) : null}
 
-      <AuthTextField
+      <JordanPhoneField
         label={t('businessJoin.phone')}
         placeholder={t('businessJoin.phonePh')}
         value={phone}
@@ -235,8 +231,9 @@ export default function BusinessJoinScreen() {
           setPhone(v);
           clearError('phone');
         }}
-        keyboardType="phone-pad"
-        autoCapitalize="none"
+        appearance="business"
+        fieldRowStyle={premiumRow}
+        highlightOnFocus
       />
       {errors.phone ? (
         <AppText variant="label" color="error" style={styles.inlineErr}>
@@ -245,6 +242,7 @@ export default function BusinessJoinScreen() {
       ) : null}
 
       <GovernorateSelectField
+        appearance="business"
         label={t('businessJoin.governorate')}
         valueSlug={governorateSlug}
         onChangeSlug={setGovernorateSlug}
@@ -280,7 +278,7 @@ export default function BusinessJoinScreen() {
             clearError('message');
           }}
           placeholder={t('businessJoin.messagePh')}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.placeholder}
           multiline
           numberOfLines={5}
           textAlignVertical="top"

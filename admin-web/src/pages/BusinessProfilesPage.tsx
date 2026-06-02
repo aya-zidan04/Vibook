@@ -17,7 +17,9 @@ import { StatusBadge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
+import { localizedGovernorateName } from '@/utils/governorateLabels';
 import { formatDateTime } from '@/utils/format';
 
 type DialogState =
@@ -25,16 +27,26 @@ type DialogState =
   | { type: 'approve' | 'reject'; id: number; name: string }
   | { type: 'bulk-approve' | 'bulk-reject' };
 
-const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: 'createdAt,desc', label: 'Newest first' },
-  { value: 'createdAt,asc', label: 'Oldest first' },
-  { value: 'businessName,asc', label: 'Name A–Z' },
-  { value: 'businessName,desc', label: 'Name Z–A' },
-  { value: 'status,asc', label: 'Status A–Z' },
-  { value: 'status,desc', label: 'Status Z–A' },
-];
+const SORT_VALUES = [
+  'createdAt,desc',
+  'createdAt,asc',
+  'businessName,asc',
+  'businessName,desc',
+  'status,asc',
+  'status,desc',
+] as const;
+
+const SORT_LABEL_KEY: Record<(typeof SORT_VALUES)[number], string> = {
+  'createdAt,desc': 'sort.newest',
+  'createdAt,asc': 'sort.oldest',
+  'businessName,asc': 'sort.nameAz',
+  'businessName,desc': 'sort.nameZa',
+  'status,asc': 'sort.statusAz',
+  'status,desc': 'sort.statusZa',
+};
 
 export function BusinessProfilesPage() {
+  const { t, locale } = useAdminI18n();
   const { headerSearch } = useAdminChrome();
   const { showToast } = useToast();
   const [filter, setFilter] = useState<'ALL' | BusinessProfileStatus>('ALL');
@@ -84,11 +96,11 @@ export function BusinessProfilesPage() {
       setRows(page.content);
       setSelected(new Set());
     } catch (e) {
-      setError(getFriendlyErrorMessage(e, 'Could not load business profiles.'));
+      setError(getFriendlyErrorMessage(e, t('businessProfiles.loadError')));
     } finally {
       setLoading(false);
     }
-  }, [filter, categoryId, governorateId, createdFrom, createdTo, sort]);
+  }, [filter, categoryId, governorateId, createdFrom, createdTo, sort, t]);
 
   useEffect(() => {
     void loadRows();
@@ -144,11 +156,11 @@ export function BusinessProfilesPage() {
     setBusyId(dialog.id);
     try {
       await approveBusinessProfile(dialog.id);
-      showToast('Profile approved.', 'success');
+      showToast(t('businessProfiles.approvedToast'), 'success');
       setDialog(null);
       await loadRows();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Approve failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('businessProfiles.approveFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -159,12 +171,12 @@ export function BusinessProfilesPage() {
     setBusyId(dialog.id);
     try {
       await rejectBusinessProfile(dialog.id, rejectReason.trim() || undefined);
-      showToast('Profile rejected.', 'success');
+      showToast(t('businessProfiles.rejectedToast'), 'success');
       setDialog(null);
       setRejectReason('');
       await loadRows();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Reject failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('businessProfiles.rejectFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -179,11 +191,11 @@ export function BusinessProfilesPage() {
     setBusyId(-1);
     try {
       await bulkApproveBusinessProfiles(selectedPendingIds);
-      showToast(`Approved ${selectedPendingIds.length} profile(s).`, 'success');
+      showToast(t('businessProfiles.bulkApprovedToast', { count: selectedPendingIds.length }), 'success');
       setDialog(null);
       await loadRows();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Bulk approve failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('businessProfiles.bulkApproveFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -198,12 +210,12 @@ export function BusinessProfilesPage() {
     setBusyId(-1);
     try {
       await bulkRejectBusinessProfiles(selectedPendingIds, rejectReason.trim() || undefined);
-      showToast(`Rejected ${selectedPendingIds.length} profile(s).`, 'success');
+      showToast(t('businessProfiles.bulkRejectedToast', { count: selectedPendingIds.length }), 'success');
       setDialog(null);
       setRejectReason('');
       await loadRows();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Bulk reject failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('businessProfiles.bulkRejectFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -218,14 +230,14 @@ export function BusinessProfilesPage() {
 
       <div className="vb-toolbar">
         <div className="vb-toolbar__field">
-          <label htmlFor="bf-cat">Category</label>
+          <label htmlFor="bf-cat">{t('filters.category')}</label>
           <select
             id="bf-cat"
             className="vb-input"
             value={categoryId === '' ? '' : String(categoryId)}
             onChange={(e) => setCategoryId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">All</option>
+            <option value="">{t('filters.all')}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -234,23 +246,23 @@ export function BusinessProfilesPage() {
           </select>
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="bf-gov">Governorate</label>
+          <label htmlFor="bf-gov">{t('filters.governorate')}</label>
           <select
             id="bf-gov"
             className="vb-input"
             value={governorateId === '' ? '' : String(governorateId)}
             onChange={(e) => setGovernorateId(e.target.value === '' ? '' : Number(e.target.value))}
           >
-            <option value="">All</option>
+            <option value="">{t('filters.all')}</option>
             {governorates.map((g) => (
               <option key={g.id} value={g.id}>
-                {g.name}
+                {localizedGovernorateName(g.name, locale)}
               </option>
             ))}
           </select>
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="bf-from">Created from</label>
+          <label htmlFor="bf-from">{t('filters.createdFrom')}</label>
           <input
             id="bf-from"
             type="date"
@@ -260,7 +272,7 @@ export function BusinessProfilesPage() {
           />
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="bf-to">Created to</label>
+          <label htmlFor="bf-to">{t('filters.createdTo')}</label>
           <input
             id="bf-to"
             type="date"
@@ -270,11 +282,11 @@ export function BusinessProfilesPage() {
           />
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="bf-sort">Sort</label>
+          <label htmlFor="bf-sort">{t('filters.sort')}</label>
           <select id="bf-sort" className="vb-input" value={sort} onChange={(e) => setSort(e.target.value)}>
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
+            {SORT_VALUES.map((value) => (
+              <option key={value} value={value}>
+                {t(SORT_LABEL_KEY[value])}
               </option>
             ))}
           </select>
@@ -292,10 +304,10 @@ export function BusinessProfilesPage() {
           }}
         >
           <span className="vb-muted" style={{ fontSize: '0.875rem' }}>
-            {selectedPendingIds.length} pending selected
+            {t('businessProfiles.pendingSelected', { count: selectedPendingIds.length })}
           </span>
           <Button variant="primary" size="sm" onClick={() => setDialog({ type: 'bulk-approve' })}>
-            Approve selected
+            {t('businessProfiles.approveSelected')}
           </Button>
           <Button
             variant="dangerOutline"
@@ -305,22 +317,31 @@ export function BusinessProfilesPage() {
               setDialog({ type: 'bulk-reject' });
             }}
           >
-            Reject selected
+            {t('businessProfiles.rejectSelected')}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
-            Clear selection
+            {t('businessProfiles.clearSelection')}
           </Button>
         </div>
       ) : null}
 
       {error ? (
-        <EmptyState title="Something went wrong" description={error} decor />
+        <EmptyState title={t('businessProfiles.somethingWrong')} description={error} decor />
       ) : loading ? (
         <div className="vb-table-wrap">
           <table className="vb-table">
             <thead>
               <tr>
-                {['', 'Business', 'Owner', 'Category', 'Governorate', 'Status', 'Created', 'Actions'].map((h) => (
+                {[
+                  '',
+                  t('table.business'),
+                  t('table.ownerContact'),
+                  t('table.category'),
+                  t('table.governorate'),
+                  t('table.status'),
+                  t('table.created'),
+                  t('table.actions'),
+                ].map((h) => (
                   <th key={h || 'sel'}>{h}</th>
                 ))}
               </tr>
@@ -338,11 +359,9 @@ export function BusinessProfilesPage() {
         </div>
       ) : filteredRows.length === 0 ? (
         <EmptyState
-          title="No profiles match"
+          title={t('businessProfiles.noMatch')}
           description={
-            headerSearch.trim()
-              ? 'Try a different search or clear the top bar filter.'
-              : 'Adjust filters or status chips.'
+            headerSearch.trim() ? t('businessProfiles.noMatchSearch') : t('businessProfiles.noMatchFilter')
           }
           decor
         />
@@ -357,17 +376,17 @@ export function BusinessProfilesPage() {
                     checked={allPendingSelected}
                     onChange={toggleSelectAllOnPage}
                     disabled={selectablePending.length === 0}
-                    title="Select all pending on this page"
-                    aria-label="Select all pending"
+                    title={t('table.selectAllPending')}
+                    aria-label={t('table.selectAllPending')}
                   />
                 </th>
-                <th>Business</th>
-                <th>Owner &amp; contact</th>
-                <th>Category</th>
-                <th>Governorate</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
+                <th>{t('table.business')}</th>
+                <th>{t('table.ownerContact')}</th>
+                <th>{t('table.category')}</th>
+                <th>{t('table.governorate')}</th>
+                <th>{t('table.status')}</th>
+                <th>{t('table.created')}</th>
+                <th>{t('table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -382,7 +401,7 @@ export function BusinessProfilesPage() {
                       checked={selected.has(p.id)}
                       disabled={p.status !== 'PENDING_REVIEW'}
                       onChange={() => toggleRow(p.id)}
-                      aria-label={`Select ${p.businessName}`}
+                      aria-label={t('table.selectRow', { name: p.businessName })}
                     />
                   </td>
                   <td>
@@ -403,22 +422,22 @@ export function BusinessProfilesPage() {
                           className="vb-muted"
                           style={{ fontSize: '0.6875rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}
                         >
-                          Account
+                          {t('table.account')}
                         </div>
-                        <div>{p.ownerEmail ?? '—'}</div>
+                        <div>{p.ownerEmail ?? t('common.dash')}</div>
                       </div>
                       <div>
                         <div
                           className="vb-muted"
                           style={{ fontSize: '0.6875rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}
                         >
-                          Work email
+                          {t('table.workEmail')}
                         </div>
                         <div>
                           {p.workEmail ? (
                             <a href={`mailto:${encodeURIComponent(p.workEmail)}`}>{p.workEmail}</a>
                           ) : (
-                            '—'
+                            t('common.dash')
                           )}
                         </div>
                       </div>
@@ -427,13 +446,13 @@ export function BusinessProfilesPage() {
                           className="vb-muted"
                           style={{ fontSize: '0.6875rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}
                         >
-                          Phone
+                          {t('table.phone')}
                         </div>
                         <div>
                           {p.phone ? (
                             <a href={`tel:${p.phone.replace(/\s/g, '')}`}>{p.phone}</a>
                           ) : (
-                            '—'
+                            t('common.dash')
                           )}
                         </div>
                       </div>
@@ -442,13 +461,13 @@ export function BusinessProfilesPage() {
                           to={`/users?userId=${p.ownerUserId}`}
                           style={{ fontSize: '0.8125rem', fontWeight: 600, marginTop: 2 }}
                         >
-                          View owner profile
+                          {t('businessProfiles.viewOwner')}
                         </Link>
                       ) : null}
                     </div>
                   </td>
-                  <td>{p.primaryCategoryName ?? '—'}</td>
-                  <td>{p.governorateName ?? '—'}</td>
+                  <td>{p.primaryCategoryName ?? t('common.dash')}</td>
+                  <td>{localizedGovernorateName(p.governorateName, locale) || t('common.dash')}</td>
                   <td>
                     <StatusBadge status={p.status} />
                   </td>
@@ -457,7 +476,7 @@ export function BusinessProfilesPage() {
                     <div className="vb-table-actions">
                       <Link to={`/business-profiles/${p.id}`}>
                         <Button variant="secondary" size="sm">
-                          View
+                          {t('table.view')}
                         </Button>
                       </Link>
                       {p.status === 'PENDING_REVIEW' ? (
@@ -468,7 +487,7 @@ export function BusinessProfilesPage() {
                             disabled={busyId === p.id}
                             onClick={() => setDialog({ type: 'approve', id: p.id, name: p.businessName })}
                           >
-                            Approve
+                            {t('businessProfiles.approve')}
                           </Button>
                           <Button
                             variant="dangerOutline"
@@ -479,7 +498,7 @@ export function BusinessProfilesPage() {
                               setDialog({ type: 'reject', id: p.id, name: p.businessName });
                             }}
                           >
-                            Reject
+                            {t('businessProfiles.reject')}
                           </Button>
                         </>
                       ) : null}
@@ -494,9 +513,11 @@ export function BusinessProfilesPage() {
 
       <ConfirmDialog
         open={dialog?.type === 'approve'}
-        title="Approve business profile"
-        message={`Approve “${dialog?.type === 'approve' ? dialog.name : ''}”? This will mark the profile as approved and visible for the business flow.`}
-        confirmLabel="Approve"
+        title={t('businessProfiles.approveTitle')}
+        message={t('businessProfiles.approveMsg', {
+          name: dialog?.type === 'approve' ? dialog.name : '',
+        })}
+        confirmLabel={t('businessProfiles.approveConfirm')}
         onConfirm={() => void runApprove()}
         onCancel={() => setDialog(null)}
         loading={busyId != null}
@@ -504,9 +525,11 @@ export function BusinessProfilesPage() {
 
       <ConfirmDialog
         open={dialog?.type === 'reject'}
-        title="Reject business profile"
-        message={`Reject “${dialog?.type === 'reject' ? dialog.name : ''}”? Optionally add a short note for the owner.`}
-        confirmLabel="Reject profile"
+        title={t('businessProfiles.rejectTitle')}
+        message={t('businessProfiles.rejectMsg', {
+          name: dialog?.type === 'reject' ? dialog.name : '',
+        })}
+        confirmLabel={t('businessProfiles.rejectConfirm')}
         onConfirm={() => void runReject()}
         onCancel={() => {
           setDialog(null);
@@ -516,23 +539,23 @@ export function BusinessProfilesPage() {
         loading={busyId != null}
       >
         <label className="vb-field__label" htmlFor="reject-reason">
-          Reason (optional)
+          {t('businessProfiles.reasonOptional')}
         </label>
         <textarea
           id="reject-reason"
           className="vb-modal__textarea"
           value={rejectReason}
           onChange={(e) => setRejectReason(e.target.value)}
-          placeholder="e.g. Incomplete description or invalid contact details"
+          placeholder={t('businessProfiles.rejectPlaceholder')}
           maxLength={500}
         />
       </ConfirmDialog>
 
       <ConfirmDialog
         open={dialog?.type === 'bulk-approve'}
-        title="Bulk approve"
-        message={`Approve ${selectedPendingIds.length} profile(s)? Non-pending rows are ignored by the server.`}
-        confirmLabel="Approve all"
+        title={t('businessProfiles.bulkApproveTitle')}
+        message={t('businessProfiles.bulkApproveMsg', { count: selectedPendingIds.length })}
+        confirmLabel={t('businessProfiles.bulkApproveConfirm')}
         onConfirm={() => void runBulkApprove()}
         onCancel={() => setDialog(null)}
         loading={busyId != null}
@@ -540,9 +563,9 @@ export function BusinessProfilesPage() {
 
       <ConfirmDialog
         open={dialog?.type === 'bulk-reject'}
-        title="Bulk reject"
-        message={`Reject ${selectedPendingIds.length} profile(s)? You can share one reason for all.`}
-        confirmLabel="Reject all"
+        title={t('businessProfiles.bulkRejectTitle')}
+        message={t('businessProfiles.bulkRejectMsg', { count: selectedPendingIds.length })}
+        confirmLabel={t('businessProfiles.bulkRejectConfirm')}
         onConfirm={() => void runBulkReject()}
         onCancel={() => {
           setDialog(null);
@@ -552,7 +575,7 @@ export function BusinessProfilesPage() {
         loading={busyId != null}
       >
         <label className="vb-field__label" htmlFor="bulk-reject-reason">
-          Reason (optional)
+          {t('businessProfiles.reasonOptional')}
         </label>
         <textarea
           id="bulk-reject-reason"

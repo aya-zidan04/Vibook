@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect } from 'react';
-import { I18nManager, Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useLocaleStore } from '@/store/localeStore';
+import { syncNativeRtl } from '@/utils/rtl';
 
 type Props = { children: ReactNode };
 
@@ -14,18 +15,12 @@ export function RtlLayout({ children }: Props) {
   const dir = rtl ? 'rtl' : 'ltr';
 
   useEffect(() => {
-    I18nManager.allowRTL(true);
-    if (I18nManager.isRTL !== rtl) {
-      I18nManager.forceRTL(rtl);
-      if (Platform.OS === 'android') {
-        // Some Android builds apply forceRTL fully only after restart; `direction` on root still mirrors flex.
-      }
-    }
+    syncNativeRtl(rtl);
   }, [rtl]);
 
   return <View style={[styles.root, { direction: dir }]}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: { flex: 1, backgroundColor: 'transparent' },
 });

@@ -1,6 +1,7 @@
 import { ReactNode, useMemo } from 'react';
 import { ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { HeaderSeparationChrome } from '@/components/layout/HeaderSeparationChrome';
 import { spacing } from '@/theme';
 
 type Props = {
@@ -23,7 +24,7 @@ export function Screen({
 
   const headerBlock =
     header != null ? (
-      <View style={styles.headerChrome}>{header}</View>
+      <HeaderSeparationChrome style={styles.headerChrome}>{header}</HeaderSeparationChrome>
     ) : null;
 
   if (scroll) {
@@ -64,7 +65,7 @@ function createStyles() {
       flex: 1,
       backgroundColor: 'transparent',
     },
-    flex: { flex: 1 },
+    flex: { flex: 1, backgroundColor: 'transparent' },
     headerChrome: {
       paddingHorizontal: spacing.screen,
       flexShrink: 0,

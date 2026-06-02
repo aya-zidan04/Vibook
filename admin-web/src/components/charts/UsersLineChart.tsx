@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import type { TimeSeriesPointResponse } from '@/api/types';
 import { chartColors } from '@/components/charts/chartTheme';
 
@@ -16,6 +17,7 @@ function formatDay(iso: string) {
 }
 
 export function UsersLineChart({ data }: { data: TimeSeriesPointResponse[] }) {
+  const { t } = useAdminI18n();
   const safe = data ?? [];
   const chartData = safe.map((p) => ({ ...p, label: formatDay(p.date) }));
   return (
@@ -33,7 +35,7 @@ export function UsersLineChart({ data }: { data: TimeSeriesPointResponse[] }) {
             }}
             labelStyle={{ fontWeight: 700 }}
           />
-          <Line type="monotone" dataKey="count" name="New users" stroke={chartColors.terracotta} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+          <Line type="monotone" dataKey="count" name={t('charts.newUsers')} stroke={chartColors.terracotta} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

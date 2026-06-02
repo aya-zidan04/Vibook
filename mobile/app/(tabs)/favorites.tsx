@@ -4,9 +4,10 @@ import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { listMyFavorites } from '@/api/favoritesApi';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
+import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -15,7 +16,6 @@ import { useAppStore } from '@/store/appStore';
 import type { EventItem } from '@/types';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { chevronForwardTrailing } from '@/utils/rtl';
 
 export default function FavoritesTabScreen() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function FavoritesTabScreen() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [rows, setRows] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown | null>(null);
 
   const load = useCallback(() => {
     if (!isAuthenticated) {
@@ -42,7 +42,7 @@ export default function FavoritesTabScreen() {
         setError(null);
       } catch (e) {
         setRows([]);
-        setError(e instanceof ApiError ? e.message : t('common.error'));
+        setError(e);
       } finally {
         setLoading(false);
       }
@@ -102,7 +102,7 @@ export default function FavoritesTabScreen() {
     return (
       <Screen scroll contentStyle={styles.pad} header={headerList}>
         <AppText variant="body" color="textSecondary">
-          {error}
+          {mapApiError(error, t)}
         </AppText>
         <PrimaryButton title={t('common.retry')} onPress={load} />
       </Screen>
@@ -138,11 +138,11 @@ export default function FavoritesTabScreen() {
               <AppText variant="caption" color="textMuted" numberOfLines={2}>
                 {cityLine}
               </AppText>
-              <AppText variant="h3" color="accent">
+              <AppText variant="h3" color="primaryLight">
                 {t('common.from')} {formatMoney(e.priceFrom, e.currency)}
               </AppText>
             </View>
-            <Ionicons name={chevronForwardTrailing()} size={20} color={colors.textMuted} />
+            <NavigationChevronForward size={20} color={colors.icon} />
           </Pressable>
         );
       })}

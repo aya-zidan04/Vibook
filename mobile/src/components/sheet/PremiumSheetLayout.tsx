@@ -13,9 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppBackground } from '@/components/ui/AppBackground';
 import { AppText } from '@/components/ui/AppText';
+import { NavigationChevronBack } from '@/components/ui/NavigationChevron';
 import { premiumSheetTokens as t } from '@/components/sheet/premiumSheetTokens';
 import { useTranslation } from '@/i18n/useTranslation';
-import { ltrNavigationChrome } from '@/utils/navigationChrome';
+import { navigationRowStyle } from '@/utils/rtl';
 import { spacing, useThemeColors } from '@/theme';
 import { useThemeStore } from '@/store/themeStore';
 import type { ThemeColors } from '@/theme/palettes';
@@ -41,7 +42,7 @@ export function PremiumSheetLayout({
   const colors = useThemeColors();
   const isLight = useThemeStore((s) => s.colorScheme) === 'light';
   const insets = useSafeAreaInsets();
-  const { t: tr } = useTranslation();
+  const { t: tr, isRTL } = useTranslation();
   const styles = useMemo(
     () => createStyles(colors, Math.max(insets.bottom, spacing.lg), isLight),
     [colors, insets.bottom, isLight],
@@ -57,7 +58,7 @@ export function PremiumSheetLayout({
           accessibilityLabel={tr('common.a11yClose')}
         >
           {Platform.OS === 'ios' ? (
-            <BlurView intensity={18} tint="light" style={StyleSheet.absoluteFill} />
+            <BlurView intensity={isLight ? 18 : 10} tint={isLight ? 'light' : 'dark'} style={StyleSheet.absoluteFill} />
           ) : null}
           <View style={[StyleSheet.absoluteFill, styles.dim]} />
         </Pressable>
@@ -68,18 +69,18 @@ export function PremiumSheetLayout({
           pointerEvents="box-none"
         >
           <View style={styles.sheet}>
-          <View style={styles.grabber} accessibilityLabel="Sheet handle" />
+          <View style={styles.grabber} accessibilityLabel={tr('common.a11ySheetHandle')} />
 
-          <View style={[ltrNavigationChrome, styles.toolbar]}>
+          <View style={[navigationRowStyle(isRTL), styles.toolbar]}>
             {authMode ? (
               <Pressable onPress={onClose} style={styles.iconBtn} hitSlop={12} accessibilityRole="button" accessibilityLabel={tr('common.a11yClose')}>
-                <Ionicons name="close" size={28} color={colors.text} />
+                <Ionicons name="close" size={28} color={colors.icon} />
               </Pressable>
             ) : (
               <>
                 {onBack ? (
                   <Pressable onPress={onBack} style={styles.iconBtn} hitSlop={12} accessibilityRole="button" accessibilityLabel={tr('common.a11yGoBack')}>
-                    <Ionicons name="chevron-back" size={28} color={colors.text} />
+                    <NavigationChevronBack size={28} color={colors.icon} />
                   </Pressable>
                 ) : (
                   <View style={styles.iconBtnSpacer} />
@@ -91,9 +92,7 @@ export function PremiumSheetLayout({
                 ) : (
                   <View style={styles.toolbarTitle} />
                 )}
-                <Pressable onPress={onClose} style={styles.iconBtn} hitSlop={12} accessibilityRole="button" accessibilityLabel={tr('common.a11yClose')}>
-                  <Ionicons name="close" size={26} color={colors.textMuted} />
-                </Pressable>
+                <View style={styles.iconBtnSpacer} />
               </>
             )}
           </View>
@@ -123,7 +122,7 @@ function createStyles(colors: ThemeColors, bottomPad: number, isLight: boolean) 
       ...StyleSheet.absoluteFillObject,
     },
     dim: {
-      backgroundColor: 'rgba(255, 247, 251, 0.35)',
+      backgroundColor: colors.overlayLight,
     },
     keyboard: {
       flex: 1,
@@ -134,7 +133,7 @@ function createStyles(colors: ThemeColors, bottomPad: number, isLight: boolean) 
       maxHeight: t.sheetMaxHeightPct,
       borderTopLeftRadius: t.sheetTopRadius,
       borderTopRightRadius: t.sheetTopRadius,
-      backgroundColor: 'rgba(255, 255, 255, 0.88)',
+      backgroundColor: colors.sheetSurface,
       paddingTop: spacing.sm,
       paddingBottom: bottomPad,
       borderWidth: StyleSheet.hairlineWidth,

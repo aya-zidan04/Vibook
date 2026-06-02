@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { submitModerationReport } from '@/api/reportsApi';
 import type { ModerationReportType } from '@/api/types';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
@@ -91,8 +91,7 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
         onClose();
         Alert.alert(t('common.ok'), t('report.success'));
       } catch (e) {
-        const msg = e instanceof ApiError ? e.message : t('common.error');
-        setError(msg);
+        setError(mapApiError(e, t));
       } finally {
         setLoading(false);
       }
@@ -138,7 +137,7 @@ export function ReportIssueModal({ visible, onClose, targetType, targetId, title
             value={details}
             onChangeText={setDetails}
             placeholder={t('report.detailsPlaceholder')}
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor={colors.placeholder}
             multiline
             numberOfLines={4}
             style={styles.input}
@@ -171,11 +170,11 @@ function createStyles(colors: ThemeColors) {
     },
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(255, 247, 251, 0.35)',
+      backgroundColor: colors.overlayLight,
     },
     sheet: {
       maxHeight: '88%',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      backgroundColor: colors.sheetSurface,
       borderTopLeftRadius: radii.xl,
       borderTopRightRadius: radii.xl,
       paddingHorizontal: spacing.screen,

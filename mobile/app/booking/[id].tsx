@@ -10,7 +10,7 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { cancelMyBooking, getMyBooking } from '@/api/bookingsApi';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { bookingResponseToBooking } from '@/services/api/bookingMap';
 import { MOCK_BOOKINGS } from '@/services/mock';
 import { useAppStore } from '@/store/appStore';
@@ -110,8 +110,7 @@ export default function BookingDetailScreen() {
           const row = await cancelMyBooking(Number(id), null);
           setBooking(bookingResponseToBooking(row));
         } catch (e) {
-          const msg = e instanceof ApiError ? e.message : t('common.error');
-          Alert.alert(t('bookingDetail.title'), msg);
+          Alert.alert(t('bookingDetail.title'), mapApiError(e, t));
         }
       })();
       return;
@@ -147,7 +146,7 @@ export default function BookingDetailScreen() {
         {t('bookingDetail.status')}: {t(STATUS_KEYS[displayStatus])}
       </AppText>
       {booking.totalPaid > 0 ? (
-        <AppText variant="h3" color="accent" style={styles.mt}>
+        <AppText variant="h3" color="primaryLight" style={styles.mt}>
           {formatMoney(booking.totalPaid, booking.currency)}
         </AppText>
       ) : (
@@ -178,7 +177,7 @@ export default function BookingDetailScreen() {
           style={({ pressed }) => [styles.reportPress, pressed && { opacity: 0.7 }]}
           accessibilityRole="button"
         >
-          <AppText variant="body-em" color="accent">
+          <AppText variant="body-em" color="primaryLight">
             {t('report.bookingAction')}
           </AppText>
         </Pressable>

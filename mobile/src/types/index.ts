@@ -12,7 +12,8 @@ export type User = {
   /** Null when the user has no profile photo (optional). */
   avatarUrl: string | null;
   cityId: ID;
-  membershipTier: 'standard' | 'gold' | 'platinum';
+  /** True when the user has an active Premium membership (mock until billing is connected). */
+  isPremiumMember: boolean;
   walletBalance: number;
   preferredLanguage: 'en' | 'ar';
 };
@@ -22,6 +23,10 @@ export type City = {
   nameEn: string;
   nameAr: string;
   country: string;
+  /** Canonical slug when known (e.g. `amman`). */
+  slug?: string;
+  displayOrder?: number;
+  active?: boolean;
   imageUrl?: string;
 };
 
@@ -154,15 +159,6 @@ export type Booking = {
   cityNameAr?: string;
   totalPaid: number;
   currency: string;
-};
-
-export type NotificationItem = {
-  id: ID;
-  title: string;
-  body: string;
-  createdAt: string;
-  read: boolean;
-  kind: 'booking' | 'promo' | 'reminder' | 'price' | 'wishlist';
 };
 
 export type Voucher = {

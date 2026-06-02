@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppBackground } from '@/components/ui/AppBackground';
 import { AppText } from '@/components/ui/AppText';
 import {
   JORDAN_GOVERNORATES,
   type JordanGovernorateSlug,
 } from '@/constants/jordanGovernorates';
 import { useTranslation } from '@/i18n/useTranslation';
+import { governorateLabel } from '@/utils/governorateLabels';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -33,7 +33,7 @@ export function GovernoratePickerSheet({
 }: Props) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { t, locale } = useTranslation();
+  const { locale } = useTranslation();
   const styles = useMemo(
     () => createStyles(colors, insets.bottom),
     [colors, insets.bottom],
@@ -41,8 +41,7 @@ export function GovernoratePickerSheet({
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <AppBackground>
-        <View style={styles.modalRoot}>
+      <View style={styles.modalRoot}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityRole="button" />
         <View style={styles.sheet}>
           <AppText variant="overline" color="textMuted" style={styles.sheetTitle}>
@@ -55,7 +54,7 @@ export function GovernoratePickerSheet({
           >
             {JORDAN_GOVERNORATES.map((g) => {
               const selected = selectedEnName === g.en;
-              const label = locale === 'ar' ? t(`explore.gov.${g.slug}`) : g.en;
+              const label = governorateLabel(g.slug, locale);
               return (
                 <Pressable
                   key={g.slug}
@@ -77,7 +76,7 @@ export function GovernoratePickerSheet({
                     {label}
                   </AppText>
                   {selected ? (
-                    <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
+                    <Ionicons name="checkmark-circle" size={22} color={colors.primaryLight} />
                   ) : (
                     <View style={styles.radioOuter} />
                   )}
@@ -86,8 +85,7 @@ export function GovernoratePickerSheet({
             })}
           </ScrollView>
         </View>
-        </View>
-      </AppBackground>
+      </View>
     </Modal>
   );
 }
@@ -100,10 +98,10 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     },
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(255, 247, 251, 0.35)',
+      backgroundColor: colors.overlayLight,
     },
     sheet: {
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      backgroundColor: colors.sheetSurface,
       borderTopLeftRadius: radii.xxl,
       borderTopRightRadius: radii.xxl,
       paddingTop: spacing.lg,

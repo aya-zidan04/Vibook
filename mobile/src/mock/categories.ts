@@ -1,11 +1,40 @@
+import {
+  EXPLORE_MAIN_CATEGORY_ORDER,
+  EXPLORE_SUBCATEGORY_ORDER,
+  mainCategoryIcon,
+  mainCategoryLabel,
+  subcategoryLabel,
+  type ExploreCategorySlug,
+  type ExploreSubcategorySlug,
+} from '@/constants/exploreCategoryTaxonomy';
 import type { Category } from '@/types';
 
-export const MOCK_CATEGORIES: Category[] = [
-  { id: 'cat1', slug: 'events', labelEn: 'Events', labelAr: 'فعاليات', icon: 'calendar' },
-  { id: 'cat2', slug: 'dining', labelEn: 'Dining', labelAr: 'مطاعم', icon: 'restaurant' },
-  { id: 'cat3', slug: 'stays', labelEn: 'Stays', labelAr: 'إقامة', icon: 'bed' },
-  { id: 'cat4', slug: 'experiences', labelEn: 'Experiences', labelAr: 'تجارب', icon: 'compass' },
-  { id: 'cat5', slug: 'sports', labelEn: 'Sports', labelAr: 'رياضة', icon: 'football' },
-  { id: 'cat6', slug: 'wellness', labelEn: 'Wellness', labelAr: 'عافية', icon: 'leaf' },
-  { id: 'cat7', slug: 'travel', labelEn: 'Packages', labelAr: 'باقات', icon: 'globe' },
-];
+/** Mock reference catalog aligned with backend Explore taxonomy (slug ids). */
+export const MOCK_CATEGORIES: Category[] = EXPLORE_MAIN_CATEGORY_ORDER.map((slug) => ({
+  id: slug,
+  slug,
+  labelEn: mainCategoryLabel(slug, 'en'),
+  labelAr: mainCategoryLabel(slug, 'ar'),
+  icon: mainCategoryIcon(slug),
+}));
+
+function mockSubcategory(subSlug: ExploreSubcategorySlug, parentSlug: ExploreCategorySlug) {
+  return {
+    id: subSlug,
+    parentId: parentSlug,
+    name: subcategoryLabel(subSlug, 'en'),
+    nameAr: subcategoryLabel(subSlug, 'ar'),
+  };
+}
+
+export function buildMockExploreCategories() {
+  return EXPLORE_MAIN_CATEGORY_ORDER.map((slug) => ({
+    id: slug,
+    name: mainCategoryLabel(slug, 'en'),
+    nameAr: mainCategoryLabel(slug, 'ar'),
+    icon: mainCategoryIcon(slug),
+    subcategories: EXPLORE_SUBCATEGORY_ORDER[slug].map((subSlug) =>
+      mockSubcategory(subSlug, slug),
+    ),
+  }));
+}

@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { NavigationChevronBack } from '@/components/ui/NavigationChevron';
 import { useTranslation } from '@/i18n/useTranslation';
-import { ltrNavigationChrome } from '@/utils/navigationChrome';
+import { navigationRowStyle } from '@/utils/rtl';
 import { spacing, useThemeColors } from '@/theme';
 
 type Props = {
@@ -14,18 +14,18 @@ type Props = {
 
 export function DetailHeader({ title, right }: Props) {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, isRTL } = useTranslation();
   const colors = useThemeColors();
 
   return (
-    <View style={[ltrNavigationChrome, styles.row]}>
+    <View style={[navigationRowStyle(isRTL), styles.row]}>
       <Pressable
         onPress={() => router.back()}
         hitSlop={12}
         accessibilityRole="button"
         accessibilityLabel={t('common.a11yGoBack')}
       >
-        <Ionicons name="chevron-back" size={28} color={colors.text} />
+        <NavigationChevronBack size={28} color={colors.icon} />
       </Pressable>
       {title ? (
         <AppText variant="h3" color="text" numberOfLines={1} style={styles.title}>

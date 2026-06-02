@@ -12,7 +12,7 @@ export function userResponseToUser(u: UserResponse): User {
     phone: u.phone,
     avatarUrl: resolveBackendMediaUrl(u.profileImageUrl),
     cityId: '1',
-    membershipTier: 'standard',
+    isPremiumMember: false,
     walletBalance: 0,
     preferredLanguage: 'en',
   };

@@ -18,11 +18,18 @@ import {
 } from '@/components/explore';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { CatalogRouter } from '@/services/catalog/mapCatalog';
+import { isExploreMainCategorySlug } from '@/constants/exploreCategoryTaxonomy';
+import { buildMockExploreCategories } from '@/mock/categories';
 import type { ExploreMainCategory, ExploreSubcategory } from '@/mock/exploreCategories';
+import {
+  fallbackSubcategoriesForParent,
+  subcategoriesFromApi,
+} from '@/utils/categoryLabels';
 import { businessEventSummaryToEventItem } from '@/services/api/eventMap';
 import { MOCK_EVENTS } from '@/services/mock';
 import { useAppStore } from '@/store/appStore';
-import { useReferenceStore } from '@/store/referenceStore';
+import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
+import { localizedCityLabel } from '@/utils/governorateLabels';
 import type { EventItem } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -95,52 +102,95 @@ export default function ExploreScreen() {
   const { t, locale } = useTranslation();
   const r = router as CatalogRouter;
   const categories = useReferenceStore((s) => s.categories);
+  const refStatus = useReferenceStore((s) => s.status);
+  const catalogFromApi = useReferenceStore((s) => s.catalogFromApi);
   const selectedCityId = useAppStore((s) => s.selectedCityId);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const cities = useReferenceStore((s) => s.cities);
 
-  const [subsByParent, setSubsByParent] = useState<Record<string, ExploreSubcategory[]>>({});
+  const [subsByParent, setSubsByParent] = useState<Record<string, ExploreSubcategory[]>>(() => {
+    const seed: Record<string, ExploreSubcategory[]> = {};
+    for (const c of buildMockExploreCategories()) {
+      seed[c.id] = c.subcategories;
+    }
+    return seed;
+  });
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
   const [apiEvents, setApiEvents] = useState<EventItem[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(false);
 
   useEffect(() => {
+    if (refStatus === 'idle') void loadReferenceData();
+  }, [refStatus]);
+
+  useEffect(() => {
     if (categories.length === 0) return;
+
+    const toExploreSub = (
+      rows: ReturnType<typeof fallbackSubcategoriesForParent>,
+    ): ExploreSubcategory[] =>
+      rows.map(({ id, parentId, name, nameAr }) => ({ id, parentId, name, nameAr }));
+
+    const seedFromTaxonomy = () => {
+      const next: Record<string, ExploreSubcategory[]> = {};
+      for (const c of categories) {
+        if (!isExploreMainCategorySlug(c.slug)) continue;
+        next[c.id] = toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
+      }
+      setSubsByParent(next);
+    };
+
+    seedFromTaxonomy();
+
     let cancelled = false;
     void (async () => {
       const next: Record<string, ExploreSubcategory[]> = {};
       for (const c of categories) {
+        if (!isExploreMainCategorySlug(c.slug)) continue;
+        const categoryIdNum = Number(c.id);
+        if (!Number.isFinite(categoryIdNum)) {
+          next[c.id] = toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
+          continue;
+        }
         try {
-          const subs = await listSubcategories(Number(c.id));
+          const subs = await listSubcategories(categoryIdNum);
           if (cancelled) return;
-          next[c.id] = subs
-            .filter((s) => s.active)
-            .map((s) => ({
-              id: String(s.id),
-              parentId: c.id,
-              name: s.name,
-              nameAr: s.name,
-            }));
+          const fromApi = subcategoriesFromApi(c.id, c.slug, subs);
+          next[c.id] =
+            fromApi.length > 0
+              ? toExploreSub(fromApi)
+              : toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
         } catch {
-          next[c.id] = [];
+          next[c.id] = toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
         }
       }
       if (!cancelled) setSubsByParent(next);
     })();
+
     return () => {
       cancelled = true;
     };
   }, [categories]);
 
   const exploreCategories = useMemo<ExploreMainCategory[]>(() => {
-    return categories.map((c) => ({
-      id: c.id,
-      name: c.labelEn,
-      nameAr: c.labelAr,
-      icon: (c.icon as keyof typeof Ionicons.glyphMap) || 'grid-outline',
-      subcategories: subsByParent[c.id] ?? [],
-    }));
+    const source =
+      categories.length > 0 ? categories : buildMockExploreCategories().map((c) => ({
+        id: c.id,
+        slug: c.id,
+        labelEn: c.name,
+        labelAr: c.nameAr,
+        icon: c.icon,
+      }));
+    return source
+      .filter((c) => isExploreMainCategorySlug(c.slug))
+      .map((c) => ({
+        id: c.id,
+        name: c.labelEn,
+        nameAr: c.labelAr,
+        icon: (c.icon as keyof typeof Ionicons.glyphMap) || 'grid-outline',
+        subcategories: subsByParent[c.id] ?? [],
+      }));
   }, [categories, subsByParent]);
 
   useEffect(() => {
@@ -212,11 +262,8 @@ export default function ExploreScreen() {
     ? selectedSubcategories.find((sub) => sub.id === selectedSubcategoryId)
     : undefined;
 
-  const cityLabelForCard = (cityId: string) => {
-    const c = cities.find((x) => x.id === cityId);
-    if (c) return locale === 'ar' ? c.nameAr : c.nameEn;
-    return cityId;
-  };
+  const showCatalogWarning = refStatus === 'error' || (refStatus === 'ready' && !catalogFromApi);
+  const cityLabelForCard = (cityId: string) => localizedCityLabel(cityId, locale, cities);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -269,27 +316,24 @@ export default function ExploreScreen() {
             <AppText variant="h2" color="text">
               {t('explore.categoriesTitle')}
             </AppText>
-          </View>
-          {exploreCategories.length > 0 ? (
-            <ExploreCategoryStrip
-              categories={exploreCategories}
-              selectedCategoryId={selectedCategoryId}
-              onSelectCategory={(id) => {
-                setSelectedCategoryId(id);
-                setSelectedSubcategoryId(null);
-              }}
-              subcategories={selectedSubcategories}
-              selectedSubcategoryId={selectedSubcategoryId}
-              onSelectSubcategory={setSelectedSubcategoryId}
-              locale={locale}
-            />
-          ) : (
-            <View style={[styles.padH, { marginBottom: spacing.md }]}>
-              <AppText variant="caption" color="textMuted">
+            {showCatalogWarning ? (
+              <AppText variant="caption" color="textMuted" style={styles.catalogWarn}>
                 {t('explore.catalogFallbackHint')}
               </AppText>
-            </View>
-          )}
+            ) : null}
+          </View>
+          <ExploreCategoryStrip
+            categories={exploreCategories}
+            selectedCategoryId={selectedCategoryId}
+            onSelectCategory={(id) => {
+              setSelectedCategoryId(id);
+              setSelectedSubcategoryId(null);
+            }}
+            subcategories={selectedSubcategories}
+            selectedSubcategoryId={selectedSubcategoryId}
+            onSelectSubcategory={setSelectedSubcategoryId}
+            locale={locale}
+          />
 
           <View style={[styles.sectionHead, styles.padH]}>
             <AppText variant="h2" color="text">
@@ -361,6 +405,10 @@ function createStyles(colors: ThemeColors) {
       gap: 4,
     },
     padH: { paddingHorizontal: spacing.screen },
+    catalogWarn: {
+      lineHeight: 18,
+      marginTop: 2,
+    },
     horizontalPad: { paddingHorizontal: spacing.screen },
     feed: { paddingHorizontal: spacing.screen, paddingTop: spacing.sm },
     emptyCard: {

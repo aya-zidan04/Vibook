@@ -1,0 +1,130 @@
+Add an extremely subtle ambient gradient to the Me profile header card.
+
+Important:
+The gradient should be barely visible.
+
+Goal:
+Add depth and richness without making the card look colorful or busy.
+
+Light mode:
+
+Card base:
+#DCE7CC
+
+Gradient:
+top-left:
+rgba(167,220,43,0.08)
+
+center:
+transparent
+
+bottom-right:
+rgba(139,194,73,0.06)
+
+Dark mode:
+
+Keep current dark card.
+
+Add a very subtle ambient glow:
+
+top-left:
+rgba(167,220,43,0.10)
+
+center:
+transparent
+
+bottom-right:
+rgba(139,194,73,0.06)
+
+Rules:
+
+* No visible color bands.
+* No strong gradients.
+* No radial blobs.
+* No neon effect.
+* User should barely notice it.
+* The card should simply feel richer and less flat.
+
+Keep:
+
+* Existing borders.
+* Existing typography.
+* Existing shadows.
+* Existing button gradient.
+* Existing layout.
+
+Apply the same subtle ambient treatment to:
+
+* Me profile header card
+* Business hero/profile cards
+* Similar hero cards in the app
+
+Do NOT apply it to:
+
+* Standard list rows
+* Tables
+* Settings rows
+* Small cards
+
+The effect should feel like premium glass-free depth, not a decorative gradient.
+---
+description: Admin Web theme is locked — no color changes without explicit user approval
+globs: admin-web/**/*
+alwaysApply: true
+---
+
+# Admin Web theme is LOCKED
+
+The Admin Web color system is **approved and frozen**. Do not redesign, retune, or refactor theme colors unless the user **explicitly** requests it.
+
+## Status
+
+- LOCKED
+- APPROVED
+- DO NOT MODIFY WITHOUT EXPLICIT USER APPROVAL
+
+## Protected (do not change)
+
+- Light mode palette
+- Dark mode palette
+- Theme tokens (`--vb-*`, `--palette-*`)
+- Sidebar colors
+- Header / topbar colors
+- Page background colors
+- Card / surface colors
+- Button colors
+- Accent colors
+- Shadows, borders, and contrast values tied to the theme
+
+Protected sources:
+
+- `admin-web/src/theme/palette-colors.css`
+- `admin-web/src/theme/admin-theme.css`
+- `admin-web/src/theme/colors.ts`
+- `admin-web/src/styles/admin-components.css` (color/shadow/border tokens only)
+- Any admin-web component inline `style` colors or hardcoded `#` / `rgba()` values
+
+## Required for all future Admin Web UI work
+
+- Reuse existing theme tokens only
+- Follow the approved color system
+- Preserve visual consistency
+- Never introduce new colors without explicit approval
+- Never hardcode colors in components — use `--vb-*` variables
+
+## Allowed without color approval
+
+- Bug fixes (non-color)
+- Layout, spacing, alignment
+- Responsive fixes
+- Accessibility fixes that do not change theme tokens (e.g. ARIA, focus order)
+- Component improvements using existing tokens
+- New screens/features styled with existing tokens
+
+## Before any Admin Web color-related change
+
+1. **Stop and warn the user** that the change affects the approved theme system.
+2. **Do not proceed** until the user explicitly approves the color change.
+3. Prefer token reuse over new values; prefer layout/structure fixes over color tweaks.
+
+Treat the current Admin Web theme as the design baseline.

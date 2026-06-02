@@ -15,7 +15,9 @@ com/vibook/backend/service/impl/ModerationReportSubmissionServiceImpl$1.class
 com/vibook/backend/service/RefreshTokenService.class
 com/vibook/backend/mapper/BusinessEventMapper.class
 com/vibook/backend/entity/PaymentMethod.class
+com/vibook/backend/repository/UserReportRepository.class
 com/vibook/backend/config/CorsConfig.class
+com/vibook/backend/service/impl/UserReportSubmissionServiceImpl.class
 com/vibook/backend/dto/NameCountResponse.class
 com/vibook/backend/service/AdminEventRatingModerationService.class
 com/vibook/backend/mapper/BookingMapper.class
@@ -26,6 +28,7 @@ com/vibook/backend/repository/EventRatingRepository.class
 com/vibook/backend/dto/BusinessEventUpsertRequest.class
 com/vibook/backend/service/impl/BusinessEventServiceImpl.class
 com/vibook/backend/entity/RefreshToken.class
+com/vibook/backend/dto/AdminUserReportResponse.class
 com/vibook/backend/spec/BusinessProfileAdminSpecs.class
 com/vibook/backend/mapper/FavoriteMapper.class
 com/vibook/backend/dto/UpdateUserRequest.class
@@ -37,7 +40,9 @@ com/vibook/backend/service/impl/AuthServiceImpl.class
 com/vibook/backend/dto/LogoutRequest.class
 com/vibook/backend/dto/TimeSeriesPointResponse.class
 com/vibook/backend/service/AdminModerationReportService.class
+com/vibook/backend/service/impl/AdminUserReportServiceImpl.class
 com/vibook/backend/service/ConsumerEventService.class
+com/vibook/backend/controller/AdminUserReportController.class
 com/vibook/backend/dto/AdminActivityLogResponse.class
 com/vibook/backend/repository/BusinessEventRepository.class
 com/vibook/backend/dto/ErrorResponse.class
@@ -57,10 +62,12 @@ com/vibook/backend/service/impl/AdminUserServiceImpl.class
 com/vibook/backend/service/AdminAnalyticsService.class
 com/vibook/backend/entity/User.class
 com/vibook/backend/dto/AdminEventNotesRequest.class
+com/vibook/backend/entity/UserReportStatus.class
 com/vibook/backend/mapper/BusinessProfileMapper.class
 com/vibook/backend/dto/PaymentMethodResponse.class
 com/vibook/backend/repository/UserRepository.class
 com/vibook/backend/controller/BookingController.class
+com/vibook/backend/service/AdminUserReportService.class
 com/vibook/backend/dto/CategoryUpdateRequest.class
 com/vibook/backend/repository/BookingRepository.class
 com/vibook/backend/service/impl/ConsumerEventServiceImpl.class
@@ -70,6 +77,7 @@ com/vibook/backend/config/CorsProperties.class
 com/vibook/backend/exception/ResourceNotFoundException.class
 com/vibook/backend/dto/AdminDashboardStatsResponse.class
 com/vibook/backend/mapper/GovernorateMapper.class
+com/vibook/backend/dto/UserReportCreatedResponse.class
 com/vibook/backend/service/BusinessProfileService.class
 com/vibook/backend/mapper/PaymentMethodMapper.class
 com/vibook/backend/entity/Role.class
@@ -88,6 +96,7 @@ com/vibook/backend/dto/AuthResponse.class
 com/vibook/backend/dto/EventRatingResponse.class
 com/vibook/backend/dto/GovernorateResponse.class
 com/vibook/backend/controller/AdminModerationReportController.class
+com/vibook/backend/controller/UserReportController.class
 com/vibook/backend/service/ProfileImageStorageService.class
 com/vibook/backend/config/GovernorateSeederConfig.class
 com/vibook/backend/service/impl/AdminActivityLogServiceImpl.class
@@ -96,6 +105,7 @@ com/vibook/backend/repository/CategoryRepository.class
 com/vibook/backend/controller/GovernorateController.class
 com/vibook/backend/config/CategoryDataLoader.class
 com/vibook/backend/dto/BulkBusinessProfileRejectRequest.class
+com/vibook/backend/entity/UserReport.class
 com/vibook/backend/exception/GlobalExceptionHandler.class
 com/vibook/backend/entity/BusinessProfile.class
 com/vibook/backend/service/impl/AdminBookingModerationServiceImpl.class
@@ -112,6 +122,7 @@ com/vibook/backend/dto/AdminReportResolveRequest.class
 com/vibook/backend/dto/CategoryCreateRequest.class
 com/vibook/backend/controller/UserController.class
 com/vibook/backend/entity/Booking.class
+com/vibook/backend/dto/AdminUserReportStatusRequest.class
 com/vibook/backend/service/impl/UserServiceImpl.class
 com/vibook/backend/security/CustomUserDetailsService.class
 com/vibook/backend/controller/AdminAnalyticsController.class
@@ -175,6 +186,7 @@ com/vibook/backend/dto/ModerationReportCreatedResponse.class
 com/vibook/backend/entity/ModerationReport.class
 com/vibook/backend/service/impl/FavoriteServiceImpl.class
 com/vibook/backend/entity/ModerationReportType.class
+com/vibook/backend/dto/CreateUserReportRequest.class
 com/vibook/backend/dto/EventRatingRequest.class
 com/vibook/backend/dto/BusinessEventSummaryResponse.class
 com/vibook/backend/controller/BusinessProfileController.class
@@ -193,6 +205,7 @@ com/vibook/backend/entity/BusinessEventTimeSlot.class
 com/vibook/backend/dto/MessageResponse.class
 com/vibook/backend/controller/AdminBusinessProfileController.class
 com/vibook/backend/dto/AdminEventDetailPayload.class
+com/vibook/backend/service/UserReportSubmissionService.class
 com/vibook/backend/service/impl/ProfileImageStorageServiceImpl$StorageRoot.class
 com/vibook/backend/dto/RefreshTokenRequest.class
 com/vibook/backend/controller/AdminGovernorateStatsController.class

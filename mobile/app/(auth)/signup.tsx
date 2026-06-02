@@ -2,14 +2,16 @@ import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthScreenLayout } from '@/components/auth/AuthScreenLayout';
 import { AuthTextField, PasswordToggleIcon } from '@/components/auth/AuthTextField';
-import { Screen } from '@/components/layout/Screen';
+import { JordanPhoneField } from '@/components/auth/JordanPhoneField';
+import { BusinessFieldIconSlot } from '@/components/business/businessFieldRow';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { registerRequest } from '@/api/authApi';
 import { saveAuthResponse } from '@/api/authSession';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { useAppStore } from '@/store/appStore';
 import { useSessionStore } from '@/store/sessionStore';
 import {
@@ -17,7 +19,6 @@ import {
   isValidJordanLocalPhone,
   isValidSignupPassword,
 } from '@/utils/authValidation';
-import { ltrNavigationChrome } from '@/utils/navigationChrome';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -64,6 +65,10 @@ export default function SignupScreen() {
     setPhone(d);
   };
 
+  const goLogin = () => {
+    router.replace('/login');
+  };
+
   const onCreate = () => {
     if (!canCreate || busy) return;
     setBusy(true);
@@ -84,8 +89,7 @@ export default function SignupScreen() {
         setHasCompletedOnboarding(true);
         router.replace('/(tabs)/explore');
       } catch (e) {
-        const msg = e instanceof ApiError ? e.message : t('common.error');
-        Alert.alert(t('auth.signupTitle'), msg);
+        Alert.alert(t('auth.signupTitle'), mapApiError(e, t));
       } finally {
         setBusy(false);
       }
@@ -95,21 +99,7 @@ export default function SignupScreen() {
   const btnFull = { width: '100%' as const };
 
   return (
-    <Screen scroll edges={['top', 'right', 'left', 'bottom']} contentStyle={styles.scroll}>
-      <View style={ltrNavigationChrome}>
-        <View style={styles.grabber} />
-
-        <Pressable
-          onPress={() => router.back()}
-          style={styles.backRow}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-        >
-          <Ionicons name="chevron-back" size={28} color={colors.text} />
-        </Pressable>
-      </View>
-
+    <AuthScreenLayout onBack={goLogin}>
       <AppText variant="h1" color="text" style={styles.title}>
         {t('auth.signupTitle')}
       </AppText>
@@ -140,10 +130,15 @@ export default function SignupScreen() {
         value={email}
         onChangeText={setEmail}
         placeholder={t('auth.emailPlaceholder')}
-        helper={t('auth.emailHelper')}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        technicalInput
+        leftSlot={
+          <BusinessFieldIconSlot>
+            <Ionicons name="mail-outline" size={20} color={colors.primary} />
+          </BusinessFieldIconSlot>
+        }
       />
 
       <AuthTextField
@@ -151,32 +146,17 @@ export default function SignupScreen() {
         value={password}
         onChangeText={setPassword}
         placeholder="••••••••"
-        helper={t('auth.passwordHelper')}
         secureTextEntry={!showPassword}
         autoCapitalize="none"
         autoCorrect={false}
         rightSlot={<PasswordToggleIcon visible={showPassword} onToggle={() => setShowPassword((v) => !v)} />}
       />
 
-      <AuthTextField
+      <JordanPhoneField
         label={t('auth.phone')}
         value={phone}
         onChangeText={onPhoneChange}
         placeholder={t('auth.phonePlaceholder')}
-        keyboardType="number-pad"
-        autoCorrect={false}
-        textInputStyle={styles.phoneInput}
-        leftSlot={
-          <View style={styles.phonePrefix}>
-            <AppText variant="h2">
-              🇯🇴
-            </AppText>
-            <AppText variant="body-em" color="textSecondary">
-              +962
-            </AppText>
-            <View style={styles.phoneSep} />
-          </View>
-        }
       />
 
       <Pressable
@@ -192,7 +172,7 @@ export default function SignupScreen() {
           {t('auth.agreePrefix')}{' '}
           <AppText
             variant="caption"
-            color="accent"
+            color="primaryLight"
             style={styles.link}
             onPress={() => Alert.alert(t('auth.termsMockTitle'), t('auth.termsMockBody'))}
           >
@@ -201,7 +181,7 @@ export default function SignupScreen() {
           {t('auth.and')}{' '}
           <AppText
             variant="caption"
-            color="accent"
+            color="primaryLight"
             style={styles.link}
             onPress={() => Alert.alert(t('auth.privacy'), t('auth.termsMockBody'))}
           >
@@ -215,7 +195,7 @@ export default function SignupScreen() {
         title={t('auth.createAccountSubmit')}
         onPress={onCreate}
         disabled={!canCreate || busy}
-        style={{ ...btnFull, marginTop: spacing.md }}
+        style={{ ...btnFull, marginTop: spacing.sm }}
       />
 
       <Pressable
@@ -231,93 +211,57 @@ export default function SignupScreen() {
           {t('auth.browseFirstLink')}
         </AppText>
       </Pressable>
-    </Screen>
+    </AuthScreenLayout>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  scroll: {
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xxxl,
-  },
-  grabber: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.borderLight,
-    alignSelf: 'center',
-    marginBottom: spacing.md,
-    opacity: 0.85,
-  },
-  backRow: {
-    alignSelf: 'flex-start',
-    marginBottom: spacing.md,
-  },
-  title: {
-    marginBottom: spacing.xl,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: 0,
-  },
-  nameHalf: {
-    flex: 1,
-  },
-  phonePrefix: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingStart: spacing.sm,
-  },
-  phoneSep: {
-    width: 1,
-    height: 26,
-    backgroundColor: colors.border,
-  },
-  phoneInput: {
-    // Keep phone numerals LTR inside the field in RTL layouts
-    textAlign: 'left',
-    writingDirection: 'ltr',
-  },
-  termsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: radii.xs,
-    borderWidth: 1.5,
-    borderColor: colors.borderLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2,
-    backgroundColor: colors.surface,
-  },
-  checkboxOn: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primaryMuted,
-  },
-  termsText: {
-    flex: 1,
-  },
-  link: {
-    color: colors.accent,
-    textDecorationLine: 'underline',
-  },
-  browseLink: {
-    alignSelf: 'center',
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  browseUnderline: {
-    textDecorationLine: 'underline',
-  },
-});
-
+    title: {
+      marginBottom: spacing.lg,
+    },
+    nameRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    nameHalf: {
+      flex: 1,
+    },
+    termsRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.md,
+      marginTop: spacing.xs,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: radii.xs,
+      borderWidth: 1.5,
+      borderColor: colors.borderLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 2,
+      backgroundColor: colors.surface,
+    },
+    checkboxOn: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryMuted,
+    },
+    termsText: {
+      flex: 1,
+    },
+    link: {
+      color: colors.primaryLight,
+      textDecorationLine: 'underline',
+    },
+    browseLink: {
+      alignSelf: 'center',
+      marginTop: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    browseUnderline: {
+      textDecorationLine: 'underline',
+    },
+  });
 }

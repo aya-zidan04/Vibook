@@ -246,7 +246,7 @@ flowchart LR
     "phone": "string",
     "avatarUrl": "string",
     "cityId": "string",
-    "membershipTier": "standard | gold | platinum",
+    "isPremiumMember": true,
     "walletBalance": 0,
     "preferredLanguage": "en | ar"
   },

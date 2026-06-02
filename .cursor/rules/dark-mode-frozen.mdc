@@ -1,0 +1,41 @@
+---
+description: Dark Mode palette is locked — see mobile-theme-locked.mdc (superseded scope)
+alwaysApply: true
+---
+
+# Dark Mode palette is frozen
+
+The Mobile app **Dark Mode** color palette is **locked**. Do not modify dark-mode colors unless the user **explicitly** requests it.
+
+**Light mode is also locked.** See `.cursor/rules/mobile-theme-locked.mdc` for the full approved mobile theme system (both modes).
+
+## Protected (do not change in dark mode)
+
+- Background colors
+- Surface / card colors
+- Text colors
+- Accent colors
+- Button colors
+- Border colors
+- Gradients
+- Overlays
+- Shadows and visual depth colors
+
+Relevant sources: `mobile/src/theme/`, palette files, semantic tokens, and component hardcoded dark-theme colors.
+
+## Allowed without color approval
+
+- Layout, spacing, alignment
+- Typography sizing (not color)
+- Icons and icon placement (using existing token colors only)
+- Components and structure
+- RTL / LTR behavior
+- Functionality
+
+## Before any dark-mode color change
+
+1. **Ask for approval first** if the task would touch dark-mode tokens, theme values, semantic colors, or component colors used in dark mode.
+2. Prefer layout/structure fixes over color tweaks when improving contrast or hierarchy in dark mode.
+3. Do **not** change light-mode or dark-mode theme tokens without explicit user approval.
+
+Treat the current Dark Mode theme as design-frozen and protected from automatic modifications.

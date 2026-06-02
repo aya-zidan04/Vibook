@@ -21,10 +21,6 @@ export {
   MOCK_VOUCHERS,
 } from '@/mock';
 
-/** Membership catalogue (mock). */
-export {
-  MEMBERSHIP_PLANS,
-  TIER_TO_PLAN_ID,
-  getPlanById,
-} from '@/mock/membershipPlans';
-export type { MembershipPlan, MembershipPlanId } from '@/mock/membershipPlans';
+/** Premium membership (mock). */
+export { PREMIUM_PLAN } from '@/mock/membershipPlans';
+export type { PremiumPlan } from '@/mock/membershipPlans';

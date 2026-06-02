@@ -21,7 +21,7 @@ export default function ConfirmationScreen() {
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
       <View style={styles.inner}>
         <View style={styles.iconWrap}>
-          <Ionicons name="checkmark-circle" size={72} color={colors.accent} />
+          <Ionicons name="checkmark-circle" size={72} color={colors.primaryLight} />
         </View>
         <AppText variant="h1" color="text" style={styles.title}>
           {t('confirmation.title')}

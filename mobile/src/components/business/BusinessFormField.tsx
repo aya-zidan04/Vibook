@@ -1,11 +1,16 @@
 import type { ComponentProps } from 'react';
 import { useMemo, useState } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField } from '@/components/auth/AuthTextField';
+import {
+  BusinessFieldIconSlot,
+  businessFieldRowStyle,
+} from '@/components/business/businessFieldRow';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
-import { textAlignStart } from '@/utils/rtlText';
+import { textAlignStart, leadingIconRowStyle } from '@/utils/rtlText';
 import { useLocaleStore } from '@/store/localeStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import { inputTextStyle } from '@/theme/typography';
@@ -13,22 +18,12 @@ import type { ThemeColors } from '@/theme/palettes';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
-function fieldRowPremium(colors: ThemeColors) {
-  return {
-    minHeight: 54,
-    borderRadius: radii.xl,
-    backgroundColor: colors.surfaceMuted,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
-  };
-}
-
 function IconSlot({ name }: { name: IconName }) {
   const colors = useThemeColors();
   return (
-    <View style={[styles.iconSlot, { backgroundColor: colors.primaryMuted }]}>
+    <BusinessFieldIconSlot>
       <Ionicons name={name} size={20} color={colors.primary} />
-    </View>
+    </BusinessFieldIconSlot>
   );
 }
 
@@ -41,6 +36,10 @@ type TextFieldProps = {
   keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'number-pad';
   autoCapitalize?: 'none' | 'sentences' | 'words';
   autoCorrect?: boolean;
+  fieldRowStyle?: object;
+  highlightOnFocus?: boolean;
+  wrapperStyle?: StyleProp<ViewStyle>;
+  technicalInput?: boolean;
 };
 
 export function BusinessIconTextField({
@@ -52,6 +51,10 @@ export function BusinessIconTextField({
   keyboardType,
   autoCapitalize,
   autoCorrect,
+  fieldRowStyle,
+  highlightOnFocus,
+  wrapperStyle,
+  technicalInput,
 }: TextFieldProps) {
   const colors = useThemeColors();
   return (
@@ -64,8 +67,10 @@ export function BusinessIconTextField({
       autoCapitalize={autoCapitalize}
       autoCorrect={autoCorrect}
       leftSlot={<IconSlot name={icon} />}
-      fieldRowStyle={fieldRowPremium(colors)}
-      highlightOnFocus
+      fieldRowStyle={fieldRowStyle ?? businessFieldRowStyle(colors)}
+      highlightOnFocus={highlightOnFocus ?? true}
+      wrapperStyle={wrapperStyle}
+      technicalInput={technicalInput ?? false}
     />
   );
 }
@@ -98,7 +103,7 @@ export function BusinessIconMultiline({
       <AppText variant="label" color="text">
         {label}
       </AppText>
-      <View style={[styles.row, focused && { borderColor: colors.primary, borderWidth: 1.5 }]}>
+      <View style={[styles.row, leadingIconRowStyle, focused && { borderColor: colors.primary, borderWidth: 1.5 }]}>
         <View style={styles.iconCol}>
           <IconSlot name={icon} />
         </View>
@@ -106,7 +111,7 @@ export function BusinessIconMultiline({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.placeholder}
           multiline
           textAlignVertical="top"
           onFocus={() => setFocused(true)}
@@ -127,16 +132,6 @@ export function BusinessIconMultiline({
   );
 }
 
-const styles = StyleSheet.create({
-  iconSlot: {
-    width: 40,
-    height: 40,
-    borderRadius: radii.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
-
 function createMultilineStyles(colors: ThemeColors) {
   return StyleSheet.create({
     wrap: {
@@ -144,7 +139,6 @@ function createMultilineStyles(colors: ThemeColors) {
       marginBottom: spacing.md,
     },
     row: {
-      flexDirection: 'row',
       alignItems: 'flex-start',
       borderRadius: radii.xl,
       backgroundColor: colors.surfaceMuted,

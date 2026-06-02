@@ -3,8 +3,8 @@ import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { SecondaryButton } from '@/components/ui/Button';
+import { useTranslation } from '@/i18n/useTranslation';
 import { spacing, useThemeColors } from '@/theme';
-import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
   title?: string;
@@ -12,25 +12,25 @@ type Props = {
   onRetry?: () => void;
 };
 
-export function ErrorState({
-  title = 'Something went wrong',
-  message = 'Check your connection and try again.',
-  onRetry,
-}: Props) {
+export function ErrorState({ title, message, onRetry }: Props) {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(), []);
+
+  const displayTitle = title ?? t('common.errorDefaultTitle');
+  const displayMessage = message ?? t('common.errorDefaultMessage');
 
   return (
     <View style={styles.wrap}>
       <Ionicons name="cloud-offline-outline" size={40} color={colors.error} />
       <AppText variant="h3" color="text" style={styles.title}>
-        {title}
+        {displayTitle}
       </AppText>
       <AppText variant="body" color="textSecondary" style={styles.msg}>
-        {message}
+        {displayMessage}
       </AppText>
       {onRetry ? (
-        <SecondaryButton title="Try again" onPress={onRetry} style={styles.btn} />
+        <SecondaryButton title={t('common.retry')} onPress={onRetry} style={styles.btn} />
       ) : null}
     </View>
   );

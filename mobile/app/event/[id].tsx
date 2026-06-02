@@ -9,19 +9,19 @@ import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
+import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useEventPdp, useOrganizerForEvent } from '@/hooks/useCatalogPdp';
-import { getCityName } from '@/services/mock';
+import { localizedCityLabel } from '@/utils/governorateLabels';
 import { useAppStore } from '@/store/appStore';
 import { useReferenceStore } from '@/store/referenceStore';
 import { ratingKey } from '@/services/ratings';
 import { useUserRatingsStore } from '@/store/userRatingsStore';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
-import { chevronForwardTrailing } from '@/utils/rtl';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { useLocaleStore } from '@/store/localeStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
@@ -45,9 +45,7 @@ export default function EventDetailScreen() {
 
   const cityDisplay = useMemo(() => {
     if (!event) return '';
-    const c = cities.find((x) => x.id === event.cityId);
-    if (c) return locale === 'ar' ? c.nameAr : c.nameEn;
-    return getCityName(event.cityId, locale);
+    return localizedCityLabel(event.cityId, locale, cities);
   }, [cities, event, locale]);
 
   useEffect(() => {
@@ -126,8 +124,8 @@ export default function EventDetailScreen() {
       quantity: qty,
       fees,
       startsAt: event.startAt,
-      cityName: cities.find((x) => x.id === event.cityId)?.nameEn ?? getCityName(event.cityId, 'en'),
-      cityNameAr: cities.find((x) => x.id === event.cityId)?.nameAr ?? getCityName(event.cityId, 'ar'),
+      cityName: localizedCityLabel(event.cityId, 'en', cities),
+      cityNameAr: localizedCityLabel(event.cityId, 'ar', cities),
       tierName: activeTier.name,
       metaLine: `${formatMoney(lineTotal, currency)} ${t('event.plusFees')}`,
     });
@@ -149,7 +147,7 @@ export default function EventDetailScreen() {
               <DetailHeader
                 right={
                   <Pressable hitSlop={8}>
-                    <Ionicons name="share-outline" size={22} color={colors.text} />
+                    <Ionicons name="share-outline" size={22} color={colors.icon} />
                   </Pressable>
                 }
               />
@@ -205,7 +203,7 @@ export default function EventDetailScreen() {
                     {t('event.organizer')} · {organizer.verified ? t('organizer.verified') : t('event.host')}
                   </AppText>
                 </View>
-                <Ionicons name={chevronForwardTrailing()} size={18} color={colors.textMuted} />
+                <NavigationChevronForward size={18} color={colors.icon} />
               </Pressable>
             ) : null}
 
@@ -239,7 +237,7 @@ export default function EventDetailScreen() {
                         </AppText>
                       ) : null}
                     </View>
-                    <AppText variant="h3" color="accent">
+                    <AppText variant="h3" color="primaryLight">
                       {formatMoney(tier.price, tier.currency)}
                     </AppText>
                   </Pressable>

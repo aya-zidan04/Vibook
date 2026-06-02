@@ -28,25 +28,18 @@ export default function SettingsScreen() {
         key: 'appearance',
         label: t('settings.appearance'),
         subtitle: appearanceLabel,
-        icon: <Ionicons name="moon-outline" size={22} color={colors.primary} />,
+        icon: <Ionicons name="moon-outline" size={22} color={colors.primaryLight} />,
         href: '/appearance' as const,
       },
       {
         key: 'language',
         label: t('me.menuLanguage'),
         subtitle: `${languageLabel} · ${currency}`,
-        icon: <Ionicons name="language-outline" size={22} color={colors.primary} />,
+        icon: <Ionicons name="language-outline" size={22} color={colors.primaryLight} />,
         href: '/language-currency' as const,
       },
-      {
-        key: 'notifications',
-        label: t('me.menuNotif'),
-        subtitle: undefined,
-        icon: <Ionicons name="notifications-outline" size={22} color={colors.primary} />,
-        href: '/notifications' as const,
-      },
     ],
-    [appearanceLabel, colors.primary, currency, languageLabel, t],
+    [appearanceLabel, colors.primaryLight, currency, languageLabel, t],
   );
 
   return (

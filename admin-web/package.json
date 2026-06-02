@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "check:api": "node ../scripts/check-admin-api-base.mjs",
+    "check:i18n": "node scripts/check-i18n-keys.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

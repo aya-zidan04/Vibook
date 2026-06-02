@@ -4,13 +4,18 @@ export type { TypographyVariant } from './typography';
 export { createShadows, shadows, shadowTokensFor } from './shadows';
 export type { ThemeColors } from './palettes';
 export { darkPalette, lightPalette, fadeFromBackground, semanticToThemeColors } from './palettes';
+export { lightColors, darkColors } from './paletteColors';
+export type { LightPalette, DarkPalette } from './paletteColors';
 export {
   brand,
   paletteAccentPink,
+  paletteAccent,
   lightTheme,
   darkTheme,
   themeForMode,
   colorUsageGuide,
+  lightPaletteSwatches,
+  darkPaletteSwatches,
   type AppTheme,
   type SemanticColors,
   type ThemeGradients,
@@ -28,7 +33,12 @@ export {
 } from './ambient';
 export { elevatedCardStyle } from './elevatedSurfaces';
 export { PageShell } from '@/components/layout/PageShell';
-export { APP_BACKGROUND_COLORS, APP_BACKGROUND_BASE } from './appBackground';
+export {
+  APP_BACKGROUND_COLORS,
+  APP_BACKGROUND_BASE,
+  appBackgroundColorsFor,
+  appBackgroundBaseFor,
+} from './appBackground';
 export { AppBackground } from '@/components/ui/AppBackground';
 export type { ThemeGradients as Gradients } from './gradients';
 export { colors, fadePlum } from './colors';

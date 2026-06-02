@@ -6,7 +6,7 @@ import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { addPaymentMethod } from '@/api/paymentMethodsApi';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { useTranslation } from '@/i18n/useTranslation';
 import { spacing } from '@/theme';
 
@@ -83,8 +83,7 @@ export default function AddPaymentMethodScreen() {
           { text: t('common.ok'), onPress: () => router.back() },
         ]);
       } catch (e) {
-        const msg = e instanceof ApiError ? e.message : t('common.error');
-        Alert.alert(t('common.error'), msg);
+        Alert.alert(t('common.error'), mapApiError(e, t));
       }
     })();
   };

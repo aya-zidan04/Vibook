@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/auth/useAuth';
 import {
-  fetchActivityLog,
   fetchAnalyticsSummary,
   fetchBusinessProfilesPage,
 } from '@/api/adminApi';
 import type {
-  AdminActivityLogResponse,
   AdminAnalyticsSummaryResponse,
   BusinessProfileResponse,
   NameCountResponse,
@@ -32,8 +30,9 @@ import {
 } from '@/components/ui/icons';
 import { StatCardSkeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { activityActionLabel } from '@/utils/activityLogLabel';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
+import { localizedGovernorateName } from '@/utils/governorateLabels';
 import { formatDateTime } from '@/utils/format';
 import { sumLastDays } from '@/utils/timeSeries';
 
@@ -53,11 +52,22 @@ function emptySpringPage<T>(): { content: T[] } {
   return { content: [] };
 }
 
-function RankedList({ title, rows, emptyHint }: { title: string; rows: NameCountResponse[]; emptyHint: string }) {
+function RankedList({
+  title,
+  rows,
+  emptyHint,
+  formatName,
+}: {
+  title: string;
+  rows: NameCountResponse[];
+  emptyHint: string;
+  formatName?: (name: string) => string;
+}) {
+  const { t } = useAdminI18n();
   return (
     <div className="vb-chart-card vb-animate-in">
       <h4 className="vb-chart-card__title">{title}</h4>
-      <p className="vb-chart-card__hint">Based on live business profiles.</p>
+      <p className="vb-chart-card__hint">{t('dashboard.rankHint')}</p>
       {rows.length === 0 ? (
         <p className="vb-muted" style={{ margin: 0 }}>
           {emptyHint}
@@ -66,7 +76,7 @@ function RankedList({ title, rows, emptyHint }: { title: string; rows: NameCount
         <ol className="vb-rank-list">
           {rows.map((r) => (
             <li key={r.name}>
-              <span className="vb-rank-list__name">{r.name}</span>
+              <span className="vb-rank-list__name">{formatName ? formatName(r.name) : r.name}</span>
               <span className="vb-rank-list__count">{r.count}</span>
             </li>
           ))}
@@ -76,31 +86,20 @@ function RankedList({ title, rows, emptyHint }: { title: string; rows: NameCount
   );
 }
 
-const FEED_ACTIONS = new Set<string>([
-  'APPROVE_BUSINESS_PROFILE',
-  'REJECT_BUSINESS_PROFILE',
-  'BULK_APPROVE_BUSINESS_PROFILES',
-  'BULK_REJECT_BUSINESS_PROFILES',
-  'ENABLE_USER',
-  'DISABLE_USER',
-  'UPDATE_USER_ROLES',
-]);
-
 type DashboardState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
   | {
       status: 'ok';
       analytics: AdminAnalyticsSummaryResponse;
-      activityFeed: AdminActivityLogResponse[];
       pendingPreview: BusinessProfileResponse[];
       recentProfiles: BusinessProfileResponse[];
     };
 
 export function DashboardPage() {
+  const { t, locale } = useAdminI18n();
   const { user } = useAuth();
   const [state, setState] = useState<DashboardState>({ status: 'loading' });
-  /** Increment to re-run the dashboard data effect (retry). */
   const [loadKey, setLoadKey] = useState(0);
 
   useEffect(() => {
@@ -110,26 +109,20 @@ export function DashboardPage() {
         const analyticsRaw = await fetchAnalyticsSummary();
         if (cancelled) return;
 
-        const [activityRes, pendingRes, recentRes] = await Promise.allSettled([
-          fetchActivityLog({ page: 0, size: 20 }),
+        const [pendingRes, recentRes] = await Promise.allSettled([
           fetchBusinessProfilesPage({ status: 'PENDING_REVIEW', page: 0, size: 5, sort: 'createdAt,asc' }),
           fetchBusinessProfilesPage({ page: 0, size: 6, sort: 'createdAt,desc' }),
         ]);
 
-        const activityPage =
-          activityRes.status === 'fulfilled' ? activityRes.value : emptySpringPage<AdminActivityLogResponse>();
         const pendingPage =
           pendingRes.status === 'fulfilled' ? pendingRes.value : emptySpringPage<BusinessProfileResponse>();
         const recentPage =
           recentRes.status === 'fulfilled' ? recentRes.value : emptySpringPage<BusinessProfileResponse>();
 
-        const activityFeed = activityPage.content.filter((e) => FEED_ACTIONS.has(e.action)).slice(0, 12);
-
         if (cancelled) return;
         setState({
           status: 'ok',
           analytics: normalizeAnalytics(analyticsRaw),
-          activityFeed,
           pendingPreview: pendingPage.content,
           recentProfiles: recentPage.content,
         });
@@ -137,7 +130,7 @@ export function DashboardPage() {
         if (!cancelled) {
           setState({
             status: 'error',
-            message: getFriendlyErrorMessage(e, 'Could not load dashboard.'),
+            message: getFriendlyErrorMessage(e, t('dashboard.loadError')),
           });
         }
       }
@@ -145,14 +138,14 @@ export function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [loadKey]);
+  }, [loadKey, t]);
 
   if (state.status === 'loading') {
     return (
       <div className="vb-page vb-dashboard">
         <div className="vb-dashboard-hero vb-dashboard-hero--skeleton vb-skeleton" />
         <p className="vb-dashboard-section-label" style={{ marginTop: 'var(--vb-space-xxl)' }}>
-          Metrics
+          {t('dashboard.metrics')}
         </p>
         <div className="vb-stat-grid vb-dashboard-stat-grid">
           {Array.from({ length: 10 }).map((_, i) => (
@@ -167,7 +160,7 @@ export function DashboardPage() {
     return (
       <div className="vb-page vb-dashboard">
         <EmptyState
-          title="Dashboard unavailable"
+          title={t('dashboard.unavailable')}
           description={state.message}
           decor
           action={
@@ -180,7 +173,7 @@ export function DashboardPage() {
                 setLoadKey((k) => k + 1);
               }}
             >
-              Retry loading dashboard
+              {t('dashboard.retry')}
             </button>
           }
         />
@@ -188,8 +181,8 @@ export function DashboardPage() {
     );
   }
 
-  const { analytics, activityFeed, pendingPreview, recentProfiles } = state;
-  const first = user?.firstName?.trim() || 'there';
+  const { analytics, pendingPreview, recentProfiles } = state;
+  const first = user?.firstName?.trim() || t('dashboard.welcomeThere');
   const newUsers7d = sumLastDays(analytics.newUsersByDay, 7);
 
   return (
@@ -201,178 +194,151 @@ export function DashboardPage() {
         newUsers7d={newUsers7d}
       />
 
-      <p className="vb-dashboard-section-label">Metrics</p>
+      <p className="vb-dashboard-section-label">{t('dashboard.metrics')}</p>
       <div className="vb-stat-grid vb-dashboard-stat-grid">
-        <StatCard label="Total users" value={analytics.totalUsers} hint="Registered accounts" icon={<IconUsers />} />
-        <StatCard label="Active users" value={analytics.activeUsers} hint="Enabled accounts" icon={<IconCheck />} />
+        <StatCard label={t('dashboard.statTotalUsers')} value={analytics.totalUsers} hint={t('dashboard.statTotalUsersHint')} icon={<IconUsers />} />
+        <StatCard label={t('dashboard.statActiveUsers')} value={analytics.activeUsers} hint={t('dashboard.statActiveUsersHint')} icon={<IconCheck />} />
         <StatCard
-          label="Business profiles"
+          label={t('dashboard.statBusinessProfiles')}
           value={analytics.totalBusinessProfiles}
-          hint="All statuses"
+          hint={t('dashboard.statBusinessProfilesHint')}
           icon={<IconBriefcase />}
         />
         <StatCard
-          label="Pending approvals"
+          label={t('dashboard.statPending')}
           value={analytics.pendingBusinessProfiles}
-          hint="Awaiting review"
+          hint={t('dashboard.statPendingHint')}
           icon={<IconClock />}
         />
         <StatCard
-          label="Approval rate"
+          label={t('dashboard.statApprovalRate')}
           value={`${analytics.approvalRatePercent}%`}
-          hint="Share of decided reviews that were approved"
+          hint={t('dashboard.statApprovalRateHint')}
           icon={<IconSpark />}
         />
         <StatCard
-          label="Rejection rate"
+          label={t('dashboard.statRejectionRate')}
           value={`${analytics.rejectionRatePercent}%`}
-          hint="Share of decided reviews that were rejected"
+          hint={t('dashboard.statRejectionRateHint')}
           icon={<IconX />}
         />
         <StatCard
-          label="Approved"
+          label={t('dashboard.statApproved')}
           value={analytics.approvedBusinessProfiles}
-          hint="Live on the platform"
+          hint={t('dashboard.statApprovedHint')}
           icon={<IconCheck />}
         />
         <StatCard
-          label="Rejected"
+          label={t('dashboard.statRejected')}
           value={analytics.rejectedBusinessProfiles}
-          hint="Sent back for edits"
+          hint={t('dashboard.statRejectedHint')}
           icon={<IconX />}
         />
         <StatCard
-          label="Draft"
+          label={t('dashboard.statDraft')}
           value={analytics.draftBusinessProfiles}
-          hint="Not yet submitted"
+          hint={t('dashboard.statDraftHint')}
           icon={<IconSpark />}
         />
         <StatCard
-          label="Bookings (30d)"
+          label={t('dashboard.statBookings30d')}
           value={sumLastDays(analytics.newBookingsByDay, 30)}
           hint={
             analytics.bookingsTrendAvailable
-              ? 'New bookings per day in charts below'
-              : 'Booking trend not available'
+              ? t('dashboard.statBookings30dHintTrend')
+              : t('dashboard.statBookings30dHintNoTrend')
           }
           icon={<IconCalendar />}
         />
       </div>
 
-      <p className="vb-dashboard-section-label">Analytics</p>
+      <p className="vb-dashboard-section-label">{t('dashboard.analytics')}</p>
       <div className="vb-dashboard-grid">
         <div className="vb-chart-card vb-chart-card--accent">
-          <h4 className="vb-chart-card__title">New users (30 days)</h4>
-          <p className="vb-chart-card__hint">Daily registrations.</p>
+          <h4 className="vb-chart-card__title">{t('dashboard.chartNewUsers')}</h4>
+          <p className="vb-chart-card__hint">{t('dashboard.chartNewUsersHint')}</p>
           <UsersLineChart data={analytics.newUsersByDay} />
         </div>
         <div className="vb-chart-card vb-chart-card--accent">
-          <h4 className="vb-chart-card__title">New business profiles (30 days)</h4>
-          <p className="vb-chart-card__hint">Daily created profiles.</p>
+          <h4 className="vb-chart-card__title">{t('dashboard.chartNewProfiles')}</h4>
+          <p className="vb-chart-card__hint">{t('dashboard.chartNewProfilesHint')}</p>
           <BusinessLineChart data={analytics.newBusinessProfilesByDay} />
         </div>
         <div className="vb-chart-card vb-chart-card--accent">
-          <h4 className="vb-chart-card__title">New bookings (30 days)</h4>
-          <p className="vb-chart-card__hint">Daily booking volume from the platform.</p>
+          <h4 className="vb-chart-card__title">{t('dashboard.chartNewBookings')}</h4>
+          <p className="vb-chart-card__hint">{t('dashboard.chartNewBookingsHint')}</p>
           <BookingsLineChart data={analytics.newBookingsByDay} />
         </div>
         <div className="vb-chart-card">
-          <h4 className="vb-chart-card__title">Profiles by status</h4>
-          <p className="vb-chart-card__hint">Current distribution.</p>
+          <h4 className="vb-chart-card__title">{t('dashboard.chartByStatus')}</h4>
+          <p className="vb-chart-card__hint">{t('dashboard.chartByStatusHint')}</p>
           <StatusBarChart data={analytics.businessProfilesByStatus} />
         </div>
         <div className="vb-chart-card">
-          <h4 className="vb-chart-card__title">Categories</h4>
-          <p className="vb-chart-card__hint">Share by primary category (top slices).</p>
+          <h4 className="vb-chart-card__title">{t('dashboard.chartCategories')}</h4>
+          <p className="vb-chart-card__hint">{t('dashboard.chartCategoriesHint')}</p>
           <CategoryPieChart data={(analytics.topCategories ?? []).slice(0, 6)} />
         </div>
       </div>
 
-      <p className="vb-dashboard-section-label">Insights</p>
+      <p className="vb-dashboard-section-label">{t('dashboard.insights')}</p>
       <div className="vb-dashboard-grid vb-dashboard-grid--narrow">
-        <RankedList title="Top performing categories" rows={analytics.topCategories} emptyHint="No categories in use yet." />
         <RankedList
-          title="Most active governorates"
+          title={t('dashboard.topCategories')}
+          rows={analytics.topCategories}
+          emptyHint={t('dashboard.topCategoriesEmpty')}
+        />
+        <RankedList
+          title={t('dashboard.topGovernorates')}
           rows={analytics.topGovernorates}
-          emptyHint="No governorate data yet."
+          emptyHint={t('dashboard.topGovernoratesEmpty')}
+          formatName={(name) => localizedGovernorateName(name, locale)}
         />
       </div>
 
-      <div className="vb-dashboard-split">
-        <section className="vb-section vb-dashboard-section--flush">
-          <div className="vb-section__head">
-            <h3>Recent activity</h3>
-            <Link to="/activity-log" className="vb-dashboard-link-more">
-              View all
-            </Link>
-          </div>
-          <Card padding="lg" className="vb-dashboard-card">
-            {activityFeed.length === 0 ? (
-              <EmptyState title="Quiet for now" description="Admin actions will stream here as they happen." />
-            ) : (
-              <ul className="vb-rank-list vb-rank-list--flush">
-                {activityFeed.map((e) => (
-                  <li key={e.id}>
-                    <div>
-                      <div className="vb-rank-list__name">{activityActionLabel(e.action)}</div>
-                      <div className="vb-muted" style={{ fontSize: '0.8125rem', marginTop: 4 }}>
-                        {e.adminEmail} · {formatDateTime(e.createdAt)}
-                        {e.entityType === 'BUSINESS_PROFILE' ? (
-                          <>
-                            {' · '}
-                            <Link to={`/business-profiles/${e.entityId}`}>Profile #{e.entityId}</Link>
-                          </>
-                        ) : null}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        </section>
-
-        <section className="vb-section vb-dashboard-section--flush">
-          <div className="vb-section__head">
-            <h3>Pending approvals</h3>
-            <Link to="/business-profiles" className="vb-dashboard-link-more">
-              View all
-            </Link>
-          </div>
-          <Card padding="lg" className="vb-dashboard-card">
-            {pendingPreview.length === 0 ? (
-              <EmptyState title="All caught up" description="No business profiles waiting for review." decor />
-            ) : (
-              pendingPreview.map((p) => (
-                <div key={p.id} className="vb-profile-row">
-                  <div>
-                    <Link to={`/business-profiles/${p.id}`}>{p.businessName}</Link>
-                    <div className="vb-muted" style={{ fontSize: '0.8125rem', marginTop: 4 }}>
-                      {p.ownerEmail ?? 'Owner email unavailable'} · {formatDateTime(p.createdAt)}
-                    </div>
+      <section className="vb-section vb-dashboard-section--flush">
+        <div className="vb-section__head">
+          <h3>{t('dashboard.pendingApprovals')}</h3>
+          <Link to="/business-profiles" className="vb-dashboard-link-more">
+            {t('dashboard.viewAll')}
+          </Link>
+        </div>
+        <Card padding="lg" className="vb-dashboard-card">
+          {pendingPreview.length === 0 ? (
+            <EmptyState title={t('dashboard.allCaughtUp')} description={t('dashboard.noPending')} decor />
+          ) : (
+            pendingPreview.map((p) => (
+              <div key={p.id} className="vb-profile-row">
+                <div>
+                  <Link to={`/business-profiles/${p.id}`}>{p.businessName}</Link>
+                  <div className="vb-muted" style={{ fontSize: '0.8125rem', marginTop: 4 }}>
+                    {p.ownerEmail ?? t('dashboard.ownerEmailUnavailable')} · {formatDateTime(p.createdAt)}
                   </div>
-                  <StatusBadge status={p.status} />
                 </div>
-              ))
-            )}
-          </Card>
-        </section>
-      </div>
+                <StatusBadge status={p.status} />
+              </div>
+            ))
+          )}
+        </Card>
+      </section>
 
       <section className="vb-section">
         <div className="vb-section__head">
-          <h3>Latest business profiles</h3>
+          <h3>{t('dashboard.latestProfiles')}</h3>
         </div>
         <Card padding="lg">
           {recentProfiles.length === 0 ? (
-            <EmptyState title="No profiles yet" description="New submissions will appear here." decor />
+            <EmptyState title={t('dashboard.noProfilesYet')} description={t('dashboard.noProfilesYetDesc')} decor />
           ) : (
             recentProfiles.map((p) => (
               <div key={p.id} className="vb-profile-row">
                 <div>
                   <Link to={`/business-profiles/${p.id}`}>{p.businessName}</Link>
                   <div className="vb-muted" style={{ fontSize: '0.8125rem', marginTop: 4 }}>
-                    {p.primaryCategoryName ?? 'Category'} · {p.governorateName ?? 'Governorate'}
+                    {p.primaryCategoryName ?? t('dashboard.categoryFallback')} ·{' '}
+                    {p.governorateName
+                      ? localizedGovernorateName(p.governorateName, locale)
+                      : t('dashboard.governorateFallback')}
                   </div>
                 </div>
                 <StatusBadge status={p.status} />

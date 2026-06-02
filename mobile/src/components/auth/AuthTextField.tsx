@@ -3,12 +3,17 @@ import { useMemo, useState } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import {
+  BusinessFieldLeadSlot,
+  businessFieldInputControlStyle,
+  businessFieldInputFlexStyle,
+  businessFieldRowLayoutStyle,
+} from '@/components/business/businessFieldRow';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
-import { textAlignStart } from '@/utils/rtlText';
+import { leadingIconRowStyle, textAlignStart, technicalInputStyle } from '@/utils/rtlText';
 import { useLocaleStore } from '@/store/localeStore';
 import { radii, spacing, useThemeColors } from '@/theme';
-import { inputTextStyle } from '@/theme/typography';
 import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
@@ -31,6 +36,8 @@ type Props = {
   /** Wrapper around label + field (e.g. tighten vertical spacing). */
   wrapperStyle?: StyleProp<ViewStyle>;
   editable?: boolean;
+  /** Email, phone digits, URLs — value stays LTR. Icon position uses {@link leadingIconRowStyle} via leftSlot. */
+  technicalInput?: boolean;
 };
 
 export function AuthTextField({
@@ -50,12 +57,14 @@ export function AuthTextField({
   highlightOnFocus,
   wrapperStyle,
   editable = true,
+  technicalInput = false,
 }: Props) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { isRTL } = useTranslation();
   const locale = useLocaleStore((s) => s.locale);
   const [rowFocused, setRowFocused] = useState(false);
+  const hasLeadingIcon = Boolean(leftSlot);
 
   return (
     <View style={[styles.wrap, wrapperStyle]}>
@@ -65,6 +74,8 @@ export function AuthTextField({
       <View
         style={[
           styles.fieldRow,
+          businessFieldRowLayoutStyle,
+          hasLeadingIcon ? leadingIconRowStyle : null,
           leftSlot || rightSlot ? styles.fieldRowPad : null,
           fieldRowStyle,
           highlightOnFocus && rowFocused
@@ -72,13 +83,13 @@ export function AuthTextField({
             : null,
         ]}
       >
-        {leftSlot ? <View style={styles.left}>{leftSlot}</View> : null}
+        {leftSlot ? <BusinessFieldLeadSlot>{leftSlot}</BusinessFieldLeadSlot> : null}
         <TextInput
           value={value}
           onChangeText={onChangeText}
           editable={editable}
           placeholder={placeholder}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.placeholder}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
@@ -87,11 +98,14 @@ export function AuthTextField({
           onBlur={() => setRowFocused(false)}
           style={[
             styles.input,
-            inputTextStyle(locale),
-            {
-              textAlign: textAlignStart(isRTL),
-              writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
-            },
+            businessFieldInputFlexStyle(),
+            businessFieldInputControlStyle(locale),
+            technicalInput
+              ? technicalInputStyle()
+              : {
+                  textAlign: textAlignStart(isRTL),
+                  writingDirection: (isRTL ? 'rtl' : 'ltr') as 'rtl' | 'ltr',
+                },
             textInputStyle,
           ]}
         />
@@ -116,7 +130,7 @@ export function PasswordToggleIcon({
   const colors = useThemeColors();
   return (
     <Pressable onPress={onToggle} hitSlop={10} accessibilityRole="button">
-      <Ionicons name={visible ? 'eye-off-outline' : 'eye-outline'} size={22} color={colors.textSecondary} />
+      <Ionicons name={visible ? 'eye-off-outline' : 'eye-outline'} size={22} color={colors.icon} />
     </Pressable>
   );
 }
@@ -125,23 +139,19 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     wrap: { gap: spacing.xs, marginBottom: spacing.md },
     fieldRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
       backgroundColor: colors.surface,
       borderRadius: radii.md,
       borderWidth: 1,
       borderColor: colors.border,
-      minHeight: 52,
     },
     fieldRowPad: { paddingEnd: spacing.sm },
     input: {
-      flex: 1,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
       color: colors.text,
     },
-    left: { paddingStart: spacing.sm },
-    right: { paddingEnd: spacing.sm },
+    right: {
+      justifyContent: 'center',
+      paddingEnd: spacing.sm,
+    },
     helper: { marginTop: 2 },
   });
 }

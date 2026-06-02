@@ -77,7 +77,7 @@ export function EventPhotosField({
                 style={({ pressed }) => [styles.removeHit, pressed && styles.removePressed]}
                 hitSlop={8}
               >
-                <Ionicons name="close-circle" size={26} color="rgba(0,0,0,0.55)" />
+                <Ionicons name="close-circle" size={26} color={colors.icon} />
               </Pressable>
             </View>
           ))}
@@ -138,7 +138,7 @@ function createStyles(colors: ThemeColors) {
       position: 'absolute',
       top: 2,
       right: 2,
-      backgroundColor: 'rgba(255,250,245,0.92)',
+      backgroundColor: colors.card,
       borderRadius: radii.full,
     },
     removePressed: { opacity: 0.85 },

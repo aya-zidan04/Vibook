@@ -1,4 +1,5 @@
 import type { BusinessProfileStatus } from '@/api/types';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 
 const FILTERS: Array<'ALL' | BusinessProfileStatus> = [
   'ALL',
@@ -8,12 +9,12 @@ const FILTERS: Array<'ALL' | BusinessProfileStatus> = [
   'DRAFT',
 ];
 
-const FILTER_LABEL: Record<(typeof FILTERS)[number], string> = {
-  ALL: 'All',
-  PENDING_REVIEW: 'Pending review',
-  APPROVED: 'Approved',
-  REJECTED: 'Rejected',
-  DRAFT: 'Draft',
+const FILTER_KEY: Record<(typeof FILTERS)[number], string> = {
+  ALL: 'businessProfileFilters.all',
+  PENDING_REVIEW: 'businessProfileFilters.pendingReview',
+  APPROVED: 'businessProfileFilters.approved',
+  REJECTED: 'businessProfileFilters.rejected',
+  DRAFT: 'businessProfileFilters.draft',
 };
 
 export function BusinessProfileFilterBar({
@@ -23,9 +24,11 @@ export function BusinessProfileFilterBar({
   value: 'ALL' | BusinessProfileStatus;
   onChange: (v: 'ALL' | BusinessProfileStatus) => void;
 }) {
+  const { t } = useAdminI18n();
+
   return (
     <div className="vb-filters">
-      <div className="vb-chip-group" role="tablist" aria-label="Filter by status">
+      <div className="vb-chip-group" role="tablist" aria-label={t('filters.filterByStatus')}>
         {FILTERS.map((f) => (
           <button
             key={f}
@@ -35,7 +38,7 @@ export function BusinessProfileFilterBar({
             className={`vb-chip ${value === f ? 'vb-chip--active' : ''}`.trim()}
             onClick={() => onChange(f)}
           >
-            {FILTER_LABEL[f]}
+            {t(FILTER_KEY[f])}
           </button>
         ))}
       </div>

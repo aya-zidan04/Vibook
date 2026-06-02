@@ -81,7 +81,7 @@ export function ExploreCategoryStrip({
                 accessibilityLabel={locale === 'ar' ? s.nameAr : s.name}
                 style={[styles.subChip, active && styles.subChipActive]}
               >
-                <AppText variant="caption" color={active ? 'accentText' : 'textSecondary'}>
+                <AppText variant="caption" color={active ? 'text' : 'rowDescription'}>
                   {locale === 'ar' ? s.nameAr : s.name}
                 </AppText>
               </AnimatedChip>

@@ -8,10 +8,12 @@ import { RoleBadge } from '@/components/ui/Badge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
 
 export function RatingsPage() {
+  const { t } = useAdminI18n();
   const { headerSearch } = useAdminChrome();
   const { showToast } = useToast();
   const [rows, setRows] = useState<AdminEventRatingResponse[]>([]);
@@ -39,11 +41,11 @@ export function RatingsPage() {
       setRows(data.content);
       setTotalPages(data.totalPages);
     } catch (e) {
-      setError(getFriendlyErrorMessage(e, 'Could not load ratings.'));
+      setError(getFriendlyErrorMessage(e, t('ratings.loadError')));
     } finally {
       setLoading(false);
     }
-  }, [minStars, flaggedOnly, headerSearch, page]);
+  }, [minStars, flaggedOnly, headerSearch, page, t]);
 
   useEffect(() => {
     void load();
@@ -54,11 +56,11 @@ export function RatingsPage() {
     setBusy(true);
     try {
       await deleteAdminRating(deleteId);
-      showToast('Rating removed.', 'success');
+      showToast(t('ratings.removedToast'), 'success');
       setDeleteId(null);
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Delete failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('ratings.deleteFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -68,10 +70,10 @@ export function RatingsPage() {
     setBusy(true);
     try {
       await setAdminRatingHidden(r.id, !r.moderationHidden);
-      showToast(r.moderationHidden ? 'Rating visible in aggregates again.' : 'Rating hidden from aggregates.', 'success');
+      showToast(r.moderationHidden ? t('ratings.visibleToast') : t('ratings.hiddenToast'), 'success');
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Update failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('ratings.updateFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -80,7 +82,7 @@ export function RatingsPage() {
   if (error) {
     return (
       <div className="vb-page">
-        <EmptyState title="Ratings unavailable" description={error} decor />
+        <EmptyState title={t('ratings.unavailable')} description={error} decor />
       </div>
     );
   }
@@ -88,11 +90,11 @@ export function RatingsPage() {
   return (
     <div className="vb-page vb-animate-in">
       <p className="vb-muted" style={{ marginTop: 0 }}>
-        Event star ratings only — the API does not store review comments yet.
+        {t('ratings.intro')}
       </p>
       <div className="vb-toolbar">
         <div className="vb-toolbar__field">
-          <label htmlFor="rt-min">Min stars</label>
+          <label htmlFor="rt-min">{t('filters.minStars')}</label>
           <select
             id="rt-min"
             className="vb-input"
@@ -102,10 +104,10 @@ export function RatingsPage() {
               setMinStars(e.target.value === '' ? '' : Number(e.target.value));
             }}
           >
-            <option value="">Any</option>
+            <option value="">{t('filters.any')}</option>
             {[5, 4, 3, 2, 1].map((n) => (
               <option key={n} value={n}>
-                {n}+
+                {t('ratings.starsPlus', { n })}
               </option>
             ))}
           </select>
@@ -119,7 +121,7 @@ export function RatingsPage() {
               setFlaggedOnly(e.target.checked);
             }}
           />
-          <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Flagged only</span>
+          <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{t('filters.flaggedOnly')}</span>
         </label>
       </div>
 
@@ -128,7 +130,14 @@ export function RatingsPage() {
           <table className="vb-table">
             <thead>
               <tr>
-                {['User', 'Event', 'Business', 'Stars', 'Flags', 'Created', 'Actions'].map((h) => (
+                {[
+                  t('table.user'),
+                  t('table.eventBusiness'),
+                  t('table.stars'),
+                  t('table.moderation'),
+                  t('table.created'),
+                  t('table.actions'),
+                ].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -136,7 +145,7 @@ export function RatingsPage() {
             <tbody>
               {Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i}>
-                  <td colSpan={7}>
+                  <td colSpan={6}>
                     <div className="vb-skeleton" style={{ height: 20 }} />
                   </td>
                 </tr>
@@ -145,19 +154,19 @@ export function RatingsPage() {
           </table>
         </div>
       ) : rows.length === 0 ? (
-        <EmptyState title="No ratings" description="Nothing matches your filters." decor />
+        <EmptyState title={t('ratings.noRatings')} description={t('ratings.noRatingsDesc')} decor />
       ) : (
         <>
           <div className="vb-table-wrap">
             <table className="vb-table">
               <thead>
                 <tr>
-                  <th>User</th>
-                  <th>Event / business</th>
-                  <th>Stars</th>
-                  <th>Moderation</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t('table.user')}</th>
+                  <th>{t('table.eventBusiness')}</th>
+                  <th>{t('table.stars')}</th>
+                  <th>{t('table.moderation')}</th>
+                  <th>{t('table.created')}</th>
+                  <th>{t('table.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,25 +176,27 @@ export function RatingsPage() {
                       <Link to={`/users?userId=${r.userId}`}>{r.userEmail}</Link>
                     </td>
                     <td>
-                      <Link to={`/events/${r.eventId}`}>{r.eventTitle ?? 'Event'}</Link>
+                      <Link to={`/events/${r.eventId}`}>{r.eventTitle ?? t('ratings.eventFallback')}</Link>
                       <div className="vb-muted" style={{ fontSize: '0.8125rem' }}>
                         {r.businessName}
                       </div>
                     </td>
-                    <td>{r.ratingValue} ★</td>
                     <td>
-                      {r.moderationHidden ? <RoleBadge label="Hidden" /> : null}
-                      {r.flagged ? <RoleBadge label="Flagged" /> : null}
-                      {!r.moderationHidden && !r.flagged ? <span className="vb-muted">—</span> : null}
+                      {r.ratingValue} ★
+                    </td>
+                    <td>
+                      {r.moderationHidden ? <RoleBadge label={t('ratings.hiddenBadge')} /> : null}
+                      {r.flagged ? <RoleBadge label={t('ratings.flaggedBadge')} /> : null}
+                      {!r.moderationHidden && !r.flagged ? <span className="vb-muted">{t('common.dash')}</span> : null}
                     </td>
                     <td>{formatDateTime(r.createdAt)}</td>
                     <td>
                       <div className="vb-table-actions">
                         <Button variant="secondary" size="sm" disabled={busy} onClick={() => void toggleHide(r)}>
-                          {r.moderationHidden ? 'Unhide' : 'Hide'}
+                          {r.moderationHidden ? t('ratings.unhide') : t('ratings.hide')}
                         </Button>
                         <Button variant="dangerOutline" size="sm" onClick={() => setDeleteId(r.id)}>
-                          Delete
+                          {t('ratings.delete')}
                         </Button>
                       </div>
                     </td>
@@ -195,11 +206,9 @@ export function RatingsPage() {
             </table>
           </div>
           <div className="vb-pagination">
-            <span>
-              Page {page + 1} of {Math.max(1, totalPages)}
-            </span>
+            <span>{t('common.pageOf', { n: page + 1, total: Math.max(1, totalPages) })}</span>
             <Button variant="secondary" size="sm" disabled={page <= 0} onClick={() => setPage((p) => p - 1)}>
-              Previous
+              {t('common.previous')}
             </Button>
             <Button
               variant="secondary"
@@ -207,7 +216,7 @@ export function RatingsPage() {
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next
+              {t('common.next')}
             </Button>
           </div>
         </>
@@ -215,9 +224,9 @@ export function RatingsPage() {
 
       <ConfirmDialog
         open={deleteId != null}
-        title="Delete rating"
-        message="Remove this rating and recalculate the event average?"
-        confirmLabel="Delete"
+        title={t('ratings.deleteTitle')}
+        message={t('ratings.deleteMsg')}
+        confirmLabel={t('ratings.delete')}
         danger
         loading={busy}
         onConfirm={() => void confirmDelete()}

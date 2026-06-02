@@ -2,12 +2,11 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { HeaderSeparationChrome } from '@/components/layout/HeaderSeparationChrome';
 import { CityPickerSheet } from '@/components/forms/CityPickerSheet';
-import { GovernoratePickerSheet } from '@/components/forms/GovernoratePickerSheet';
-import { JORDAN_GOVERNORATES } from '@/constants/jordanGovernorates';
 import { useTranslation } from '@/i18n/useTranslation';
+import { localizedCityLabel } from '@/utils/governorateLabels';
 import { useAppStore } from '@/store/appStore';
-import { useLocaleStore } from '@/store/localeStore';
 import { useReferenceStore } from '@/store/referenceStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -28,50 +27,34 @@ export function ExploreHeader({
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, locale, isRTL } = useTranslation();
-  const regionStored = useLocaleStore((s) => s.regionLabel);
-  const setRegionLabel = useLocaleStore((s) => s.setRegionLabel);
   const selectedCityId = useAppStore((s) => s.selectedCityId);
   const setSelectedCityId = useAppStore((s) => s.setSelectedCityId);
-  const cities = useReferenceStore((s) => s.cities);
+  const governorates = useReferenceStore((s) => s.governorates);
   const refStatus = useReferenceStore((s) => s.status);
-  const refError = useReferenceStore((s) => s.errorMessage);
+  const governoratesFromApi = useReferenceStore((s) => s.governoratesFromApi);
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const catalogCityMode = cities.length > 0;
-
   const regionDisplay = useMemo(() => {
-    if (catalogCityMode) {
-      if (refStatus === 'loading' && cities.length === 0) {
-        return t('common.loading');
-      }
-      const city = cities.find((c) => c.id === selectedCityId);
-      if (city) {
-        return locale === 'ar' ? city.nameAr : city.nameEn;
-      }
-      return t('explore.pickGovernorate');
+    if (refStatus === 'loading' && governorates.length === 0) {
+      return t('common.loading');
     }
-    const row = JORDAN_GOVERNORATES.find((g) => g.en === regionStored);
-    if (!row) return regionStored;
-    return locale === 'ar' ? t(`explore.gov.${row.slug}`) : row.en;
-  }, [
-    catalogCityMode,
-    cities,
-    locale,
-    refStatus,
-    regionStored,
-    selectedCityId,
-    t,
-  ]);
+    const city = governorates.find((c) => c.id === selectedCityId);
+    if (city) {
+      return localizedCityLabel(city.id, locale, governorates);
+    }
+    return t('explore.pickGovernorate');
+  }, [governorates, locale, refStatus, selectedCityId, t]);
 
   const citySheetEmptyHint = useMemo(() => {
-    if (!catalogCityMode || cities.length > 0) return undefined;
+    if (governorates.length > 0) return undefined;
     if (refStatus === 'loading' || refStatus === 'idle') return t('common.loading');
-    if (refStatus === 'error') return refError ?? t('common.error');
+    if (refStatus === 'error') return t('errors.referenceLoad');
     return t('explore.emptyCities');
-  }, [catalogCityMode, cities.length, refError, refStatus, t]);
+  }, [governorates.length, refStatus, t]);
 
   return (
-    <View style={styles.bar}>
+    <HeaderSeparationChrome>
+      <View style={styles.bar}>
       <AppText variant="h2" color="text" numberOfLines={1} style={styles.wordmark}>
         {brandLabel}
       </AppText>
@@ -102,31 +85,31 @@ export function ExploreHeader({
           accessibilityLabel={a11ySearch}
           hitSlop={12}
         >
-          <Ionicons name="search-outline" size={24} color={colors.text} />
+          <Ionicons name="search-outline" size={24} color={colors.icon} />
         </Pressable>
       </View>
 
-      {catalogCityMode ? (
-        <CityPickerSheet
-          visible={pickerOpen}
-          onClose={() => setPickerOpen(false)}
-          cities={cities}
-          selectedId={selectedCityId}
-          title={t('explore.pickGovernorate')}
-          locale={locale}
-          emptyHint={citySheetEmptyHint}
-          onSelect={setSelectedCityId}
-        />
-      ) : (
-        <GovernoratePickerSheet
-          visible={pickerOpen}
-          onClose={() => setPickerOpen(false)}
-          selectedEnName={regionStored}
-          title={t('explore.pickGovernorate')}
-          onSelect={(en) => setRegionLabel(en)}
-        />
-      )}
-    </View>
+      <CityPickerSheet
+        visible={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        cities={governorates}
+        selectedId={selectedCityId}
+        title={t('explore.pickGovernorate')}
+        locale={locale}
+        emptyHint={citySheetEmptyHint}
+        onSelect={(id) => {
+          setSelectedCityId(id);
+          if (__DEV__) {
+            console.log(
+              '[ExploreHeader] selected governorate id:',
+              id,
+              governoratesFromApi ? '(API)' : '(fallback)',
+            );
+          }
+        }}
+      />
+      </View>
+    </HeaderSeparationChrome>
   );
 }
 

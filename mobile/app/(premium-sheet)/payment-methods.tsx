@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { listPaymentMethods } from '@/api/paymentMethodsApi';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { AppText } from '@/components/ui/AppText';
 import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { SecondaryButton } from '@/components/ui/Button';
@@ -20,7 +20,7 @@ export default function PaymentMethodsScreen() {
   const { t } = useTranslation();
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [cards, setCards] = useState<PaymentMethodResponse[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown | null>(null);
 
   const load = useCallback(() => {
     if (!isAuthenticated) {
@@ -35,10 +35,10 @@ export default function PaymentMethodsScreen() {
         setError(null);
       } catch (e) {
         setCards([]);
-        setError(e instanceof ApiError ? e.message : t('common.error'));
+        setError(e);
       }
     })();
-  }, [isAuthenticated, t]);
+  }, [isAuthenticated]);
 
   useFocusEffect(
     useCallback(() => {
@@ -61,7 +61,7 @@ export default function PaymentMethodsScreen() {
     return (
       <PremiumScreen title={t('paymentMethods.title')}>
         <AppText variant="body" color="textSecondary">
-          {error}
+          {mapApiError(error, t)}
         </AppText>
       </PremiumScreen>
     );
@@ -77,7 +77,7 @@ export default function PaymentMethodsScreen() {
         cards.map((card) => (
           <View key={card.id} style={styles.paymentCard}>
             <View style={styles.iconCircle}>
-              <Ionicons name="card-outline" size={26} color={colors.primary} />
+              <Ionicons name="card-outline" size={26} color={colors.primaryLight} />
             </View>
             <View style={{ flex: 1, gap: 4 }}>
               <AppText variant="body-em" color="text">

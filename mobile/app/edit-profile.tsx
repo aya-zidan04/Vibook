@@ -4,12 +4,14 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTextField } from '@/components/auth/AuthTextField';
+import { JordanPhoneField } from '@/components/auth/JordanPhoneField';
+import { BusinessFieldIconSlot } from '@/components/business/businessFieldRow';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { fetchCurrentUser } from '@/api/authApi';
-import { ApiError } from '@/api/http';
+import { mapApiError } from '@/utils/mapApiError';
 import { updateUser } from '@/api/usersApi';
 import { useMockUser } from '@/hooks/useMockUser';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -115,8 +117,7 @@ export default function EditProfileScreen() {
           Alert.alert(t('editProfile.saved'));
           router.back();
         } catch (e) {
-          const msg = e instanceof ApiError ? e.message : t('common.error');
-          Alert.alert(t('editProfile.title'), msg);
+          Alert.alert(t('editProfile.title'), mapApiError(e, t));
         }
       })();
       return;
@@ -145,7 +146,7 @@ export default function EditProfileScreen() {
               <Image source={{ uri: user.avatarUrl }} style={styles.avatar} contentFit="cover" />
             ) : (
               <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                <Ionicons name="person" size={44} color={colors.textMuted} />
+                <Ionicons name="person" size={44} color={colors.placeholder} />
               </View>
             )}
             <Pressable
@@ -155,7 +156,7 @@ export default function EditProfileScreen() {
               accessibilityLabel={t('editProfile.changePhotoA11y')}
               hitSlop={8}
             >
-              <Ionicons name="pencil" size={18} color={colors.accent} />
+              <Ionicons name="pencil" size={18} color={colors.text} />
             </Pressable>
           </View>
           <AppText variant="label" color="textMuted" style={styles.heroNote}>
@@ -163,7 +164,7 @@ export default function EditProfileScreen() {
           </AppText>
           {user.avatarUrl ? (
             <Pressable onPress={onRemovePhotoPress} hitSlop={8} accessibilityRole="button">
-              <AppText variant="caption" color="accent" style={styles.removePhoto}>
+              <AppText variant="caption" color="primaryLight" style={styles.removePhoto}>
                 {t('editProfile.removePhoto')}
               </AppText>
             </Pressable>
@@ -190,26 +191,11 @@ export default function EditProfileScreen() {
         </View>
       </View>
 
-      <AuthTextField
+      <JordanPhoneField
         label={t('editProfile.phone')}
         value={phoneLocal}
         onChangeText={onPhoneChange}
         placeholder={t('auth.phonePlaceholder')}
-        helper={t('editProfile.phoneJordanNote')}
-        keyboardType="number-pad"
-        autoCorrect={false}
-        textInputStyle={styles.phoneInput}
-        leftSlot={
-          <View style={styles.phonePrefix}>
-            <AppText variant="h2">
-              🇯🇴
-            </AppText>
-            <AppText variant="body-em" color="textSecondary">
-              +962
-            </AppText>
-            <View style={styles.phoneSep} />
-          </View>
-        }
       />
 
       <AuthTextField
@@ -217,11 +203,16 @@ export default function EditProfileScreen() {
         value={email}
         onChangeText={setEmail}
         placeholder={t('auth.emailPlaceholder')}
-        helper={authSource ? t('editProfile.emailReadOnlyBackend') : t('editProfile.emailHelper')}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
         editable={!authSource}
+        technicalInput
+        leftSlot={
+          <BusinessFieldIconSlot>
+            <Ionicons name="mail-outline" size={20} color={colors.primary} />
+          </BusinessFieldIconSlot>
+        }
       />
 
       <PrimaryButton title={t('common.save')} onPress={save} />
@@ -247,9 +238,9 @@ function createStyles(colors: ThemeColors) {
       width: 100,
       height: 100,
       borderRadius: 50,
-      backgroundColor: colors.surfaceMuted,
+      backgroundColor: colors.card,
       borderWidth: 3,
-      borderColor: colors.primaryMuted,
+      borderColor: colors.primary,
     },
     avatarPlaceholder: {
       alignItems: 'center',
@@ -261,7 +252,7 @@ function createStyles(colors: ThemeColors) {
     avatarEditBadge: {
       position: 'absolute',
       bottom: 2,
-      end: 2,
+      left: 2,
       width: 36,
       height: 36,
       borderRadius: 18,
@@ -293,20 +284,5 @@ function createStyles(colors: ThemeColors) {
       marginBottom: 0,
     },
     nameHalf: { flex: 1 },
-    phonePrefix: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      paddingStart: spacing.sm,
-    },
-    phoneSep: {
-      width: 1,
-      height: 26,
-      backgroundColor: colors.border,
-    },
-    phoneInput: {
-      textAlign: 'left',
-      writingDirection: 'ltr',
-    },
   });
 }

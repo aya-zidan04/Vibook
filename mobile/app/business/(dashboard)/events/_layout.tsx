@@ -1,14 +1,13 @@
 import { Stack } from 'expo-router';
+import { transparentStackScreenOptions } from '@/navigation/navigationCanvas';
 import { nativeStackDrillInTransition } from '@/navigation/transitionPresets';
-import { useThemeColors } from '@/theme';
 
 export default function EventsStackLayout() {
-  const colors = useThemeColors();
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: 'transparent' },
+        ...transparentStackScreenOptions,
         ...nativeStackDrillInTransition,
       }}
     />

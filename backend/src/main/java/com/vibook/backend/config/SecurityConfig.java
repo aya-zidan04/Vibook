@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/events/*").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/events/*/rate").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/reports").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/user-reports").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/profile-images/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-logos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-banners/**").permitAll()

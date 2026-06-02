@@ -62,13 +62,13 @@ export function ExploreEventFeedCard({
           {event.title}
         </AppText>
         <View style={styles.metaRow}>
-          <Ionicons name="calendar-outline" size={15} color={colors.textMuted} />
+          <Ionicons name="calendar-outline" size={15} color={colors.icon} />
           <AppText variant="caption" color="textSecondary">
             {dateStr}
           </AppText>
         </View>
         <View style={styles.metaRow}>
-          <Ionicons name="location-outline" size={15} color={colors.textMuted} />
+          <Ionicons name="location-outline" size={15} color={colors.icon} />
           <AppText variant="caption" color="textMuted" numberOfLines={1}>
             {event.venueName} · {cityName}
           </AppText>
@@ -77,7 +77,7 @@ export function ExploreEventFeedCard({
           <AppText variant="caption" color="textMuted">
             {t('common.from')}
           </AppText>
-          <AppText variant="h3" color="accent">
+          <AppText variant="h3" color="primaryLight">
             {price}
           </AppText>
         </View>

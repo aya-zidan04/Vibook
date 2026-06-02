@@ -1,6 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { DashboardShell } from '@/components/layout/DashboardShell';
-import { ActivityLogPage } from '@/pages/ActivityLogPage';
 import { BookingDetailPage } from '@/pages/BookingDetailPage';
 import { BookingsPage } from '@/pages/BookingsPage';
 import { BusinessProfileDetailPage } from '@/pages/BusinessProfileDetailPage';
@@ -14,6 +13,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { RatingsPage } from '@/pages/RatingsPage';
 import { ReportDetailPage } from '@/pages/ReportDetailPage';
 import { ReportsPage } from '@/pages/ReportsPage';
+import { UserReportDetailPage } from '@/pages/UserReportDetailPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { UsersPage } from '@/pages/UsersPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
@@ -30,13 +30,13 @@ export default function App() {
           <Route path="/users" element={<UsersPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/governorates" element={<GovernoratesPage />} />
-          <Route path="/activity-log" element={<ActivityLogPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/bookings/:id" element={<BookingDetailPage />} />
           <Route path="/ratings" element={<RatingsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/reports/user/:id" element={<UserReportDetailPage />} />
           <Route path="/reports/:id" element={<ReportDetailPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>

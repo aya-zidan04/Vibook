@@ -15,12 +15,15 @@ import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
+import { localizedGovernorateName } from '@/utils/governorateLabels';
 import { formatDateTime } from '@/utils/format';
 
 type Dialog = null | { type: 'delete' | 'hide' | 'show'; row: AdminEventRowResponse };
 
 export function EventsPage() {
+  const { t, locale } = useAdminI18n();
   const { headerSearch } = useAdminChrome();
   const { showToast } = useToast();
   const [rows, setRows] = useState<AdminEventRowResponse[]>([]);
@@ -64,11 +67,11 @@ export function EventsPage() {
       setRows(data.content);
       setTotalPages(data.totalPages);
     } catch (e) {
-      setError(getFriendlyErrorMessage(e, 'Could not load events.'));
+      setError(getFriendlyErrorMessage(e, t('events.loadError')));
     } finally {
       setLoading(false);
     }
-  }, [categoryId, governorateId, visibility, headerSearch, page]);
+  }, [categoryId, governorateId, visibility, headerSearch, page, t]);
 
   useEffect(() => {
     void load();
@@ -82,18 +85,18 @@ export function EventsPage() {
     try {
       if (dialog.type === 'delete') {
         await deleteAdminEvent(dialog.row.id);
-        showToast('Event deleted.', 'success');
+        showToast(t('events.deletedToast'), 'success');
       } else if (dialog.type === 'hide') {
         await hideAdminEvent(dialog.row.id);
-        showToast('Event hidden.', 'success');
+        showToast(t('events.hiddenToast'), 'success');
       } else {
         await showAdminEvent(dialog.row.id);
-        showToast('Event is visible again.', 'success');
+        showToast(t('events.shownToast'), 'success');
       }
       setDialog(null);
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Action failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('events.actionFailed')), 'error');
     } finally {
       setBusy(false);
     }
@@ -102,7 +105,7 @@ export function EventsPage() {
   if (error) {
     return (
       <div className="vb-page">
-        <EmptyState title="Events unavailable" description={error} decor />
+        <EmptyState title={t('events.unavailable')} description={error} decor />
       </div>
     );
   }
@@ -110,11 +113,11 @@ export function EventsPage() {
   return (
     <div className="vb-page vb-animate-in">
       <p className="vb-muted" style={{ marginTop: 0 }}>
-        Moderate listings across all businesses. Draft filter is reserved until a draft lifecycle exists in the API.
+        {t('events.intro')}
       </p>
       <div className="vb-toolbar">
         <div className="vb-toolbar__field">
-          <label htmlFor="ev-cat">Category</label>
+          <label htmlFor="ev-cat">{t('filters.category')}</label>
           <select
             id="ev-cat"
             className="vb-input"
@@ -124,7 +127,7 @@ export function EventsPage() {
               setCategoryId(e.target.value === '' ? '' : Number(e.target.value));
             }}
           >
-            <option value="">All</option>
+            <option value="">{t('filters.all')}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -133,7 +136,7 @@ export function EventsPage() {
           </select>
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="ev-gov">Governorate</label>
+          <label htmlFor="ev-gov">{t('filters.governorate')}</label>
           <select
             id="ev-gov"
             className="vb-input"
@@ -143,16 +146,16 @@ export function EventsPage() {
               setGovernorateId(e.target.value === '' ? '' : Number(e.target.value));
             }}
           >
-            <option value="">All</option>
+            <option value="">{t('filters.all')}</option>
             {governorates.map((g) => (
               <option key={g.id} value={g.id}>
-                {g.name}
+                {localizedGovernorateName(g.name, locale)}
               </option>
             ))}
           </select>
         </div>
         <div className="vb-toolbar__field">
-          <label htmlFor="ev-vis">Visibility</label>
+          <label htmlFor="ev-vis">{t('filters.visibility')}</label>
           <select
             id="ev-vis"
             className="vb-input"
@@ -162,10 +165,10 @@ export function EventsPage() {
               setVisibility(e.target.value);
             }}
           >
-            <option value="ALL">All</option>
-            <option value="VISIBLE">Visible</option>
-            <option value="HIDDEN">Hidden</option>
-            <option value="DRAFT">Draft (no data yet)</option>
+            <option value="ALL">{t('filters.all')}</option>
+            <option value="VISIBLE">{t('status.visible')}</option>
+            <option value="HIDDEN">{t('status.hidden')}</option>
+            <option value="DRAFT">{t('filters.draftNoData')}</option>
           </select>
         </div>
       </div>
@@ -175,7 +178,17 @@ export function EventsPage() {
           <table className="vb-table">
             <thead>
               <tr>
-                {['Title', 'Business', 'Category', 'Gov.', 'Price', 'Cap.', 'Status', 'Created', 'Actions'].map((h) => (
+                {[
+                  t('table.title'),
+                  t('table.business'),
+                  t('table.category'),
+                  t('table.gov'),
+                  t('table.price'),
+                  t('table.capacity'),
+                  t('table.status'),
+                  t('table.created'),
+                  t('table.actions'),
+                ].map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -193,8 +206,8 @@ export function EventsPage() {
         </div>
       ) : filteredRows.length === 0 ? (
         <EmptyState
-          title="No events"
-          description={headerSearch.trim() ? 'Try clearing search or filters.' : 'No events match the current filters.'}
+          title={t('events.noEvents')}
+          description={headerSearch.trim() ? t('events.noEventsSearch') : t('events.noEventsFilter')}
           decor
         />
       ) : (
@@ -203,26 +216,26 @@ export function EventsPage() {
             <table className="vb-table">
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Business</th>
-                  <th>Category</th>
-                  <th>Gov.</th>
-                  <th>Price</th>
-                  <th>Cap.</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t('table.title')}</th>
+                  <th>{t('table.business')}</th>
+                  <th>{t('table.category')}</th>
+                  <th>{t('table.gov')}</th>
+                  <th>{t('table.price')}</th>
+                  <th>{t('table.capacity')}</th>
+                  <th>{t('table.status')}</th>
+                  <th>{t('table.created')}</th>
+                  <th>{t('table.actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRows.map((r) => (
                   <tr key={r.id}>
                     <td>
-                      <strong>{r.title ?? '—'}</strong>
+                      <strong>{r.title ?? t('common.dash')}</strong>
                     </td>
-                    <td>{r.businessName ?? '—'}</td>
-                    <td>{r.categoryName ?? '—'}</td>
-                    <td>{r.governorateName ?? '—'}</td>
+                    <td>{r.businessName ?? t('common.dash')}</td>
+                    <td>{r.categoryName ?? t('common.dash')}</td>
+                    <td>{localizedGovernorateName(r.governorateName, locale) || t('common.dash')}</td>
                     <td>
                       {r.priceJod} {r.currency}
                     </td>
@@ -235,20 +248,20 @@ export function EventsPage() {
                       <div className="vb-table-actions">
                         <Link to={`/events/${r.id}`}>
                           <Button variant="secondary" size="sm">
-                            View
+                            {t('table.view')}
                           </Button>
                         </Link>
                         {r.visibilityStatus === 'HIDDEN' ? (
                           <Button variant="primary" size="sm" onClick={() => setDialog({ type: 'show', row: r })}>
-                            Show
+                            {t('events.showConfirm')}
                           </Button>
                         ) : (
                           <Button variant="secondary" size="sm" onClick={() => setDialog({ type: 'hide', row: r })}>
-                            Hide
+                            {t('events.hideConfirm')}
                           </Button>
                         )}
                         <Button variant="dangerOutline" size="sm" onClick={() => setDialog({ type: 'delete', row: r })}>
-                          Delete
+                          {t('events.deleteConfirm')}
                         </Button>
                       </div>
                     </td>
@@ -258,11 +271,9 @@ export function EventsPage() {
             </table>
           </div>
           <div className="vb-pagination">
-            <span>
-              Page {page + 1} of {Math.max(1, totalPages)}
-            </span>
+            <span>{t('common.pageOf', { n: page + 1, total: Math.max(1, totalPages) })}</span>
             <Button variant="secondary" size="sm" disabled={page <= 0} onClick={() => setPage((p) => p - 1)}>
-              Previous
+              {t('common.previous')}
             </Button>
             <Button
               variant="secondary"
@@ -270,7 +281,7 @@ export function EventsPage() {
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => p + 1)}
             >
-              Next
+              {t('common.next')}
             </Button>
           </div>
         </>
@@ -278,9 +289,12 @@ export function EventsPage() {
 
       <ConfirmDialog
         open={dialog?.type === 'delete'}
-        title="Delete event"
-        message={`Permanently delete “${dialog?.type === 'delete' ? dialog.row.title ?? 'event' : ''}”? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t('events.deleteTitle')}
+        message={t('events.deleteMsg', {
+          title:
+            dialog?.type === 'delete' ? dialog.row.title ?? t('events.untitled') : '',
+        })}
+        confirmLabel={t('events.deleteConfirm')}
         onConfirm={() => void runDialogAction()}
         onCancel={() => setDialog(null)}
         danger
@@ -288,18 +302,22 @@ export function EventsPage() {
       />
       <ConfirmDialog
         open={dialog?.type === 'hide'}
-        title="Hide event"
-        message={`Hide “${dialog?.type === 'hide' ? dialog.row.title ?? 'event' : ''}” from consumers?`}
-        confirmLabel="Hide"
+        title={t('events.hideTitle')}
+        message={t('events.hideMsg', {
+          title: dialog?.type === 'hide' ? dialog.row.title ?? t('events.untitled') : '',
+        })}
+        confirmLabel={t('events.hideConfirm')}
         onConfirm={() => void runDialogAction()}
         onCancel={() => setDialog(null)}
         loading={busy}
       />
       <ConfirmDialog
         open={dialog?.type === 'show'}
-        title="Show event"
-        message={`Make “${dialog?.type === 'show' ? dialog.row.title ?? 'event' : ''}” visible again?`}
-        confirmLabel="Show"
+        title={t('events.showTitle')}
+        message={t('events.showMsg', {
+          title: dialog?.type === 'show' ? dialog.row.title ?? t('events.untitled') : '',
+        })}
+        confirmLabel={t('events.showConfirm')}
         onConfirm={() => void runDialogAction()}
         onCancel={() => setDialog(null)}
         loading={busy}

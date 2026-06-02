@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import type { TimeSeriesPointResponse } from '@/api/types';
 import { chartColors } from '@/components/charts/chartTheme';
 
@@ -16,6 +17,7 @@ function formatDay(iso: string) {
 }
 
 export function BookingsLineChart({ data }: { data: TimeSeriesPointResponse[] }) {
+  const { t } = useAdminI18n();
   const safe = data ?? [];
   const chartData = safe.map((p) => ({ ...p, label: formatDay(p.date) }));
   return (
@@ -36,7 +38,7 @@ export function BookingsLineChart({ data }: { data: TimeSeriesPointResponse[] })
           <Line
             type="monotone"
             dataKey="count"
-            name="New bookings"
+            name={t('charts.newBookings')}
             stroke={chartColors.accentSoft}
             strokeWidth={2.5}
             dot={false}

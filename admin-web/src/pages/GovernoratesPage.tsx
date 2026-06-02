@@ -5,14 +5,25 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { RoleBadge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
+import { localizedGovernorateName } from '@/utils/governorateLabels';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 
 export function GovernoratesPage() {
+  const { t, locale } = useAdminI18n();
   const { showToast } = useToast();
   const [rows, setRows] = useState<GovernorateAdminStatsResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+
+  const tableHeaders = [
+    t('table.name'),
+    t('table.businesses'),
+    t('table.displayOrder'),
+    t('table.active'),
+    t('table.actions'),
+  ];
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -21,11 +32,11 @@ export function GovernoratesPage() {
       const data = await fetchGovernorateStats();
       setRows(data);
     } catch (e) {
-      setError(getFriendlyErrorMessage(e, 'Could not load governorates.'));
+      setError(getFriendlyErrorMessage(e, t('governorates.loadError')));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -39,10 +50,10 @@ export function GovernoratesPage() {
         displayOrder: g.displayOrder,
         active: !g.active,
       });
-      showToast(g.active ? 'Governorate hidden from active lists.' : 'Governorate activated.', 'success');
+      showToast(g.active ? t('governorates.hiddenToast') : t('governorates.activatedToast'), 'success');
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Update failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('governorates.updateFailed')), 'error');
     } finally {
       setBusyId(null);
     }
@@ -51,7 +62,7 @@ export function GovernoratesPage() {
   if (error) {
     return (
       <div className="vb-page">
-        <EmptyState title="Governorates unavailable" description={error} decor />
+        <EmptyState title={t('governorates.unavailable')} description={error} decor />
       </div>
     );
   }
@@ -63,7 +74,7 @@ export function GovernoratesPage() {
           <table className="vb-table">
             <thead>
               <tr>
-                {['Name', 'Businesses', 'Display order', 'Active', 'Actions'].map((h) => (
+                {tableHeaders.map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -86,33 +97,30 @@ export function GovernoratesPage() {
   return (
     <div className="vb-page">
       <p className="vb-muted" style={{ marginTop: 0, maxWidth: 560 }}>
-        All governorates with business counts. Toggling active updates the public directory; existing businesses keep
-        their region reference.
+        {t('governorates.intro')}
       </p>
       {rows.length === 0 ? (
-        <EmptyState title="No governorates" description="Seed data may be missing." decor />
+        <EmptyState title={t('governorates.noGovernorates')} description={t('governorates.noGovernoratesDesc')} decor />
       ) : (
         <div className="vb-table-wrap">
           <table className="vb-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Businesses</th>
-                <th>Display order</th>
-                <th>Active</th>
-                <th>Actions</th>
+                {tableHeaders.map((h) => (
+                  <th key={h}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {rows.map((g) => (
                 <tr key={g.id}>
                   <td>
-                    <strong>{g.name}</strong>
+                    <strong>{localizedGovernorateName(g.name, locale)}</strong>
                   </td>
                   <td>{g.businessCount}</td>
                   <td>{g.displayOrder}</td>
                   <td>
-                    <RoleBadge label={g.active ? 'Yes' : 'No'} />
+                    <RoleBadge label={g.active ? t('yesNo.yes') : t('yesNo.no')} />
                   </td>
                   <td>
                     <Button
@@ -121,7 +129,7 @@ export function GovernoratesPage() {
                       disabled={busyId === g.id}
                       onClick={() => void toggleActive(g)}
                     >
-                      {g.active ? 'Deactivate' : 'Activate'}
+                      {g.active ? t('governorates.deactivate') : t('governorates.activate')}
                     </Button>
                   </td>
                 </tr>

@@ -12,6 +12,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Modal } from '@/components/ui/Modal';
 import { RoleBadge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/useToast';
+import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 
 type FormState = {
@@ -32,6 +33,7 @@ function slugifyHint(name: string) {
 }
 
 export function CategoriesPage() {
+  const { t } = useAdminI18n();
   const { showToast } = useToast();
   const [rows, setRows] = useState<CategoryAdminResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,15 @@ export function CategoriesPage() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
 
+  const tableHeaders = [
+    t('table.name'),
+    t('table.slug'),
+    t('table.usage'),
+    t('table.icon'),
+    t('table.active'),
+    t('table.actions'),
+  ];
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -49,11 +60,11 @@ export function CategoriesPage() {
       const data = await fetchAdminCategories();
       setRows(data);
     } catch (e) {
-      setError(getFriendlyErrorMessage(e, 'Could not load categories.'));
+      setError(getFriendlyErrorMessage(e, t('categories.loadError')));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -83,12 +94,12 @@ export function CategoriesPage() {
         icon: form.icon.trim() || undefined,
         active: form.active,
       });
-      showToast('Category created.', 'success');
+      showToast(t('categories.createdToast'), 'success');
       setCreateOpen(false);
       setForm(emptyForm);
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Create failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('categories.createFailed')), 'error');
     } finally {
       setSaving(false);
     }
@@ -104,11 +115,11 @@ export function CategoriesPage() {
         icon: form.icon.trim() || undefined,
         active: form.active,
       });
-      showToast('Category updated.', 'success');
+      showToast(t('categories.updatedToast'), 'success');
       setEditRow(null);
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Update failed.'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('categories.updateFailed')), 'error');
     } finally {
       setSaving(false);
     }
@@ -119,11 +130,11 @@ export function CategoriesPage() {
     setSaving(true);
     try {
       await deleteAdminCategory(deleteRow.id);
-      showToast('Category deleted.', 'success');
+      showToast(t('categories.deletedToast'), 'success');
       setDeleteRow(null);
       await load();
     } catch (e) {
-      showToast(getFriendlyErrorMessage(e, 'Delete failed (may still be in use).'), 'error');
+      showToast(getFriendlyErrorMessage(e, t('categories.deleteFailed')), 'error');
     } finally {
       setSaving(false);
     }
@@ -132,7 +143,7 @@ export function CategoriesPage() {
   if (error) {
     return (
       <div className="vb-page">
-        <EmptyState title="Categories unavailable" description={error} decor />
+        <EmptyState title={t('categories.unavailable')} description={error} decor />
       </div>
     );
   }
@@ -144,7 +155,7 @@ export function CategoriesPage() {
           <table className="vb-table">
             <thead>
               <tr>
-                {['Name', 'Slug', 'Usage', 'Icon', 'Active', 'Actions'].map((h) => (
+                {tableHeaders.map((h) => (
                   <th key={h}>{h}</th>
                 ))}
               </tr>
@@ -168,23 +179,20 @@ export function CategoriesPage() {
     <div className="vb-page">
       <div style={{ marginBottom: 'var(--vb-space-lg)' }}>
         <Button variant="primary" onClick={openCreate}>
-          New category
+          {t('categories.newCategory')}
         </Button>
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState title="No categories" description="Create a category to get started." decor />
+        <EmptyState title={t('categories.noCategories')} description={t('categories.noCategoriesDesc')} decor />
       ) : (
         <div className="vb-table-wrap">
           <table className="vb-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Slug</th>
-                <th>Usage</th>
-                <th>Icon</th>
-                <th>Active</th>
-                <th>Actions</th>
+                {tableHeaders.map((h) => (
+                  <th key={h}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -195,23 +203,23 @@ export function CategoriesPage() {
                   </td>
                   <td className="vb-muted">{c.slug}</td>
                   <td>{c.usageCount}</td>
-                  <td>{c.icon || '—'}</td>
+                  <td>{c.icon || t('common.dash')}</td>
                   <td>
-                    <RoleBadge label={c.active ? 'Yes' : 'No'} />
+                    <RoleBadge label={c.active ? t('yesNo.yes') : t('yesNo.no')} />
                   </td>
                   <td>
                     <div className="vb-table-actions">
                       <Button variant="secondary" size="sm" onClick={() => openEdit(c)}>
-                        Edit
+                        {t('categories.edit')}
                       </Button>
                       <Button
                         variant="dangerOutline"
                         size="sm"
                         disabled={c.usageCount > 0}
-                        title={c.usageCount > 0 ? 'In use — remove from businesses first' : undefined}
+                        title={c.usageCount > 0 ? t('categories.inUseTitle') : undefined}
                         onClick={() => setDeleteRow(c)}
                       >
-                        Delete
+                        {t('categories.delete')}
                       </Button>
                     </div>
                   </td>
@@ -222,7 +230,7 @@ export function CategoriesPage() {
         </div>
       )}
 
-      <Modal open={createOpen} title="New category" onClose={() => setCreateOpen(false)} wide>
+      <Modal open={createOpen} title={t('categories.createTitle')} onClose={() => setCreateOpen(false)} wide>
         <CategoryForm
           form={form}
           onChange={setForm}
@@ -231,17 +239,17 @@ export function CategoriesPage() {
         />
         <div className="vb-modal__actions" style={{ marginTop: 'var(--vb-space-lg)', justifyContent: 'flex-end' }}>
           <Button variant="ghost" onClick={() => setCreateOpen(false)} disabled={saving}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={() => void submitCreate()} disabled={saving}>
-            {saving ? 'Saving…' : 'Create'}
+            {saving ? t('common.saving') : t('categories.create')}
           </Button>
         </div>
       </Modal>
 
       <Modal
         open={editRow != null}
-        title={editRow ? `Edit ${editRow.name}` : ''}
+        title={editRow ? t('categories.editTitle', { name: editRow.name }) : ''}
         onClose={() => setEditRow(null)}
         wide
       >
@@ -253,19 +261,19 @@ export function CategoriesPage() {
         />
         <div className="vb-modal__actions" style={{ marginTop: 'var(--vb-space-lg)', justifyContent: 'flex-end' }}>
           <Button variant="ghost" onClick={() => setEditRow(null)} disabled={saving}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={() => void submitEdit()} disabled={saving}>
-            {saving ? 'Saving…' : 'Save'}
+            {saving ? t('common.saving') : t('common.save')}
           </Button>
         </div>
       </Modal>
 
       <ConfirmDialog
         open={deleteRow != null}
-        title="Delete category"
-        message={`Delete “${deleteRow?.name ?? ''}”? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t('categories.deleteTitle')}
+        message={t('categories.deleteMsg', { name: deleteRow?.name ?? '' })}
+        confirmLabel={t('categories.delete')}
         onConfirm={() => void runDelete()}
         onCancel={() => setDeleteRow(null)}
         danger
@@ -286,10 +294,12 @@ function CategoryForm({
   slugHint: string;
   onAutofillSlug: () => void;
 }) {
+  const { t } = useAdminI18n();
+
   return (
     <>
       <label className="vb-field__label" htmlFor="cat-name">
-        Name
+        {t('categories.formName')}
       </label>
       <input
         id="cat-name"
@@ -299,7 +309,7 @@ function CategoryForm({
         maxLength={120}
       />
       <label className="vb-field__label" htmlFor="cat-slug" style={{ marginTop: 'var(--vb-space-md)' }}>
-        Slug (kebab-case)
+        {t('categories.formSlug')}
       </label>
       <div style={{ display: 'flex', gap: 'var(--vb-space-sm)', alignItems: 'center' }}>
         <input
@@ -310,12 +320,12 @@ function CategoryForm({
           maxLength={80}
         />
         <Button type="button" variant="secondary" size="sm" onClick={onAutofillSlug}>
-          From name
+          {t('categories.formFromName')}
         </Button>
       </div>
-      <p className="vb-field__hint">Suggested: {slugHint || '—'}</p>
+      <p className="vb-field__hint">{t('categories.formSlugSuggested', { slug: slugHint || t('common.dash') })}</p>
       <label className="vb-field__label" htmlFor="cat-icon" style={{ marginTop: 'var(--vb-space-md)' }}>
-        Icon key (optional)
+        {t('categories.formIcon')}
       </label>
       <input
         id="cat-icon"
@@ -330,7 +340,7 @@ function CategoryForm({
           checked={form.active}
           onChange={(e) => onChange({ ...form, active: e.target.checked })}
         />
-        Active
+        {t('categories.formActive')}
       </label>
     </>
   );

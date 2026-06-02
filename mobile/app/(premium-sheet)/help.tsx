@@ -7,20 +7,20 @@ import {
   UIManager,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
 import { useTranslation } from '@/i18n/useTranslation';
-import { openSupportEmail } from '@/utils/supportEmail';
 import { spacing, useThemeColors } from '@/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const FAQ_IDS = ['help.q1', 'help.q2', 'help.q3', 'help.q4', 'help.q5', 'help.q6'] as const;
+const FAQ_IDS = ['help.q1', 'help.q2', 'help.q3', 'help.q4'] as const;
 
 function AnswerWithHighlights({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -46,6 +46,7 @@ function AnswerWithHighlights({ text }: { text: string }) {
 }
 
 export default function HelpScreen() {
+  const router = useRouter();
   const colors = useThemeColors();
   const styles = useMemo(() => createPremiumSheetStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -94,7 +95,7 @@ export default function HelpScreen() {
                     { width: 44, height: 44, borderRadius: 14 },
                   ]}
                 >
-                  <Ionicons name="help-circle-outline" size={22} color={colors.primary} />
+                  <Ionicons name="help-circle-outline" size={22} color={colors.primaryLight} />
                 </View>
                 <AppText variant="body-em" color="text" style={{ flex: 1 }}>
                   {t(qKey)}
@@ -102,7 +103,7 @@ export default function HelpScreen() {
                 <Ionicons
                   name={expanded ? 'chevron-up' : 'chevron-down'}
                   size={22}
-                  color={colors.textMuted}
+                  color={colors.chevron}
                 />
               </Pressable>
               {expanded ? (
@@ -116,14 +117,10 @@ export default function HelpScreen() {
       </View>
 
       <PrimaryButton
-        sheet
-        title={t('help.contactCta')}
-        onPress={() => void openSupportEmail('Vibook — Help')}
-        style={{ alignSelf: 'stretch', width: '100%' }}
+        title={t('help.reportProblem')}
+        onPress={() => router.push('/report-problem')}
+        style={styles.sheetButton}
       />
-      <AppText variant="caption" color="textMuted" style={{ textAlign: 'center' }}>
-        {t('help.contactFooter')}
-      </AppText>
     </PremiumScreen>
   );
 }

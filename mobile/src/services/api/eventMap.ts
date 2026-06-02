@@ -75,7 +75,7 @@ export function businessEventDetailToEventItem(row: BusinessEventResponse): Even
     gallery: urls.length > 0 ? urls : img ? [img] : [],
     startAt,
     endAt: end.toISOString(),
-    venueName: row.governorateName || row.subcategoryName || '',
+    venueName: row.subcategoryName || '',
     address: row.googleMapsUrl || '',
     description: row.description ?? '',
     priceFrom: numPrice(row.priceJod),

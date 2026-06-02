@@ -4,17 +4,27 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
+import { HeroAmbientOverlay } from '@/components/ui/HeroAmbientOverlay';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
+import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
 import { MicroBars, MicroSparkline } from '@/components/business/DashboardMicroViz';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import type { BusinessEventRecord } from '@/types/businessHub';
 import { bookingBucketsLast7Days, eventBucketsNext7Days } from '@/utils/dashboardVitals';
-import { chevronForwardTrailing } from '@/utils/rtl';
-import { createShadows, radii, spacing, useThemeColors } from '@/theme';
+import { createShadows, radii, spacing, useThemeColors, useThemeGradients } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { useThemeGradients } from '@/theme';
+
+type DashboardHeroTypography = { primary: string; secondary: string };
+
+/** Hero labels on the business dashboard gradient. */
+function dashboardHeroTypography(colors: ThemeColors): DashboardHeroTypography {
+  return {
+    primary: colors.textPrimary,
+    secondary: colors.textSecondary,
+  };
+}
 
 function startOfTodayMs(): number {
   const d = new Date();
@@ -32,6 +42,7 @@ function eventIsUpcoming(e: BusinessEventRecord): boolean {
 export default function BusinessDashboardHomeScreen() {
   const colors = useThemeColors();
   const gradients = useThemeGradients();
+  const heroText = useMemo(() => dashboardHeroTypography(colors), [colors]);
   const sh = useMemo(() => createShadows(colors), [colors]);
   const styles = useMemo(() => createStyles(colors, sh), [colors, sh]);
   const router = useRouter();
@@ -158,22 +169,25 @@ export default function BusinessDashboardHomeScreen() {
 
   return (
     <Screen scroll contentStyle={styles.screenPad}>
-      <LinearGradient
-        colors={[...gradients.hero]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.hero, sh.lg]}
-      >
+      <View style={[styles.hero, sh.lg]}>
+        <LinearGradient
+          colors={[...gradients.hero]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+        <HeroAmbientOverlay />
         <View style={styles.heroTopRow}>
-          <AppText variant="overline" style={styles.heroKicker}>
+          <AppText variant="overline" color={heroText.secondary}>
             {t('businessHub.dashKicker')}
           </AppText>
         </View>
-        <AppText variant="h1" style={styles.heroBusinessName} numberOfLines={2}>
+        <AppText variant="h1" color={heroText.primary} style={styles.heroBusinessName} numberOfLines={2}>
           {businessName}
         </AppText>
         <View style={[styles.pulseLine, { backgroundColor: colors.primaryMuted }]}>
-          <AppText variant="body-em" style={styles.heroDynamic}>
+          <AppText variant="body-em" color={heroText.primary} style={styles.heroDynamic}>
             {dynamicMessage}
           </AppText>
         </View>
@@ -183,10 +197,10 @@ export default function BusinessDashboardHomeScreen() {
               values={booking7d}
               colors={colors}
               maxHeight={12}
-              barColor={colors.textOnPrimary}
+              barColor={heroText.secondary}
             />
           </View>
-          <AppText variant="label" style={styles.heroTrendLabel}>
+          <AppText variant="label" color={heroText.secondary} style={styles.heroTrendLabel}>
             {t('businessHub.dashVizTrend')}
           </AppText>
         </View>
@@ -195,7 +209,7 @@ export default function BusinessDashboardHomeScreen() {
           onPress={() => router.push('/business/events/new')}
           style={styles.heroCta}
         />
-      </LinearGradient>
+      </View>
 
       <AppText variant="overline" color="textMuted" style={styles.sectionEyebrow}>
         {t('businessHub.dashAtAGlance')}
@@ -328,7 +342,7 @@ export default function BusinessDashboardHomeScreen() {
                   {b.subtitle}
                 </AppText>
               </View>
-              <Ionicons name={chevronForwardTrailing()} size={20} color={colors.textMuted} />
+              <NavigationChevronForward size={20} color={colors.icon} />
             </Pressable>
           ))
         )}
@@ -350,7 +364,7 @@ export default function BusinessDashboardHomeScreen() {
             ]}
           >
             <View style={[styles.activityIcon, { backgroundColor: colors.backgroundElevated }]}>
-              <Ionicons name={row.icon} size={18} color={colors.accent} />
+              <Ionicons name={row.icon} size={18} color={colors.primaryLight} />
             </View>
             <View style={styles.activityCopy}>
               <AppText variant="caption" color="text" numberOfLines={2}>
@@ -393,12 +407,7 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       alignItems: 'center',
       justifyContent: 'space-between',
     },
-    heroKicker: {
-      color: colors.textOnPrimary,
-      opacity: 0.85,
-    },
     heroBusinessName: {
-      color: colors.textOnPrimary,
       letterSpacing: -0.6,
       lineHeight: 34,
     },
@@ -409,7 +418,6 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
       borderRadius: radii.lg,
     },
     heroDynamic: {
-      color: colors.textOnPrimary,
       lineHeight: 22,
     },
     heroCta: {
@@ -418,14 +426,11 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
     heroTrend: {
       alignSelf: 'stretch',
       gap: 6,
-      opacity: 0.92,
     },
     heroSparkWrap: {
       paddingHorizontal: spacing.xs,
     },
     heroTrendLabel: {
-      color: colors.textOnPrimary,
-      opacity: 0.72,
       letterSpacing: 0.3,
     },
     sectionEyebrow: {

@@ -1,4 +1,5 @@
 import { useReferenceStore } from '@/store/referenceStore';
+import { localizedCityLabel } from '@/utils/governorateLabels';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import { businessEventToEventItem } from '@/utils/businessEventToEventItem';
 import type {
@@ -48,13 +49,9 @@ export function getOrganizerById(id: string): Organizer | undefined {
 
 export function getCityName(cityId: string, locale: 'en' | 'ar' = 'en'): string {
   const { cities } = useReferenceStore.getState();
-  const fromRef = cities.find((x) => x.id === cityId);
-  if (fromRef) {
-    return locale === 'ar' ? fromRef.nameAr : fromRef.nameEn;
-  }
-  const c = MOCK_CITIES.find((x) => x.id === cityId);
-  if (!c) return '';
-  return locale === 'ar' ? c.nameAr : c.nameEn;
+  const fromRef = localizedCityLabel(cityId, locale, cities);
+  if (fromRef) return fromRef;
+  return localizedCityLabel(cityId, locale, MOCK_CITIES);
 }
 
 export function getTiersForEvent(eventId: string) {
