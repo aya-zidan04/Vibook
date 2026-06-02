@@ -44,23 +44,34 @@
   --palette-dark-charcoal: #404040;
   --palette-dark-black: #000000;
 
-  /* Dark mixes — derived from palette only */
+  /* Dark mixes — sync with mobile/src/theme/paletteColors.ts darkMix */
   --palette-dark-canvas-deep: #0a0a0a;
   --palette-dark-canvas-mid: #121212;
+  --palette-dark-canvas-sheen: #1a1a1a;
   --palette-dark-canvas-shadow: #070707;
   --palette-dark-card-hover: #4a4a4a;
   --palette-dark-card-elevated: #484848;
+  --palette-dark-sheet: rgba(64, 64, 64, 0.96);
   --palette-dark-charcoal-wash-6: rgba(64, 64, 64, 0.06);
+  --palette-dark-charcoal-wash-10: rgba(64, 64, 64, 0.1);
+  --palette-dark-charcoal-wash-18: rgba(64, 64, 64, 0.04);
   --palette-dark-charcoal-wash-32: rgba(64, 64, 64, 0.08);
   --palette-dark-lime-glow-1: rgba(199, 254, 29, 0.01);
   --palette-dark-lime-glow-edge: rgba(199, 254, 29, 0.012);
+  --palette-dark-lime-glow-4: rgba(199, 254, 29, 0.008);
   --palette-dark-lime-glow-7: rgba(199, 254, 29, 0.014);
+  --palette-dark-lime-glow-10: rgba(199, 254, 29, 0.02);
   --palette-dark-lime-muted-12: rgba(199, 254, 29, 0.12);
   --palette-dark-lime-muted-18: rgba(199, 254, 29, 0.18);
   --palette-dark-lime-border-32: rgba(199, 254, 29, 0.32);
   --palette-dark-white-border-6: rgba(254, 254, 254, 0.06);
   --palette-dark-white-border-8: rgba(254, 254, 254, 0.08);
+  --palette-dark-white-border-10: rgba(254, 254, 254, 0.1);
   --palette-dark-text-muted: rgba(193, 193, 193, 0.72);
+  --palette-dark-overlay: rgba(0, 0, 0, 0.88);
+  --palette-dark-overlay-light: rgba(0, 0, 0, 0.68);
+  --palette-dark-error-bg: rgba(248, 113, 113, 0.15);
+  --palette-dark-error-border: #f87171;
 
   /* Global page background — sync with mobile/src/theme/darkCanvas.ts */
   --palette-page-bg-base: #0a0a0a;

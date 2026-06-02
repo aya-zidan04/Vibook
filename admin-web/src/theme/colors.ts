@@ -1,5 +1,6 @@
 /**
- * Admin theme palette — edit light/dark swatches here; CSS in `palette-colors.css` mirrors these values.
+ * Admin theme palette — mirrors mobile `paletteColors.ts`.
+ * CSS variables in `palette-colors.css` / `dark-semantics.css` are the runtime source of truth.
  */
 
 export const lightPalette = {
@@ -32,7 +33,7 @@ export const lightPalette = {
   navSidebarEdge: 'rgba(26, 35, 24, 0.14)',
 } as const;
 
-/** Dark mode — 7 swatches from brand reference. */
+/** Dark mode — 7 swatches from brand reference (sync mobile `darkColors`). */
 export const darkPalette = {
   neonLime: '#C7FE1D',
   paleYellow: '#F2F862',
@@ -41,6 +42,56 @@ export const darkPalette = {
   lightGray: '#C1C1C1',
   charcoal: '#404040',
   black: '#000000',
+} as const;
+
+/** Derived dark mixes — sync mobile `darkMix` in paletteColors.ts */
+export const darkMix = {
+  canvasDeep: '#0A0A0A',
+  canvasMid: '#121212',
+  canvasSheen: '#1A1A1A',
+  canvasShadow: '#070707',
+  cardHover: '#4A4A4A',
+  cardElevated: '#484848',
+  sheet: 'rgba(64, 64, 64, 0.96)',
+  charcoalWash6: 'rgba(64, 64, 64, 0.06)',
+  charcoalWash10: 'rgba(64, 64, 64, 0.10)',
+  charcoalWash18: 'rgba(64, 64, 64, 0.04)',
+  charcoalWash32: 'rgba(64, 64, 64, 0.08)',
+  limeGlow1: 'rgba(199, 254, 29, 0.01)',
+  limeGlowEdge: 'rgba(199, 254, 29, 0.012)',
+  limeGlow4: 'rgba(199, 254, 29, 0.008)',
+  limeGlow7: 'rgba(199, 254, 29, 0.014)',
+  limeGlow10: 'rgba(199, 254, 29, 0.02)',
+  limeMuted12: 'rgba(199, 254, 29, 0.12)',
+  limeMuted18: 'rgba(199, 254, 29, 0.18)',
+  limeBorder32: 'rgba(199, 254, 29, 0.32)',
+  whiteBorder6: 'rgba(254, 254, 254, 0.06)',
+  whiteBorder8: 'rgba(254, 254, 254, 0.08)',
+  whiteBorder10: 'rgba(254, 254, 254, 0.1)',
+  textMuted: 'rgba(193, 193, 193, 0.72)',
+  overlay: 'rgba(0, 0, 0, 0.88)',
+  overlayLight: 'rgba(0, 0, 0, 0.68)',
+  errorBg: 'rgba(248, 113, 113, 0.15)',
+  errorBorder: '#F87171',
+} as const;
+
+/** Dark semantic colors — sync mobile `designSystem.ts` darkSemantic */
+export const darkSemantic = {
+  background: darkPalette.black,
+  surface: darkMix.canvasDeep,
+  card: darkPalette.charcoal,
+  primary: darkPalette.neonLime,
+  primaryLight: darkPalette.paleYellow,
+  success: '#4ADE80',
+  warning: darkPalette.brightYellow,
+  error: '#F87171',
+  errorBg: darkMix.errorBg,
+  errorBorder: darkMix.errorBorder,
+  textPrimary: darkPalette.white,
+  textSecondary: darkPalette.lightGray,
+  textMuted: darkMix.textMuted,
+  border: darkMix.whiteBorder8,
+  borderLight: darkMix.whiteBorder6,
 } as const;
 
 /** Semantic tokens for charts (resolved at runtime via CSS variables when possible). */

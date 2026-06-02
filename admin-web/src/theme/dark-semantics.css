@@ -1,0 +1,364 @@
+/**
+ * Dark semantic tokens — 1:1 with mobile `designSystem.ts` darkTheme + darkMix.
+ * Applied when OS prefers dark or `[data-theme='dark']`.
+ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    /* Surfaces — mobile darkSemantic */
+    --vb-bg: var(--palette-dark-black);
+    --vb-bg-elevated: var(--palette-dark-canvas-deep);
+    --vb-surface: var(--palette-dark-canvas-deep);
+    --vb-surface-hover: var(--palette-dark-card-hover);
+    --vb-surface-muted: var(--palette-dark-canvas-deep);
+    --vb-card: var(--palette-dark-charcoal);
+    --vb-border: var(--palette-dark-white-border-8);
+    --vb-border-light: var(--palette-dark-white-border-6);
+
+    /* Typography */
+    --vb-text: var(--palette-dark-white);
+    --vb-text-secondary: var(--palette-dark-light-gray);
+    --vb-text-muted: var(--palette-dark-text-muted);
+    --vb-text-on-primary: var(--palette-dark-black);
+
+    /* Brand accents */
+    --vb-primary: var(--palette-dark-neon-lime);
+    --vb-primary-light: var(--palette-dark-pale-yellow);
+    --vb-primary-dark: var(--palette-dark-pale-yellow);
+    --vb-primary-muted: var(--palette-dark-lime-muted-18);
+
+    --vb-accent: var(--palette-dark-neon-lime);
+    --vb-accent-soft: var(--palette-dark-pale-yellow);
+    --vb-accent-light: var(--palette-dark-card-elevated);
+    --vb-accent-bg: var(--palette-dark-lime-muted-12);
+    --vb-accent-border: var(--palette-dark-lime-border-32);
+    --vb-accent-text: var(--palette-dark-black);
+    --vb-accent-muted: var(--vb-accent-bg);
+
+    /* Status — mobile darkSemantic */
+    --vb-success: #4ade80;
+    --vb-warning: var(--palette-dark-bright-yellow);
+    --vb-error: #f87171;
+    --vb-error-bg: var(--palette-dark-error-bg);
+    --vb-error-border: var(--palette-dark-error-border);
+
+    /* Glow / depth */
+    --vb-glow-primary: var(--palette-dark-lime-glow-10);
+    --vb-glow-accent: var(--palette-dark-lime-glow-edge);
+
+    --vb-gradient-primary: linear-gradient(
+      135deg,
+      var(--palette-dark-neon-lime) 0%,
+      var(--palette-dark-pale-yellow) 100%
+    );
+    --vb-gradient-accent: var(--vb-gradient-primary);
+    --vb-gradient-hero: linear-gradient(
+      145deg,
+      var(--palette-dark-black) 0%,
+      var(--palette-dark-canvas-deep) 55%,
+      var(--palette-dark-charcoal) 100%
+    );
+    --vb-page-bg-base: var(--palette-page-bg-base);
+    --vb-page-bg: var(--palette-dark-page-bg);
+
+    /* Legacy aliases → mobile tokens */
+    --vb-terracotta: var(--vb-primary);
+    --vb-terracotta-light: var(--vb-primary-light);
+    --vb-terracotta-dark: var(--vb-primary-dark);
+    --vb-plum: var(--palette-dark-charcoal);
+    --vb-plum-deep: var(--palette-dark-black);
+    --vb-cream: var(--palette-dark-white);
+    --vb-beige: var(--vb-border-light);
+    --vb-navy: var(--palette-dark-white);
+    --vb-blue: var(--vb-primary);
+    --vb-blue-light: var(--vb-primary-light);
+    --vb-blue-dark: var(--vb-primary-dark);
+    --vb-pink: var(--vb-accent);
+    --vb-pink-soft: var(--vb-accent-soft);
+    --vb-pink-light: var(--vb-accent-light);
+    --vb-pink-bg: var(--vb-accent-bg);
+    --vb-pink-border: var(--vb-accent-border);
+    --vb-pink-text: var(--vb-accent-text);
+    --vb-white: var(--palette-dark-card-elevated);
+    --vb-light-gray: var(--palette-dark-charcoal);
+    --vb-light-surface: var(--palette-dark-charcoal);
+
+    /* Navigation — charcoal + lime (no light-theme cream/plum) */
+    --vb-sidebar-bg: linear-gradient(
+      180deg,
+      var(--palette-dark-charcoal) 0%,
+      var(--palette-dark-canvas-deep) 48%,
+      var(--palette-dark-black) 100%
+    );
+    --vb-sidebar-fg: var(--palette-dark-white);
+    --vb-sidebar-fg-muted: var(--palette-dark-text-muted);
+    --vb-sidebar-border: var(--palette-dark-white-border-6);
+    --vb-sidebar-shadow: var(--vb-shadow-md);
+    --vb-sidebar-shadow-rtl: var(--vb-shadow-md);
+    --vb-sidebar-brand-border: var(--palette-dark-white-border-8);
+    --vb-sidebar-subtitle-opacity: 1;
+    --vb-sidebar-link-color: var(--palette-dark-light-gray);
+    --vb-sidebar-link-hover-bg: var(--palette-dark-lime-muted-12);
+    --vb-sidebar-link-hover-color: var(--palette-dark-white);
+    --vb-sidebar-link-hover-shadow: none;
+    --vb-sidebar-link-hover-shift: 2px;
+    --vb-sidebar-link-active-bg: var(--palette-dark-lime-muted-18);
+    --vb-sidebar-link-active-color: var(--palette-dark-white);
+    --vb-sidebar-link-active-indicator: var(--palette-dark-neon-lime);
+    --vb-sidebar-link-active-indicator-width: 3px;
+    --vb-sidebar-link-active-shadow: none;
+    --vb-sidebar-link-active-hover-bg: var(--palette-dark-lime-muted-18);
+    --vb-sidebar-link-active-hover-shadow: none;
+    --vb-sidebar-icon-color: var(--palette-dark-neon-lime);
+    --vb-sidebar-icon-opacity: 1;
+
+    --vb-topbar-bg: color-mix(in srgb, var(--palette-dark-black) 92%, transparent);
+    --vb-topbar-fg: var(--vb-text);
+    --vb-topbar-fg-muted: var(--vb-text-muted);
+    --vb-topbar-border: var(--palette-dark-white-border-6);
+    --vb-field-bg: var(--palette-dark-charcoal);
+    --vb-table-head-bg: var(--palette-dark-card-elevated);
+    --vb-modal-bg: var(--palette-dark-charcoal);
+    --vb-overlay-backdrop: var(--palette-dark-overlay-light);
+    --vb-hover-subtle: var(--palette-dark-white-border-8);
+    --vb-hover-row: var(--palette-dark-charcoal-wash-6);
+    --vb-hover-row-selected: var(--palette-dark-lime-muted-12);
+
+    /* Badges / chips */
+    --vb-badge-pending-bg: rgba(255, 243, 11, 0.12);
+    --vb-badge-pending-border: rgba(255, 243, 11, 0.32);
+    --vb-badge-approved-bg: rgba(74, 222, 128, 0.12);
+    --vb-badge-approved-border: rgba(74, 222, 128, 0.28);
+    --vb-badge-rejected-bg: var(--palette-dark-error-bg);
+    --vb-badge-rejected-border: rgba(248, 113, 113, 0.32);
+    --vb-badge-neutral-bg: var(--palette-dark-lime-muted-12);
+    --vb-badge-neutral-fg: var(--palette-dark-light-gray);
+    --vb-chip-active-bg: var(--palette-dark-lime-muted-18);
+
+    /* Blocks */
+    --vb-stat-icon-bg: linear-gradient(
+      145deg,
+      var(--palette-dark-lime-muted-18),
+      var(--palette-dark-charcoal-wash-32)
+    );
+    --vb-stat-accent-line: linear-gradient(90deg, var(--vb-primary), var(--vb-primary-light));
+    --vb-welcome-bg: linear-gradient(
+      120deg,
+      var(--palette-dark-lime-muted-12) 0%,
+      var(--palette-dark-charcoal-wash-32) 100%
+    );
+    --vb-welcome-border: var(--vb-border);
+    --vb-hero-bg: linear-gradient(
+      145deg,
+      var(--vb-card) 0%,
+      var(--vb-surface) 55%,
+      var(--vb-bg-elevated) 100%
+    );
+    --vb-hero-border: var(--vb-border);
+    --vb-hero-aside-bg: var(--palette-dark-card-elevated);
+    --vb-hero-aside-border: var(--vb-border);
+
+    /* Login */
+    --vb-login-card-border: var(--vb-border);
+    --vb-login-card-shadow: var(--vb-shadow-lg);
+    --vb-login-accent-line: linear-gradient(90deg, var(--vb-primary), var(--vb-primary-light));
+    --vb-login-mark-filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+    --vb-login-submit-bg: var(--vb-gradient-primary);
+    --vb-login-submit-shadow: var(--vb-shadow-md);
+
+    /* Feedback */
+    --vb-toast-success-bg: rgba(74, 222, 128, 0.12);
+    --vb-toast-success-border: rgba(74, 222, 128, 0.28);
+    --vb-toast-error-bg: var(--palette-dark-error-bg);
+    --vb-toast-error-border: rgba(248, 113, 113, 0.28);
+    --vb-danger-btn-fg: var(--palette-dark-black);
+    --vb-danger-outline-border: rgba(248, 113, 113, 0.45);
+    --vb-danger-outline-hover-bg: var(--palette-dark-error-bg);
+    --vb-callout-warning-bg: rgba(255, 243, 11, 0.08);
+    --vb-callout-warning-border: rgba(255, 243, 11, 0.22);
+    --vb-empty-illustr-shadow: var(--palette-dark-lime-muted-18);
+    --vb-empty-illustr-fill: var(--palette-dark-charcoal-wash-32);
+    --vb-empty-illustr-stroke: var(--palette-dark-lime-border-32);
+    --vb-empty-illustr-accent: var(--vb-primary);
+
+    /* Shadows — mobile darkShadows */
+    --vb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.4);
+    --vb-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.55), 0 16px 32px rgba(0, 0, 0, 0.45);
+    --vb-shadow-lg: 0 8px 18px rgba(0, 0, 0, 0.6), 0 24px 48px rgba(0, 0, 0, 0.5);
+  }
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --vb-bg: var(--palette-dark-black);
+  --vb-bg-elevated: var(--palette-dark-canvas-deep);
+  --vb-surface: var(--palette-dark-canvas-deep);
+  --vb-surface-hover: var(--palette-dark-card-hover);
+  --vb-surface-muted: var(--palette-dark-canvas-deep);
+  --vb-card: var(--palette-dark-charcoal);
+  --vb-border: var(--palette-dark-white-border-8);
+  --vb-border-light: var(--palette-dark-white-border-6);
+
+  --vb-text: var(--palette-dark-white);
+  --vb-text-secondary: var(--palette-dark-light-gray);
+  --vb-text-muted: var(--palette-dark-text-muted);
+  --vb-text-on-primary: var(--palette-dark-black);
+
+  --vb-primary: var(--palette-dark-neon-lime);
+  --vb-primary-light: var(--palette-dark-pale-yellow);
+  --vb-primary-dark: var(--palette-dark-pale-yellow);
+  --vb-primary-muted: var(--palette-dark-lime-muted-18);
+
+  --vb-accent: var(--palette-dark-neon-lime);
+  --vb-accent-soft: var(--palette-dark-pale-yellow);
+  --vb-accent-light: var(--palette-dark-card-elevated);
+  --vb-accent-bg: var(--palette-dark-lime-muted-12);
+  --vb-accent-border: var(--palette-dark-lime-border-32);
+  --vb-accent-text: var(--palette-dark-black);
+  --vb-accent-muted: var(--vb-accent-bg);
+
+  --vb-success: #4ade80;
+  --vb-warning: var(--palette-dark-bright-yellow);
+  --vb-error: #f87171;
+  --vb-error-bg: var(--palette-dark-error-bg);
+  --vb-error-border: var(--palette-dark-error-border);
+
+  --vb-glow-primary: var(--palette-dark-lime-glow-10);
+  --vb-glow-accent: var(--palette-dark-lime-glow-edge);
+
+  --vb-gradient-primary: linear-gradient(
+    135deg,
+    var(--palette-dark-neon-lime) 0%,
+    var(--palette-dark-pale-yellow) 100%
+  );
+  --vb-gradient-accent: var(--vb-gradient-primary);
+  --vb-gradient-hero: linear-gradient(
+    145deg,
+    var(--palette-dark-black) 0%,
+    var(--palette-dark-canvas-deep) 55%,
+    var(--palette-dark-charcoal) 100%
+  );
+  --vb-page-bg-base: var(--palette-page-bg-base);
+  --vb-page-bg: var(--palette-dark-page-bg);
+
+  --vb-terracotta: var(--vb-primary);
+  --vb-terracotta-light: var(--vb-primary-light);
+  --vb-terracotta-dark: var(--vb-primary-dark);
+  --vb-plum: var(--palette-dark-charcoal);
+  --vb-plum-deep: var(--palette-dark-black);
+  --vb-cream: var(--palette-dark-white);
+  --vb-beige: var(--vb-border-light);
+  --vb-navy: var(--palette-dark-white);
+  --vb-blue: var(--vb-primary);
+  --vb-blue-light: var(--vb-primary-light);
+  --vb-blue-dark: var(--vb-primary-dark);
+  --vb-pink: var(--vb-accent);
+  --vb-pink-soft: var(--vb-accent-soft);
+  --vb-pink-light: var(--vb-accent-light);
+  --vb-pink-bg: var(--vb-accent-bg);
+  --vb-pink-border: var(--vb-accent-border);
+  --vb-pink-text: var(--vb-accent-text);
+  --vb-white: var(--palette-dark-card-elevated);
+  --vb-light-gray: var(--palette-dark-charcoal);
+  --vb-light-surface: var(--palette-dark-charcoal);
+
+  --vb-sidebar-bg: linear-gradient(
+    180deg,
+    var(--palette-dark-charcoal) 0%,
+    var(--palette-dark-canvas-deep) 48%,
+    var(--palette-dark-black) 100%
+  );
+  --vb-sidebar-fg: var(--palette-dark-white);
+  --vb-sidebar-fg-muted: var(--palette-dark-text-muted);
+  --vb-sidebar-border: var(--palette-dark-white-border-6);
+  --vb-sidebar-shadow: var(--vb-shadow-md);
+  --vb-sidebar-shadow-rtl: var(--vb-shadow-md);
+  --vb-sidebar-brand-border: var(--palette-dark-white-border-8);
+  --vb-sidebar-subtitle-opacity: 1;
+  --vb-sidebar-link-color: var(--palette-dark-light-gray);
+  --vb-sidebar-link-hover-bg: var(--palette-dark-lime-muted-12);
+  --vb-sidebar-link-hover-color: var(--palette-dark-white);
+  --vb-sidebar-link-hover-shadow: none;
+  --vb-sidebar-link-hover-shift: 2px;
+  --vb-sidebar-link-active-bg: var(--palette-dark-lime-muted-18);
+  --vb-sidebar-link-active-color: var(--palette-dark-white);
+  --vb-sidebar-link-active-indicator: var(--palette-dark-neon-lime);
+  --vb-sidebar-link-active-indicator-width: 3px;
+  --vb-sidebar-link-active-shadow: none;
+  --vb-sidebar-link-active-hover-bg: var(--palette-dark-lime-muted-18);
+  --vb-sidebar-link-active-hover-shadow: none;
+  --vb-sidebar-icon-color: var(--palette-dark-neon-lime);
+  --vb-sidebar-icon-opacity: 1;
+
+  --vb-topbar-bg: color-mix(in srgb, var(--palette-dark-black) 92%, transparent);
+  --vb-topbar-fg: var(--vb-text);
+  --vb-topbar-fg-muted: var(--vb-text-muted);
+  --vb-topbar-border: var(--palette-dark-white-border-6);
+  --vb-field-bg: var(--palette-dark-charcoal);
+  --vb-table-head-bg: var(--palette-dark-card-elevated);
+  --vb-modal-bg: var(--palette-dark-charcoal);
+  --vb-overlay-backdrop: var(--palette-dark-overlay-light);
+  --vb-hover-subtle: var(--palette-dark-white-border-8);
+  --vb-hover-row: var(--palette-dark-charcoal-wash-6);
+  --vb-hover-row-selected: var(--palette-dark-lime-muted-12);
+
+  --vb-badge-pending-bg: rgba(255, 243, 11, 0.12);
+  --vb-badge-pending-border: rgba(255, 243, 11, 0.32);
+  --vb-badge-approved-bg: rgba(74, 222, 128, 0.12);
+  --vb-badge-approved-border: rgba(74, 222, 128, 0.28);
+  --vb-badge-rejected-bg: var(--palette-dark-error-bg);
+  --vb-badge-rejected-border: rgba(248, 113, 113, 0.32);
+  --vb-badge-neutral-bg: var(--palette-dark-lime-muted-12);
+  --vb-badge-neutral-fg: var(--palette-dark-light-gray);
+  --vb-chip-active-bg: var(--palette-dark-lime-muted-18);
+
+  --vb-stat-icon-bg: linear-gradient(
+    145deg,
+    var(--palette-dark-lime-muted-18),
+    var(--palette-dark-charcoal-wash-32)
+  );
+  --vb-stat-accent-line: linear-gradient(90deg, var(--vb-primary), var(--vb-primary-light));
+  --vb-welcome-bg: linear-gradient(
+    120deg,
+    var(--palette-dark-lime-muted-12) 0%,
+    var(--palette-dark-charcoal-wash-32) 100%
+  );
+  --vb-welcome-border: var(--vb-border);
+  --vb-hero-bg: linear-gradient(
+    145deg,
+    var(--vb-card) 0%,
+    var(--vb-surface) 55%,
+    var(--vb-bg-elevated) 100%
+  );
+  --vb-hero-border: var(--vb-border);
+  --vb-hero-aside-bg: var(--palette-dark-card-elevated);
+  --vb-hero-aside-border: var(--vb-border);
+
+  --vb-login-card-border: var(--vb-border);
+  --vb-login-card-shadow: var(--vb-shadow-lg);
+  --vb-login-accent-line: linear-gradient(90deg, var(--vb-primary), var(--vb-primary-light));
+  --vb-login-mark-filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+  --vb-login-submit-bg: var(--vb-gradient-primary);
+  --vb-login-submit-shadow: var(--vb-shadow-md);
+
+  --vb-toast-success-bg: rgba(74, 222, 128, 0.12);
+  --vb-toast-success-border: rgba(74, 222, 128, 0.28);
+  --vb-toast-error-bg: var(--palette-dark-error-bg);
+  --vb-toast-error-border: rgba(248, 113, 113, 0.28);
+  --vb-danger-btn-fg: var(--palette-dark-black);
+  --vb-danger-outline-border: rgba(248, 113, 113, 0.45);
+  --vb-danger-outline-hover-bg: var(--palette-dark-error-bg);
+  --vb-callout-warning-bg: rgba(255, 243, 11, 0.08);
+  --vb-callout-warning-border: rgba(255, 243, 11, 0.22);
+  --vb-empty-illustr-shadow: var(--palette-dark-lime-muted-18);
+  --vb-empty-illustr-fill: var(--palette-dark-charcoal-wash-32);
+  --vb-empty-illustr-stroke: var(--palette-dark-lime-border-32);
+  --vb-empty-illustr-accent: var(--vb-primary);
+
+  --vb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.4);
+  --vb-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.55), 0 16px 32px rgba(0, 0, 0, 0.45);
+  --vb-shadow-lg: 0 8px 18px rgba(0, 0, 0, 0.6), 0 24px 48px rgba(0, 0, 0, 0.5);
+}

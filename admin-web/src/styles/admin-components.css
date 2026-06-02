@@ -42,7 +42,7 @@
 }
 
 .vb-btn--secondary {
-  background: var(--vb-surface);
+  background: var(--vb-card);
   color: var(--vb-text);
   border: 1px solid var(--vb-border);
 }
@@ -62,8 +62,9 @@
 }
 
 .vb-btn--danger {
-  background: var(--vb-error);
-  color: var(--vb-danger-btn-fg);
+  background: var(--vb-error-bg, var(--vb-error));
+  color: var(--vb-error);
+  border: 1px solid var(--vb-error-border, var(--vb-error));
 }
 
 .vb-btn--danger:hover:not(:disabled) {
@@ -98,7 +99,7 @@
   padding: 0.6rem 0.85rem;
   border-radius: var(--vb-radius-sm);
   border: 1px solid var(--vb-border);
-  background: var(--vb-surface);
+  background: var(--vb-field-bg);
   color: var(--vb-text);
   font: inherit;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -135,7 +136,7 @@
   border: 1px solid var(--vb-border);
   font: inherit;
   resize: vertical;
-  background: var(--vb-bg);
+  background: var(--vb-field-bg);
 }
 
 .vb-modal textarea.vb-modal__textarea:focus {
@@ -218,8 +219,8 @@
 }
 
 .vb-badge--neutral {
-  background: var(--vb-primary-muted);
-  color: var(--vb-primary-dark);
+  background: var(--vb-badge-neutral-bg, var(--vb-primary-muted));
+  color: var(--vb-badge-neutral-fg, var(--vb-primary-dark));
   text-transform: none;
   font-weight: 600;
   letter-spacing: 0;
@@ -703,7 +704,7 @@ html[dir='rtl'] .vb-sidebar {
   padding: 0.85rem 1rem;
   font-weight: 600;
   color: var(--vb-text-secondary);
-  background: var(--vb-surface-muted);
+  background: var(--vb-table-head-bg, var(--vb-surface-muted));
   border-bottom: 1px solid var(--vb-border);
   white-space: nowrap;
 }
@@ -783,11 +784,11 @@ html[dir='rtl'] .vb-sidebar {
   z-index: 1;
   width: 100%;
   max-width: 420px;
-  background: var(--vb-surface);
+  background: var(--vb-modal-bg, var(--vb-card));
   border-radius: var(--vb-radius-lg);
   padding: var(--vb-space-xl);
   box-shadow: var(--vb-shadow-lg);
-  border: 1px solid var(--vb-border-light);
+  border: 1px solid var(--vb-border);
 }
 
 .vb-modal__title {
@@ -876,7 +877,7 @@ html[dir='rtl'] .vb-sidebar {
 .vb-login__card {
   width: 100%;
   max-width: 460px;
-  background: var(--vb-surface);
+  background: var(--vb-card);
   border-radius: 18px;
   padding: var(--vb-space-xxxl) clamp(var(--vb-space-xl), 4vw, var(--vb-space-xxl));
   border: 1px solid var(--vb-login-card-border);

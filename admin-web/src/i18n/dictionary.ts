@@ -152,6 +152,11 @@ export const translations = {
     },
     settings: {
       title: 'Settings',
+      appearanceTitle: 'Appearance',
+      appearanceDesc: 'Match the Vibook mobile dark theme or use light / system default.',
+      themeDark: 'Dark',
+      themeLight: 'Light',
+      themeSystem: 'System',
       languageTitle: 'Language',
       languageDesc: 'Choose the admin console display language. Layout mirrors for Arabic (RTL).',
       comingTitle: 'More preferences',
@@ -771,6 +776,11 @@ export const translations = {
     },
     settings: {
       title: 'الإعدادات',
+      appearanceTitle: 'المظهر',
+      appearanceDesc: 'يطابق الوضع الداكن لتطبيق Vibook أو فاتح / تفضيل النظام.',
+      themeDark: 'داكن',
+      themeLight: 'فاتح',
+      themeSystem: 'النظام',
       languageTitle: 'اللغة',
       languageDesc: 'اختر لغة لوحة الإدارة. يعكس التخطيط العربية (من اليمين لليسار).',
       comingTitle: 'المزيد من التفضيلات',
