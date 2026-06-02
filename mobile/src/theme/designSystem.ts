@@ -322,6 +322,11 @@ export const colorUsageGuide = {
     primary: 'Links, focus, primary buttons',
     accent: 'Notification badge, secondary chart series, highlight cards',
   },
+  visualEffects: {
+    headerSeparation: 'HeaderSeparationChrome — nav layer shadow/fade (see visualEffects.ts)',
+    heroAmbient: 'HeroAmbientOverlay — hero/profile card diagonal wash',
+    meProfileCard: 'Me tab profile card light-mode border/shadow tuning',
+  },
 } as const;
 
 export { lightColors as lightPaletteSwatches, darkColors as darkPaletteSwatches } from './paletteColors';

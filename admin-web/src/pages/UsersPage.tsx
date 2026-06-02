@@ -51,7 +51,7 @@ export function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadUsers();

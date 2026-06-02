@@ -16,13 +16,13 @@ import { useMockUser } from '@/hooks/useMockUser';
 import { useAppStore } from '@/store/appStore';
 import { buttonMetrics, createShadows, radii, spacing, useThemeColors } from '@/theme';
 import { lightColors as lightSw } from '@/theme/paletteColors';
+import { meProfileCardLightEffect } from '@/theme/visualEffects';
 import { useThemeStore } from '@/store/themeStore';
 import { textAlignStart } from '@/utils/rtlText';
 import type { ThemeColors } from '@/theme/palettes';
 
 /** Me profile card base — light mode sage (#DCE7CC). */
 const PROFILE_HEADER_BASE_LIGHT = lightSw.sageBorder;
-const PROFILE_HEADER_BORDER_LIGHT = '#B7C8A3';
 
 const MENU_AUTH_ONLY: { key: string; labelKey: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: 'membership', labelKey: 'me.menuMembership', icon: 'diamond-outline' },
@@ -233,11 +233,11 @@ function createStyles(colors: ThemeColors, isLight: boolean) {
     ? Platform.select({
         ios: {
           shadowColor: colors.emptyStateIcon,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.22,
-          shadowRadius: 12,
+          shadowOffset: meProfileCardLightEffect.shadowOffset,
+          shadowOpacity: meProfileCardLightEffect.shadowOpacity,
+          shadowRadius: meProfileCardLightEffect.shadowRadius,
         },
-        android: { elevation: 5 },
+        android: { elevation: meProfileCardLightEffect.androidElevation },
         default: {},
       })
     : {};
@@ -249,7 +249,7 @@ function createStyles(colors: ThemeColors, isLight: boolean) {
       padding: spacing.lg,
       marginBottom: spacing.lg,
       borderWidth: 1,
-      borderColor: isLight ? PROFILE_HEADER_BORDER_LIGHT : colors.border,
+      borderColor: isLight ? meProfileCardLightEffect.borderColor : colors.border,
       overflow: 'hidden',
       ...profileHeaderShadow,
     },

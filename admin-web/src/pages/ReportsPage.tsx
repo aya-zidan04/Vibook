@@ -93,7 +93,7 @@ export function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [tab, loadModeration, loadUserReports]);
+  }, [tab, loadModeration, loadUserReports, t]);
 
   useEffect(() => {
     void load();

@@ -1,8 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-type AppLocale = 'en' | 'ar';
-type DisplayCurrency = 'USD' | 'JOD';
-type ColorScheme = 'light' | 'dark';
+import type { AppLocale, DisplayCurrency } from '@/store/localeStore';
+import type { ColorScheme } from '@/store/themeStore';
 
 export const LOCALE_PERSIST_KEY = 'vibook-locale';
 export const THEME_PERSIST_KEY = 'vibook-theme';

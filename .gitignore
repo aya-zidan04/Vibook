@@ -17,3 +17,7 @@ backend/target/
 *.iml
 .vscode/*
 !.vscode/extensions.json
+
+# Local tooling artifacts
+.tmp-pillow/
+mobile/.tmp-pillow/

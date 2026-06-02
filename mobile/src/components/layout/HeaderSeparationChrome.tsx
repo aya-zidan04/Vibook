@@ -1,29 +1,22 @@
 import { ReactNode, useMemo } from 'react';
 import { Platform, StyleSheet, View, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { headerSeparationEffect } from '@/theme/visualEffects';
 import { useThemeStore } from '@/store/themeStore';
-
-const SHADOW_COLOR_LIGHT = '#55644A';
-const FADE_TOP_LIGHT = 'rgba(85, 100, 74, 0.05)';
-
-/** Dark accent family — rgb(166, 205, 87) / #A6CD57 */
-const SHADOW_COLOR_DARK = '#A6CD57';
-const FADE_TOP_DARK = 'rgba(166, 205, 87, 0.06)';
-
-const FADE_HEIGHT = 14;
 
 /** Light-mode soft bottom shadow for navigation headers. */
 export function headerLightSeparationShadow(isLight: boolean): ViewStyle {
   if (!isLight) return {};
+  const fx = headerSeparationEffect.light;
   return (
     Platform.select({
       ios: {
-        shadowColor: SHADOW_COLOR_LIGHT,
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 4 },
+        shadowColor: fx.shadowColor,
+        shadowOpacity: fx.shadowOpacity,
+        shadowRadius: fx.shadowRadius,
+        shadowOffset: fx.shadowOffset,
       },
-      android: { elevation: 3 },
+      android: { elevation: fx.androidElevation },
       default: {},
     }) ?? {}
   );
@@ -31,15 +24,16 @@ export function headerLightSeparationShadow(isLight: boolean): ViewStyle {
 
 /** Dark-mode soft ambient glow beneath navigation headers. */
 export function headerDarkSeparationShadow(): ViewStyle {
+  const fx = headerSeparationEffect.dark;
   return (
     Platform.select({
       ios: {
-        shadowColor: SHADOW_COLOR_DARK,
-        shadowOpacity: 0.08,
-        shadowRadius: 20,
-        shadowOffset: { width: 0, height: 4 },
+        shadowColor: fx.shadowColor,
+        shadowOpacity: fx.shadowOpacity,
+        shadowRadius: fx.shadowRadius,
+        shadowOffset: fx.shadowOffset,
       },
-      android: { elevation: 2 },
+      android: { elevation: fx.androidElevation },
       default: {},
     }) ?? {}
   );
@@ -57,7 +51,9 @@ export function HeaderSeparationChrome({ children, style }: Props) {
     () => (isLight ? headerLightSeparationShadow(true) : headerDarkSeparationShadow()),
     [isLight],
   );
-  const fadeTop = isLight ? FADE_TOP_LIGHT : FADE_TOP_DARK;
+  const fadeTop = isLight
+    ? headerSeparationEffect.light.fadeTop
+    : headerSeparationEffect.dark.fadeTop;
 
   return (
     <View style={[styles.root, shadowStyle, style]}>
@@ -82,7 +78,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: -FADE_HEIGHT,
-    height: FADE_HEIGHT,
+    bottom: -headerSeparationEffect.fadeHeight,
+    height: headerSeparationEffect.fadeHeight,
   },
 });

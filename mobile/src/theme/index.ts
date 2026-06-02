@@ -32,6 +32,11 @@ export {
   type AmbientGlowOrb,
 } from './ambient';
 export { elevatedCardStyle } from './elevatedSurfaces';
+export {
+  headerSeparationEffect,
+  heroAmbientEffect,
+  meProfileCardLightEffect,
+} from './visualEffects';
 export { PageShell } from '@/components/layout/PageShell';
 export {
   APP_BACKGROUND_COLORS,

@@ -1,3 +1,6 @@
+/**
+ * Jordan governorate labels for admin-web (kept local — mobile has its own copy under `mobile/src/utils/governorateLabels.ts`).
+ */
 type JordanGovernorateSlug =
   | 'irbid'
   | 'ajloun'

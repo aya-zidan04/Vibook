@@ -6,7 +6,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { formatIntForLocale } from '@/utils/format';
 import { rateEvent } from '@/api/eventsApi';
 import { useUserListingRating, type RatingVertical } from '@/services/ratings';
-import { ltrNavigationChrome } from '@/utils/navigationChrome';
+import { ltrNavigationChrome } from '@/utils/rtl';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
