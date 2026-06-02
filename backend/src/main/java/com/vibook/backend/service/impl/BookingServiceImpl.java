@@ -121,7 +121,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setGuestsCount(guests);
         booking.setTotalPriceJod(total);
         booking.setNote(blankToNull(request.note()));
-        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setStatus(BookingStatus.PENDING);
 
         Booking saved = bookingRepository.save(booking);
         return bookingMapper.toResponse(saved);

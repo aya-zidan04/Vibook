@@ -1,4 +1,10 @@
-import type { BookingStatus, BusinessProfileStatus, ModerationReportStatus, UserReportStatus } from '@/api/types';
+import type {
+  BookingStatus,
+  BusinessProfileStatus,
+  ModerationReportStatus,
+  PaymentStatus,
+  UserReportStatus,
+} from '@/api/types';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 
 const statusTone: Record<BusinessProfileStatus, string> = {
@@ -52,6 +58,27 @@ const bookingLabelKey: Record<BookingStatus, string> = {
 export function BookingStatusBadge({ status }: { status: BookingStatus }) {
   const { t } = useAdminI18n();
   return <span className={`vb-badge ${bookingTone[status]}`}>{t(bookingLabelKey[status])}</span>;
+}
+
+const paymentTone: Record<PaymentStatus, string> = {
+  CREATED: 'vb-badge--pending',
+  APPROVED: 'vb-badge--neutral',
+  CAPTURED: 'vb-badge--approved',
+  FAILED: 'vb-badge--rejected',
+  CANCELLED: 'vb-badge--rejected',
+};
+
+const paymentLabelKey: Record<PaymentStatus, string> = {
+  CREATED: 'paymentStatus.created',
+  APPROVED: 'paymentStatus.approved',
+  CAPTURED: 'paymentStatus.captured',
+  FAILED: 'paymentStatus.failed',
+  CANCELLED: 'paymentStatus.cancelled',
+};
+
+export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
+  const { t } = useAdminI18n();
+  return <span className={`vb-badge ${paymentTone[status]}`}>{t(paymentLabelKey[status])}</span>;
 }
 
 const reportTone: Record<ModerationReportStatus, string> = {

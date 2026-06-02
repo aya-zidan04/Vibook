@@ -22,6 +22,7 @@ public record AdminBookingResponse(
     String note,
     String cancelReason,
     Instant createdAt,
-    Instant updatedAt
+    Instant updatedAt,
+    AdminBookingPaymentInfo payment
 ) {
 }

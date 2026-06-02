@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
@@ -9,21 +10,30 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { createBooking } from '@/api/bookingsApi';
+import { capturePayPalOrder, createPayPalOrder } from '@/api/paymentsApi';
 import { mapApiError } from '@/utils/mapApiError';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+
+const PAYPAL_RETURN_URL = 'vibook://paypal-return';
 
 export default function PaymentScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const draft = useBookingDraftStore((s) => s.draft);
+  const pendingBookingId = useBookingDraftStore((s) => s.pendingBookingId);
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const setLastOrderId = useBookingDraftStore((s) => s.setLastOrderId);
+  const setPendingBookingId = useBookingDraftStore((s) => s.setPendingBookingId);
+  const clearCheckoutSession = useBookingDraftStore((s) => s.clearCheckoutSession);
   const [busy, setBusy] = useState(false);
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
+
+  const usePayPal =
+    draft?.apiEventId != null && draft.vertical === 'event';
 
   if (!draft) {
     return (
@@ -38,23 +48,47 @@ export default function PaymentScreen() {
 
   const total = draft.unitPrice * draft.quantity + draft.fees;
 
-  const pay = async () => {
+  const payWithPayPal = async () => {
+    const eventId = draft.apiEventId;
+    if (eventId == null) return;
+
     setBusy(true);
     try {
-      if (draft.apiEventId != null && draft.vertical === 'event') {
+      let bookingId = pendingBookingId;
+      if (bookingId == null) {
         const created = await createBooking({
-          eventId: draft.apiEventId,
+          eventId,
+          timeSlotId: draft.apiTimeSlotId ?? null,
           guestsCount: draft.quantity,
           note: null,
         });
-        setLastOrderId(String(created.id));
-        setDraft(null);
-        router.replace('/confirmation');
+        bookingId = created.id;
+        setPendingBookingId(bookingId);
+      }
+
+      const order = await createPayPalOrder({
+        bookingId,
+        eventId,
+        timeSlotId: draft.apiTimeSlotId ?? null,
+      });
+
+      const browserResult = await WebBrowser.openAuthSessionAsync(
+        order.approvalUrl,
+        PAYPAL_RETURN_URL,
+      );
+
+      if (browserResult.type !== 'success') {
+        Alert.alert(t('payment.title'), t('payment.paypalCancelled'));
         return;
       }
-      const id = `VB-${Date.now().toString(36).toUpperCase()}`;
-      setLastOrderId(id);
-      setDraft(null);
+
+      await capturePayPalOrder({
+        paypalOrderId: order.paypalOrderId,
+        bookingId,
+      });
+
+      setLastOrderId(String(bookingId));
+      clearCheckoutSession();
       router.replace('/confirmation');
     } catch (e) {
       Alert.alert(t('payment.title'), mapApiError(e, t));
@@ -63,40 +97,70 @@ export default function PaymentScreen() {
     }
   };
 
+  const paySimulated = async () => {
+    setBusy(true);
+    try {
+      const id = `VB-${Date.now().toString(36).toUpperCase()}`;
+      setLastOrderId(id);
+      clearCheckoutSession();
+      router.replace('/confirmation');
+    } catch (e) {
+      Alert.alert(t('payment.title'), mapApiError(e, t));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const pay = () => {
+    if (usePayPal) {
+      void payWithPayPal();
+    } else {
+      void paySimulated();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <View style={styles.shell}>
         <DetailHeader title={t('payment.title')} />
         <ScrollView contentContainerStyle={styles.content} style={styles.scroll}>
-          <AppText variant="body" color="textSecondary">
-            {t('payment.sim')}
-          </AppText>
-          <View style={styles.fakeCard}>
-            <AppText variant="label" color="textMuted">
-              {t('payment.cardNumber')}
+          {usePayPal ? (
+            <AppText variant="body" color="textSecondary">
+              {t('payment.paypalSandbox')}
             </AppText>
-            <AppText variant="h3" color="text">
-              •••• •••• •••• 4242
-            </AppText>
-            <View style={styles.fakeRow}>
-              <View>
+          ) : (
+            <>
+              <AppText variant="body" color="textSecondary">
+                {t('payment.sim')}
+              </AppText>
+              <View style={styles.fakeCard}>
                 <AppText variant="label" color="textMuted">
-                  {t('payment.expires')}
+                  {t('payment.cardNumber')}
                 </AppText>
-                <AppText variant="body-em" color="text">
-                  12 / 28
+                <AppText variant="h3" color="text">
+                  •••• •••• •••• 4242
                 </AppText>
+                <View style={styles.fakeRow}>
+                  <View>
+                    <AppText variant="label" color="textMuted">
+                      {t('payment.expires')}
+                    </AppText>
+                    <AppText variant="body-em" color="text">
+                      12 / 28
+                    </AppText>
+                  </View>
+                  <View>
+                    <AppText variant="label" color="textMuted">
+                      {t('payment.cvv')}
+                    </AppText>
+                    <AppText variant="body-em" color="text">
+                      •••
+                    </AppText>
+                  </View>
+                </View>
               </View>
-              <View>
-                <AppText variant="label" color="textMuted">
-                  {t('payment.cvv')}
-                </AppText>
-                <AppText variant="body-em" color="text">
-                  •••
-                </AppText>
-              </View>
-            </View>
-          </View>
+            </>
+          )}
           <View style={styles.summary}>
             <AppText variant="body-em" color="text">
               {draft.title}
@@ -109,8 +173,8 @@ export default function PaymentScreen() {
         <View style={styles.footer}>
           <SecondaryButton title={t('common.back')} onPress={() => router.back()} style={styles.half} />
           <PrimaryButton
-            title={t('payment.payNow')}
-            onPress={() => void pay()}
+            title={usePayPal ? t('payment.payWithPayPal') : t('payment.payNow')}
+            onPress={pay}
             loading={busy}
             style={styles.half}
           />

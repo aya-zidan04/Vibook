@@ -79,6 +79,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/profile-images/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-logos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/files/business-banners/**").permitAll()
+                // PayPal sandbox payments (server-side only — secret never exposed to clients)
+                .requestMatchers("/api/v1/payments/paypal/**").hasAnyRole("USER", "ADMIN")
                 // Bookings
                 .requestMatchers("/api/v1/bookings/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/business/bookings/**").hasAnyRole("USER", "ADMIN")

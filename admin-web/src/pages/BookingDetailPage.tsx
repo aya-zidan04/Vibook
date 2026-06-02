@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { cancelAdminBooking, completeAdminBooking, fetchAdminBooking } from '@/api/adminApi';
-import type { AdminBookingResponse } from '@/api/types';
+import type { AdminBookingPaymentInfo, AdminBookingResponse } from '@/api/types';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { BookingStatusBadge } from '@/components/ui/Badge';
+import { BookingStatusBadge, PaymentStatusBadge } from '@/components/ui/Badge';
+import { formatPaymentAmount } from '@/utils/bookingPayment';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
@@ -102,9 +103,41 @@ export function BookingDetailPage() {
         {t('bookingDetail.back')}
       </Button>
       <h1 style={{ marginTop: 0 }}>{t('bookingDetail.title', { id: row.id })}</h1>
-      <div style={{ marginBottom: 16 }}>
-        <BookingStatusBadge status={row.status} />
-      </div>
+
+      <Card padding="lg" style={{ marginBottom: 24 }}>
+        <CardHeader title={t('bookingDetail.paypalPayment')} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+          <div>
+            <div className="vb-label-muted" style={{ marginBottom: 4 }}>
+              {t('bookingDetail.bookingStatusLabel')}
+            </div>
+            <BookingStatusBadge status={row.status} />
+          </div>
+          <div>
+            <div className="vb-label-muted" style={{ marginBottom: 4 }}>
+              {t('bookingDetail.paymentStatusLabel')}
+            </div>
+            {row.payment ? (
+              <PaymentStatusBadge status={row.payment.paymentStatus} />
+            ) : (
+              <span className="vb-badge vb-badge--neutral">{t('paymentStatus.none')}</span>
+            )}
+          </div>
+        </div>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 14,
+            color: row.payment?.confirmedByPayPalCapture
+              ? 'var(--vb-success)'
+              : 'var(--vb-text-secondary)',
+          }}
+        >
+          {row.payment?.confirmedByPayPalCapture
+            ? t('bookingDetail.confirmedByPayPal')
+            : t('bookingDetail.notConfirmedByPayPal')}
+        </p>
+      </Card>
 
       {row.status !== 'CANCELLED' && row.status !== 'COMPLETED' ? (
         <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
@@ -144,6 +177,14 @@ export function BookingDetailPage() {
           <dl className="vb-dl">
             <dt>{t('bookingDetail.total')}</dt>
             <dd>{t('bookingDetail.totalJod', { amount: row.totalPriceJod })}</dd>
+            {row.payment ? (
+              <PaymentFields payment={row.payment} />
+            ) : (
+              <>
+                <dt>{t('bookingDetail.paypalPayment')}</dt>
+                <dd>{t('bookingDetail.noPaymentRecorded')}</dd>
+              </>
+            )}
             <dt>{t('bookingDetail.note')}</dt>
             <dd>{row.note ?? t('common.dash')}</dd>
             <dt>{t('bookingDetail.cancelReason')}</dt>
@@ -194,5 +235,25 @@ export function BookingDetailPage() {
         onCancel={() => setDialog(null)}
       />
     </div>
+  );
+}
+
+function PaymentFields({ payment }: { payment: AdminBookingPaymentInfo }) {
+  const { t } = useAdminI18n();
+  return (
+    <>
+      <dt>{t('bookingDetail.paymentProvider')}</dt>
+      <dd>{t('paymentProvider.paypal')}</dd>
+      <dt>{t('bookingDetail.paymentStatusLabel')}</dt>
+      <dd>
+        <PaymentStatusBadge status={payment.paymentStatus} />
+      </dd>
+      <dt>{t('bookingDetail.paymentAmount')}</dt>
+      <dd>{formatPaymentAmount(payment)}</dd>
+      <dt>{t('bookingDetail.paypalOrderId')}</dt>
+      <dd>{payment.paypalOrderId ?? t('common.dash')}</dd>
+      <dt>{t('bookingDetail.paypalCaptureId')}</dt>
+      <dd>{payment.paypalCaptureId ?? t('common.dash')}</dd>
+    </>
   );
 }

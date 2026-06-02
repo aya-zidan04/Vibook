@@ -8,7 +8,7 @@ import {
 } from '@/api/adminApi';
 import type { AdminBookingResponse, BookingStatus, BusinessProfileResponse } from '@/api/types';
 import { useAdminChrome } from '@/components/layout/useAdminChrome';
-import { BookingStatusBadge } from '@/components/ui/Badge';
+import { BookingStatusBadge, PaymentStatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -191,6 +191,7 @@ export function BookingsPage() {
                   t('table.business'),
                   t('eventDetail.date'),
                   t('table.status'),
+                  t('table.payment'),
                   t('table.amount'),
                   t('table.actions'),
                 ].map((h) => (
@@ -201,7 +202,7 @@ export function BookingsPage() {
             <tbody>
               {Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i}>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <div className="vb-skeleton" style={{ height: 20 }} />
                   </td>
                 </tr>
@@ -223,6 +224,7 @@ export function BookingsPage() {
                   <th>{t('table.business')}</th>
                   <th>{t('eventDetail.date')}</th>
                   <th>{t('table.status')}</th>
+                  <th>{t('table.payment')}</th>
                   <th>{t('table.amount')}</th>
                   <th>{t('table.actions')}</th>
                 </tr>
@@ -241,6 +243,13 @@ export function BookingsPage() {
                     <td>{r.eventDate}</td>
                     <td>
                       <BookingStatusBadge status={r.status} />
+                    </td>
+                    <td>
+                      {r.payment ? (
+                        <PaymentStatusBadge status={r.payment.paymentStatus} />
+                      ) : (
+                        <span className="vb-badge vb-badge--neutral">{t('bookings.paymentNone')}</span>
+                      )}
                     </td>
                     <td>{t('bookings.amountJod', { amount: r.totalPriceJod })}</td>
                     <td>

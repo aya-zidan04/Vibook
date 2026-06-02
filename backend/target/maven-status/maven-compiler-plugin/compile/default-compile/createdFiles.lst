@@ -13,9 +13,11 @@ com/vibook/backend/service/GovernorateService.class
 com/vibook/backend/repository/RefreshTokenRepository.class
 com/vibook/backend/service/impl/ModerationReportSubmissionServiceImpl$1.class
 com/vibook/backend/service/RefreshTokenService.class
+com/vibook/backend/exception/PayPalApiException.class
 com/vibook/backend/mapper/BusinessEventMapper.class
 com/vibook/backend/entity/PaymentMethod.class
 com/vibook/backend/repository/UserReportRepository.class
+com/vibook/backend/config/PayPalProperties.class
 com/vibook/backend/config/CorsConfig.class
 com/vibook/backend/service/impl/UserReportSubmissionServiceImpl.class
 com/vibook/backend/dto/NameCountResponse.class
@@ -39,6 +41,7 @@ com/vibook/backend/dto/AdminBookingResponse.class
 com/vibook/backend/service/impl/AuthServiceImpl.class
 com/vibook/backend/dto/LogoutRequest.class
 com/vibook/backend/dto/TimeSeriesPointResponse.class
+com/vibook/backend/entity/PaymentStatus.class
 com/vibook/backend/service/AdminModerationReportService.class
 com/vibook/backend/service/impl/AdminUserReportServiceImpl.class
 com/vibook/backend/service/ConsumerEventService.class
@@ -49,7 +52,9 @@ com/vibook/backend/dto/ErrorResponse.class
 com/vibook/backend/service/impl/BookingServiceImpl.class
 com/vibook/backend/dto/BookingCreateRequest.class
 com/vibook/backend/entity/Subcategory.class
+com/vibook/backend/paypal/PayPalOrderCaptured.class
 com/vibook/backend/service/impl/AdminCategoryServiceImpl.class
+com/vibook/backend/entity/Payment.class
 com/vibook/backend/security/RestAuthenticationEntryPoint.class
 com/vibook/backend/dto/BookingResponse.class
 com/vibook/backend/dto/BusinessEventResponse.class
@@ -67,6 +72,7 @@ com/vibook/backend/mapper/BusinessProfileMapper.class
 com/vibook/backend/dto/PaymentMethodResponse.class
 com/vibook/backend/repository/UserRepository.class
 com/vibook/backend/controller/BookingController.class
+com/vibook/backend/service/PayPalPaymentService.class
 com/vibook/backend/service/AdminUserReportService.class
 com/vibook/backend/dto/CategoryUpdateRequest.class
 com/vibook/backend/repository/BookingRepository.class
@@ -77,6 +83,7 @@ com/vibook/backend/config/CorsProperties.class
 com/vibook/backend/exception/ResourceNotFoundException.class
 com/vibook/backend/dto/AdminDashboardStatsResponse.class
 com/vibook/backend/mapper/GovernorateMapper.class
+com/vibook/backend/paypal/PayPalApiClient.class
 com/vibook/backend/dto/UserReportCreatedResponse.class
 com/vibook/backend/service/BusinessProfileService.class
 com/vibook/backend/mapper/PaymentMethodMapper.class
@@ -85,11 +92,13 @@ com/vibook/backend/repository/SubcategoryRepository.class
 com/vibook/backend/entity/Favorite.class
 com/vibook/backend/service/ModerationReportSubmissionService.class
 com/vibook/backend/security/JwtAuthenticationFilter.class
+com/vibook/backend/dto/PayPalCaptureOrderRequest.class
 com/vibook/backend/repository/BusinessEventTimeSlotRepository.class
 com/vibook/backend/dto/CreateModerationReportRequest.class
 com/vibook/backend/dto/FavoriteStatusResponse.class
 com/vibook/backend/dto/BusinessProfileUpsertRequest.class
 com/vibook/backend/service/AuthService.class
+com/vibook/backend/repository/PaymentRepository.class
 com/vibook/backend/repository/GovernorateRepository.class
 com/vibook/backend/dto/UserResponse.class
 com/vibook/backend/dto/AuthResponse.class
@@ -109,6 +118,8 @@ com/vibook/backend/entity/UserReport.class
 com/vibook/backend/exception/GlobalExceptionHandler.class
 com/vibook/backend/entity/BusinessProfile.class
 com/vibook/backend/service/impl/AdminBookingModerationServiceImpl.class
+com/vibook/backend/config/PayPalConfig.class
+com/vibook/backend/paypal/PayPalOrderCreated.class
 com/vibook/backend/config/RoleSeederConfig.class
 com/vibook/backend/mapper/CategoryMapper.class
 com/vibook/backend/service/impl/ModerationReportSubmissionServiceImpl.class
@@ -120,7 +131,10 @@ com/vibook/backend/entity/ModerationReportStatus.class
 com/vibook/backend/mapper/UserMapper.class
 com/vibook/backend/dto/AdminReportResolveRequest.class
 com/vibook/backend/dto/CategoryCreateRequest.class
+com/vibook/backend/dto/PayPalCreateOrderRequest.class
+com/vibook/backend/dto/PayPalCaptureOrderResponse.class
 com/vibook/backend/controller/UserController.class
+com/vibook/backend/controller/PayPalPaymentController.class
 com/vibook/backend/entity/Booking.class
 com/vibook/backend/dto/AdminUserReportStatusRequest.class
 com/vibook/backend/service/impl/UserServiceImpl.class
@@ -135,6 +149,7 @@ com/vibook/backend/entity/EventRating.class
 com/vibook/backend/dto/AdminEventRowResponse.class
 com/vibook/backend/entity/BusinessEventPhoto.class
 com/vibook/backend/service/AdminEventModerationService.class
+com/vibook/backend/dto/AdminBookingPaymentInfo.class
 com/vibook/backend/entity/BusinessEvent.class
 com/vibook/backend/dto/AdminRatingModerationRequest.class
 com/vibook/backend/dto/AdminUserRolesRequest.class
@@ -166,6 +181,8 @@ com/vibook/backend/repository/BusinessProfileRepository.class
 com/vibook/backend/dto/AdminModerationReportResponse.class
 com/vibook/backend/entity/BookingStatus.class
 com/vibook/backend/dto/LoginRequest.class
+com/vibook/backend/entity/PaymentProvider.class
+com/vibook/backend/dto/PayPalCreateOrderResponse.class
 com/vibook/backend/dto/TokenRefreshResponse.class
 com/vibook/backend/dto/BusinessProfileAdminNotesRequest.class
 com/vibook/backend/dto/CancelBookingRequest.class
@@ -178,6 +195,7 @@ com/vibook/backend/service/impl/CategoryServiceImpl.class
 com/vibook/backend/service/impl/AdminModerationReportServiceImpl.class
 com/vibook/backend/dto/FavoriteResponse.class
 com/vibook/backend/spec/AdminEventRatingSpecs.class
+com/vibook/backend/service/impl/PayPalPaymentServiceImpl.class
 com/vibook/backend/exception/BadRequestException.class
 com/vibook/backend/controller/AuthController.class
 com/vibook/backend/entity/BusinessProfileStatus.class

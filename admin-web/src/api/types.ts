@@ -175,6 +175,21 @@ export type AdminEventDetailPayload = {
 
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 
+export type PaymentProvider = 'PAYPAL';
+
+export type PaymentStatus = 'CREATED' | 'APPROVED' | 'CAPTURED' | 'FAILED' | 'CANCELLED';
+
+export type AdminBookingPaymentInfo = {
+  paymentId: number;
+  provider: PaymentProvider;
+  paymentStatus: PaymentStatus;
+  paypalOrderId: string | null;
+  paypalCaptureId: string | null;
+  amount: number;
+  currency: string;
+  confirmedByPayPalCapture: boolean;
+};
+
 export type AdminBookingResponse = {
   id: number;
   eventId: number;
@@ -193,6 +208,7 @@ export type AdminBookingResponse = {
   cancelReason: string | null;
   createdAt: string;
   updatedAt: string;
+  payment: AdminBookingPaymentInfo | null;
 };
 
 export type AdminEventRatingResponse = {

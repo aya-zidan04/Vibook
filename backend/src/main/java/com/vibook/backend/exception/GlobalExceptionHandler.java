@@ -127,6 +127,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(PayPalApiException.class)
+    public ResponseEntity<ErrorResponse> handlePayPalApi(PayPalApiException ex, HttpServletRequest request) {
+        log.warn("PayPal API error at {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+            Instant.now(),
+            HttpStatus.BAD_GATEWAY.value(),
+            "Payment provider error",
+            ex.getMessage(),
+            request.getRequestURI(),
+            null
+        );
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(response);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse(

@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  # Load secrets from backend/.env when present (file is gitignored; never commit it).
+  config:
+    import: optional:file:.env[.properties]
   servlet:
     multipart:
       max-file-size: 5MB
@@ -23,6 +26,13 @@ spring:
     time-zone: UTC
 
 vibook:
+  paypal:
+    mode: ${PAYPAL_MODE:sandbox}
+    client-id: ${PAYPAL_CLIENT_ID:}
+    client-secret: ${PAYPAL_CLIENT_SECRET:}
+    base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
+    return-url: ${PAYPAL_RETURN_URL:vibook://paypal-return}
+    cancel-url: ${PAYPAL_CANCEL_URL:vibook://paypal-cancel}
   demo:
     # Set to true to auto-create a sample CONFIRMED booking (first user + first event) for rating API tests.
     rating-data: false

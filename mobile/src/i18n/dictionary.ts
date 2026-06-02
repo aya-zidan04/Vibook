@@ -250,6 +250,10 @@ export const translations = {
       title: 'Payment',
       empty: 'Nothing to pay. Return to checkout from a listing.',
       sim: 'Simulated card — tap Pay to complete your mock order.',
+      paypalSandbox:
+        'Pay with PayPal Sandbox. You will sign in with a Personal sandbox buyer account. No real money is charged.',
+      payWithPayPal: 'Pay with PayPal',
+      paypalCancelled: 'PayPal checkout was cancelled. Your booking stays pending until you pay.',
       cardNumber: 'Card number',
       expires: 'Expires',
       cvv: 'CVV',
@@ -1086,6 +1090,10 @@ export const translations = {
       title: 'الدفع',
       empty: 'لا يوجد مبلغ. ارجع من صفحة الدفع.',
       sim: 'بطاقة تجريبية — اضغط ادفع لإتمام الطلب التجريبي.',
+      paypalSandbox:
+        'ادفع عبر PayPal Sandbox. ستسجّل الدخول بحساب مشتري تجريبي (Personal). لا يتم خصم أموال حقيقية.',
+      payWithPayPal: 'الدفع عبر PayPal',
+      paypalCancelled: 'تم إلغاء الدفع عبر PayPal. يبقى حجزك قيد الانتظار حتى تكمل الدفع.',
       cardNumber: 'رقم البطاقة',
       expires: 'الانتهاء',
       cvv: 'CVV',

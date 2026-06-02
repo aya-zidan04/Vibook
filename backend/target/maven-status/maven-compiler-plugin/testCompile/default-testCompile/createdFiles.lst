@@ -1,2 +1,3 @@
 com/vibook/backend/VibookApplicationTests.class
+com/vibook/backend/service/PayPalPaymentServiceImplTest.class
 com/vibook/backend/entity/RoleNameTest.class
