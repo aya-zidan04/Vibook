@@ -7,7 +7,6 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useCatalogSubcategories } from '@/hooks/useCatalogSubcategories';
 import { useTranslation } from '@/i18n/useTranslation';
-import { isExploreMainCategorySlug } from '@/constants/exploreCategoryTaxonomy';
 import { backendIconToOutline } from '@/services/reference/mapReference';
 import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
 import { useSearchStore } from '@/store/searchStore';
@@ -24,11 +23,7 @@ export default function FiltersScreen() {
   const filters = useSearchStore((s) => s.filters);
   const setFilters = useSearchStore((s) => s.setFilters);
 
-  const exploreCategories = useMemo(
-    () => categories.filter((c) => isExploreMainCategorySlug(c.slug)),
-    [categories],
-  );
-  const subsByParent = useCatalogSubcategories(exploreCategories);
+  const subsByParent = useCatalogSubcategories(categories);
 
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<Set<string>>(
     () => new Set(filters.categoryIds),
@@ -81,7 +76,7 @@ export default function FiltersScreen() {
         <AppText variant="h3" color="text" style={styles.refTitle}>
           {t('filters.categoriesFromCatalog')}
         </AppText>
-        {exploreCategories.length === 0 ? (
+        {categories.length === 0 ? (
           <View style={styles.emptyCategories}>
             <AppText variant="caption" color="textMuted">
               {refStatus === 'loading' ? t('common.loading') : t('filters.noCategories')}
@@ -96,7 +91,7 @@ export default function FiltersScreen() {
           </View>
         ) : (
           <View style={styles.chips}>
-            {exploreCategories.map((c) => (
+            {categories.map((c) => (
               <CategoryChip
                 key={c.id}
                 label={locale === 'ar' ? c.labelAr : c.labelEn}
@@ -108,12 +103,12 @@ export default function FiltersScreen() {
           </View>
         )}
       </View>
-      {exploreCategories.some((c) => (subsByParent[c.id] ?? []).length > 0) ? (
+      {categories.some((c) => (subsByParent[c.id] ?? []).length > 0) ? (
         <View style={styles.refBlock}>
           <AppText variant="h3" color="text" style={styles.refTitle}>
             {t('filters.subcategoriesFromCatalog')}
           </AppText>
-          {exploreCategories.map((c) => {
+          {categories.map((c) => {
             const subs = subsByParent[c.id] ?? [];
             if (subs.length === 0) return null;
             return (

@@ -1,29 +1,24 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
-import {
-  JORDAN_GOVERNORATES,
-  type JordanGovernorateSlug,
-} from '@/constants/jordanGovernorates';
+import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { useTranslation } from '@/i18n/useTranslation';
-import { governorateLabel } from '@/utils/governorateLabels';
+import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  /** Selected row matches `JORDAN_GOVERNORATES[].en` (persisted in locale header). */
+  /** Selected row matches API governorate English `nameEn`. */
   selectedEnName: string;
-  onSelect: (en: string, slug: JordanGovernorateSlug) => void;
+  onSelect: (en: string, slug: JordanGovernorateSlug | string) => void;
   title: string;
 };
 
-/**
- * Shared bottom sheet listing Jordan governorates in canonical order (see `JORDAN_GOVERNORATES`).
- */
+/** Bottom sheet listing active governorates from `GET /governorates/active`. */
 export function GovernoratePickerSheet({
   visible,
   onClose,
@@ -34,10 +29,16 @@ export function GovernoratePickerSheet({
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { locale } = useTranslation();
+  const cities = useReferenceStore((s) => s.governorates);
+  const refStatus = useReferenceStore((s) => s.status);
   const styles = useMemo(
     () => createStyles(colors, insets.bottom),
     [colors, insets.bottom],
   );
+
+  useEffect(() => {
+    if (visible && refStatus === 'idle') void loadReferenceData();
+  }, [visible, refStatus]);
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
@@ -52,37 +53,44 @@ export function GovernoratePickerSheet({
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {JORDAN_GOVERNORATES.map((g) => {
-              const selected = selectedEnName === g.en;
-              const label = governorateLabel(g.slug, locale);
-              return (
-                <Pressable
-                  key={g.slug}
-                  onPress={() => {
-                    onSelect(g.en, g.slug);
-                    onClose();
-                  }}
-                  style={({ pressed }) => [
-                    styles.option,
-                    selected && styles.optionSelected,
-                    pressed && styles.optionPressed,
-                  ]}
-                >
-                  <AppText
-                    variant="body-em"
-                    color="text"
-                    style={[styles.optionLabel, selected && styles.optionLabelSelected]}
+            {cities.length === 0 ? (
+              <AppText variant="body" color="textMuted" style={styles.empty}>
+                —
+              </AppText>
+            ) : (
+              cities.map((g) => {
+                const selected = selectedEnName === g.nameEn;
+                const label = locale === 'ar' ? g.nameAr : g.nameEn;
+                const slug = (g.slug ?? g.nameEn) as JordanGovernorateSlug | string;
+                return (
+                  <Pressable
+                    key={g.id}
+                    onPress={() => {
+                      onSelect(g.nameEn, slug);
+                      onClose();
+                    }}
+                    style={({ pressed }) => [
+                      styles.option,
+                      selected && styles.optionSelected,
+                      pressed && styles.optionPressed,
+                    ]}
                   >
-                    {label}
-                  </AppText>
-                  {selected ? (
-                    <Ionicons name="checkmark-circle" size={22} color={colors.primaryLight} />
-                  ) : (
-                    <View style={styles.radioOuter} />
-                  )}
-                </Pressable>
-              );
-            })}
+                    <AppText
+                      variant="body-em"
+                      color="text"
+                      style={[styles.optionLabel, selected && styles.optionLabelSelected]}
+                    >
+                      {label}
+                    </AppText>
+                    {selected ? (
+                      <Ionicons name="checkmark-circle" size={22} color={colors.primaryLight} />
+                    ) : (
+                      <View style={styles.radioOuter} />
+                    )}
+                  </Pressable>
+                );
+              })
+            )}
           </ScrollView>
         </View>
       </View>
@@ -116,6 +124,10 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     },
     sheetList: {
       flexGrow: 0,
+    },
+    empty: {
+      paddingVertical: spacing.lg,
+      textAlign: 'center',
     },
     option: {
       flexDirection: 'row',

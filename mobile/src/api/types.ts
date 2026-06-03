@@ -80,6 +80,12 @@ export type BusinessEventSummaryResponse = {
   createdAt: string;
 };
 
+export type BusinessEventPhotoDto = {
+  id: number;
+  url: string;
+  sortOrder: number;
+};
+
 export type BusinessEventResponse = {
   id: number;
   businessProfileId: number;
@@ -101,6 +107,7 @@ export type BusinessEventResponse = {
   averageRating: number;
   reviewCount: number;
   photoUrls: string[];
+  photos?: BusinessEventPhotoDto[];
   createdAt: string;
   updatedAt: string;
   myRating: number | null;

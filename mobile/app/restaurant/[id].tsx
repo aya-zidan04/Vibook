@@ -15,7 +15,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useRestaurantPdp } from '@/hooks/useCatalogPdp';
-import { getCityName } from '@/services/mock';
+import { localizedCityLabel } from '@/utils/governorateLabels';
+import { useReferenceStore } from '@/store/referenceStore';
 import { parseCatalogNumericId } from '@/services/catalog/mapCatalog';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { formatEventTimeSlotLabel } from '@/utils/formatEventTimeSlot';
@@ -42,6 +43,7 @@ export default function RestaurantDetailScreen() {
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const checkoutCurrency = useLocaleStore((s) => s.currency);
+  const cities = useReferenceStore((s) => s.cities);
   const { restaurant: r, loading } = useRestaurantPdp(id);
   const [guests, setGuests] = useState(2);
   const [slot, setSlot] = useState(RESTAURANT_SLOTS[2]);
@@ -69,7 +71,7 @@ export default function RestaurantDetailScreen() {
   }
 
   const fee = 40 * guests;
-  const city = getCityName(r.cityId, locale);
+  const city = localizedCityLabel(r.cityId, locale, cities);
   const blurbKey =
     id && parseCatalogNumericId(id) == null && r.id in BLURB_KEYS
       ? BLURB_KEYS[r.id as keyof typeof BLURB_KEYS]
@@ -86,8 +88,8 @@ export default function RestaurantDetailScreen() {
       quantity: 1,
       fees: 15,
       startsAt: new Date(Date.now() + 2 * 86400000).toISOString(),
-      cityName: getCityName(r.cityId, 'en'),
-      cityNameAr: getCityName(r.cityId, 'ar'),
+      cityName: localizedCityLabel(r.cityId, 'en', cities),
+      cityNameAr: localizedCityLabel(r.cityId, 'ar', cities),
       metaLine: `${slot} · ${guests} ${t('restaurant.guestsLabel')}`,
     });
     router.push('/checkout');

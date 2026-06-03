@@ -191,7 +191,7 @@ When the dashboard tab layout is focused, lists refresh from the server:
 
 - `resolveHubSubcategory.ts` — category picker label `"Category · Subcategory"` → `subcategoryId`
 - `resolveGovernorateId.ts` — Jordan slug → governorate id
-- `photoUrlsForApi()` — drops local file URIs
+- `splitEditorPhotos()` — separates server URLs from local `file://` for multipart upload flow
 
 **Partner bookings API** (`/business/bookings`):
 
@@ -298,7 +298,7 @@ API wrappers: `fetchAdminReportsPage`, `fetchAdminReport`, `reviewAdminReport`, 
 | Bookings          | `/admin/bookings`                                    | Filter, cancel with reason, mark complete    |
 | Ratings           | `/admin/ratings`                                     | Hide/show, delete                            |
 | Categories        | `/admin/categories`                                  | CRUD                                         |
-| Dashboard         | `/admin/dashboard/stats`, `/admin/analytics/summary` | Charts on dashboard                          |
+| Dashboard         | `/admin/analytics/summary`                           | Charts on dashboard                          |
 | Activity log      | `/admin/activity-log`                                | Filter by entity                             |
 
 

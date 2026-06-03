@@ -12,7 +12,6 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { cancelMyBooking, getMyBooking } from '@/api/bookingsApi';
 import { mapApiError } from '@/utils/mapApiError';
 import { bookingResponseToBooking } from '@/services/api/bookingMap';
-import { MOCK_BOOKINGS } from '@/services/mock';
 import { useAppStore } from '@/store/appStore';
 import type { Booking, BookingStatus } from '@/types';
 import { canCancelBookingStatus } from '@/utils/bookingApiMap';
@@ -40,13 +39,11 @@ export default function BookingDetailScreen() {
 
   const [booking, setBooking] = useState<Booking | undefined>();
   const [loading, setLoading] = useState(true);
-  const [mockCancelled, setMockCancelled] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
   const isApiId = !!(id && /^\d+$/.test(id));
 
   useEffect(() => {
-    setMockCancelled(false);
     if (!id) {
       setBooking(undefined);
       setLoading(false);
@@ -66,7 +63,7 @@ export default function BookingDetailScreen() {
       })();
       return;
     }
-    setBooking(MOCK_BOOKINGS.find((b) => b.id === id));
+    setBooking(undefined);
     setLoading(false);
   }, [id, isApiId, isAuthenticated]);
 
@@ -96,9 +93,9 @@ export default function BookingDetailScreen() {
     );
   }
 
-  const displayStatus: BookingStatus = mockCancelled ? 'cancelled' : booking.status;
+  const displayStatus: BookingStatus = booking.status;
   const listingHref = hrefForBookingRef(booking);
-  const showCancel = canCancelBookingStatus(booking.status) && !mockCancelled && !(isApiId && booking.status === 'cancelled');
+  const showCancel = canCancelBookingStatus(booking.status) && !(isApiId && booking.status === 'cancelled');
 
   const refTitle = locale === 'ar' && booking.refTitleAr ? booking.refTitleAr : booking.refTitle;
   const cityLine = locale === 'ar' && booking.cityNameAr ? booking.cityNameAr : booking.cityName;
@@ -115,7 +112,6 @@ export default function BookingDetailScreen() {
       })();
       return;
     }
-    setMockCancelled(true);
   };
 
   const confirmCancel = () => {

@@ -14,7 +14,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useExperiencePdp } from '@/hooks/useCatalogPdp';
-import { getCityName } from '@/services/mock';
+import { localizedCityLabel } from '@/utils/governorateLabels';
+import { useReferenceStore } from '@/store/referenceStore';
 import { formatDecimalForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { spacing, useThemeColors } from '@/theme';
@@ -28,6 +29,7 @@ export default function ExperienceDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const cities = useReferenceStore((s) => s.cities);
   const { experience: x, loading } = useExperiencePdp(id);
   const [qty, setQty] = useState(2);
 
@@ -67,9 +69,9 @@ export default function ExperienceDetailScreen() {
       quantity: qty,
       fees,
       startsAt: new Date(Date.now() + 5 * 86400000).toISOString(),
-      cityName: getCityName(x.cityId, 'en'),
-      cityNameAr: getCityName(x.cityId, 'ar'),
-      metaLine: `${x.durationHours} ${t('experience.hours')} · ${getCityName(x.cityId, locale)}`,
+      cityName: localizedCityLabel(x.cityId, 'en', cities),
+      cityNameAr: localizedCityLabel(x.cityId, 'ar', cities),
+      metaLine: `${x.durationHours} ${t('experience.hours')} · ${localizedCityLabel(x.cityId, locale, cities)}`,
     });
     router.push('/checkout');
   };
@@ -85,7 +87,7 @@ export default function ExperienceDetailScreen() {
             {x.title}
           </AppText>
           <AppText variant="body" color="textSecondary">
-            {x.durationHours} {t('experience.hours')} · {getCityName(x.cityId, locale)}
+            {x.durationHours} {t('experience.hours')} · {localizedCityLabel(x.cityId, locale, cities)}
           </AppText>
           <View style={styles.row}>
             <Ionicons name="star" size={16} color={colors.warning} />

@@ -5,8 +5,12 @@ import { useLocalSearchParams, useRouter, useSegments } from 'expo-router';
 import { EventPhotosField } from '@/components/business/EventPhotosField';
 import { BusinessIconMultiline, BusinessIconTextField } from '@/components/business/BusinessFormField';
 import { GovernorateSelectField } from '@/components/forms/GovernorateSelectField';
-import { BUSINESS_PARTNER_CATEGORIES } from '@/constants/businessPartnerCategories';
 import { canonicalizeToEventTimeSlot, EVENT_TIME_OPTIONS } from '@/constants/eventTimeSlots';
+import {
+  useBusinessEventCategoryGroups,
+  type EventCategoryGroup,
+  type EventCategoryOption,
+} from '@/hooks/useBusinessEventCategoryGroups';
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
@@ -16,58 +20,28 @@ import { useTranslation } from '@/i18n/useTranslation';
 import {
   createMyBusinessEvent,
   deleteMyBusinessEvent,
+  deleteMyBusinessEventPhoto,
   getMyBusinessEvent,
   updateMyBusinessEvent,
+  uploadMyBusinessEventPhoto,
   type BusinessEventUpsertPayload,
 } from '@/api/businessEventsApi';
 import { listActiveGovernorates } from '@/api/governoratesApi';
 import { refreshBusinessHubLists } from '@/services/businessHubSync';
 import { radii, spacing, useThemeColors, type ThemeColors } from '@/theme';
 import type { BusinessEventRecord } from '@/types/businessHub';
-import { businessEventResponseToRecord, photoUrlsForApi } from '@/utils/businessHubMappers';
+import {
+  businessEventResponseToRecord,
+  editorPhotosFromApiResponse,
+  splitEditorPhotos,
+  type EventEditorPhoto,
+} from '@/utils/businessHubMappers';
 import { resolveGovernorateId } from '@/utils/resolveGovernorateId';
 import { resolveSubcategoryIdForHubCategory } from '@/utils/resolveHubSubcategory';
 import { leadingIconRowStyle, textAlignStart } from '@/utils/rtlText';
 import { NavigationChevronPrev, NavigationChevronNext } from '@/components/ui/NavigationChevron';
 import { navigationRowStyle } from '@/utils/rtl';
 import { formatEventTimeSlotLabel } from '@/utils/formatEventTimeSlot';
-
-type EventCategoryOption = {
-  id: string;
-  valueEn: string;
-  labelEn: string;
-  labelAr: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  parentSlug: string;
-};
-
-type EventCategoryGroup = {
-  slug: string;
-  nameEn: string;
-  nameAr: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  options: EventCategoryOption[];
-};
-
-const EVENT_CATEGORY_GROUPS: EventCategoryGroup[] = BUSINESS_PARTNER_CATEGORIES.map((c) => ({
-  slug: c.slug,
-  nameEn: c.en,
-  nameAr: c.ar,
-  icon: c.icon,
-  options: c.partsEn.map((partEn, idx) => {
-    const partAr = c.partsAr[idx] ?? partEn;
-    return {
-      id: `${c.slug}-${idx}`,
-      valueEn: `${c.en} - ${partEn}`,
-      labelEn: `${c.en} · ${partEn}`,
-      labelAr: `${c.ar} · ${partAr}`,
-      icon: c.icon,
-      parentSlug: c.slug,
-    };
-  }),
-}));
-
-const EVENT_CATEGORY_OPTIONS: EventCategoryOption[] = EVENT_CATEGORY_GROUPS.flatMap((group) => group.options);
 
 type TicketFormRow = {
   key: string;
@@ -101,6 +75,8 @@ export default function BusinessEventEditorScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t, locale } = useTranslation();
+  const { groups: eventCategoryGroups, options: eventCategoryOptions } =
+    useBusinessEventCategoryGroups();
   const numericEdit = !isNew && !!id && /^\d+$/.test(String(id));
   const [remoteLoading, setRemoteLoading] = useState(false);
   const [remoteError, setRemoteError] = useState(false);
@@ -117,7 +93,8 @@ export default function BusinessEventEditorScreen() {
   const [mapsUrl, setMapsUrl] = useState('');
   const [ticketRows, setTicketRows] = useState<TicketFormRow[]>([emptyTicketFormRow()]);
   const [capacity, setCapacity] = useState('');
-  const [imageUris, setImageUris] = useState<string[]>([]);
+  const [editorPhotos, setEditorPhotos] = useState<EventEditorPhoto[]>([]);
+  const loadedPhotoIdsRef = useRef<number[]>([]);
   const [hidden, setHidden] = useState(false);
   const [saving, setSaving] = useState(false);
   const saveLockRef = useRef(false);
@@ -150,7 +127,8 @@ export default function BusinessEventEditorScreen() {
     setMapsUrl('');
     setTicketRows([emptyTicketFormRow()]);
     setCapacity('');
-    setImageUris([]);
+    setEditorPhotos([]);
+    loadedPhotoIdsRef.current = [];
     setHidden(false);
     setCalendarMonth(() => {
       const d = new Date();
@@ -200,7 +178,9 @@ export default function BusinessEventEditorScreen() {
             : [emptyTicketFormRow()],
         );
         setCapacity(String(rec.capacityGuests ?? ''));
-        setImageUris(parseStoredImages(rec.images));
+        const photos = editorPhotosFromApiResponse(r);
+        setEditorPhotos(photos);
+        loadedPhotoIdsRef.current = (r.photos ?? []).map((p) => p.id);
         setHidden(rec.hidden);
         const calBase = parseIsoDate(rec.date) ?? new Date();
         calBase.setDate(1);
@@ -340,16 +320,40 @@ export default function BusinessEventEditorScreen() {
         capacityGuests: capNum,
         hidden,
         photoUrls: (() => {
-          const urls = photoUrlsForApi(imageUris);
-          return urls.length ? urls : null;
+          const { serverUrls } = splitEditorPhotos(editorPhotos);
+          return serverUrls.length ? serverUrls : null;
         })(),
       };
+      const { localUris } = splitEditorPhotos(editorPhotos);
+      const currentPhotoIds = editorPhotos
+        .map((p) => p.photoId)
+        .filter((pid): pid is number => pid != null);
+
       if (isNew) {
         const created = await createMyBusinessEvent(apiPayload);
+        let eventId = created.id;
+        for (const uri of localUris) {
+          const updated = await uploadMyBusinessEventPhoto(eventId, uri);
+          eventId = updated.id;
+        }
+        const refreshed = await getMyBusinessEvent(eventId);
+        loadedPhotoIdsRef.current = (refreshed.photos ?? []).map((p) => p.id);
+        setEditorPhotos(editorPhotosFromApiResponse(refreshed));
         await refreshBusinessHubLists();
-        router.replace(`/business/events/${created.id}`);
+        router.replace(`/business/events/${eventId}`);
       } else if (id && /^\d+$/.test(String(id))) {
-        await updateMyBusinessEvent(Number(id), apiPayload);
+        const eventId = Number(id);
+        const toDelete = loadedPhotoIdsRef.current.filter((pid) => !currentPhotoIds.includes(pid));
+        for (const photoId of toDelete) {
+          await deleteMyBusinessEventPhoto(eventId, photoId);
+        }
+        await updateMyBusinessEvent(eventId, apiPayload);
+        for (const uri of localUris) {
+          await uploadMyBusinessEventPhoto(eventId, uri);
+        }
+        const refreshed = await getMyBusinessEvent(eventId);
+        loadedPhotoIdsRef.current = (refreshed.photos ?? []).map((p) => p.id);
+        setEditorPhotos(editorPhotosFromApiResponse(refreshed));
         await refreshBusinessHubLists();
         router.back();
       }
@@ -400,11 +404,11 @@ export default function BusinessEventEditorScreen() {
         onChangeText={setTitle}
       />
       <PickerField
-        icon={selectedCategoryOption(category)?.icon ?? 'pricetag-outline'}
+        icon={findCategoryOption(category, eventCategoryOptions)?.icon ?? 'pricetag-outline'}
         label={t('businessHub.fieldCategory')}
         value={
-          selectedCategoryOption(category)
-            ? localeLabel(selectedCategoryOption(category)!, locale)
+          findCategoryOption(category, eventCategoryOptions)
+            ? localeLabel(findCategoryOption(category, eventCategoryOptions)!, locale)
             : category
         }
         placeholder={t('businessHub.profileCategorySheet')}
@@ -530,8 +534,10 @@ export default function BusinessEventEditorScreen() {
       <EventPhotosField
         label={t('businessHub.fieldImages')}
         hint={t('businessHub.fieldImagesHint')}
-        uris={imageUris}
-        onUrisChange={setImageUris}
+        uris={editorPhotos.map((p) => p.uri)}
+        onUrisChange={(uris) =>
+          setEditorPhotos(uris.map((uri, index) => ({ uri, photoId: editorPhotos[index]?.photoId })))
+        }
         addAccessibilityLabel={t('businessHub.eventPhotosAddA11y')}
         removeAccessibilityLabel={t('businessHub.eventPhotosRemoveA11y')}
         permissionTitle={t('businessHub.profilePhotoPermissionTitle')}
@@ -578,7 +584,7 @@ export default function BusinessEventEditorScreen() {
         onClose={() => setCategorySheetOpen(false)}
       >
         <View style={styles.categoryGroupsWrap}>
-          {EVENT_CATEGORY_GROUPS.map((group) => (
+          {eventCategoryGroups.map((group) => (
             <View
               key={group.slug}
               style={[
@@ -722,10 +728,13 @@ export default function BusinessEventEditorScreen() {
   );
 }
 
-function selectedCategoryOption(category: string): EventCategoryOption | undefined {
+function findCategoryOption(
+  category: string,
+  options: EventCategoryOption[],
+): EventCategoryOption | undefined {
   const c = category.trim();
   if (!c) return undefined;
-  return EVENT_CATEGORY_OPTIONS.find((opt) => opt.valueEn === c);
+  return options.find((opt) => opt.valueEn === c);
 }
 
 function localeLabel(

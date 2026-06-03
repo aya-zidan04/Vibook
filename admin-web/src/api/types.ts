@@ -48,13 +48,6 @@ export type BusinessProfileResponse = {
   rejectedAt?: string | null;
 };
 
-export type AdminDashboardStatsResponse = {
-  totalUsers: number;
-  totalBusinessProfiles: number;
-  pendingBusinessProfiles: number;
-  approvedBusinessProfiles: number;
-};
-
 export type TimeSeriesPointResponse = {
   date: string;
   count: number;

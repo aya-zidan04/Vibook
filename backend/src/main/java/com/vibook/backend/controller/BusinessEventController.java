@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/business/events")
@@ -90,6 +93,26 @@ public class BusinessEventController {
     ) {
         requirePrincipal(principal);
         return ResponseEntity.ok(businessEventService.unhide(id));
+    }
+
+    @PostMapping(value = "/{id}/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BusinessEventResponse> uploadPhoto(
+        @AuthenticationPrincipal AuthenticatedUser principal,
+        @PathVariable Long id,
+        @RequestPart("image") MultipartFile image
+    ) {
+        requirePrincipal(principal);
+        return ResponseEntity.ok(businessEventService.uploadPhoto(id, image));
+    }
+
+    @DeleteMapping("/{id}/photos/{photoId}")
+    public ResponseEntity<BusinessEventResponse> deletePhoto(
+        @AuthenticationPrincipal AuthenticatedUser principal,
+        @PathVariable Long id,
+        @PathVariable Long photoId
+    ) {
+        requirePrincipal(principal);
+        return ResponseEntity.ok(businessEventService.deletePhoto(id, photoId));
     }
 
     private static void requirePrincipal(AuthenticatedUser principal) {

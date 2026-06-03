@@ -16,7 +16,6 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/AdminBookingModerationController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/AdminBusinessProfileController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/AdminCategoryController.java
-/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/AdminDashboardController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/AdminEventModerationController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/AdminEventRatingModerationController.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/controller/AdminGovernorateStatsController.java
@@ -43,7 +42,6 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/AdminBookingCancelRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/AdminBookingPaymentInfo.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/AdminBookingResponse.java
-/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/AdminDashboardStatsResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/AdminEventDetailPayload.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/AdminEventNotesRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/AdminEventRatingResponse.java
@@ -60,6 +58,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BookingStatusUpdateRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BulkBusinessProfileIdsRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BulkBusinessProfileRejectRequest.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventPhotoResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventSummaryResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventUpsertRequest.java
@@ -149,6 +148,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/paypal/PayPalOrderCreated.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/AdminActivityLogRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/BookingRepository.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/BusinessEventPhotoRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/BusinessEventRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/BusinessEventTimeSlotRepository.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/repository/BusinessProfileRepository.java
@@ -173,7 +173,6 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/AdminBookingModerationService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/AdminBusinessProfileService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/AdminCategoryService.java
-/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/AdminDashboardService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/AdminEventModerationService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/AdminEventRatingModerationService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/AdminModerationReportService.java
@@ -183,6 +182,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/BookingService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/BusinessEventService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/BusinessProfileService.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/BusinessUserRoleService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/CategoryService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/ConsumerEventService.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/EventRatingService.java
@@ -201,7 +201,6 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/AdminBookingModerationServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/AdminBusinessProfileServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/AdminCategoryServiceImpl.java
-/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/AdminDashboardServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/AdminEventModerationServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/AdminEventRatingModerationServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/AdminModerationReportServiceImpl.java
@@ -211,6 +210,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/BookingServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/BusinessEventServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/BusinessProfileServiceImpl.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/BusinessUserRoleServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/CategoryServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/ConsumerEventServiceImpl.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/service/impl/EventRatingServiceImpl.java

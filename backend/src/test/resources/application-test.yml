@@ -11,5 +11,5 @@ spring:
 
 app:
   jwt:
-    secret: bXktc3VwZXItc2VjcmV0LWtleS1mb3Itdmlib29rLWp3dC1zaWduaW5nLXRva2Vucy0xMjM0NTY3ODkw
+    secret: vibook-test-jwt-secret-at-least-32-bytes-long
     expiration-ms: 3600000

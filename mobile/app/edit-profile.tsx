@@ -12,8 +12,9 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { fetchCurrentUser } from '@/api/authApi';
 import { mapApiError } from '@/utils/mapApiError';
-import { updateUser } from '@/api/usersApi';
-import { useMockUser } from '@/hooks/useMockUser';
+import { deleteMyProfileImage, updateUser, uploadMyProfileImage } from '@/api/usersApi';
+import { useUserProfileStore } from '@/store/userProfileStore';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useSessionStore } from '@/store/sessionStore';
 import {
@@ -31,7 +32,7 @@ export default function EditProfileScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
-  const { user, setOverrides } = useMockUser();
+  const { user, setOverrides } = useCurrentUser();
   const authSource = useSessionStore((s) => s.authSource);
 
   const initialParts = useMemo(() => nameToFirstLast(user.name), [user.name]);
@@ -102,11 +103,19 @@ export default function EditProfileScreen() {
       void (async () => {
         try {
           const phone = `+962${phoneLocal.replace(/\D/g, '').slice(-9)}`;
-          const updated = await updateUser(authSource.id, {
+          let updated = await updateUser(authSource.id, {
             firstName: firstName.trim(),
             lastName: lastName.trim(),
             phone,
           });
+          const avatarOverride = useUserProfileStore.getState().overrides.avatarUrl;
+          if (avatarOverride === null) {
+            updated = await deleteMyProfileImage();
+            useUserProfileStore.getState().setOverrides({ avatarUrl: undefined });
+          } else if (typeof avatarOverride === 'string' && avatarOverride.startsWith('file:')) {
+            updated = await uploadMyProfileImage(avatarOverride);
+            useUserProfileStore.getState().setOverrides({ avatarUrl: undefined });
+          }
           useSessionStore.getState().patchSessionUser(updated);
           try {
             const fresh = await fetchCurrentUser();

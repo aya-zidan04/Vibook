@@ -9,8 +9,8 @@ import { PrimaryButton } from '@/components/ui/Button';
 import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useMockUser } from '@/hooks/useMockUser';
-import { PREMIUM_PLAN } from '@/services/mock';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { PREMIUM_PLAN } from '@/constants/premiumPlan';
 import { spacing, useThemeColors } from '@/theme';
 
 export default function MembershipScreen() {
@@ -18,7 +18,7 @@ export default function MembershipScreen() {
   const styles = useMemo(() => createPremiumSheetStyles(colors), [colors]);
   const router = useRouter();
   const { t } = useTranslation();
-  const { user } = useMockUser();
+  const { user } = useCurrentUser();
 
   return (
     <PremiumScreen title={t('membership.title')}>

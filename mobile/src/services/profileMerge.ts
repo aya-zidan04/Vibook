@@ -13,8 +13,8 @@ function resolveAvatarUrl(base: User, overrides: UserProfileOverrides): string |
   return trimmed === '' ? null : trimmed;
 }
 
-/** Merge mock baseline user with persisted local overrides (no network). */
-export function mergeMockUser(base: User, overrides: UserProfileOverrides): User {
+/** Merge API user with temporary local overrides before save completes. */
+export function mergeProfileUser(base: User, overrides: UserProfileOverrides): User {
   const baseParts = nameToFirstLast(base.name);
   const baseFirst = baseParts.firstName;
   const baseLast = baseParts.lastName ?? '';

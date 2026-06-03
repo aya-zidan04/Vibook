@@ -84,7 +84,12 @@ export function UsersPage() {
     if (roleFilter === 'ADMIN') list = list.filter((u) => u.roles.includes('ROLE_ADMIN'));
     else if (roleFilter === 'BUSINESS') list = list.filter((u) => u.roles.includes('ROLE_BUSINESS'));
     else if (roleFilter === 'USER_ONLY')
-      list = list.filter((u) => u.roles.includes('ROLE_USER') && !u.roles.includes('ROLE_ADMIN'));
+      list = list.filter(
+        (u) =>
+          u.roles.includes('ROLE_USER') &&
+          !u.roles.includes('ROLE_ADMIN') &&
+          !u.roles.includes('ROLE_BUSINESS'),
+      );
     if (statusFilter === 'ACTIVE') list = list.filter((u) => u.enabled);
     if (statusFilter === 'DISABLED') list = list.filter((u) => !u.enabled);
     return list;

@@ -69,10 +69,11 @@ A **single marketplace** for timed experiences (events) in Jordan, with:
 | Partner event CRUD + hide/unhide                   | ✅                                                        |
 | Partner booking status updates                     | ✅                                                        |
 | Admin dashboard analytics                          | ✅ `GET /admin/analytics/summary`                         |
-| Mock catalog (restaurants, hotels, packages, etc.) | ⚠️ Mobile still uses `src/mock/` for non-event verticals |
-| Membership / wallet / vouchers                     | ⚠️ Mock-only on mobile                                   |
-| Event photo multipart upload                       | ❌ URLs only in JSON (`photoUrls`)                        |
-| `ROLE_BUSINESS` in Spring Security                 | ⚠️ Seeded but unused in matchers                         |
+| Runtime mock catalog                               | ✅ Removed — API-only for in-scope data (`PRODUCTION_DATA_CLEANUP_REPORT.md`) |
+| Premium / wallet / vouchers (mobile UI)            | ✅ **Static presentation** — not paid backend features |
+| Legacy PDP routes (restaurant/stay/etc.)           | ✅ UI shells only — **out of product scope** |
+| Event photo multipart upload                       | ✅ Partner event photo endpoints + mobile |
+| `ROLE_BUSINESS` on business approval               | ✅ Granted/revoked with profile lifecycle |
 
 
 ---
@@ -127,7 +128,7 @@ Vibook/
 │       ├── api/             # HTTP clients
 │       ├── store/           # Zustand + AsyncStorage
 │       ├── services/        # Mappers, sync, mock re-exports
-│       ├── mock/            # Fixture data (20 files)
+│       ├── api/             # HTTP clients (catalog, auth, business)
 │       ├── components/
 │       ├── hooks/
 │       ├── i18n/
@@ -279,30 +280,26 @@ See **Section 7**. Routes under `app/business/`.
 | Event/booking mappers | `utils/businessHubMappers.ts`        | DTO → hub records                     |
 | API event map         | `services/api/eventMap.ts`           | `BusinessEventResponse` → `EventItem` |
 | Booking map           | `services/api/bookingMap.ts`         | `BookingResponse` → app `Booking`     |
-| Catalog map           | `services/catalog/mapCatalog.ts`     | Numeric ID → API route vs mock        |
+| Catalog map           | `services/catalog/mapCatalog.ts`     | Numeric event IDs → API routes        |
 | Reference map         | `services/reference/mapReference.ts` | Governorates/categories               |
-| Profile merge         | `services/profileMerge.ts`           | Local + server profile                |
-| Mock index            | `services/mock/index.ts`             | Re-exports fixtures                   |
+| Profile merge         | `services/profileMerge.ts`           | Temporary overrides + server profile  |
 
 
-## Mock vs API logic
+## API vs presentation-only UI
 
-**Hybrid rule** (`services/catalog/mapCatalog.ts`): event IDs that are **numeric** use the **live API**; opaque IDs (`e1`, `rest-1`, etc.) use `**src/mock/`**.
+**In-scope data** uses the live API (`referenceStore`, `searchEvents`, `GET /events/{id}`, bookings, favorites, business hub).
 
-
-| Feature                                     | API                      | Mock                                 |
-| ------------------------------------------- | ------------------------ | ------------------------------------ |
-| Auth, profile                               | ✅                        | —                                    |
-| Explore events feed                         | ✅ `searchEvents`         | Promo fallbacks if sparse            |
-| Event PDP                                   | ✅ if numeric id          | ✅ `useCatalogPdp` + `MOCK_EVENTS`    |
-| Restaurant/stay/experience/package PDP      | —                        | ✅                                    |
-| Search                                      | —                        | ✅ `MOCK_EVENTS`, hotels, restaurants |
-| Filters                                     | —                        | ✅ `MOCK_CATEGORIES`                  |
-| Payment/booking                             | ✅ if `draft.apiEventId`  | ✅ fake `VB-*` order id               |
-| Favorites tab                               | ✅                        | —                                    |
-| Partner hub events/bookings                 | ✅                        | —                                    |
-| Wallet, vouchers, membership, notifications | —                        | ✅                                    |
-| `useIntegrationMode`                        | Reports `mockOnly: true` | **Stale** — misleading               |
+| Feature                                     | API                      | Presentation-only UI                |
+| ------------------------------------------- | ------------------------ | --------------------------------- |
+| Auth, profile                               | ✅                        | —                                 |
+| Explore / search / filters / event PDP      | ✅                        | —                                 |
+| Payment/booking (events)                    | ✅ PayPal + bookings API  | —                                 |
+| Favorites, ratings, reports                 | ✅                        | —                                 |
+| Partner hub events/bookings                 | ✅                        | —                                 |
+| Premium membership, resell entry              | —                        | ✅ Static plans/copy (no billing) |
+| Wallet, vouchers                            | —                        | ✅ Static screens                 |
+| Restaurant/stay/experience/package/organizer  | —                        | ✅ Legacy routes (not-found)      |
+| Notifications                               | —                        | ✅ Static i18n                    |
 
 
 ## Localization & RTL
@@ -351,7 +348,7 @@ Columns: **Route file** | **Purpose** | **APIs** | **Stores / hooks** | **Key co
 | `app/(tabs)/explore.tsx`   | Home discovery   | `GET /events`, `GET /categories/{id}/subcategories` | `appStore`, `referenceStore`              | `ExploreHeader`, `ExploreHeroCarousel`, `ExploreCategoryStrip`, `ExploreEventFeedCard` |
 | `app/(tabs)/booking.tsx`   | My bookings list | `GET /bookings/me`                                  | `sessionStore`                            | Booking cards                                                                          |
 | `app/(tabs)/favorites.tsx` | Saved events     | `GET /favorites`                                    | `favoritesStore`                          | Favorite cards                                                                         |
-| `app/(tabs)/me.tsx`        | Profile hub      | — (logout → API)                                    | `appStore`, `sessionStore`, profile merge | Menu, partner CTA, `MOCK_VOUCHERS` preview                                             |
+| `app/(tabs)/me.tsx`        | Profile hub      | Session / profile APIs when signed in               | `useCurrentUser`, `sessionStore`          | Menu, partner CTA, Premium navigation (static UI)                                      |
 
 
 ### Discovery & PDP
@@ -359,14 +356,14 @@ Columns: **Route file** | **Purpose** | **APIs** | **Stores / hooks** | **Key co
 
 | Screen file               | Purpose               | APIs                                           | State                          | Components                                      |
 | ------------------------- | --------------------- | ---------------------------------------------- | ------------------------------ | ----------------------------------------------- |
-| `app/search.tsx`          | Cross-vertical search | — (mock)                                       | —                              | Search UI                                       |
-| `app/filters.tsx`         | Filter chips          | — (mock categories)                            | —                              | —                                               |
-| `app/event/[id].tsx`      | Event PDP             | `GET /events/{id}`, `POST .../rate`, favorites | `bookingDraftStore`, favorites | `StarRatingInput`, `ReportIssueModal`, book CTA |
-| `app/restaurant/[id].tsx` | Restaurant PDP        | Mock                                           | `bookingDraftStore`            | —                                               |
-| `app/stay/[id].tsx`       | Hotel PDP             | Mock                                           | draft                          | —                                               |
-| `app/experience/[id].tsx` | Experience PDP        | Mock                                           | draft                          | —                                               |
-| `app/package/[id].tsx`    | Package PDP           | Mock                                           | draft                          | —                                               |
-| `app/organizer/[id].tsx`  | Organizer profile     | Mock                                           | —                              | —                                               |
+| `app/search.tsx`          | Event search          | `GET /events` (keyword/filters)                | `referenceStore`, search store | Search UI                                       |
+| `app/filters.tsx`         | Filter chips          | Categories/subcategories from API              | `referenceStore`               | —                                               |
+| `app/event/[id].tsx`      | Event PDP             | `GET /events/{id}`, rate, favorites            | `bookingDraftStore`, favorites | `StarRatingInput`, `ReportIssueModal`, book CTA |
+| `app/restaurant/[id].tsx` | Legacy PDP shell      | — (out of scope)                               | —                              | Not-found / presentation                        |
+| `app/stay/[id].tsx`       | Legacy PDP shell      | — (out of scope)                               | —                              | Same                                            |
+| `app/experience/[id].tsx` | Legacy PDP shell      | — (out of scope)                               | —                              | Same                                            |
+| `app/package/[id].tsx`    | Legacy PDP shell      | — (out of scope)                               | —                              | Same                                            |
+| `app/organizer/[id].tsx`  | Legacy PDP shell      | — (out of scope)                               | —                              | Same                                            |
 
 
 ### Booking commerce
@@ -377,7 +374,7 @@ Columns: **Route file** | **Purpose** | **APIs** | **Stores / hooks** | **Key co
 | `app/checkout.tsx`     | Order summary        | —                                                   | `bookingDraftStore` | —                                 |
 | `app/payment.tsx`      | Pay / submit booking | `POST /bookings` if `apiEventId`                    | `bookingDraftStore` | Fake card UI                      |
 | `app/confirmation.tsx` | Success              | —                                                   | `lastOrderId`       | —                                 |
-| `app/booking/[id].tsx` | Booking detail       | `GET /bookings/me/{id}`, `PATCH .../cancel`, report | —                   | `ReportIssueModal`; mock fallback |
+| `app/booking/[id].tsx` | Booking detail       | `GET /bookings/me/{id}`, `PATCH .../cancel`, report | —                   | `ReportIssueModal` |
 
 
 ### Account & settings
@@ -392,10 +389,10 @@ Columns: **Route file** | **Purpose** | **APIs** | **Stores / hooks** | **Key co
 | `app/notifications.tsx`      | Notification list | — (i18n keys only)                 | —                                  | —                |
 | `app/payment-methods.tsx`    | Saved cards       | `GET /users/me/payment-methods`    | —                                  | —                |
 | `app/add-payment-method.tsx` | Add card          | `POST /users/me/payment-methods`   | —                                  | —                |
-| `app/wallet.tsx`             | Wallet            | Mock user                          | —                                  | —                |
-| `app/vouchers.tsx`           | Vouchers          | Mock                               | —                                  | —                |
-| `app/membership/index.tsx`   | Membership tier   | Mock plans                         | —                                  | —                |
-| `app/membership/plans.tsx`   | Plan compare      | Mock                               | —                                  | —                |
+| `app/wallet.tsx`             | Wallet (static UI)| —                                  | `useCurrentUser` (display)         | —                |
+| `app/vouchers.tsx`           | Vouchers (static) | —                                  | —                                  | —                |
+| `app/membership/index.tsx`   | Premium hub       | — (static UI)                      | `useCurrentUser`                   | Plans navigation |
+| `app/membership/plans.tsx`   | Premium plans     | — (static UI)                      | —                                  | —                |
 | `app/help.tsx`               | FAQ               | —                                  | —                                  | —                |
 | `app/about.tsx`              | About             | —                                  | —                                  | —                |
 | `app/favorites.tsx`          | Redirect          | —                                  | —                                  | → tabs favorites |
@@ -660,7 +657,7 @@ Grouped by controller; see `admin-web/src/api/adminApi.ts` for 1:1 client mappin
 - **Reports:** list, get, review, resolve, dismiss
 - **Categories:** CRUD
 - **Users:** patch roles, enable/disable
-- **Dashboard:** `GET /admin/dashboard/stats`
+- **Dashboard:** `GET /admin/analytics/summary` (legacy `/admin/dashboard/stats` removed)
 - **Analytics:** `GET /admin/analytics/summary`
 - **Activity log:** `GET /admin/activity-log`
 - **Governorate stats:** `GET /admin/governorates/stats`
@@ -935,10 +932,13 @@ erDiagram
 8. **Create event** — editor `POST /business/events` (requires APPROVED)
 9. **Manage bookings** — `PATCH /business/bookings/{id}/status`
 
-## Gaps
+## Gaps (in-scope)
 
-- Partner `profile.tsx` edits **local** hub store; full sync with `PUT /business-profile/me` may be partial — verify `business/(dashboard)/profile.tsx` for API calls
-- Logo/banner multipart exists on backend; mobile partner profile may use URL strings only
+- Optional `nameAr` on taxonomy API fields
+- Password reset — only if product requires
+- Admin JWT refresh and activity-log UI (see `docs/API_AUDIT_REPORT.md`)
+
+Partner profile save uses `PUT /business-profile/me` and logo/banner multipart (see `PRODUCTION_CRITICAL_FIXES_REPORT.md`).
 
 ---
 
@@ -978,7 +978,7 @@ erDiagram
 - `topCategories`, `topGovernorates`
 - Stat cards from same payload
 
-**Unused API:** `fetchDashboardStats()` → `GET /admin/dashboard/stats` (superseded by analytics summary).
+**Removed (cleanup):** legacy `GET /admin/dashboard/stats` and dead `adminApi` exports; dashboard uses `fetchAnalyticsSummary` only.
 
 ## Notifications
 
@@ -1048,24 +1048,26 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 
 # 10. Missing Features Analysis
 
-## Missing or incomplete APIs / integrations
+## In-scope gaps only
 
+| Item | Notes |
+|------|--------|
+| Optional `nameAr` on categories, subcategories, governorates | API returns single `name`; mobile mirrors for AR |
+| Password reset | Stub in login UI — implement only if required |
+| Admin JWT refresh | Admin SPA does not persist refresh token |
+| Admin activity log UI | Backend endpoint exists; no admin page |
+| Admin settings page | Placeholder |
+| Production hardening | Secrets, migrations, CORS (Section 11) |
 
-| Item                            | Evidence                                                                                                          |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Event image upload              | Backend accepts `photoUrls` only; mobile `photoUrlsForApi` strips `file://` — no upload endpoint for event photos |
-| Non-event verticals             | Restaurants, hotels, packages have no backend entities — mock only                                                |
-| Real payment gateway            | `payment.tsx` simulates card; `POST /bookings` does not charge `PaymentMethod`                                    |
-| Push notifications              | `notifications.tsx` uses static i18n keys; no FCM/backend                                                         |
-| Membership / wallet / vouchers  | No backend modules                                                                                                |
-| `useIntegrationMode.ts`         | Still `mockOnly: true` while API is used widely                                                                   |
-| Admin `fetchDashboardStats`     | Exported but unused                                                                                               |
-| `ROLE_BUSINESS`                 | Seeded, not used in `SecurityConfig`                                                                              |
-| Partner profile screen          | May not fully sync logo/banner via multipart to API                                                               |
-| Search                          | No `GET /search`; mobile uses local mock filter                                                                   |
-| Admin settings page             | No functionality                                                                                                  |
-| Cancel booking from partner app | Partner can only advance status; no CANCELLED tap                                                                 |
-| Guest booking                   | Payment may hit mock path without `apiEventId`                                                                    |
+## Intentionally out of scope (not gaps)
+
+| Item | Notes |
+|------|--------|
+| Wallet, vouchers | Static mobile UI |
+| Premium / membership billing | Static mobile UI — screens and navigation **remain in the app** |
+| Hotels, restaurants, experiences, packages, organizer catalog | Legacy routes / presentation only |
+| Push notifications | Static UI |
+| Dedicated multi-vertical search service | Event search via `GET /events` params is sufficient |
 
 
 ## Unused / dead code
@@ -1073,9 +1075,6 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 
 | Item                                               | Path                                                           |
 | -------------------------------------------------- | -------------------------------------------------------------- |
-| `fetchDashboardStats`                              | `admin-web/src/api/adminApi.ts`                                |
-| `fetchUserById`, `fetchGovernoratesActive`         | same (unused imports in UI)                                    |
-| `useIntegrationMode` misleading flags              | `mobile/src/hooks/useIntegrationMode.ts`                       |
 | Legacy redirects                                   | `business/success.tsx`, `business/brand.tsx`, `onboarding.tsx` |
 | `userRatingsStore`                                 | Partially superseded by server ratings on PDP                  |
 | `businessHubStore.addEvent` / local-only mutations | Largely replaced by API sync; methods still present            |
@@ -1104,10 +1103,9 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 
 ## UI inconsistencies
 
-- README (`mobile/README.md`) still says "mock-only" — outdated vs code
 - Booking tab vs partner "bookings" naming
 - Arabic RTL with forced LTR tabs/back — intentional but document for testers
-- Dashboard home still shows mock activity rows (`mock-1`, `mock-2` in `home.tsx`)
+- Some i18n strings still say "mock" for checkout simulation copy (not data fallbacks)
 
 ---
 
@@ -1122,7 +1120,7 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 | Favorites + ratings + reports          | ✅         |                              |             |
 | Partner onboarding + events + bookings | ✅         | Profile media sync           |             |
 | Admin moderation suite                 | ✅         | Settings page                |             |
-| Multi-vertical catalog                 |           |                              | ❌ (mock)    |
+| Legacy vertical PDP shells             | ✅         | UI only                      | N/A (out of scope) |
 | Payments (PSP)                         |           | Simulated UI                 | ❌           |
 | Production config/secrets              |           |                              | ❌           |
 | Migrations (Flyway/Liquibase)          |           | ddl-auto                     | ❌           |
@@ -1139,7 +1137,7 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 4. File storage (S3 vs local `uploads/`)
 5. Remove or secure demo seeders (`RatingDemoDataConfigurer`, `vibook.demo.rating-data`)
 6. CORS allowlist for production domains
-7. Complete or clearly scope mock verticals (product decision)
+7. Document legacy PDP / Premium / wallet / vouchers as presentation-only for examiners
 
 ---
 
@@ -1149,11 +1147,9 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 | Category             | Finding                                                    | Location                                        |
 | -------------------- | ---------------------------------------------------------- | ----------------------------------------------- |
 | Duplication          | Hub event form vs API single `priceJod` vs multi ticket UI | `events/[id].tsx`, `BusinessEventUpsertRequest` |
-| Duplication          | Mock + API catalog paths                                   | `useCatalogPdp`, `mapCatalog.ts`                |
+| Duplication          | Legacy PDP routes vs events-only product                   | `app/restaurant`, `app/stay`, etc.              |
 | Large files          | `events/[id].tsx` (~1100 lines)                            | Partner event editor                            |
 | Large files          | `dictionary.ts` (~1600+ lines)                             | i18n                                            |
-| Stale docs           | README claims mock-only                                    | `mobile/README.md`                              |
-| Stale hook           | `useIntegrationMode`                                       | `hooks/useIntegrationMode.ts`                   |
 | Persisted legacy     | `userRatingsStore` vs API ratings                          | stores                                          |
 | Partner store API    | `addEvent`, `cycleBookingStatus` still in store            | `businessHubStore.ts`                           |
 | Admin unused exports | dashboard stats helper                                     | `adminApi.ts`                                   |
@@ -1175,7 +1171,7 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 
 - Designed and implemented **95+ REST endpoints** across 23 Spring controllers with role-based security and global exception handling.
 - Built **JWT + refresh token** authentication with token revocation and mobile auto-refresh on 401.
-- Delivered **Expo Router** mobile app with **bilingual (EN/AR) RTL** support, Zustand persistence, and hybrid mock/API catalog routing.
+- Delivered **Expo Router** mobile app with **bilingual (EN/AR) RTL** support, Zustand persistence, and **API-backed** event catalog (mock runtime data removed).
 - Implemented **partner dashboard** integrated with live APIs for event CRUD and booking status workflow.
 - Shipped **admin SPA** with analytics dashboards (Recharts), business onboarding moderation, and end-to-end report review (OPEN → RESOLVED/DISMISSED).
 
@@ -1193,7 +1189,7 @@ Format: **Feature → Mobile/Admin → Endpoint → Backend service → Reposito
 
 ## Honest scope statement (documentation)
 
-The project is a **strong vertical slice** for **events + business partners + admin moderation**, not a finished multi-vertical OTA. Restaurants, hotels, membership, and wallet remain **prototype UI with mock data**. Production hardening (secrets, migrations, payments, CDN uploads) is identified as follow-up work in Section 11.
+The project is a **strong vertical slice** for **events + business partners + admin moderation**. **Premium, wallet, and vouchers** are **static presentation** in the mobile app (navigation and screens kept; no paid subscription backend). Legacy PDP routes (restaurant/stay/etc.) are **UI shells**, not missing catalog APIs. Production hardening (secrets, migrations, CDN uploads) is identified in Section 11.
 
 ## Suggested demo script (5–7 minutes)
 

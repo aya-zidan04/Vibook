@@ -39,14 +39,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponse getActiveCategoryBySlug(String slug) {
-        Category category = categoryRepository.findBySlugAndActiveIsTrue(slug.trim().toLowerCase())
-            .orElseThrow(() -> new NotFoundException("Category not found"));
-        return categoryMapper.toCategoryResponse(category);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<SubcategoryResponse> listActiveSubcategoriesByCategoryId(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new NotFoundException("Category not found"));

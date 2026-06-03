@@ -4,6 +4,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   StyleSheet,
+  TextStyle,
   View,
   useWindowDimensions,
 } from 'react-native';
@@ -16,9 +17,8 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
-import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
+import { fadeFromBackground, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { textAlignStart } from '@/utils/rtlText';
 
 /** Time between automatic slide advances (manual swipe still uses native momentum). */
 const AUTO_MS = 3800;
@@ -29,6 +29,32 @@ const SLIDES = [
   { key: 'welcome-03', source: require('../assets/entry/entry_welcome_03.png') },
 ] as const;
 
+/** Entry hero typography — explicit line heights prevent Arabic glyph overlap when wrapping. */
+function entryHeroTextStyle(isRTL: boolean): { title: TextStyle; subtitle: TextStyle } {
+  const direction: TextStyle = isRTL ? { writingDirection: 'rtl' } : { writingDirection: 'ltr' };
+  return {
+    title: {
+      width: '100%',
+      maxWidth: '100%',
+      textAlign: 'center',
+      fontSize: 38,
+      fontWeight: '800',
+      lineHeight: 50,
+      letterSpacing: 0,
+      ...direction,
+    },
+    subtitle: {
+      width: '100%',
+      maxWidth: '100%',
+      textAlign: 'center',
+      fontSize: 18,
+      lineHeight: 28,
+      letterSpacing: 0,
+      ...direction,
+    },
+  };
+}
+
 export default function AppEntryScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -36,6 +62,7 @@ export default function AppEntryScreen() {
   const { width: winW, height: winH } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { t, isRTL } = useTranslation();
+  const heroText = useMemo(() => entryHeroTextStyle(isRTL), [isRTL]);
 
   /** Full physical page size so photos bleed behind status bar + home indicator. */
   const pageW = winW + insets.left + insets.right;
@@ -159,13 +186,12 @@ export default function AppEntryScreen() {
         <View style={styles.topSpacer} />
 
         <View style={styles.bottom}>
-          <View style={[styles.brandBlock, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
-            <AppText
-              variant="display"
-              color="textSecondary"
-              style={[styles.tagline, { textAlign: textAlignStart(isRTL) }]}
-            >
-              {t('entry.tagline')}
+          <View style={styles.heroBlock}>
+            <AppText variant="display" color="textSecondary" style={heroText.title}>
+              {t('entry.title')}
+            </AppText>
+            <AppText variant="body-lg" color="textSecondary" style={heroText.subtitle}>
+              {t('entry.subtitle')}
             </AppText>
           </View>
           <PrimaryButton title={t('entry.loginSignup')} onPress={goAuth} style={btnShape} />
@@ -178,29 +204,28 @@ export default function AppEntryScreen() {
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-  root: { flex: 1, backgroundColor: 'transparent' },
-  /** Position + outsets applied in JSX via `bleedStyle` for edge-to-edge photos. */
-  carousel: {},
-  carouselList: { flex: 1 },
-  safe: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'column',
-  },
-  /** Fills space so headline + controls sit at the bottom of the screen. */
-  topSpacer: { flex: 1, minHeight: 0 },
-  brandBlock: {
-    alignItems: 'flex-start',
-    width: '100%',
-  },
-  tagline: {
-    width: '100%',
-  },
-  bottom: {
-    flexShrink: 0,
-    paddingHorizontal: spacing.screen,
-    paddingBottom: spacing.md,
-    gap: spacing.md,
-    width: '100%',
-  },
+    root: { flex: 1, backgroundColor: 'transparent' },
+    carousel: {},
+    carouselList: { flex: 1 },
+    safe: {
+      ...StyleSheet.absoluteFillObject,
+      flexDirection: 'column',
+    },
+    topSpacer: { flex: 1, minHeight: 0 },
+    heroBlock: {
+      width: '100%',
+      maxWidth: '100%',
+      alignItems: 'center',
+      alignSelf: 'center',
+      marginBottom: spacing.lg,
+      gap: spacing.md,
+    },
+    bottom: {
+      flexShrink: 0,
+      paddingHorizontal: spacing.screen,
+      paddingBottom: spacing.md,
+      gap: spacing.md,
+      width: '100%',
+    },
   });
 }

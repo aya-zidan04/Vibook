@@ -1,46 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { BusinessEventResponse } from '@/api/types';
 import { getEventById as getEventByIdFromApi } from '@/api/eventsApi';
-import {
-  getEventById,
-  getExperienceById,
-  getHotelById,
-  getOrganizerById,
-  getPackageById,
-  getRestaurantById,
-  getTiersForEvent,
-  MOCK_EVENTS,
-} from '@/services/mock';
 import { businessEventDetailToEventItem, tiersFromBusinessEvent } from '@/services/api/eventMap';
-import { useAppStore } from '@/store/appStore';
-import { useBusinessHubStore } from '@/store/businessHubStore';
-import type {
-  EventItem,
-  ExperienceItem,
-  Hotel,
-  Organizer,
-  Restaurant,
-  TicketTier,
-  TravelPackage,
-} from '@/types';
-import {
-  businessTicketOptionsToTicketTiers,
-  syntheticTierFromEventItem,
-} from '@/utils/businessEventTickets';
+import type { EventItem, ExperienceItem, Hotel, Organizer, Restaurant, TicketTier, TravelPackage } from '@/types';
 
 export function useEventPdp(id: string | undefined): {
   event: EventItem | undefined;
   tiers: TicketTier[];
   loading: boolean;
+  error: boolean;
   /** Present for numeric/API-backed events; use for ratings and bookings. */
   apiDetail: BusinessEventResponse | null;
   refetchApiDetail: () => void;
 } {
-  const hubEvents = useBusinessHubStore((s) => s.events);
-  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [event, setEvent] = useState<EventItem | undefined>();
   const [tiers, setTiers] = useState<TicketTier[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [apiDetail, setApiDetail] = useState<BusinessEventResponse | null>(null);
   const [refreshTick, setRefreshTick] = useState(0);
 
@@ -54,6 +30,7 @@ export function useEventPdp(id: string | undefined): {
       setEvent(undefined);
       setTiers([]);
       setApiDetail(null);
+      setError(false);
       setLoading(false);
       return () => {
         cancelled = true;
@@ -61,83 +38,47 @@ export function useEventPdp(id: string | undefined): {
     }
 
     const isNumericCatalog = /^\d+$/.test(id);
-
-    if (isNumericCatalog) {
-      if (!isAuthenticated) {
-        setEvent(undefined);
-        setTiers([]);
-        setApiDetail(null);
-        setLoading(false);
-        return () => {
-          cancelled = true;
-        };
-      }
-      setLoading(true);
-      void (async () => {
-        try {
-          const raw = await getEventByIdFromApi(Number(id));
-          if (cancelled) return;
-          setApiDetail(raw);
-          setEvent(businessEventDetailToEventItem(raw));
-          setTiers(tiersFromBusinessEvent(raw));
-        } catch {
-          if (!cancelled) {
-            setApiDetail(null);
-            setEvent(undefined);
-            setTiers([]);
-          }
-        } finally {
-          if (!cancelled) setLoading(false);
-        }
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    setApiDetail(null);
-    const ev = getEventById(id);
-    setEvent(ev);
-    if (!ev) {
+    if (!isNumericCatalog) {
+      setApiDetail(null);
+      setEvent(undefined);
       setTiers([]);
+      setError(false);
       setLoading(false);
       return () => {
         cancelled = true;
       };
     }
-    const fromMock = MOCK_EVENTS.some((e) => e.id === id);
-    if (fromMock) {
-      const explicit = getTiersForEvent(ev.id);
-      setTiers(explicit.length > 0 ? explicit : [syntheticTierFromEventItem(ev)]);
-    } else {
-      const biz = hubEvents.find((e) => e.id === id && !e.hidden);
-      if (biz && biz.ticketOptions?.length) {
-        setTiers(businessTicketOptionsToTicketTiers(biz.id, biz.ticketOptions));
-      } else {
-        setTiers([]);
+
+    setLoading(true);
+    setError(false);
+    void (async () => {
+      try {
+        const raw = await getEventByIdFromApi(Number(id));
+        if (cancelled) return;
+        setApiDetail(raw);
+        setEvent(businessEventDetailToEventItem(raw));
+        setTiers(tiersFromBusinessEvent(raw));
+      } catch {
+        if (!cancelled) {
+          setApiDetail(null);
+          setEvent(undefined);
+          setTiers([]);
+          setError(true);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    }
-    setLoading(false);
+    })();
     return () => {
       cancelled = true;
     };
-  }, [id, hubEvents, isAuthenticated, refreshTick]);
+  }, [id, refreshTick]);
 
-  return { event, tiers, loading, apiDetail, refetchApiDetail };
+  return { event, tiers, loading, error, apiDetail, refetchApiDetail };
 }
 
-export function useOrganizerForEvent(event: EventItem | undefined): Organizer | undefined {
-  const [organizer, setOrganizer] = useState<Organizer | undefined>();
-
-  useEffect(() => {
-    if (!event) {
-      setOrganizer(undefined);
-      return;
-    }
-    setOrganizer(getOrganizerById(event.organizerId));
-  }, [event?.organizerId, event?.id]);
-
-  return organizer;
+export function useOrganizerForEvent(_event: EventItem | undefined): Organizer | undefined {
+  return undefined;
 }
 
 export function useRestaurantPdp(id: string | undefined): {
@@ -148,7 +89,7 @@ export function useRestaurantPdp(id: string | undefined): {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setRestaurant(id ? getRestaurantById(id) : undefined);
+    setRestaurant(undefined);
     setLoading(false);
   }, [id]);
 
@@ -163,7 +104,7 @@ export function useExperiencePdp(id: string | undefined): {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setExperience(id ? getExperienceById(id) : undefined);
+    setExperience(undefined);
     setLoading(false);
   }, [id]);
 
@@ -175,7 +116,7 @@ export function useHotelPdp(id: string | undefined): { hotel: Hotel | undefined;
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setHotel(id ? getHotelById(id) : undefined);
+    setHotel(undefined);
     setLoading(false);
   }, [id]);
 
@@ -190,7 +131,7 @@ export function usePackagePdp(id: string | undefined): {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setPkg(id ? getPackageById(id) : undefined);
+    setPkg(undefined);
     setLoading(false);
   }, [id]);
 
@@ -207,10 +148,8 @@ export function useOrganizerPdp(id: string | undefined): {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mockOrg = id ? getOrganizerById(id) : undefined;
-    const mockEvents = mockOrg ? MOCK_EVENTS.filter((e) => e.organizerId === mockOrg.id) : [];
-    setOrganizer(mockOrg);
-    setEvents(mockEvents);
+    setOrganizer(undefined);
+    setEvents([]);
     setLoading(false);
   }, [id]);
 

@@ -1,25 +1,19 @@
 import { create } from 'zustand';
 import { listCategories } from '@/api/categoriesApi';
 import { listActiveGovernorates } from '@/api/governoratesApi';
-import { MOCK_CATEGORIES } from '@/mock/categories';
 import type { Category } from '@/types';
 import type { City } from '@/types';
 import { useAppStore } from '@/store/appStore';
-import {
-  categoriesFromApi,
-  fallbackCategories,
-  mergeCategoriesWithFallback,
-} from '@/utils/categoryLabels';
+import { categoriesFromApi } from '@/utils/categoryLabels';
 import {
   cityIdToGovernorateSlug,
-  fallbackGovernorateCities,
   governoratesFromApiRows,
 } from '@/utils/governorateLabels';
 
 type ReferenceStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 type ReferenceState = {
-  /** Governorates from API or fallback (same as {@link cities}). */
+  /** Governorates from API (same as {@link cities}). */
   governorates: City[];
   cities: City[];
   categories: Category[];
@@ -45,18 +39,16 @@ function ensureValidSelectedCity(cities: City[]): void {
     }
   }
 
-  setSelectedCityId(cities[0]?.id ?? '1');
+  setSelectedCityId(cities[0]?.id ?? '');
 }
 
 function applyGovernorates(cities: City[]): Pick<ReferenceState, 'governorates' | 'cities'> {
   return { governorates: cities, cities };
 }
 
-const initialGovernorates = fallbackGovernorateCities();
-
 export const useReferenceStore = create<ReferenceState>((set, get) => ({
-  ...applyGovernorates(initialGovernorates),
-  categories: fallbackCategories(),
+  ...applyGovernorates([]),
+  categories: [],
   status: 'idle',
   governoratesFromApi: false,
   categoriesFromApi: false,
@@ -65,9 +57,8 @@ export const useReferenceStore = create<ReferenceState>((set, get) => ({
     if (get().status === 'loading') return;
     set({ status: 'loading' });
 
-    const fallbackCats = fallbackCategories();
-    let governorates = fallbackGovernorateCities();
-    let categories: Category[] = fallbackCats;
+    let governorates: City[] = [];
+    let categories: Category[] = [];
     let governoratesFromApiFlag = false;
     let categoriesFromApiFlag = false;
     let hadError = false;
@@ -79,40 +70,36 @@ export const useReferenceStore = create<ReferenceState>((set, get) => ({
 
     if (govsResult.status === 'fulfilled') {
       const fromApi = governoratesFromApiRows(govsResult.value);
+      governorates = fromApi;
+      governoratesFromApiFlag = fromApi.length > 0;
       if (fromApi.length > 0) {
-        governorates = fromApi;
         ensureValidSelectedCity(governorates);
-        governoratesFromApiFlag = true;
-        if (__DEV__) {
-          console.log(
-            '[referenceStore] governorates loaded from API:',
-            fromApi.length,
-            fromApi.map((g) => ({ id: g.id, nameEn: g.nameEn, nameAr: g.nameAr })),
-          );
-        }
       } else {
         hadError = true;
-        if (__DEV__) {
-          console.warn('[referenceStore] governorates API returned empty — using fallback');
-        }
+      }
+      if (__DEV__) {
+        console.log('[referenceStore] governorates from API:', fromApi.length);
       }
     } else {
       hadError = true;
       if (__DEV__) {
-        console.warn('[referenceStore] governorates API failed — using fallback', govsResult.reason);
+        console.warn('[referenceStore] governorates API failed', govsResult.reason);
       }
     }
 
     if (catsResult.status === 'fulfilled') {
-      categories = mergeCategoriesWithFallback(categoriesFromApi(catsResult.value));
-      categoriesFromApiFlag = categories.some((c) => /^\d+$/.test(c.id));
-      if (__DEV__ && categoriesFromApiFlag) {
-        console.log('[referenceStore] categories loaded from API:', categories.length);
+      categories = categoriesFromApi(catsResult.value);
+      categoriesFromApiFlag = categories.length > 0;
+      if (categories.length === 0) {
+        hadError = true;
+      }
+      if (__DEV__) {
+        console.log('[referenceStore] categories from API:', categories.length);
       }
     } else {
       hadError = true;
       if (__DEV__) {
-        console.warn('[referenceStore] categories API failed — using fallback', catsResult.reason);
+        console.warn('[referenceStore] categories API failed', catsResult.reason);
       }
     }
 

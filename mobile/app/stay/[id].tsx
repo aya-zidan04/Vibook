@@ -14,7 +14,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useHotelPdp } from '@/hooks/useCatalogPdp';
-import { getCityName } from '@/services/mock';
+import { localizedCityLabel } from '@/utils/governorateLabels';
+import { useReferenceStore } from '@/store/referenceStore';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
@@ -28,6 +29,7 @@ export default function StayDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const cities = useReferenceStore((s) => s.cities);
   const { hotel: h, loading } = useHotelPdp(id);
   const [nights] = useState(2);
 
@@ -67,9 +69,9 @@ export default function StayDetailScreen() {
       quantity: nights,
       fees,
       startsAt: new Date(Date.now() + 14 * 86400000).toISOString(),
-      cityName: getCityName(h.cityId, 'en'),
-      cityNameAr: getCityName(h.cityId, 'ar'),
-      metaLine: `${nights} ${t('stay.nights')} · ${getCityName(h.cityId, locale)}`,
+      cityName: localizedCityLabel(h.cityId, 'en', cities),
+      cityNameAr: localizedCityLabel(h.cityId, 'ar', cities),
+      metaLine: `${nights} ${t('stay.nights')} · ${localizedCityLabel(h.cityId, locale, cities)}`,
     });
     router.push('/checkout');
   };
@@ -85,7 +87,7 @@ export default function StayDetailScreen() {
             {h.name}
           </AppText>
           <AppText variant="body" color="textSecondary">
-            {getCityName(h.cityId, locale)} · {formatIntForLocale(h.stars, locale)}★
+            {localizedCityLabel(h.cityId, locale, cities)} · {formatIntForLocale(h.stars, locale)}★
           </AppText>
           <View style={styles.row}>
             <Ionicons name="star" size={16} color={colors.warning} />

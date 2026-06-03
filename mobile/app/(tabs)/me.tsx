@@ -12,7 +12,7 @@ import { HeroAmbientOverlay } from '@/components/ui/HeroAmbientOverlay';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useMockUser } from '@/hooks/useMockUser';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAppStore } from '@/store/appStore';
 import { buttonMetrics, createShadows, radii, spacing, useThemeColors } from '@/theme';
 import { lightColors as lightSw } from '@/theme/paletteColors';
@@ -42,7 +42,7 @@ export default function MeScreen() {
   const colors = useThemeColors();
   const isLight = useThemeStore((s) => s.colorScheme) === 'light';
   const styles = useMemo(() => createStyles(colors, isLight), [colors, isLight]);
-  const { user } = useMockUser();
+  const { user } = useCurrentUser();
   const displayName = locale === 'ar' && user.nameAr ? user.nameAr : user.name;
   const logout = useAppStore((s) => s.logout);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);

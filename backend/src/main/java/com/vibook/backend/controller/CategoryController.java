@@ -25,14 +25,6 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.listActiveCategories());
     }
 
-    /**
-     * Resolved before {@code /{id}/subcategories} so {@code slug} is never parsed as a numeric id.
-     */
-    @GetMapping("/slug/{slug}")
-    public ResponseEntity<CategoryResponse> getCategoryBySlug(@PathVariable String slug) {
-        return ResponseEntity.ok(categoryService.getActiveCategoryBySlug(slug));
-    }
-
     @GetMapping("/{id}/subcategories")
     public ResponseEntity<List<SubcategoryResponse>> listSubcategories(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.listActiveSubcategoriesByCategoryId(id));

@@ -120,6 +120,18 @@ public class EventRatingServiceImpl implements EventRatingService {
 
     @Override
     @Transactional(readOnly = true)
+    public BusinessEventResponse getEventForPublic(Long eventId) {
+        BusinessEvent event = businessEventRepository
+            .findWithDetailsById(eventId)
+            .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+        if (event.isHidden()) {
+            throw new ResourceNotFoundException("Event not found");
+        }
+        return businessEventMapper.toResponse(event);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public BusinessEventResponse getEventForViewer(Long eventId, String userEmail) {
         User user = userRepository
             .findByEmail(userEmail)

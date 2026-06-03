@@ -7,7 +7,6 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { MOCK_VOUCHERS } from '@/services/mock';
 import { useLocaleStore } from '@/store/localeStore';
 import type { Voucher } from '@/types';
 import { useThemeColors } from '@/theme';
@@ -20,7 +19,7 @@ export default function VouchersScreen() {
   const [code, setCode] = useState('');
   const [redeemBusy, setRedeemBusy] = useState(false);
 
-  const displayList = useMemo(() => [...MOCK_VOUCHERS, ...extra], [extra]);
+  const displayList = useMemo(() => [...extra], [extra]);
 
   const redeem = async () => {
     const trimmed = code.trim().toUpperCase();

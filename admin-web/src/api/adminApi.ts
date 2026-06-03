@@ -2,7 +2,6 @@ import { api } from '@/api/client';
 import type {
   AdminAnalyticsSummaryResponse,
   AdminBookingResponse,
-  AdminDashboardStatsResponse,
   AdminEventDetailPayload,
   AdminEventRatingResponse,
   AdminEventRowResponse,
@@ -24,11 +23,6 @@ import type {
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>('/auth/login', { email, password });
-  return data;
-}
-
-export async function fetchDashboardStats(): Promise<AdminDashboardStatsResponse> {
-  const { data } = await api.get<AdminDashboardStatsResponse>('/admin/dashboard/stats');
   return data;
 }
 
@@ -121,11 +115,6 @@ export async function fetchAllUsers(): Promise<UserResponse[]> {
   return data;
 }
 
-export async function fetchUserById(id: number): Promise<UserResponse> {
-  const { data } = await api.get<UserResponse>(`/users/${id}`);
-  return data;
-}
-
 export async function updateUserRoles(userId: number, roles: RoleName[]): Promise<UserResponse> {
   const { data } = await api.patch<UserResponse>(`/admin/users/${userId}/roles`, { roles });
   return data;
@@ -170,11 +159,6 @@ export async function updateAdminCategory(
 
 export async function deleteAdminCategory(id: number): Promise<void> {
   await api.delete(`/admin/categories/${id}`);
-}
-
-export async function fetchGovernoratesActive(): Promise<GovernorateResponse[]> {
-  const { data } = await api.get<GovernorateResponse[]>('/governorates/active');
-  return data;
 }
 
 export async function fetchAllGovernorates(): Promise<GovernorateResponse[]> {

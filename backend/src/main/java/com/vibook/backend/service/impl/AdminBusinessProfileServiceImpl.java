@@ -16,6 +16,7 @@ import com.vibook.backend.repository.BusinessProfileRepository;
 import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.AdminActivityLogService;
 import com.vibook.backend.service.AdminBusinessProfileService;
+import com.vibook.backend.service.BusinessUserRoleService;
 import com.vibook.backend.spec.BusinessProfileAdminSpecs;
 import com.vibook.backend.util.AdminSecurityUtils;
 import java.time.Instant;
@@ -39,6 +40,7 @@ public class AdminBusinessProfileServiceImpl implements AdminBusinessProfileServ
     private final BusinessProfileMapper businessProfileMapper;
     private final AdminActivityLogService adminActivityLogService;
     private final ObjectMapper objectMapper;
+    private final BusinessUserRoleService businessUserRoleService;
     private final AdminBusinessProfileService self;
 
     public AdminBusinessProfileServiceImpl(
@@ -46,12 +48,14 @@ public class AdminBusinessProfileServiceImpl implements AdminBusinessProfileServ
         BusinessProfileMapper businessProfileMapper,
         AdminActivityLogService adminActivityLogService,
         ObjectMapper objectMapper,
+        BusinessUserRoleService businessUserRoleService,
         @Lazy AdminBusinessProfileService self
     ) {
         this.businessProfileRepository = businessProfileRepository;
         this.businessProfileMapper = businessProfileMapper;
         this.adminActivityLogService = adminActivityLogService;
         this.objectMapper = objectMapper;
+        this.businessUserRoleService = businessUserRoleService;
         this.self = self;
     }
 
@@ -93,6 +97,7 @@ public class AdminBusinessProfileServiceImpl implements AdminBusinessProfileServ
         entity.setApprovedAt(Instant.now());
         entity.setRejectedAt(null);
         BusinessProfile saved = businessProfileRepository.save(entity);
+        businessUserRoleService.grantBusinessRole(saved.getUser());
         adminActivityLogService.log(
             admin.getUser().getId(),
             admin.getUsername(),

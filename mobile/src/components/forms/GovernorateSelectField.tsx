@@ -5,7 +5,8 @@ import { AppText } from '@/components/ui/AppText';
 import { GovernoratePickerSheet } from '@/components/forms/GovernoratePickerSheet';
 import { JORDAN_GOVERNORATES, type JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { useTranslation } from '@/i18n/useTranslation';
-import { governorateLabel } from '@/utils/governorateLabels';
+import { useReferenceStore } from '@/store/referenceStore';
+import { localizedCityLabel } from '@/utils/governorateLabels';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import {
@@ -25,7 +26,12 @@ type Props = {
   appearance?: 'default' | 'business';
 };
 
-function enNameForSlug(slug: JordanGovernorateSlug): string {
+function enNameForSlug(
+  slug: JordanGovernorateSlug,
+  cities: ReturnType<typeof useReferenceStore.getState>['cities'],
+): string {
+  const fromApi = cities.find((c) => c.slug === slug);
+  if (fromApi) return fromApi.nameEn;
   return JORDAN_GOVERNORATES.find((g) => g.slug === slug)?.en ?? 'Amman';
 }
 
@@ -42,10 +48,12 @@ export function GovernorateSelectField({
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { locale, isRTL } = useTranslation();
+  const cities = useReferenceStore((s) => s.cities);
   const [open, setOpen] = useState(false);
 
-  const selectedEn = enNameForSlug(valueSlug);
-  const displayLabel = governorateLabel(valueSlug, locale);
+  const selectedEn = enNameForSlug(valueSlug, cities);
+  const cityId = cities.find((c) => c.slug === valueSlug)?.id ?? `gov-${valueSlug}`;
+  const displayLabel = localizedCityLabel(cityId, locale, cities);
 
   return (
     <View style={styles.wrap}>
@@ -84,7 +92,7 @@ export function GovernorateSelectField({
         onClose={() => setOpen(false)}
         selectedEnName={selectedEn}
         title={sheetTitle}
-        onSelect={(_en, slug) => onChangeSlug(slug)}
+        onSelect={(_en, slug) => onChangeSlug(slug as JordanGovernorateSlug)}
       />
     </View>
   );

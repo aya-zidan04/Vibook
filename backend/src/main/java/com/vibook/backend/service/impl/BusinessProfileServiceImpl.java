@@ -17,6 +17,7 @@ import com.vibook.backend.repository.GovernorateRepository;
 import com.vibook.backend.repository.UserRepository;
 import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.BusinessProfileService;
+import com.vibook.backend.service.BusinessUserRoleService;
 import com.vibook.backend.service.ProfileImageStorageService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +35,7 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
     private final GovernorateRepository governorateRepository;
     private final BusinessProfileMapper businessProfileMapper;
     private final ProfileImageStorageService profileImageStorageService;
+    private final BusinessUserRoleService businessUserRoleService;
 
     public BusinessProfileServiceImpl(
         BusinessProfileRepository businessProfileRepository,
@@ -41,7 +43,8 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
         CategoryRepository categoryRepository,
         GovernorateRepository governorateRepository,
         BusinessProfileMapper businessProfileMapper,
-        ProfileImageStorageService profileImageStorageService
+        ProfileImageStorageService profileImageStorageService,
+        BusinessUserRoleService businessUserRoleService
     ) {
         this.businessProfileRepository = businessProfileRepository;
         this.userRepository = userRepository;
@@ -49,6 +52,7 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
         this.governorateRepository = governorateRepository;
         this.businessProfileMapper = businessProfileMapper;
         this.profileImageStorageService = profileImageStorageService;
+        this.businessUserRoleService = businessUserRoleService;
     }
 
     @Override
@@ -88,6 +92,8 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
         if (previousStatus == BusinessProfileStatus.APPROVED) {
             entity.setStatus(BusinessProfileStatus.DRAFT);
             entity.setRejectionReason(null);
+            entity.setApprovedAt(null);
+            businessUserRoleService.revokeBusinessRole(user);
         }
         BusinessProfile saved = businessProfileRepository.save(entity);
         return businessProfileMapper.toResponse(saved);

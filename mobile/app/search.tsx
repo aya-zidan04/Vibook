@@ -64,7 +64,7 @@ export default function SearchScreen() {
     filters.categoryIds.length > 0 || filters.subcategoryIds.length > 0;
   const showResults = hasActiveQuery || hasActiveFilters;
 
-  const searchEnabled = isAuthenticated && showResults;
+  const searchEnabled = showResults;
 
   const { events, loading, error, retry } = useEventSearch(
     q,
@@ -73,7 +73,7 @@ export default function SearchScreen() {
     searchEnabled,
   );
 
-  const { events: browseEvents } = useEventSearch('', filters, governorateId, isAuthenticated && !showResults);
+  const { events: browseEvents } = useEventSearch('', filters, governorateId, !showResults);
 
   const filteredEvents = useMemo(
     () => filterEventsBySegment(events, seg),

@@ -13,7 +13,8 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { usePackagePdp } from '@/hooks/useCatalogPdp';
-import { getCityName } from '@/services/mock';
+import { localizedCityLabel } from '@/utils/governorateLabels';
+import { useReferenceStore } from '@/store/referenceStore';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -26,6 +27,7 @@ export default function PackageDetailScreen() {
   const setDraft = useBookingDraftStore((s) => s.setDraft);
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const cities = useReferenceStore((s) => s.cities);
   const { pkg: p, loading } = usePackagePdp(id);
   const [travelers] = useState(2);
 
@@ -66,8 +68,8 @@ export default function PackageDetailScreen() {
       quantity: travelers,
       fees,
       startsAt: new Date(Date.now() + 21 * 86400000).toISOString(),
-      cityName: primaryCityId ? getCityName(primaryCityId, 'en') : undefined,
-      cityNameAr: primaryCityId ? getCityName(primaryCityId, 'ar') : undefined,
+      cityName: primaryCityId ? localizedCityLabel(primaryCityId, 'en', cities) : undefined,
+      cityNameAr: primaryCityId ? localizedCityLabel(primaryCityId, 'ar', cities) : undefined,
       metaLine: `${p.nights} ${t('stay.nights')} · ${travelers} ${t('package.travelers')}`,
     });
     router.push('/checkout');

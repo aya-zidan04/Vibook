@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextStyle, View } from 'react-native';
 import { useNavigationContainerRef, useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -20,9 +20,10 @@ const BRAND_LOGO = require('../assets/vibook-wordmark.png');
 export default function SplashScreen() {
   const router = useRouter();
   const navRef = useNavigationContainerRef();
-  const { t } = useTranslation();
+  const { t, isRTL } = useTranslation();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const splashText = useMemo(() => splashHeroTextStyle(isRTL), [isRTL]);
   const [hydrated, setHydrated] = useState(() => useAppStore.persist.hasHydrated());
 
   useEffect(() => {
@@ -69,15 +70,40 @@ export default function SplashScreen() {
   return (
     <View style={styles.root}>
       <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
-      <AppText variant="display" color="text" style={styles.brand}>
+      <AppText variant="display" color="text" style={[styles.brand, splashText.title]}>
         {t('common.brandDisplay')}
       </AppText>
-      <AppText variant="body" color="textSecondary" style={styles.tag}>
+      <AppText variant="body-lg" color="textSecondary" style={[styles.tag, splashText.subtitle]}>
         {t('common.splashTagline')}
       </AppText>
       <ActivityIndicator color={colors.primary} size="large" style={styles.loader} />
     </View>
   );
+}
+
+function splashHeroTextStyle(isRTL: boolean): { title: TextStyle; subtitle: TextStyle } {
+  const direction: TextStyle = isRTL ? { writingDirection: 'rtl' } : { writingDirection: 'ltr' };
+  return {
+    title: {
+      width: '100%',
+      maxWidth: '100%',
+      textAlign: 'center',
+      fontSize: 38,
+      fontWeight: '800',
+      lineHeight: 50,
+      letterSpacing: 0,
+      ...direction,
+    },
+    subtitle: {
+      width: '100%',
+      maxWidth: '100%',
+      textAlign: 'center',
+      fontSize: 18,
+      lineHeight: 28,
+      letterSpacing: 0,
+      ...direction,
+    },
+  };
 }
 
 function createStyles(_colors: ThemeColors) {
@@ -87,6 +113,7 @@ function createStyles(_colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: spacing.xxl,
+      width: '100%',
     },
     brandLogo: {
       width: 112,
@@ -94,10 +121,9 @@ function createStyles(_colors: ThemeColors) {
       marginBottom: spacing.lg,
     },
     brand: {
-      marginBottom: spacing.sm,
+      marginBottom: spacing.md,
     },
     tag: {
-      textAlign: 'center',
       marginBottom: spacing.xxl,
     },
     loader: {

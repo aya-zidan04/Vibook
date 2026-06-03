@@ -5,6 +5,7 @@ import { AppText } from '@/components/ui/AppText';
 import { BusinessCategoryPickerSheet } from '@/components/forms/BusinessCategoryPickerSheet';
 import { partnerCategoryRowForStored } from '@/constants/businessPartnerCategories';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useReferenceStore } from '@/store/referenceStore';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import {
@@ -28,8 +29,9 @@ export function BusinessPartnerCategorySelectField({ label, valueEn, onChangeEn,
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { t, isRTL, locale } = useTranslation();
   const [open, setOpen] = useState(false);
+  const categories = useReferenceStore((s) => s.categories);
 
-  const row = partnerCategoryRowForStored(valueEn);
+  const row = partnerCategoryRowForStored(valueEn, categories);
   const displayLabel = row
     ? locale === 'ar'
       ? row.ar

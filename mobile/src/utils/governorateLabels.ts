@@ -1,10 +1,8 @@
 import type { GovernorateResponse } from '@/api/types';
-import { JORDAN_GOVERNORATES, type JordanGovernorateSlug } from '@/constants/jordanGovernorates';
-import { MOCK_CITIES } from '@/mock/cities';
 import type { City } from '@/types';
 
-/** Backend seed names → mobile slug (English canonical on server). */
-const BACKEND_NAME_TO_SLUG: Record<string, JordanGovernorateSlug> = {
+/** Backend seed names → slug for legacy `gov-{slug}` persisted city ids. */
+const BACKEND_NAME_TO_SLUG: Record<string, string> = {
   Irbid: 'irbid',
   Ajloun: 'ajloun',
   Jerash: 'jerash',
@@ -22,38 +20,19 @@ const BACKEND_NAME_TO_SLUG: Record<string, JordanGovernorateSlug> = {
 
 export function backendGovernorateNameToSlug(
   name: string | null | undefined,
-): JordanGovernorateSlug | undefined {
+): string | undefined {
   const trimmed = (name ?? '').trim();
   if (!trimmed) return undefined;
   const mapped = BACKEND_NAME_TO_SLUG[trimmed];
   if (mapped) return mapped;
-  const byEn = JORDAN_GOVERNORATES.find((g) => g.en === trimmed);
-  if (byEn) return byEn.slug;
-  const bySlug = JORDAN_GOVERNORATES.find((g) => g.slug === trimmed.toLowerCase());
-  return bySlug?.slug;
+  return trimmed.toLowerCase().replace(/\s+/g, '-');
 }
 
-export function governorateLabel(slug: JordanGovernorateSlug, locale: 'en' | 'ar'): string {
-  const row = JORDAN_GOVERNORATES.find((g) => g.slug === slug);
-  if (!row) return slug;
-  return locale === 'ar' ? row.ar : row.en;
-}
-
-export function localizedGovernorateName(
-  backendName: string | null | undefined,
-  locale: 'en' | 'ar',
-): string {
-  const slug = backendGovernorateNameToSlug(backendName);
-  if (slug) return governorateLabel(slug, locale);
-  return (backendName ?? '').trim();
-}
-
-export function cityIdToGovernorateSlug(cityId: string): JordanGovernorateSlug | undefined {
+export function cityIdToGovernorateSlug(cityId: string): string | undefined {
   const trimmed = cityId.trim();
   if (!trimmed) return undefined;
   if (trimmed.startsWith('gov-')) {
-    const slug = trimmed.slice(4) as JordanGovernorateSlug;
-    return JORDAN_GOVERNORATES.some((g) => g.slug === slug) ? slug : undefined;
+    return trimmed.slice(4);
   }
   if (/^\d+$/.test(trimmed)) return undefined;
   return backendGovernorateNameToSlug(trimmed);
@@ -69,21 +48,19 @@ export function localizedCityLabel(
   if (fromCatalog) {
     return locale === 'ar' ? fromCatalog.nameAr : fromCatalog.nameEn;
   }
-  const slug = cityIdToGovernorateSlug(cityId);
-  if (slug) return governorateLabel(slug, locale);
-  return localizedGovernorateName(cityId, locale);
+  return cityId;
 }
 
-/** Map one API governorate row → UI city (English from DB, Arabic from taxonomy). */
+/** Map one API governorate row → UI city. */
 export function governorateFromApiRow(row: GovernorateResponse): City {
   const slug = backendGovernorateNameToSlug(row.name);
   const nameEn = row.name.trim();
-  const nameAr = slug ? governorateLabel(slug, 'ar') : nameEn;
   return {
     id: String(row.id),
     slug: slug ?? undefined,
     nameEn,
-    nameAr,
+    /** Backend gap: governorates have no `nameAr`; mirror English until API adds it. */
+    nameAr: nameEn,
     country: 'Jordan',
     displayOrder: row.displayOrder,
     active: row.active,
@@ -98,16 +75,3 @@ export function governoratesFromApiRows(rows: GovernorateResponse[]): City[] {
     .map(governorateFromApiRow);
 }
 
-export function fallbackGovernorateCities(): City[] {
-  return [...MOCK_CITIES];
-}
-
-/** @deprecated Use {@link governorateFromApiRow}. */
-export function governorateCityFromApi(id: number, backendName: string): City {
-  return governorateFromApiRow({
-    id,
-    name: backendName,
-    displayOrder: 0,
-    active: true,
-  });
-}

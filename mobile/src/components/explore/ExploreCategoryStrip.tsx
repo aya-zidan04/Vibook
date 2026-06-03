@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { type ReactNode, useMemo, useRef } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
-import type { ExploreMainCategory, ExploreSubcategory } from '@/mock/exploreCategories';
+import type { ExploreMainCategory, ExploreSubcategory } from '@/types/exploreCategories';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 

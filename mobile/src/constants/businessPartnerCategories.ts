@@ -1,34 +1,38 @@
-import {
-  EXPLORE_MAIN_CATEGORY_ORDER,
-  EXPLORE_SUBCATEGORY_ORDER,
-  mainCategoryIcon,
-  mainCategoryLabel,
-  subcategoryLabel,
-  type ExploreCategorySlug,
-} from '@/constants/exploreCategoryTaxonomy';
+import type { Category } from '@/types';
+import { backendIconToOutline } from '@/services/reference/mapReference';
+import type { LocalizedSubcategory } from '@/utils/categoryLabels';
 
-/**
- * Canonical partner verticals for business profile (stored `profile.category` = English `en` string).
- */
-export const BUSINESS_PARTNER_CATEGORIES = EXPLORE_MAIN_CATEGORY_ORDER.map((slug) => ({
-  slug,
-  en: mainCategoryLabel(slug, 'en'),
-  ar: mainCategoryLabel(slug, 'ar'),
-  icon: mainCategoryIcon(slug),
-  partsEn: EXPLORE_SUBCATEGORY_ORDER[slug].map((sub) => subcategoryLabel(sub, 'en')),
-  partsAr: EXPLORE_SUBCATEGORY_ORDER[slug].map((sub) => subcategoryLabel(sub, 'ar')),
-})) as ReadonlyArray<{
-  slug: ExploreCategorySlug;
+export type BusinessPartnerCategoryRow = {
+  slug: string;
   en: string;
   ar: string;
-  icon: ReturnType<typeof mainCategoryIcon>;
+  icon: ReturnType<typeof backendIconToOutline>;
   partsEn: string[];
   partsAr: string[];
-}>;
+};
 
-export type BusinessPartnerCategorySlug = (typeof BUSINESS_PARTNER_CATEGORIES)[number]['slug'];
+export function businessPartnerCategoriesFromCatalog(
+  categories: Category[],
+  subsByParent: Record<string, LocalizedSubcategory[]>,
+): BusinessPartnerCategoryRow[] {
+  return categories.map((c) => {
+    const subs = subsByParent[c.id] ?? [];
+    return {
+      slug: c.slug,
+      en: c.labelEn,
+      ar: c.labelAr,
+      icon: backendIconToOutline(c.icon),
+      partsEn: subs.map((s) => s.name),
+      partsAr: subs.map((s) => s.nameAr),
+    };
+  });
+}
 
-export function partnerCategoryRowForStored(stored: string) {
+export function partnerCategoryRowForStored(
+  stored: string,
+  categories: Category[],
+): BusinessPartnerCategoryRow | undefined {
   const t = stored.trim();
-  return BUSINESS_PARTNER_CATEGORIES.find((c) => c.en === t);
+  const fromCatalog = businessPartnerCategoriesFromCatalog(categories, {});
+  return fromCatalog.find((c) => c.en === t || c.slug === t);
 }

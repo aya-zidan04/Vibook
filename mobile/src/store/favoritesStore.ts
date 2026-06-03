@@ -26,32 +26,26 @@ export const useFavoritesStore = create<FavoritesState>()(
       toggleFavorite: async (type, refId) => {
         const key = ratingKey(type, refId);
         const was = !!get().keys[key];
-        const numericEvent = type === 'event' && /^\d+$/.test(refId) && getTokensSync()?.accessToken;
-        if (numericEvent) {
-          const eventId = Number(refId);
-          try {
-            if (was) {
-              await removeFavorite(eventId);
-            } else {
-              await addFavorite(eventId);
-            }
-            set((s) => {
-              const k = { ...s.keys };
-              if (was) delete k[key];
-              else k[key] = true;
-              return { keys: k };
-            });
-          } catch {
-            /* leave state unchanged */
-          }
+        const numericEvent = type === 'event' && /^\d+$/.test(refId);
+        if (!numericEvent || !getTokensSync()?.accessToken) {
           return;
         }
-        set((s) => {
-          const k = { ...s.keys };
-          if (was) delete k[key];
-          else k[key] = true;
-          return { keys: k };
-        });
+        const eventId = Number(refId);
+        try {
+          if (was) {
+            await removeFavorite(eventId);
+          } else {
+            await addFavorite(eventId);
+          }
+          set((s) => {
+            const k = { ...s.keys };
+            if (was) delete k[key];
+            else k[key] = true;
+            return { keys: k };
+          });
+        } catch {
+          /* leave state unchanged */
+        }
       },
       hasFavorite: (type, refId) => !!get().keys[ratingKey(type, refId)],
       listEntries: () =>

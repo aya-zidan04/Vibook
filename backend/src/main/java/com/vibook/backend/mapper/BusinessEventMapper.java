@@ -1,6 +1,7 @@
 package com.vibook.backend.mapper;
 
 import com.vibook.backend.dto.AdminEventRowResponse;
+import com.vibook.backend.dto.BusinessEventPhotoResponse;
 import com.vibook.backend.dto.BusinessEventResponse;
 import com.vibook.backend.dto.BusinessEventSummaryResponse;
 import com.vibook.backend.entity.BusinessEvent;
@@ -43,6 +44,11 @@ public class BusinessEventMapper {
             entity.getAverageRating(),
             entity.getReviewCount(),
             entity.getPhotos().stream().map(BusinessEventPhoto::getImageUrl).toList(),
+            entity
+                .getPhotos()
+                .stream()
+                .map(p -> new BusinessEventPhotoResponse(p.getId(), p.getImageUrl(), p.getSortOrder()))
+                .toList(),
             entity.getCreatedAt(),
             entity.getUpdatedAt(),
             myRating,

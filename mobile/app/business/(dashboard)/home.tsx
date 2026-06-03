@@ -131,18 +131,6 @@ export default function BusinessDashboardHomeScreen() {
         meta: b.createdAt.slice(0, 10),
       });
     });
-    rows.push({
-      id: 'mock-1',
-      icon: 'bulb-outline',
-      title: t('businessHub.dashActivityMock1'),
-      meta: '—',
-    });
-    rows.push({
-      id: 'mock-2',
-      icon: 'color-wand-outline',
-      title: t('businessHub.dashActivityMock2'),
-      meta: '—',
-    });
     return rows.slice(0, 4);
   }, [bookings, t]);
 

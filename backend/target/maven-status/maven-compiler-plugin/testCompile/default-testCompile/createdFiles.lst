@@ -1,3 +1,7 @@
-com/vibook/backend/VibookApplicationTests.class
 com/vibook/backend/service/PayPalPaymentServiceImplTest.class
 com/vibook/backend/entity/RoleNameTest.class
+com/vibook/backend/service/impl/JwtServiceImplTest.class
+com/vibook/backend/service/impl/BusinessEventPhotoServiceImplTest.class
+com/vibook/backend/VibookApplicationTests.class
+com/vibook/backend/service/impl/BusinessUserRoleServiceImplTest.class
+com/vibook/backend/service/impl/AdminBusinessProfileServiceImplRoleTest.class

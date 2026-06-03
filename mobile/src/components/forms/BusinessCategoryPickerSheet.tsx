@@ -3,15 +3,20 @@ import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/ui/AppText';
-import { BUSINESS_PARTNER_CATEGORIES } from '@/constants/businessPartnerCategories';
+import {
+  businessPartnerCategoriesFromCatalog,
+  type BusinessPartnerCategoryRow,
+} from '@/constants/businessPartnerCategories';
+import { useCatalogSubcategories } from '@/hooks/useCatalogSubcategories';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useReferenceStore } from '@/store/referenceStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 type Props = {
   visible: boolean;
   onClose: () => void;
-  /** Matches `BUSINESS_PARTNER_CATEGORIES[].en` of the current selection. */
+  /** Canonical English category name from the API. */
   selectedEn: string;
   onSelect: (en: string) => void;
   title: string;
@@ -21,6 +26,12 @@ export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSe
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { locale } = useTranslation();
+  const categories = useReferenceStore((s) => s.categories);
+  const subsByParent = useCatalogSubcategories(categories);
+  const rows = useMemo(
+    () => businessPartnerCategoriesFromCatalog(categories, subsByParent),
+    [categories, subsByParent],
+  );
   const styles = useMemo(
     () => createStyles(colors, insets.bottom),
     [colors, insets.bottom],
@@ -39,57 +50,84 @@ export function BusinessCategoryPickerSheet({ visible, onClose, selectedEn, onSe
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {BUSINESS_PARTNER_CATEGORIES.map((c) => {
-              const selected = selectedEn === c.en;
-              const label = locale === 'ar' ? c.ar : c.en;
-              const partsLabel = (locale === 'ar' ? c.partsAr : c.partsEn).join(' · ');
-              return (
-                <Pressable
+            {rows.length === 0 ? (
+              <AppText variant="body" color="textMuted" style={styles.empty}>
+                —
+              </AppText>
+            ) : (
+              rows.map((c) => (
+                <CategoryOption
                   key={c.slug}
-                  onPress={() => {
+                  row={c}
+                  locale={locale}
+                  selected={selectedEn === c.en}
+                  onSelect={() => {
                     onSelect(c.en);
                     onClose();
                   }}
-                  style={({ pressed }) => [
-                    styles.option,
-                    selected && styles.optionSelected,
-                    pressed && styles.optionPressed,
-                  ]}
-                >
-                  <View style={styles.optionIconWrap}>
-                    <Ionicons
-                      name={c.icon}
-                      size={19}
-                      color={selected ? colors.primary : colors.textSecondary}
-                    />
-                  </View>
-                  <AppText
-                    variant="body-em"
-                    color="text"
-                    style={[styles.optionLabel, selected && styles.optionLabelSelected]}
-                  >
-                    {label}
-                  </AppText>
-                  <AppText
-                    variant="label"
-                    color="textMuted"
-                    style={styles.optionParts}
-                    numberOfLines={1}
-                  >
-                    {partsLabel}
-                  </AppText>
-                  {selected ? (
-                    <Ionicons name="checkmark-circle" size={22} color={colors.primaryLight} />
-                  ) : (
-                    <View style={styles.radioOuter} />
-                  )}
-                </Pressable>
-              );
-            })}
+                  styles={styles}
+                  colors={colors}
+                />
+              ))
+            )}
           </ScrollView>
         </View>
       </View>
     </Modal>
+  );
+}
+
+function CategoryOption({
+  row: c,
+  locale,
+  selected,
+  onSelect,
+  styles,
+  colors,
+}: {
+  row: BusinessPartnerCategoryRow;
+  locale: 'en' | 'ar';
+  selected: boolean;
+  onSelect: () => void;
+  styles: ReturnType<typeof createStyles>;
+  colors: ThemeColors;
+}) {
+  const label = locale === 'ar' ? c.ar : c.en;
+  const partsLabel = (locale === 'ar' ? c.partsAr : c.partsEn).join(' · ');
+  return (
+    <Pressable
+      onPress={onSelect}
+      style={({ pressed }) => [
+        styles.option,
+        selected && styles.optionSelected,
+        pressed && styles.optionPressed,
+      ]}
+    >
+      <View style={styles.optionIconWrap}>
+        <Ionicons
+          name={c.icon}
+          size={19}
+          color={selected ? colors.primary : colors.textSecondary}
+        />
+      </View>
+      <AppText
+        variant="body-em"
+        color="text"
+        style={[styles.optionLabel, selected && styles.optionLabelSelected]}
+      >
+        {label}
+      </AppText>
+      {partsLabel ? (
+        <AppText variant="label" color="textMuted" style={styles.optionParts} numberOfLines={1}>
+          {partsLabel}
+        </AppText>
+      ) : null}
+      {selected ? (
+        <Ionicons name="checkmark-circle" size={22} color={colors.primaryLight} />
+      ) : (
+        <View style={styles.radioOuter} />
+      )}
+    </Pressable>
   );
 }
 
@@ -119,6 +157,10 @@ function createStyles(colors: ThemeColors, sheetBottomInset: number) {
     },
     sheetList: {
       flexGrow: 0,
+    },
+    empty: {
+      paddingVertical: spacing.lg,
+      textAlign: 'center',
     },
     option: {
       flexDirection: 'row',

@@ -30,6 +30,13 @@ public class ProfileImageStorageServiceImpl implements ProfileImageStorageServic
         "image/gif"
     );
 
+    private static final Set<String> EVENT_PHOTO_CONTENT_TYPES = Set.of(
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp"
+    );
+
     private static final Map<String, String> EXTENSION_BY_TYPE = Map.of(
         "image/jpeg", ".jpg",
         "image/jpg", ".jpg",
@@ -55,6 +62,8 @@ public class ProfileImageStorageServiceImpl implements ProfileImageStorageServic
     private final StorageRoot profileRoot;
     private final StorageRoot businessLogoRoot;
     private final StorageRoot businessBannerRoot;
+    private final StorageRoot businessEventPhotoRoot;
+    private final long maxImageBytes;
 
     public ProfileImageStorageServiceImpl(
         @Value("${app.upload.profile-images-dir:uploads/profile-images}") String profileDir,
@@ -62,15 +71,23 @@ public class ProfileImageStorageServiceImpl implements ProfileImageStorageServic
         @Value("${app.upload.business-logos-dir:uploads/business-logos}") String businessLogoDir,
         @Value("${app.upload.public-business-logo-path:/api/v1/files/business-logos}") String businessLogoPublic,
         @Value("${app.upload.business-banners-dir:uploads/business-banners}") String businessBannerDir,
-        @Value("${app.upload.public-business-banner-path:/api/v1/files/business-banners}") String businessBannerPublic
+        @Value("${app.upload.public-business-banner-path:/api/v1/files/business-banners}") String businessBannerPublic,
+        @Value("${app.upload.business-events-dir:uploads/business-events}") String businessEventDir,
+        @Value("${app.upload.public-business-event-path:/api/v1/files/business-events}") String businessEventPublic,
+        @Value("${app.upload.max-image-bytes:5242880}") long maxImageBytes
     ) {
+        this.maxImageBytes = maxImageBytes;
         this.profileRoot = new StorageRoot(Path.of(profileDir).toAbsolutePath().normalize(), profilePublic);
         this.businessLogoRoot = new StorageRoot(Path.of(businessLogoDir).toAbsolutePath().normalize(), businessLogoPublic);
         this.businessBannerRoot = new StorageRoot(
             Path.of(businessBannerDir).toAbsolutePath().normalize(),
             businessBannerPublic
         );
-        this.allRoots = List.of(profileRoot, businessLogoRoot, businessBannerRoot);
+        this.businessEventPhotoRoot = new StorageRoot(
+            Path.of(businessEventDir).toAbsolutePath().normalize(),
+            businessEventPublic
+        );
+        this.allRoots = List.of(profileRoot, businessLogoRoot, businessBannerRoot, businessEventPhotoRoot);
     }
 
     @PostConstruct
@@ -82,34 +99,50 @@ public class ProfileImageStorageServiceImpl implements ProfileImageStorageServic
 
     @Override
     public String saveProfileImage(MultipartFile file) {
-        return save(file, profileRoot);
+        return save(file, profileRoot, ALLOWED_CONTENT_TYPES);
     }
 
     @Override
     public String saveBusinessLogo(MultipartFile file) {
-        return save(file, businessLogoRoot);
+        return save(file, businessLogoRoot, ALLOWED_CONTENT_TYPES);
     }
 
     @Override
     public String saveBusinessBanner(MultipartFile file) {
-        return save(file, businessBannerRoot);
+        return save(file, businessBannerRoot, ALLOWED_CONTENT_TYPES);
     }
 
-    private String save(MultipartFile file, StorageRoot root) {
+    @Override
+    public String saveBusinessEventPhoto(MultipartFile file) {
+        return save(file, businessEventPhotoRoot, EVENT_PHOTO_CONTENT_TYPES);
+    }
+
+    private String save(MultipartFile file, StorageRoot root, Set<String> allowedTypes) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Image file is required");
+        }
+        if (file.getSize() > maxImageBytes) {
+            throw new BadRequestException("Image file is too large");
         }
         String contentType = file.getContentType();
         if (!StringUtils.hasText(contentType)) {
             throw new BadRequestException("Image must have a content type");
         }
         String normalizedType = contentType.toLowerCase(Locale.ROOT).split(";")[0].trim();
-        if (!ALLOWED_CONTENT_TYPES.contains(normalizedType)) {
-            throw new BadRequestException("Only JPEG, PNG, WebP, or GIF images are allowed");
+        if (!allowedTypes.contains(normalizedType)) {
+            throw new BadRequestException(
+                allowedTypes == EVENT_PHOTO_CONTENT_TYPES
+                    ? "Only JPEG, PNG, or WebP images are allowed"
+                    : "Only JPEG, PNG, WebP, or GIF images are allowed"
+            );
         }
         String extension = EXTENSION_BY_TYPE.get(normalizedType);
         if (extension == null) {
-            throw new BadRequestException("Only JPEG, PNG, WebP, or GIF images are allowed");
+            throw new BadRequestException(
+                allowedTypes == EVENT_PHOTO_CONTENT_TYPES
+                    ? "Only JPEG, PNG, or WebP images are allowed"
+                    : "Only JPEG, PNG, WebP, or GIF images are allowed"
+            );
         }
         String storedName = UUID.randomUUID() + extension;
         Path target = root.directory.resolve(storedName).normalize();

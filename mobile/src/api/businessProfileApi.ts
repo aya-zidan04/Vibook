@@ -1,4 +1,5 @@
 import { apiFetch, ApiError } from '@/api/http';
+import { apiUploadMultipart } from '@/api/multipartUpload';
 import type { BusinessProfileResponseDto, BusinessProfileUpsertPayload } from '@/api/types';
 
 /**
@@ -29,4 +30,20 @@ export async function submitMyBusinessProfileForReview(): Promise<BusinessProfil
   return apiFetch<BusinessProfileResponseDto>('/business-profile/me/submit', {
     method: 'PATCH',
   });
+}
+
+export async function uploadMyBusinessLogo(localUri: string): Promise<BusinessProfileResponseDto> {
+  return apiUploadMultipart<BusinessProfileResponseDto>('/business-profile/me/logo', 'image', localUri);
+}
+
+export async function uploadMyBusinessBanner(localUri: string): Promise<BusinessProfileResponseDto> {
+  return apiUploadMultipart<BusinessProfileResponseDto>('/business-profile/me/banner', 'image', localUri);
+}
+
+export async function deleteMyBusinessLogo(): Promise<BusinessProfileResponseDto> {
+  return apiFetch<BusinessProfileResponseDto>('/business-profile/me/logo', { method: 'DELETE' });
+}
+
+export async function deleteMyBusinessBanner(): Promise<BusinessProfileResponseDto> {
+  return apiFetch<BusinessProfileResponseDto>('/business-profile/me/banner', { method: 'DELETE' });
 }

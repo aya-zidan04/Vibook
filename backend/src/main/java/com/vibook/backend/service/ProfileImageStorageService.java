@@ -23,6 +23,12 @@ public interface ProfileImageStorageService {
     String saveBusinessBanner(MultipartFile file);
 
     /**
+     * Saves under the business event photos directory; returns e.g. {@code /api/v1/files/business-events/...}.
+     * Accepts JPEG, PNG, and WebP only.
+     */
+    String saveBusinessEventPhoto(MultipartFile file);
+
+    /**
      * Deletes the file previously saved under this public path, if it matches a known storage root.
      */
     void tryDeleteStoredFile(String publicPath);

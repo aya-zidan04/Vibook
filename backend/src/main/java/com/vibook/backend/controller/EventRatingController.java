@@ -51,8 +51,9 @@ public class EventRatingController {
         @RequestParam(required = false, defaultValue = "false") boolean includeHidden,
         @PageableDefault(size = 20) Pageable pageable
     ) {
-        requirePrincipal(principal);
-        boolean admin = principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(RoleName.ROLE_ADMIN.name()));
+        boolean admin =
+            principal != null
+                && principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(RoleName.ROLE_ADMIN.name()));
         boolean includeHiddenSafe = includeHidden && admin;
         return ResponseEntity.ok(
             consumerEventService.searchEvents(
@@ -75,7 +76,9 @@ public class EventRatingController {
         @AuthenticationPrincipal AuthenticatedUser principal,
         @PathVariable Long eventId
     ) {
-        requirePrincipal(principal);
+        if (principal == null) {
+            return ResponseEntity.ok(eventRatingService.getEventForPublic(eventId));
+        }
         return ResponseEntity.ok(eventRatingService.getEventForViewer(eventId, principal.getUsername()));
     }
 

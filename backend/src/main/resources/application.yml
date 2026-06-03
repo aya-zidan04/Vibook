@@ -2,7 +2,7 @@ server:
   port: 8080
 
 spring:
-  # Load secrets from backend/.env when present (file is gitignored; never commit it).
+  # Load backend/.env when present (gitignored). Run Spring Boot with working directory = backend/.
   config:
     import: optional:file:.env[.properties]
   servlet:
@@ -69,6 +69,10 @@ app:
     public-business-logo-path: /api/v1/files/business-logos
     business-banners-dir: uploads/business-banners
     public-business-banner-path: /api/v1/files/business-banners
+    business-events-dir: uploads/business-events
+    public-business-event-path: /api/v1/files/business-events
+    max-image-bytes: 5242880
   jwt:
-    secret: ${JWT_SECRET:bXktc3VwZXItc2VjcmV0LWtleS1mb3Itdmlib29rLWp3dC1zaWduaW5nLXRva2Vucy0xMjM0NTY3ODkw}
+    # Plain text by default (min 32 chars). Optional: base64:<encoded-key>
+    secret: ${JWT_SECRET:vibook-dev-jwt-secret-change-in-production-min32}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}

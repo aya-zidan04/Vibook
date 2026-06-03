@@ -729,6 +729,8 @@ export const translations = {
       subtitle: 'Auth shell — Phase 2 wires forms & tokens here.',
     },
     entry: {
+      title: 'Because great moments',
+      subtitle: 'deserve better planning',
       tagline: 'Because great moments deserve better planning',
       loginSignup: 'Log in / Sign up',
       browseFirst: 'Browse first',
@@ -1566,6 +1568,8 @@ export const translations = {
       subtitle: 'هيكل تسجيل — المرحلة 2 تربط النماذج والرموز هنا.',
     },
     entry: {
+      title: 'لأن اللحظات العظيمة',
+      subtitle: 'تستحق تخطيطاً أفضل',
       tagline: 'لأن اللحظات العظيمة تستحق تخطيطاً أفضل',
       loginSignup: 'تسجيل الدخول / إنشاء حساب',
       browseFirst: 'تصفح أولاً',

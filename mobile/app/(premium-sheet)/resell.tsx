@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { AppText } from '@/components/ui/AppText';
 import { PremiumScreen } from '@/components/sheet/PremiumScreen';
-import { useMockUser } from '@/hooks/useMockUser';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { canAccessResell } from '@/utils/premiumAccess';
@@ -17,7 +17,7 @@ export default function ResellScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
-  const { user } = useMockUser();
+  const { user } = useCurrentUser();
   const hasResellAccess = isAuthenticated && canAccessResell(user);
 
   let emptyProps: {

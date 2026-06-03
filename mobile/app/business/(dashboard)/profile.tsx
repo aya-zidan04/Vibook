@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -30,6 +31,19 @@ import { AppText } from '@/components/ui/AppText';
 import { HeroAmbientOverlay } from '@/components/ui/HeroAmbientOverlay';
 import { PrimaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { listCategories } from '@/api/categoriesApi';
+import {
+  deleteMyBusinessBanner,
+  deleteMyBusinessLogo,
+  fetchMyBusinessProfile,
+  uploadMyBusinessBanner,
+  uploadMyBusinessLogo,
+  upsertMyBusinessProfile,
+} from '@/api/businessProfileApi';
+import { listActiveGovernorates } from '@/api/governoratesApi';
+import { mapApiError } from '@/utils/mapApiError';
+import { hubProfilePatchFromApiDto } from '@/utils/businessHubMappers';
+import { resolveGovernorateId } from '@/utils/resolveGovernorateId';
 import { useBusinessHubStore } from '@/store/businessHubStore';
 import { useLocaleStore } from '@/store/localeStore';
 import { createShadows, fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
@@ -53,6 +67,7 @@ export default function BusinessProfileScreen() {
   const locale = useLocaleStore((s) => s.locale);
   const profile = useBusinessHubStore((s) => s.profile);
   const updateProfile = useBusinessHubStore((s) => s.updateProfile);
+  const syncBusinessApprovalFromApi = useBusinessHubStore((s) => s.syncBusinessApprovalFromApi);
 
   const [displayName, setDisplayName] = useState(profile.displayName);
   const [tagline, setTagline] = useState(profile.tagline);
@@ -68,6 +83,25 @@ export default function BusinessProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [descFocused, setDescFocused] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      void (async () => {
+        try {
+          const dto = await fetchMyBusinessProfile();
+          if (!active || !dto) return;
+          syncBusinessApprovalFromApi(dto);
+          updateProfile(hubProfilePatchFromApiDto(dto));
+        } catch {
+          /* no profile yet */
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [syncBusinessApprovalFromApi, updateProfile]),
+  );
 
   useEffect(() => {
     setDisplayName(profile.displayName);
@@ -171,22 +205,47 @@ export default function BusinessProfileScreen() {
   const save = async () => {
     if (saving) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 480));
-    updateProfile({
-      displayName: displayName.trim(),
-      tagline: tagline.trim(),
-      description: description.trim(),
-      category: category.trim(),
-      email: email.trim(),
-      phone: normalizePhoneForApi(phoneLocal),
-      governorateSlug,
-      mapsUrl: mapsUrl.trim(),
-      website: website.trim(),
-      coverImageUri: coverImageUri.trim(),
-      logoUri: logoUri.trim(),
-    });
-    setSaving(false);
-    setToast(t('businessHub.profileSaved'));
+    try {
+      const [categories, governorates] = await Promise.all([listCategories(), listActiveGovernorates()]);
+      const primaryCategoryId = categories.find((c) => c.name === category.trim())?.id;
+      const governorateId = resolveGovernorateId(governorates, governorateSlug);
+      if (primaryCategoryId == null || governorateId == null) {
+        Alert.alert(t('common.error'), t('businessJoin.errLists'));
+        return;
+      }
+
+      let dto = await upsertMyBusinessProfile({
+        businessName: displayName.trim().slice(0, 150),
+        tagline: tagline.trim() || null,
+        primaryCategoryId,
+        description: description.trim(),
+        workEmail: email.trim(),
+        phone: normalizePhoneForApi(phoneLocal),
+        governorateId,
+        googleMapsUrl: mapsUrl.trim() || null,
+        website: website.trim() || null,
+      });
+
+      if (logoUri.trim().startsWith('file:')) {
+        dto = await uploadMyBusinessLogo(logoUri.trim());
+      } else if (!logoUri.trim() && dto.logoImageUrl) {
+        dto = await deleteMyBusinessLogo();
+      }
+
+      if (coverImageUri.trim().startsWith('file:')) {
+        dto = await uploadMyBusinessBanner(coverImageUri.trim());
+      } else if (!coverImageUri.trim() && dto.bannerImageUrl) {
+        dto = await deleteMyBusinessBanner();
+      }
+
+      syncBusinessApprovalFromApi(dto);
+      updateProfile(hubProfilePatchFromApiDto(dto));
+      setToast(t('businessHub.profileSaved'));
+    } catch (e) {
+      Alert.alert(t('common.error'), mapApiError(e, t));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const fieldProps = {

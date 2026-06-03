@@ -8,7 +8,5 @@ public interface CategoryService {
 
     List<CategoryResponse> listActiveCategories();
 
-    CategoryResponse getActiveCategoryBySlug(String slug);
-
     List<SubcategoryResponse> listActiveSubcategoriesByCategoryId(Long categoryId);
 }

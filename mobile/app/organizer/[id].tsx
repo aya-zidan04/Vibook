@@ -15,7 +15,8 @@ import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { formatDecimalForLocale, formatIntForLocale } from '@/utils/format';
 import { useOrganizerPdp } from '@/hooks/useCatalogPdp';
-import { getCityName } from '@/services/mock';
+import { localizedCityLabel } from '@/utils/governorateLabels';
+import { useReferenceStore } from '@/store/referenceStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -26,6 +27,7 @@ export default function OrganizerScreen() {
   const router = useRouter();
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
+  const cities = useReferenceStore((s) => s.cities);
   const { organizer: org, events, loading } = useOrganizerPdp(id);
 
   if (loading) {
@@ -100,7 +102,7 @@ export default function OrganizerScreen() {
                   {e.title}
                 </AppText>
                 <AppText variant="caption" color="textMuted">
-                  {[e.venueName, getCityName(e.cityId, locale)].filter(Boolean).join(' · ')}
+                  {[e.venueName, localizedCityLabel(e.cityId, locale, cities)].filter(Boolean).join(' · ')}
                 </AppText>
                 <AppText variant="h3" color="primaryLight">
                   {t('common.from')} {formatMoney(e.priceFrom, e.currency)}

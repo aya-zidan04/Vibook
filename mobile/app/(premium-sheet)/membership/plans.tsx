@@ -7,8 +7,8 @@ import { PremiumScreen } from '@/components/sheet/PremiumScreen';
 import { createPremiumSheetStyles } from '@/components/sheet/premiumSheetStyles';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useMockUser } from '@/hooks/useMockUser';
-import { PREMIUM_PLAN } from '@/services/mock';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { PREMIUM_PLAN } from '@/constants/premiumPlan';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -19,7 +19,7 @@ export default function MembershipPlansScreen() {
   const { t } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const [yearly, setYearly] = useState(false);
-  const { user } = useMockUser();
+  const { user } = useCurrentUser();
 
   const price = yearly ? PREMIUM_PLAN.priceYearly : PREMIUM_PLAN.priceMonthly;
   const period = yearly ? `/ ${t('membership.billingYearly')}` : `/ ${t('membership.billingMonthly')}`;

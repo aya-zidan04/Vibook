@@ -17,6 +17,7 @@ import com.vibook.backend.exception.ForbiddenException;
 import com.vibook.backend.exception.NotFoundException;
 import com.vibook.backend.exception.UnauthorizedException;
 import com.vibook.backend.mapper.BusinessEventMapper;
+import com.vibook.backend.repository.BusinessEventPhotoRepository;
 import com.vibook.backend.repository.BusinessEventRepository;
 import com.vibook.backend.repository.BusinessProfileRepository;
 import com.vibook.backend.repository.GovernorateRepository;
@@ -25,9 +26,12 @@ import com.vibook.backend.repository.UserRepository;
 import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.BusinessEventService;
 import com.vibook.backend.service.EventRatingService;
+import com.vibook.backend.service.ProfileImageStorageService;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -38,29 +42,35 @@ import org.springframework.util.StringUtils;
 public class BusinessEventServiceImpl implements BusinessEventService {
 
     private final BusinessEventRepository businessEventRepository;
+    private final BusinessEventPhotoRepository businessEventPhotoRepository;
     private final BusinessProfileRepository businessProfileRepository;
     private final SubcategoryRepository subcategoryRepository;
     private final GovernorateRepository governorateRepository;
     private final UserRepository userRepository;
     private final BusinessEventMapper businessEventMapper;
     private final EventRatingService eventRatingService;
+    private final ProfileImageStorageService profileImageStorageService;
 
     public BusinessEventServiceImpl(
         BusinessEventRepository businessEventRepository,
+        BusinessEventPhotoRepository businessEventPhotoRepository,
         BusinessProfileRepository businessProfileRepository,
         SubcategoryRepository subcategoryRepository,
         GovernorateRepository governorateRepository,
         UserRepository userRepository,
         BusinessEventMapper businessEventMapper,
-        EventRatingService eventRatingService
+        EventRatingService eventRatingService,
+        ProfileImageStorageService profileImageStorageService
     ) {
         this.businessEventRepository = businessEventRepository;
+        this.businessEventPhotoRepository = businessEventPhotoRepository;
         this.businessProfileRepository = businessProfileRepository;
         this.subcategoryRepository = subcategoryRepository;
         this.governorateRepository = governorateRepository;
         this.userRepository = userRepository;
         this.businessEventMapper = businessEventMapper;
         this.eventRatingService = eventRatingService;
+        this.profileImageStorageService = profileImageStorageService;
     }
 
     @Override
@@ -179,6 +189,37 @@ public class BusinessEventServiceImpl implements BusinessEventService {
         return eventRatingService.attachViewerRatingFields(detailed, getCurrentAuthenticatedUser().getEmail());
     }
 
+    @Override
+    @Transactional
+    public BusinessEventResponse uploadPhoto(Long eventId, MultipartFile image) {
+        BusinessEvent event = requireEventForAccess(eventId);
+        String publicPath = profileImageStorageService.saveBusinessEventPhoto(image);
+        int nextOrder =
+            event.getPhotos().stream().map(BusinessEventPhoto::getSortOrder).max(Comparator.naturalOrder()).orElse(-1) + 1;
+        BusinessEventPhoto photo = new BusinessEventPhoto();
+        photo.setBusinessEvent(event);
+        photo.setImageUrl(publicPath);
+        photo.setSortOrder(nextOrder);
+        event.getPhotos().add(photo);
+        businessEventRepository.save(event);
+        BusinessEvent detailed = businessEventRepository.findWithDetailsById(eventId).orElse(event);
+        return eventRatingService.attachViewerRatingFields(detailed, getCurrentAuthenticatedUser().getEmail());
+    }
+
+    @Override
+    @Transactional
+    public BusinessEventResponse deletePhoto(Long eventId, Long photoId) {
+        BusinessEvent event = requireEventForAccess(eventId);
+        BusinessEventPhoto photo = businessEventPhotoRepository
+            .findByIdAndBusinessEvent_Id(photoId, eventId)
+            .orElseThrow(() -> new NotFoundException("Event photo not found"));
+        profileImageStorageService.tryDeleteStoredFile(photo.getImageUrl());
+        event.getPhotos().remove(photo);
+        businessEventRepository.save(event);
+        BusinessEvent detailed = businessEventRepository.findWithDetailsById(eventId).orElse(event);
+        return eventRatingService.attachViewerRatingFields(detailed, getCurrentAuthenticatedUser().getEmail());
+    }
+
     private BusinessEvent requireEventForAccess(Long id) {
         User user = getCurrentAuthenticatedUser();
         BusinessEvent event = businessEventRepository
@@ -237,9 +278,13 @@ public class BusinessEventServiceImpl implements BusinessEventService {
             if (!StringUtils.hasText(raw)) {
                 continue;
             }
+            String trimmed = raw.trim();
+            if (trimmed.startsWith("file:")) {
+                continue;
+            }
             BusinessEventPhoto photo = new BusinessEventPhoto();
             photo.setBusinessEvent(event);
-            photo.setImageUrl(raw.trim());
+            photo.setImageUrl(trimmed);
             photo.setSortOrder(order++);
             event.getPhotos().add(photo);
         }

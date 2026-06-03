@@ -12,6 +12,7 @@ import type {
   PartnerApplicationPayload,
 } from '@/types/businessHub';
 import { migrateBusinessProfile } from '@/utils/migrateBusinessProfile';
+import { hubProfilePatchFromApiDto } from '@/utils/businessHubMappers';
 
 function emptyProfile(): BusinessProfile {
   return {
@@ -107,16 +108,18 @@ export const useBusinessHubStore = create<State>()(
             return { applicationStatus: 'none', rejectedReason: '' };
           }
           const reason = profile.rejectionReason?.trim() ?? '';
+          const profilePatch = hubProfilePatchFromApiDto(profile);
+          const base = { profile: { ...s.profile, ...profilePatch }, rejectedReason: reason };
           switch (profile.status) {
             case 'APPROVED':
-              return { applicationStatus: 'approved', rejectedReason: '' };
+              return { ...base, applicationStatus: 'approved' as const };
             case 'PENDING_REVIEW':
-              return { applicationStatus: 'pending', rejectedReason: '' };
+              return { ...base, applicationStatus: 'pending' as const };
             case 'REJECTED':
-              return { applicationStatus: 'rejected', rejectedReason: reason };
+              return { ...base, applicationStatus: 'rejected' as const };
             case 'DRAFT':
             default:
-              return { applicationStatus: 'none', rejectedReason: '' };
+              return { ...base, applicationStatus: 'none' as const };
           }
         }),
 

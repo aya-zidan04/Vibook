@@ -10,5 +10,8 @@ public interface EventRatingService {
 
     BusinessEventResponse getEventForViewer(Long eventId, String userEmail);
 
+    /** Visible non-hidden events for anonymous browsers (no personal rating fields). */
+    BusinessEventResponse getEventForPublic(Long eventId);
+
     BusinessEventResponse attachViewerRatingFields(BusinessEvent event, String userEmail);
 }

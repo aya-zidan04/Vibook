@@ -3,6 +3,7 @@ import type {
   BookingStatusApi,
   BusinessEventResponse,
   BusinessEventSummaryResponse,
+  BusinessProfileResponseDto,
 } from '@/api/types';
 import { JORDAN_GOVERNORATES, type JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { backendGovernorateNameToSlug } from '@/utils/governorateLabels';
@@ -11,6 +12,7 @@ import type {
   BusinessBookingRecord,
   BusinessBookingStatus,
   BusinessEventRecord,
+  BusinessProfile,
   BusinessTicketOption,
 } from '@/types/businessHub';
 
@@ -20,7 +22,9 @@ const BACKEND_TO_MOBILE_GOV: Record<string, string> = {
 
 export function governorateNameToSlug(name: string | null | undefined): JordanGovernorateSlug {
   const slug = backendGovernorateNameToSlug(name);
-  if (slug) return slug;
+  if (slug && JORDAN_GOVERNORATES.some((g) => g.slug === slug)) {
+    return slug as JordanGovernorateSlug;
+  }
   const n = (name ?? '').trim();
   if (!n) return 'amman';
   const mapped = BACKEND_TO_MOBILE_GOV[n] ?? n;
@@ -28,24 +32,36 @@ export function governorateNameToSlug(name: string | null | undefined): JordanGo
   return row?.slug ?? 'amman';
 }
 
-/** Only server-storable URLs (paths or absolute). Skips `file://` local picks. */
-export function photoUrlsForApi(imageUris: string[]): string[] {
-  const out: string[] = [];
-  for (const raw of imageUris) {
-    const u = raw.trim();
-    if (!u || u.startsWith('file:')) continue;
-    if (u.startsWith('http://') || u.startsWith('https://')) {
-      out.push(u);
-      continue;
-    }
-    out.push(u);
+export type EventEditorPhoto = { uri: string; photoId?: number };
+
+export function editorPhotosFromApiResponse(r: BusinessEventResponse): EventEditorPhoto[] {
+  if (r.photos?.length) {
+    return r.photos.map((p) => ({
+      uri: resolveBackendMediaUrl(p.url) ?? p.url,
+      photoId: p.id,
+    }));
   }
-  return out;
+  return (r.photoUrls ?? []).map((url) => ({
+    uri: resolveBackendMediaUrl(url) ?? url,
+  }));
 }
 
-export function displayPhotoUrisFromResponse(photoUrls: string[] | null | undefined): string[] {
-  if (!photoUrls?.length) return [];
-  return photoUrls.map((p) => resolveBackendMediaUrl(p) ?? p).filter(Boolean);
+export function splitEditorPhotos(photos: EventEditorPhoto[]): {
+  serverUrls: string[];
+  localUris: string[];
+} {
+  const serverUrls: string[] = [];
+  const localUris: string[] = [];
+  for (const p of photos) {
+    const u = p.uri.trim();
+    if (!u) continue;
+    if (u.startsWith('file:')) {
+      localUris.push(u);
+    } else {
+      serverUrls.push(u);
+    }
+  }
+  return { serverUrls, localUris };
 }
 
 export function businessEventSummaryToRecord(row: BusinessEventSummaryResponse): BusinessEventRecord {
@@ -101,7 +117,9 @@ export function businessEventResponseToRecord(r: BusinessEventResponse): Busines
     ticketOptions,
     currency: r.currency || 'JOD',
     capacityGuests: r.capacityGuests,
-    images: (r.photoUrls ?? []).map((p) => resolveBackendMediaUrl(p) ?? p).join('\n'),
+    images: editorPhotosFromApiResponse(r)
+      .map((p) => p.uri)
+      .join('\n'),
     listingId: null,
     hidden: r.hidden,
   };
@@ -150,6 +168,22 @@ export function localBookingStatusToApi(s: BusinessBookingStatus): BookingStatus
 }
 
 /** Next status when partner taps a booking card (allowed by API). */
+export function hubProfilePatchFromApiDto(dto: BusinessProfileResponseDto): Partial<BusinessProfile> {
+  return {
+    displayName: dto.businessName ?? '',
+    tagline: dto.tagline ?? '',
+    description: dto.description ?? '',
+    category: dto.primaryCategoryName ?? '',
+    email: dto.workEmail ?? '',
+    phone: dto.phone ?? '',
+    governorateSlug: governorateNameToSlug(dto.governorateName),
+    mapsUrl: dto.googleMapsUrl ?? '',
+    website: dto.website ?? '',
+    coverImageUri: resolveBackendMediaUrl(dto.bannerImageUrl) ?? '',
+    logoUri: resolveBackendMediaUrl(dto.logoImageUrl) ?? '',
+  };
+}
+
 export function nextPartnerBookingStatus(current: BookingStatusApi): BookingStatusApi | null {
   switch (current) {
     case 'PENDING':

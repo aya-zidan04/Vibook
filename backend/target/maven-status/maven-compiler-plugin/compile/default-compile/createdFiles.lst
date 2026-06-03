@@ -49,6 +49,7 @@ com/vibook/backend/controller/AdminUserReportController.class
 com/vibook/backend/dto/AdminActivityLogResponse.class
 com/vibook/backend/repository/BusinessEventRepository.class
 com/vibook/backend/dto/ErrorResponse.class
+com/vibook/backend/repository/BusinessEventPhotoRepository.class
 com/vibook/backend/service/impl/BookingServiceImpl.class
 com/vibook/backend/dto/BookingCreateRequest.class
 com/vibook/backend/entity/Subcategory.class
@@ -59,7 +60,6 @@ com/vibook/backend/security/RestAuthenticationEntryPoint.class
 com/vibook/backend/dto/BookingResponse.class
 com/vibook/backend/dto/BusinessEventResponse.class
 com/vibook/backend/dto/AddPaymentMethodRequest.class
-com/vibook/backend/controller/AdminDashboardController.class
 com/vibook/backend/service/impl/PaymentMethodServiceImpl.class
 com/vibook/backend/controller/AdminCategoryController.class
 com/vibook/backend/config/RatingDemoDataConfigurer.class
@@ -77,11 +77,11 @@ com/vibook/backend/service/AdminUserReportService.class
 com/vibook/backend/dto/CategoryUpdateRequest.class
 com/vibook/backend/repository/BookingRepository.class
 com/vibook/backend/service/impl/ConsumerEventServiceImpl.class
+com/vibook/backend/service/BusinessUserRoleService.class
 com/vibook/backend/dto/AdminBookingCancelRequest.class
 com/vibook/backend/controller/BusinessEventController.class
 com/vibook/backend/config/CorsProperties.class
 com/vibook/backend/exception/ResourceNotFoundException.class
-com/vibook/backend/dto/AdminDashboardStatsResponse.class
 com/vibook/backend/mapper/GovernorateMapper.class
 com/vibook/backend/paypal/PayPalApiClient.class
 com/vibook/backend/dto/UserReportCreatedResponse.class
@@ -114,6 +114,7 @@ com/vibook/backend/repository/CategoryRepository.class
 com/vibook/backend/controller/GovernorateController.class
 com/vibook/backend/config/CategoryDataLoader.class
 com/vibook/backend/dto/BulkBusinessProfileRejectRequest.class
+com/vibook/backend/dto/BusinessEventPhotoResponse.class
 com/vibook/backend/entity/UserReport.class
 com/vibook/backend/exception/GlobalExceptionHandler.class
 com/vibook/backend/entity/BusinessProfile.class
@@ -131,6 +132,7 @@ com/vibook/backend/entity/ModerationReportStatus.class
 com/vibook/backend/mapper/UserMapper.class
 com/vibook/backend/dto/AdminReportResolveRequest.class
 com/vibook/backend/dto/CategoryCreateRequest.class
+com/vibook/backend/service/impl/BusinessUserRoleServiceImpl.class
 com/vibook/backend/dto/PayPalCreateOrderRequest.class
 com/vibook/backend/dto/PayPalCaptureOrderResponse.class
 com/vibook/backend/controller/UserController.class
@@ -228,7 +230,5 @@ com/vibook/backend/service/impl/ProfileImageStorageServiceImpl$StorageRoot.class
 com/vibook/backend/dto/RefreshTokenRequest.class
 com/vibook/backend/controller/AdminGovernorateStatsController.class
 com/vibook/backend/service/EventRatingService.class
-com/vibook/backend/service/AdminDashboardService.class
 com/vibook/backend/repository/AdminActivityLogRepository.class
-com/vibook/backend/service/impl/AdminDashboardServiceImpl.class
 com/vibook/backend/service/impl/AdminEventRatingModerationServiceImpl.class

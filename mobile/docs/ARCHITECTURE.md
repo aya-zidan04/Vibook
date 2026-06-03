@@ -1,6 +1,12 @@
 # Vibook — Product & Frontend Architecture
 
-Production-oriented structure for a WeBook-style discovery and booking app (Expo + Expo Router). **No backend** in scope; models are mock/API-ready.
+Production-oriented structure for a WeBook-style discovery and booking app (Expo + Expo Router), integrated with the Vibook backend API.
+
+## Vibook product scope
+
+- **In scope:** Events, taxonomy, bookings, favorites, auth, business partner hub — API-backed.
+- **Presentation-only (not missing APIs):** Premium membership UI, wallet, vouchers; legacy PDP routes (`restaurant/`, `stay/`, `experience/`, `package/`, `organizer/`).
+- **Do not** list those areas as pending backend verticals in gap reports.
 
 ---
 

@@ -1,4 +1,4 @@
-/** Mock Premium subscription — prices illustrative; UI uses `useFormatMoney`. */
+/** Premium UI copy and illustrative pricing until billing API exists. */
 export type PremiumPlan = {
   priceMonthly: number;
   priceYearly: number;

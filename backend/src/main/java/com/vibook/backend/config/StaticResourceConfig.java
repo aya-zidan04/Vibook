@@ -15,6 +15,8 @@ public class StaticResourceConfig implements WebMvcConfigurer {
     private final String businessLogoPublicPath;
     private final String businessBannerUploadDir;
     private final String businessBannerPublicPath;
+    private final String businessEventUploadDir;
+    private final String businessEventPublicPath;
 
     public StaticResourceConfig(
         @Value("${app.upload.profile-images-dir:uploads/profile-images}") String profileUploadDir,
@@ -22,7 +24,9 @@ public class StaticResourceConfig implements WebMvcConfigurer {
         @Value("${app.upload.business-logos-dir:uploads/business-logos}") String businessLogoUploadDir,
         @Value("${app.upload.public-business-logo-path:/api/v1/files/business-logos}") String businessLogoPublicPath,
         @Value("${app.upload.business-banners-dir:uploads/business-banners}") String businessBannerUploadDir,
-        @Value("${app.upload.public-business-banner-path:/api/v1/files/business-banners}") String businessBannerPublicPath
+        @Value("${app.upload.public-business-banner-path:/api/v1/files/business-banners}") String businessBannerPublicPath,
+        @Value("${app.upload.business-events-dir:uploads/business-events}") String businessEventUploadDir,
+        @Value("${app.upload.public-business-event-path:/api/v1/files/business-events}") String businessEventPublicPath
     ) {
         this.profileUploadDir = profileUploadDir;
         this.profilePublicPath = profilePublicPath;
@@ -30,6 +34,8 @@ public class StaticResourceConfig implements WebMvcConfigurer {
         this.businessLogoPublicPath = businessLogoPublicPath;
         this.businessBannerUploadDir = businessBannerUploadDir;
         this.businessBannerPublicPath = businessBannerPublicPath;
+        this.businessEventUploadDir = businessEventUploadDir;
+        this.businessEventPublicPath = businessEventPublicPath;
     }
 
     @Override
@@ -37,6 +43,7 @@ public class StaticResourceConfig implements WebMvcConfigurer {
         registerMappedDirectory(registry, profileUploadDir, profilePublicPath);
         registerMappedDirectory(registry, businessLogoUploadDir, businessLogoPublicPath);
         registerMappedDirectory(registry, businessBannerUploadDir, businessBannerPublicPath);
+        registerMappedDirectory(registry, businessEventUploadDir, businessEventPublicPath);
     }
 
     private static void registerMappedDirectory(ResourceHandlerRegistry registry, String uploadDir, String publicPath) {

@@ -4,18 +4,20 @@ Unified Vibook typography across **mobile** (`mobile/src/theme/typography.ts`) a
 
 ## Scale (single source of truth)
 
-| Token | Size | Weight | Line height |
-|--------|------|--------|-------------|
-| display | 32px | 800 | 40 |
-| h1 | 26px | 700 | 32 |
-| h2 | 20px | 700 | 26 |
-| h3 | 17px | 600 | 24 |
-| body-lg | 16px | 400 | 24 |
-| body | 15px | 400 | 22 |
-| body-em | 15px | 600 | 22 |
-| caption | 13px | 400 | 18 |
-| label | 12px | 600 | 16 |
-| overline | 12px | 600 | 16 |
+
+| Token    | Size | Weight | Line height |
+| -------- | ---- | ------ | ----------- |
+| display  | 32px | 800    | 40          |
+| h1       | 26px | 700    | 32          |
+| h2       | 20px | 700    | 26          |
+| h3       | 17px | 600    | 24          |
+| body-lg  | 16px | 400    | 24          |
+| body     | 15px | 400    | 22          |
+| body-em  | 15px | 600    | 22          |
+| caption  | 13px | 400    | 18          |
+| label    | 12px | 600    | 16          |
+| overline | 12px | 600    | 16          |
+
 
 ## Files changed
 
@@ -57,45 +59,51 @@ Unified Vibook typography across **mobile** (`mobile/src/theme/typography.ts`) a
 
 ## Removed duplicates / legacy names
 
-| Removed / aliased | Maps to |
-|-------------------|---------|
-| `bodyMedium` (variant) | `body-em` |
-| `meta` (variant) | `label` |
-| `price` (variant) | `h3` |
-| Inline `fontSize` on `AppText` screens | typography tokens |
-| Admin scattered `0.65–0.9375rem` | `--vb-text-label` / `caption` / `body` |
+
+| Removed / aliased                            | Maps to                                          |
+| -------------------------------------------- | ------------------------------------------------ |
+| `bodyMedium` (variant)                       | `body-em`                                        |
+| `meta` (variant)                             | `label`                                          |
+| `price` (variant)                            | `h3`                                             |
+| Inline `fontSize` on `AppText` screens       | typography tokens                                |
+| Admin scattered `0.65–0.9375rem`             | `--vb-text-label` / `caption` / `body`           |
 | `pageTitleAr`, `cardTitleEn/Ar` style splits | `textAlignStart()` + per-card `writingDirection` |
+
 
 ## Old values → new values
 
-| Location | Before | After |
-|----------|--------|-------|
-| Entry hero | 32px raw | `display` |
-| Language page title | 28px | `h1` (26px) |
-| Explore wordmark | 20px raw | `h2` |
-| Language/currency cards | 17px / 14px | `h3` / `caption` (13px) |
-| Hero eyebrows (explore) | 11px | `overline` (12px) |
-| Tab bar labels | 11px | `label` (12px/600) + DM Sans/Tajawal |
-| Badges (plans) | 10px | `label` (12px) |
-| Business tab bar | 10px | `label` |
-| Stat hints (home) | 10px (unused style) | removed |
-| Text inputs | 16px ad hoc | `body-lg` via `inputTextStyle()` |
-| Profile hero name input | 26px ad hoc | `h1` via `inputTextStyle(locale, 'h1')` |
-| Signup terms | 14px | `caption` (13px) |
-| Admin micro copy | 0.65–0.6875rem (~10–11px) | `--vb-text-label` (12px) |
-| Admin body copy | 0.875rem (14px) | `--vb-text-body` (15px) |
-| Fonts EN | system default | DM Sans |
-| Fonts AR | system default | Tajawal (600 → 700 file) |
+
+| Location                | Before                    | After                                   |
+| ----------------------- | ------------------------- | --------------------------------------- |
+| Entry hero              | 32px raw                  | `display`                               |
+| Language page title     | 28px                      | `h1` (26px)                             |
+| Explore wordmark        | 20px raw                  | `h2`                                    |
+| Language/currency cards | 17px / 14px               | `h3` / `caption` (13px)                 |
+| Hero eyebrows (explore) | 11px                      | `overline` (12px)                       |
+| Tab bar labels          | 11px                      | `label` (12px/600) + DM Sans/Tajawal    |
+| Badges (plans)          | 10px                      | `label` (12px)                          |
+| Business tab bar        | 10px                      | `label`                                 |
+| Stat hints (home)       | 10px (unused style)       | removed                                 |
+| Text inputs             | 16px ad hoc               | `body-lg` via `inputTextStyle()`        |
+| Profile hero name input | 26px ad hoc               | `h1` via `inputTextStyle(locale, 'h1')` |
+| Signup terms            | 14px                      | `caption` (13px)                        |
+| Admin micro copy        | 0.65–0.6875rem (~10–11px) | `--vb-text-label` (12px)                |
+| Admin body copy         | 0.875rem (14px)           | `--vb-text-body` (15px)                 |
+| Fonts EN                | system default            | DM Sans                                 |
+| Fonts AR                | system default            | Tajawal (600 → 700 file)                |
+
 
 ## Remaining inconsistencies (intentional or follow-up)
 
 1. **Tab bar `tabBarLabelStyle`** — still sets `fontSize: 12` / `lineHeight: 16` in StyleSheet (matches `label` token; React Navigation cannot use `AppText`). Font family is locale-aware.
 2. **Phone number fields** — `textAlign: 'left'` + `writingDirection: 'ltr'` on signup/edit-profile (keeps +962 numerals LTR in Arabic UI).
 3. **Admin responsive headings** — `clamp(1.65rem, …)` left as-is for marketing hero blocks (not in the fixed scale table).
-4. **`AppText` does not set `textAlign`** — callers use `textAlignStart(isRTL)` or `center` where needed; global RTL layout still mirrors containers.
+4. `**AppText` does not set `textAlign`** — callers use `textAlignStart(isRTL)` or `center` where needed; global RTL layout still mirrors containers.
 5. **Form field labels** — some `AppText` captions add `fontWeight: '600'` in style (redundant with token; harmless).
 6. **Arabic semibold** — weight `600` uses `Tajawal_700Bold` (no 600 font file in `@expo-google-fonts/tajawal`).
 
 ## Verification
 
 - `cd mobile && npx tsc --noEmit` — passes.
+- 
+

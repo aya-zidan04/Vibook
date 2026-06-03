@@ -11,6 +11,8 @@ import com.vibook.backend.entity.User;
 import com.vibook.backend.exception.BadRequestException;
 import com.vibook.backend.exception.NotFoundException;
 import com.vibook.backend.mapper.UserMapper;
+import com.vibook.backend.entity.BusinessProfileStatus;
+import com.vibook.backend.repository.BusinessProfileRepository;
 import com.vibook.backend.repository.RoleRepository;
 import com.vibook.backend.repository.UserRepository;
 import com.vibook.backend.security.AuthenticatedUser;
@@ -32,6 +34,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final BusinessProfileRepository businessProfileRepository;
     private final UserMapper userMapper;
     private final AdminActivityLogService adminActivityLogService;
     private final ObjectMapper objectMapper;
@@ -39,12 +42,14 @@ public class AdminUserServiceImpl implements AdminUserService {
     public AdminUserServiceImpl(
         UserRepository userRepository,
         RoleRepository roleRepository,
+        BusinessProfileRepository businessProfileRepository,
         UserMapper userMapper,
         AdminActivityLogService adminActivityLogService,
         ObjectMapper objectMapper
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.businessProfileRepository = businessProfileRepository;
         this.userMapper = userMapper;
         this.adminActivityLogService = adminActivityLogService;
         this.objectMapper = objectMapper;
@@ -61,6 +66,17 @@ public class AdminUserServiceImpl implements AdminUserService {
             throw new BadRequestException("ROLE_USER must be included");
         }
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        if (request.roles().contains(RoleName.ROLE_BUSINESS)) {
+            boolean approved = businessProfileRepository
+                .findByUser(user)
+                .map(p -> p.getStatus() == BusinessProfileStatus.APPROVED)
+                .orElse(false);
+            if (!approved) {
+                throw new BadRequestException(
+                    "ROLE_BUSINESS can only be assigned after the user's business profile is approved"
+                );
+            }
+        }
         Set<RoleName> before = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         user.getRoles().clear();
         for (RoleName name : request.roles()) {

@@ -60,10 +60,7 @@ export type BusinessEventRecord = {
   governorateSlug: JordanGovernorateSlug;
   /** Google Maps place or share link. */
   mapsUrl: string;
-  /**
-   * Ticket types for this event (one or many). Persisted with the hub; legacy storage with only `priceJod`
-   * is upgraded in {@link migrateBusinessEventRecord}.
-   */
+  /** Ticket types for this event (one or many). */
   ticketOptions: BusinessTicketOption[];
   currency: string;
   /** Max guests / capacity for business use only (not shown on public PDP). */

@@ -62,6 +62,8 @@ export function routeTitle(pathname: string): string {
   return tPath(routeKey(pathname), locale);
 }
 
+const ROLE_DISPLAY_ORDER: RoleName[] = ['ROLE_USER', 'ROLE_BUSINESS', 'ROLE_ADMIN'];
+
 export function formatRoles(roles: RoleName[] | undefined): string {
   const locale = getAdminLocale();
   const dash = locale === 'ar' ? '—' : '—';
@@ -72,5 +74,7 @@ export function formatRoles(roles: RoleName[] | undefined): string {
     if (role === 'ROLE_USER') return tPath('users.roleUser', locale);
     return String(role).replace('ROLE_', '').toLowerCase();
   };
-  return roles.map(label).join(', ');
+  return ROLE_DISPLAY_ORDER.filter((r) => roles.includes(r))
+    .map(label)
+    .join(', ');
 }

@@ -32,7 +32,7 @@
 | File | Change |
 |------|--------|
 | `src/api/http.ts` | Internal `ApiError` fallback uses `http_${status}` instead of `'Request failed'` |
-| `src/utils/apiError.ts` | Re-exports `mapApiError`; `formatApiErrorMessage` delegates to `mapApiErrorForLocale` |
+| `src/utils/apiError.ts` | Re-exports `mapApiError` / `mapApiErrorForLocale` |
 | `src/store/referenceStore.ts` | Removed hardcoded `'Failed to load reference data'`; catalog warning uses i18n in UI |
 | `src/hooks/useEventSearch.ts` | Stores `unknown` error object (not raw message string) |
 
@@ -79,7 +79,7 @@ Note: `common.error`, `common.errorDefaultTitle`, and `common.errorDefaultMessag
 | Issue | Location | Notes |
 |-------|----------|-------|
 | Report reason API payload | `ReportIssueModal.tsx` | UI labels are translated via `report.reasons.*`, but the value sent to the API is still English (`REASON_VALUES`). Admin sees English reason text. |
-| Mock / demo content | `src/mock/*` | Event titles, descriptions, organizer names remain English-only when mock data is shown. |
+| Taxonomy Arabic labels | API `name` only | Categories/governorates use backend `name` for both EN/AR until optional `nameAr` fields exist. |
 | Business partner category constants | `src/constants/businessPartnerCategories.ts` | English labels used as API fallback before taxonomy merge. |
 | Date/number formatting | Various | Uses `en-US` locale in some formatters regardless of app locale. |
 | Admin web | `admin-web/` | Separate i18n pass; not in scope for this mobile quick-wins batch. |
@@ -96,7 +96,7 @@ Note: `common.error`, `common.errorDefaultTitle`, and `common.errorDefaultMessag
 | Business event copy | Business Hub CRUD | None |
 | User-generated text | Bookings, reports, reviews | None |
 | Governorate `name` field | `/governorates/active` | Client maps to `governorateLabels` / taxonomy for display |
-| Category `name` field | `/categories` | Client maps to `exploreCategoryTaxonomy` for display |
+| Category `name` field | `/categories` | API `name` used for EN/AR until optional `nameAr` exists |
 | API error `message` / `fieldErrors` | All endpoints | **Suppressed in mobile UI** via `mapApiError`; granular field-level messages not shown |
 | Email / push notifications | Backend (if any) | Out of mobile app scope |
 

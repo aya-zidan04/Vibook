@@ -31,7 +31,7 @@ function toQuery(p: EventSearchParams): string {
 }
 
 export async function searchEvents(params: EventSearchParams = {}): Promise<PageResponse<BusinessEventSummaryResponse>> {
-  return apiFetch<PageResponse<BusinessEventSummaryResponse>>(`/events${toQuery(params)}`);
+  return apiFetch<PageResponse<BusinessEventSummaryResponse>>(`/events${toQuery(params)}`, { auth: false });
 }
 
 export async function getEventById(eventId: number): Promise<BusinessEventResponse> {

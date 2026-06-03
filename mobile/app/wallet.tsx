@@ -5,7 +5,8 @@ import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useMockUser } from '@/hooks/useMockUser';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAppStore } from '@/store/appStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -14,7 +15,9 @@ export default function WalletScreen() {
   const { formatMoney } = useFormatMoney();
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { user } = useMockUser();
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const { user } = useCurrentUser();
+  const balance = isAuthenticated ? user.walletBalance : 0;
 
   return (
     <Screen scroll contentStyle={styles.pad} header={<DetailHeader title={t('wallet.title')} />}>
@@ -23,7 +26,7 @@ export default function WalletScreen() {
           {t('wallet.balance')}
         </AppText>
         <AppText variant="display" color="text">
-          {formatMoney(user.walletBalance, displayCurrency)}
+          {formatMoney(balance, displayCurrency)}
         </AppText>
       </View>
       <AppText variant="body" color="textSecondary">

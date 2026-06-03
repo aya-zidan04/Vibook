@@ -3,7 +3,6 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { listSubcategories } from '@/api/categoriesApi';
 import { searchEvents } from '@/api/eventsApi';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
@@ -18,13 +17,9 @@ import {
 } from '@/components/explore';
 import { useTranslation } from '@/i18n/useTranslation';
 import type { CatalogRouter } from '@/services/catalog/mapCatalog';
-import { isExploreMainCategorySlug } from '@/constants/exploreCategoryTaxonomy';
-import { buildMockExploreCategories } from '@/mock/categories';
-import type { ExploreMainCategory, ExploreSubcategory } from '@/mock/exploreCategories';
-import {
-  fallbackSubcategoriesForParent,
-  subcategoriesFromApi,
-} from '@/utils/categoryLabels';
+import type { ExploreMainCategory, ExploreSubcategory } from '@/types/exploreCategories';
+import { useCatalogSubcategories } from '@/hooks/useCatalogSubcategories';
+import { backendIconToOutline } from '@/services/reference/mapReference';
 import { businessEventSummaryToEventItem } from '@/services/api/eventMap';
 import { useAppStore } from '@/store/appStore';
 import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
@@ -107,13 +102,7 @@ export default function ExploreScreen() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const cities = useReferenceStore((s) => s.cities);
 
-  const [subsByParent, setSubsByParent] = useState<Record<string, ExploreSubcategory[]>>(() => {
-    const seed: Record<string, ExploreSubcategory[]> = {};
-    for (const c of buildMockExploreCategories()) {
-      seed[c.id] = c.subcategories;
-    }
-    return seed;
-  });
+  const subsByParentRaw = useCatalogSubcategories(categories);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
   const [apiEvents, setApiEvents] = useState<EventItem[]>([]);
@@ -123,73 +112,27 @@ export default function ExploreScreen() {
     if (refStatus === 'idle') void loadReferenceData();
   }, [refStatus]);
 
-  useEffect(() => {
-    if (categories.length === 0) return;
-
-    const toExploreSub = (
-      rows: ReturnType<typeof fallbackSubcategoriesForParent>,
-    ): ExploreSubcategory[] =>
-      rows.map(({ id, parentId, name, nameAr }) => ({ id, parentId, name, nameAr }));
-
-    const seedFromTaxonomy = () => {
-      const next: Record<string, ExploreSubcategory[]> = {};
-      for (const c of categories) {
-        if (!isExploreMainCategorySlug(c.slug)) continue;
-        next[c.id] = toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
-      }
-      setSubsByParent(next);
-    };
-
-    seedFromTaxonomy();
-
-    let cancelled = false;
-    void (async () => {
-      const next: Record<string, ExploreSubcategory[]> = {};
-      for (const c of categories) {
-        if (!isExploreMainCategorySlug(c.slug)) continue;
-        const categoryIdNum = Number(c.id);
-        if (!Number.isFinite(categoryIdNum)) {
-          next[c.id] = toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
-          continue;
-        }
-        try {
-          const subs = await listSubcategories(categoryIdNum);
-          if (cancelled) return;
-          const fromApi = subcategoriesFromApi(c.id, c.slug, subs);
-          next[c.id] =
-            fromApi.length > 0
-              ? toExploreSub(fromApi)
-              : toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
-        } catch {
-          next[c.id] = toExploreSub(fallbackSubcategoriesForParent(c.id, c.slug));
-        }
-      }
-      if (!cancelled) setSubsByParent(next);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [categories]);
+  const subsByParent = useMemo(() => {
+    const next: Record<string, ExploreSubcategory[]> = {};
+    for (const c of categories) {
+      next[c.id] = (subsByParentRaw[c.id] ?? []).map(({ id, parentId, name, nameAr }) => ({
+        id,
+        parentId,
+        name,
+        nameAr,
+      }));
+    }
+    return next;
+  }, [categories, subsByParentRaw]);
 
   const exploreCategories = useMemo<ExploreMainCategory[]>(() => {
-    const source =
-      categories.length > 0 ? categories : buildMockExploreCategories().map((c) => ({
-        id: c.id,
-        slug: c.id,
-        labelEn: c.name,
-        labelAr: c.nameAr,
-        icon: c.icon,
-      }));
-    return source
-      .filter((c) => isExploreMainCategorySlug(c.slug))
-      .map((c) => ({
-        id: c.id,
-        name: c.labelEn,
-        nameAr: c.labelAr,
-        icon: (c.icon as keyof typeof Ionicons.glyphMap) || 'grid-outline',
-        subcategories: subsByParent[c.id] ?? [],
-      }));
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.labelEn,
+      nameAr: c.labelAr,
+      icon: backendIconToOutline(c.icon),
+      subcategories: subsByParent[c.id] ?? [],
+    }));
   }, [categories, subsByParent]);
 
   useEffect(() => {
@@ -201,11 +144,6 @@ export default function ExploreScreen() {
   }, [exploreCategories, selectedCategoryId]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setApiEvents([]);
-      setLoadingFeed(false);
-      return;
-    }
     let cancelled = false;
     setLoadingFeed(true);
     void (async () => {
@@ -231,7 +169,7 @@ export default function ExploreScreen() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, selectedCityId, selectedCategoryId, selectedSubcategoryId]);
+  }, [selectedCityId, selectedCategoryId, selectedSubcategoryId]);
 
   const heroSlides: HeroSlideItem[] = useMemo(() => {
     return apiEvents.slice(0, 4).map((e, i) => ({
@@ -261,7 +199,8 @@ export default function ExploreScreen() {
     ? selectedSubcategories.find((sub) => sub.id === selectedSubcategoryId)
     : undefined;
 
-  const showCatalogWarning = refStatus === 'error' || (refStatus === 'ready' && !catalogFromApi);
+  const showCatalogError = refStatus === 'error';
+  const showCatalogWarning = refStatus === 'ready' && !catalogFromApi;
   const cityLabelForCard = (cityId: string) => localizedCityLabel(cityId, locale, cities);
 
   return (
@@ -331,7 +270,18 @@ export default function ExploreScreen() {
             <AppText variant="h2" color="text">
               {t('explore.categoriesTitle')}
             </AppText>
-            {showCatalogWarning ? (
+            {showCatalogError ? (
+              <View style={styles.catalogError}>
+                <AppText variant="caption" color="textMuted" style={styles.catalogWarn}>
+                  {t('common.error')}
+                </AppText>
+                <PrimaryButton
+                  title={t('common.retry')}
+                  onPress={() => void loadReferenceData()}
+                  style={styles.catalogRetry}
+                />
+              </View>
+            ) : showCatalogWarning ? (
               <AppText variant="caption" color="textMuted" style={styles.catalogWarn}>
                 {t('explore.catalogFallbackHint')}
               </AppText>
@@ -423,6 +373,13 @@ function createStyles(colors: ThemeColors) {
     catalogWarn: {
       lineHeight: 18,
       marginTop: 2,
+    },
+    catalogError: {
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    catalogRetry: {
+      alignSelf: 'flex-start',
     },
     horizontalPad: { paddingHorizontal: spacing.screen },
     guestBanner: {

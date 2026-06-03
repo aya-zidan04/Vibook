@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 /**
- * Client-only profile overrides (mock phase). Replace with API-backed user later.
+ * Temporary profile overrides until PUT /users completes (API is source of truth).
  */
 export type UserProfileOverrides = {
   firstName?: string;

@@ -26,6 +26,7 @@ public record BusinessEventResponse(
     double averageRating,
     int reviewCount,
     List<String> photoUrls,
+    List<BusinessEventPhotoResponse> photos,
     Instant createdAt,
     Instant updatedAt,
     /** Viewer's saved stars; null if this user has not rated yet. */

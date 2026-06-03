@@ -1,8 +1,12 @@
 # Vibook — Mobile app
 
-Expo + React Native frontend for **Vibook**, a lifestyle booking experience (events, dining, stays, and more).
+Expo + React Native frontend for **Vibook** — an **events marketplace** in Jordan (discover, book, partner onboarding).
 
-This repository build is **mock-only**: there is no backend or HTTP API. All catalog and account data ships with the app.
+**API-backed:** events, categories, subcategories, governorates, bookings, favorites, ratings, auth, and business partner flows.
+
+**Presentation-only (no backend expected):** Premium membership screens, wallet, vouchers, and legacy PDP routes (`restaurant/`, `stay/`, `experience/`, `package/`, `organizer/`) kept for UI/navigation — not separate product verticals.
+
+Configure `EXPO_PUBLIC_API_URL` in `.env` (see `.env.example`).
 
 ## Tech stack
 
@@ -26,6 +30,8 @@ npx expo start
 
 Then press `i` (iOS simulator), `a` (Android), or scan the QR code with **Expo Go**.
 
+Start the backend first (default `http://localhost:8080/api/v1`). Copy `.env.example` to `.env` and set your API URL.
+
 If **port 8081 is busy**:
 
 ```bash
@@ -34,11 +40,11 @@ npm run start:8085
 
 ## App entry & tabs
 
-1. **`/` (`app/index.tsx`)** — Splash; loads mock reference data (cities/categories).
+1. **`/` (`app/index.tsx`)** — Splash; loads reference data (governorates/categories) from the API.
 2. **Onboarding / entry** — First launch flow; persisted via Zustand + AsyncStorage.
 3. **Tabs (`app/(tabs)/`)** — Explore, Booking, Favorites, Me.
 
-Additional stacks: wallet, vouchers, membership, notifications, PDP routes, checkout, business join, etc.
+Additional stacks: Premium (static UI), wallet/vouchers (static UI), checkout, business join, legacy PDP routes, etc.
 
 ## Project layout
 
@@ -48,8 +54,8 @@ mobile/
 ├── src/
 │   ├── components/
 │   ├── theme/
-│   ├── mock/            # Bundled catalog & fixtures
-│   ├── services/       # catalog mappers, favorites helpers, profile merge
+│   ├── api/             # HTTP clients
+│   ├── services/        # catalog mappers, favorites helpers, profile merge
 │   ├── store/
 │   ├── hooks/
 │   └── utils/
@@ -58,14 +64,8 @@ mobile/
 └── package.json
 ```
 
-## Scripts
+## Typecheck
 
-| Script | Description |
-|--------|-------------|
-| `npm start` / `npx expo start` | Expo dev server (Metro) |
-| `npm run start:8085` | Metro on port 8085 |
-| `npm run lint` | `tsc --noEmit` |
-
-## License / product
-
-Student / graduation project — standalone demo build.
+```bash
+npm run typecheck
+```

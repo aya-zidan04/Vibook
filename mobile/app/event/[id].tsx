@@ -40,7 +40,7 @@ export default function EventDetailScreen() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const cities = useReferenceStore((s) => s.cities);
 
-  const { event, tiers, loading, apiDetail, refetchApiDetail } = useEventPdp(id);
+  const { event, tiers, loading, error, apiDetail, refetchApiDetail } = useEventPdp(id);
   const organizer = useOrganizerForEvent(event);
 
   const cityDisplay = useMemo(() => {
@@ -88,6 +88,21 @@ export default function EventDetailScreen() {
             {t('common.loading')}
           </AppText>
         </View>
+      </Screen>
+    );
+  }
+
+  if (error) {
+    return (
+      <Screen header={<DetailHeader title={t('explore.event')} />}>
+        <AppText variant="body" color="textSecondary">
+          {t('common.error')}
+        </AppText>
+        <PrimaryButton
+          title={t('common.retry')}
+          onPress={refetchApiDetail}
+          style={{ marginTop: spacing.lg }}
+        />
       </Screen>
     );
   }
