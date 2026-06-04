@@ -14,7 +14,7 @@ type AppState = {
   setSelectedCityId: (id: string) => void;
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (v: boolean) => void;
-  /** True after a successful sign-in (mock). */
+  /** True after a successful sign-in. */
   isAuthenticated: boolean;
   setAuthenticated: (v: boolean) => void;
   isGuest: boolean;

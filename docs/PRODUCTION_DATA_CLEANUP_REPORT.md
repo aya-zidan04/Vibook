@@ -1,7 +1,7 @@
 # Production data cleanup report
 
-**Date:** 2026-06-03  
-**Scope:** Remove runtime mock/demo catalog fallbacks from mobile; keep admin-web API-driven.
+**Date:** 2026-06-04 (final pass)  
+**Scope:** Remove runtime mock/demo/test data from mobile and admin-web; filter smoke accounts from admin user list; remove demo rating seeder.
 
 ---
 
@@ -22,71 +22,92 @@ Vibook is an **events marketplace** in Jordan (discover, book, rate, report, par
 | **Organizer standalone profile** | Legacy route; not a standalone organizer product |
 | **Notifications** | Static UI; no push/inbox backend in scope |
 
-Do **not** track the above as missing backend features in gap lists.
-
 ---
 
-## Removed mock/fallback files and imports
+## Removed (prior + this pass)
 
 | Removed | Notes |
 |---------|--------|
-| `mobile/src/mock/` (entire directory) | `MOCK_EVENTS`, `MOCK_CATEGORIES`, `MOCK_CITIES`, `MOCK_BOOKINGS`, etc. |
-| `mobile/src/services/mock/` | Re-export barrel |
-| `mobile/src/config/mockCatalog.ts` | `EXPO_PUBLIC_USE_MOCK_CATALOG` |
-| `mobile/src/hooks/useMockUser.ts` | Replaced by `useCurrentUser` |
+| `mobile/src/mock/` (entire directory) | Prior pass |
+| `mobile/src/services/mock/` | Prior pass |
+| `mobile/src/config/mockCatalog.ts` | Prior pass |
+| `mobile/src/hooks/useMockUser.ts` | Prior pass |
+| `RatingDemoDataConfigurer.java` | Auto demo CONFIRMED booking for rating tests |
+| `backend/src/main/resources/db/demo-rating-data.sql` | Manual demo rating SQL |
+| `vibook.demo.rating-data` in `application.yml` | Property removed |
+| Simulated card checkout (`payment.tsx` 4242 flow) | PayPal-only for API event bookings |
+| Mock/demo i18n strings (EN + AR) | Checkout, payment, confirmation, favorites, help, auth stubs, etc. |
 
-## New / refactored modules
+## Added / updated (this pass)
 
-| Module | Role |
-|--------|------|
-| `mobile/src/hooks/useCurrentUser.ts` | Session user from API + temporary overrides |
-| `mobile/src/types/exploreCategories.ts` | Explore strip types |
-| `mobile/src/constants/premiumPlan.ts` | Premium **UI** copy/pricing display only |
-| `mobile/src/hooks/useBusinessEventCategoryGroups.ts` | Business event category picker from API |
+| File | Change |
+|------|--------|
+| `backend/.../util/TestAccountPredicate.java` | Filters smoke/test/demo emails from admin list |
+| `backend/.../util/TestAccountPredicateTest.java` | Unit tests |
+| `backend/.../service/impl/UserServiceImpl.java` | `getAllUsers()` excludes test accounts |
+| `mobile/app/payment.tsx` | PayPal only; unavailable state otherwise |
+| `mobile/app/(auth)/login.tsx` | Reset password “coming soon” alert |
+| `mobile/app/(auth)/signup.tsx` | Renamed terms keys |
+| `mobile/app/(tabs)/favorites.tsx` | `hintNote` style (was `mockNote`) |
+| `mobile/app/(premium-sheet)/membership/plans.tsx` | `comingSoon*` keys |
+| `mobile/app/(premium-sheet)/add-payment-method.tsx` | `addCardNote` |
+| `mobile/src/i18n/dictionary.ts` | Production copy EN + AR |
+| Comment-only: `appStore.ts`, `types/index.ts`, `useFormatMoney.ts`, `currencyDisplay.ts`, `premiumAccess.ts`, `businessEventTickets.ts` | Removed misleading “mock” comments |
 
 ## Screens / flows — API-backed (in-scope)
 
 | Area | Behavior |
 |------|----------|
 | Explore | Governorates, categories, subcategories, events from API; empty/error/retry |
-| Search / Filters | Events via API; taxonomy from reference store |
-| Event PDP | `GET /events/{id}` (numeric ids); error + retry |
-| Favorites | `GET /favorites` |
-| Bookings tab & detail | `GET /bookings/me`, cancel via API |
-| Profile / Me / Edit profile | `useCurrentUser` → session / `GET /users/me` |
-| Business profile & events | `business-profile` + `business/events` APIs |
-| Governorate / category pickers | `/governorates/active`, `/categories` |
+| Search / Filters | Events via API |
+| Event PDP | `GET /events/{id}` |
+| Favorites | `GET /favorites` when signed in; empty state when none |
+| Bookings | `GET /bookings/me`, cancel via API |
+| Payment | PayPal Sandbox for event bookings with `apiEventId`; disabled otherwise |
+| Profile / Me / Business | Live APIs |
+| Admin Users | `fetchAllUsers()` — test accounts hidden in list only |
 
-## Presentation-only routes (out of scope)
+## Backend seeders retained
 
-| Route | Behavior after cleanup |
-|-------|-------------------------|
-| `restaurant/`, `stay/`, `experience/`, `package/`, `organizer/` | No catalog API — shows not-found; routes kept for navigation/deep links |
-| `wallet`, `vouchers`, `membership/*`, `resell` | UI remains; no backend billing/wallet/voucher APIs expected |
+`CategorySeederConfig`, `GovernorateSeederConfig`, `RoleSeederConfig` (and admin bootstrap if present) — **not** removed.
 
 ---
 
-## Remaining gaps (in-scope only)
-
-| Item | Priority | Notes |
-|------|----------|--------|
-| **Optional `nameAr` on taxonomy** | Nice-to-have | Categories, subcategories, governorates return single `name`; mobile mirrors English for AR until API adds fields |
-| **Password reset** | Product decision | Login UI stub; implement only if accounts team requires it |
-| **Production hardening** | Ops | JWT secrets, `ddl-auto`, CORS, migrations — see `docs/API_AUDIT_REPORT.md` |
-| **Real bugs in implemented flows** | As found | Track in issues/PRs; none filed from cleanup pass |
-
-**Resolved since earlier audits (no longer gaps):** guest `GET /events`, mock catalog removal, profile/business image uploads, business event photo multipart, `ROLE_BUSINESS` on approval, `useCurrentUser`, reference store without mock fallbacks.
-
-Backend seeders (`CategorySeederConfig`, `GovernorateSeederConfig`, `RoleSeederConfig`) were **not** removed.
-
----
-
-## Verification
+## Verification (2026-06-04)
 
 ```bash
 cd mobile && npm run typecheck
 cd admin-web && npm run lint && npm run build
-cd backend && ./mvnw test
+cd backend && ./mvnw -q test
 ```
 
-All passed as of 2026-06-03.
+| Command | Result |
+|---------|--------|
+| `cd mobile && npm run typecheck` | **PASS** |
+| `cd admin-web && npm run lint && npm run build` | **PASS** |
+| `cd backend && ./mvnw -q test` | **PASS** (includes `TestAccountPredicateTest`) |
+
+---
+
+## Files changed (2026-06-04 final pass)
+
+1. `backend/src/main/java/com/vibook/backend/util/TestAccountPredicate.java` (new)
+2. `backend/src/test/java/com/vibook/backend/util/TestAccountPredicateTest.java` (new)
+3. `backend/src/main/java/com/vibook/backend/service/impl/UserServiceImpl.java`
+4. `backend/src/main/java/com/vibook/backend/config/RatingDemoDataConfigurer.java` (deleted)
+5. `backend/src/main/resources/db/demo-rating-data.sql` (deleted)
+6. `backend/src/main/resources/application.yml`
+7. `mobile/app/payment.tsx`
+8. `mobile/app/(auth)/login.tsx`
+9. `mobile/app/(auth)/signup.tsx`
+10. `mobile/app/(tabs)/favorites.tsx`
+11. `mobile/app/(premium-sheet)/membership/plans.tsx`
+12. `mobile/app/(premium-sheet)/add-payment-method.tsx`
+13. `mobile/src/i18n/dictionary.ts`
+14. `mobile/src/store/appStore.ts`
+15. `mobile/src/types/index.ts`
+16. `mobile/src/hooks/useFormatMoney.ts`
+17. `mobile/src/utils/currencyDisplay.ts`
+18. `mobile/src/utils/premiumAccess.ts`
+19. `mobile/src/utils/businessEventTickets.ts`
+20. `docs/PRODUCTION_DATA_CLEANUP_REPORT.md`

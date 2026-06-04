@@ -26,7 +26,7 @@ export default function MembershipPlansScreen() {
   const isPremium = user.isPremiumMember;
 
   const onSubscribe = () => {
-    Alert.alert(t('membership.mockTitle'), t('membership.mockBody'));
+    Alert.alert(t('membership.comingSoonTitle'), t('membership.comingSoonBody'));
   };
 
   return (

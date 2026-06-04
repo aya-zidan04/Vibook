@@ -12,7 +12,7 @@ export type User = {
   /** Null when the user has no profile photo (optional). */
   avatarUrl: string | null;
   cityId: ID;
-  /** True when the user has an active Premium membership (mock until billing is connected). */
+  /** True when the user has an active Premium membership (billing not connected in this build). */
   isPremiumMember: boolean;
   walletBalance: number;
   preferredLanguage: 'en' | 'ar';
@@ -148,7 +148,7 @@ export type Booking = {
   id: ID;
   userId: ID;
   type: 'event' | 'restaurant' | 'hotel' | 'experience' | 'package';
-  /** Target entity id for deep links (optional for legacy mocks). */
+  /** Target entity id for deep links. */
   refId?: ID;
   refTitle: string;
   refTitleAr?: string;

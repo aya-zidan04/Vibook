@@ -3,7 +3,7 @@ import { useLocaleStore } from '@/store/localeStore';
 import { formatDisplayMoney } from '@/utils/currencyDisplay';
 
 /**
- * Formats any mock price (SAR, AED, USD, …) into the user’s selected JOD/USD using global locale/currency.
+ * Formats a price in any source currency into the user’s selected JOD/USD using global locale/currency.
  */
 export function useFormatMoney() {
   const locale = useLocaleStore((s) => s.locale);

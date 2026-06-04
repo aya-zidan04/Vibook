@@ -27,7 +27,7 @@ export function businessTicketOptionsToTicketTiers(
   });
 }
 
-/** One synthetic tier for catalogue events that only expose {@link EventItem#priceFrom} (e.g. legacy mocks). */
+/** One synthetic tier for catalogue events that only expose {@link EventItem#priceFrom}. */
 export function syntheticTierFromEventItem(ev: EventItem): TicketTier {
   return {
     id: `${ev.id}-tier-default`,

@@ -24,7 +24,6 @@ export default function PaymentScreen() {
   const router = useRouter();
   const draft = useBookingDraftStore((s) => s.draft);
   const pendingBookingId = useBookingDraftStore((s) => s.pendingBookingId);
-  const setDraft = useBookingDraftStore((s) => s.setDraft);
   const setLastOrderId = useBookingDraftStore((s) => s.setLastOrderId);
   const setPendingBookingId = useBookingDraftStore((s) => s.setPendingBookingId);
   const clearCheckoutSession = useBookingDraftStore((s) => s.clearCheckoutSession);
@@ -97,28 +96,6 @@ export default function PaymentScreen() {
     }
   };
 
-  const paySimulated = async () => {
-    setBusy(true);
-    try {
-      const id = `VB-${Date.now().toString(36).toUpperCase()}`;
-      setLastOrderId(id);
-      clearCheckoutSession();
-      router.replace('/confirmation');
-    } catch (e) {
-      Alert.alert(t('payment.title'), mapApiError(e, t));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const pay = () => {
-    if (usePayPal) {
-      void payWithPayPal();
-    } else {
-      void paySimulated();
-    }
-  };
-
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <View style={styles.shell}>
@@ -129,37 +106,9 @@ export default function PaymentScreen() {
               {t('payment.paypalSandbox')}
             </AppText>
           ) : (
-            <>
-              <AppText variant="body" color="textSecondary">
-                {t('payment.sim')}
-              </AppText>
-              <View style={styles.fakeCard}>
-                <AppText variant="label" color="textMuted">
-                  {t('payment.cardNumber')}
-                </AppText>
-                <AppText variant="h3" color="text">
-                  •••• •••• •••• 4242
-                </AppText>
-                <View style={styles.fakeRow}>
-                  <View>
-                    <AppText variant="label" color="textMuted">
-                      {t('payment.expires')}
-                    </AppText>
-                    <AppText variant="body-em" color="text">
-                      12 / 28
-                    </AppText>
-                  </View>
-                  <View>
-                    <AppText variant="label" color="textMuted">
-                      {t('payment.cvv')}
-                    </AppText>
-                    <AppText variant="body-em" color="text">
-                      •••
-                    </AppText>
-                  </View>
-                </View>
-              </View>
-            </>
+            <AppText variant="body" color="textSecondary">
+              {t('payment.unavailable')}
+            </AppText>
           )}
           <View style={styles.summary}>
             <AppText variant="body-em" color="text">
@@ -174,8 +123,9 @@ export default function PaymentScreen() {
           <SecondaryButton title={t('common.back')} onPress={() => router.back()} style={styles.half} />
           <PrimaryButton
             title={usePayPal ? t('payment.payWithPayPal') : t('payment.payNow')}
-            onPress={pay}
+            onPress={() => void payWithPayPal()}
             loading={busy}
+            disabled={!usePayPal}
             style={styles.half}
           />
         </View>
@@ -191,15 +141,6 @@ function createStyles(colors: ThemeColors) {
     scroll: { flex: 1 },
     content: { paddingBottom: spacing.xxxl, gap: spacing.lg },
     empty: { marginVertical: spacing.lg },
-    fakeCard: {
-      padding: spacing.lg,
-      backgroundColor: colors.card,
-      borderRadius: radii.xl,
-      borderWidth: 1,
-      borderColor: colors.border,
-      gap: spacing.md,
-    },
-    fakeRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.lg },
     summary: {
       flexDirection: 'row',
       justifyContent: 'space-between',

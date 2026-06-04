@@ -1,6 +1,6 @@
 import type { AppLocale, DisplayCurrency } from '@/store/localeStore';
 
-/** Rough mock rates to normalize mixed mock currencies into USD, then into JOD for display. */
+/** Approximate rates to normalize mixed API currencies into USD, then into JOD for display. */
 const TO_USD: Record<string, number> = {
   SAR: 0.266,
   AED: 0.272,
@@ -10,7 +10,7 @@ const TO_USD: Record<string, number> = {
 };
 
 /**
- * Convert a mock price to the user's display currency (USD or JOD).
+ * Convert a price to the user's display currency (USD or JOD).
  */
 export function convertToDisplay(amount: number, sourceCurrency: string, display: DisplayCurrency): number {
   const usd = amount * (TO_USD[sourceCurrency] ?? 0.266);

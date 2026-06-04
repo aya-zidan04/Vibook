@@ -80,7 +80,7 @@ export default function FavoritesTabScreen() {
   if (!isAuthenticated) {
     return (
       <Screen scroll contentStyle={styles.pad} header={headerEmpty}>
-        <AppText variant="caption" color="textMuted" style={styles.mockNote}>
+        <AppText variant="caption" color="textMuted" style={styles.hintNote}>
           {t('favorites.backendSignInHint')}
         </AppText>
         <PrimaryButton sheet title={t('auth.loginCta')} onPress={() => router.push('/login')} />
@@ -112,7 +112,7 @@ export default function FavoritesTabScreen() {
   if (rows.length === 0) {
     return (
       <Screen scroll contentStyle={styles.pad} header={headerEmpty}>
-        <AppText variant="caption" color="textMuted" style={styles.mockNote}>
+        <AppText variant="caption" color="textMuted" style={styles.hintNote}>
           {t('favorites.emptyBackend')}
         </AppText>
         <PrimaryButton title={t('favorites.discover')} onPress={() => router.push('/(tabs)/explore')} />
@@ -157,7 +157,7 @@ function createStyles(colors: ThemeColors) {
     tabHeader: { paddingTop: spacing.md, paddingBottom: spacing.sm },
     title: { marginBottom: spacing.xs },
     sub: { lineHeight: 22 },
-    mockNote: { marginBottom: spacing.sm, lineHeight: 18 },
+    hintNote: { marginBottom: spacing.sm, lineHeight: 18 },
     row: {
       flexDirection: 'row',
       alignItems: 'center',

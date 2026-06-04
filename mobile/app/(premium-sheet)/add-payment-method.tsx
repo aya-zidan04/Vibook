@@ -91,7 +91,7 @@ export default function AddPaymentMethodScreen() {
   return (
     <PremiumScreen title={t('paymentMethods.addAnother')}>
       <AppText variant="caption" color="textMuted" style={{ lineHeight: 20 }}>
-        {t('paymentMethods.addCardMockNote')}
+        {t('paymentMethods.addCardNote')}
       </AppText>
 
       <AuthTextField

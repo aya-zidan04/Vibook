@@ -168,7 +168,7 @@ export default function SignupScreen() {
             variant="caption"
             color="primaryLight"
             style={styles.link}
-            onPress={() => Alert.alert(t('auth.termsMockTitle'), t('auth.termsMockBody'))}
+            onPress={() => Alert.alert(t('auth.termsComingSoonTitle'), t('auth.termsComingSoonBody'))}
           >
             {t('auth.terms')}
           </AppText>{' '}
@@ -177,7 +177,7 @@ export default function SignupScreen() {
             variant="caption"
             color="primaryLight"
             style={styles.link}
-            onPress={() => Alert.alert(t('auth.privacy'), t('auth.termsMockBody'))}
+            onPress={() => Alert.alert(t('auth.privacy'), t('auth.termsComingSoonBody'))}
           >
             {t('auth.privacy')}
           </AppText>

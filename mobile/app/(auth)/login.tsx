@@ -62,7 +62,7 @@ export default function LoginScreen() {
   };
 
   const onResetPassword = () => {
-    /* mock — no server */
+    Alert.alert(t('auth.resetComingSoonTitle'), t('auth.resetComingSoonBody'));
   };
 
   const btnFull = { width: '100%' as const };
