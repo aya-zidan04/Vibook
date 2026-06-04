@@ -171,6 +171,15 @@ export async function fetchGovernorateStats(): Promise<GovernorateAdminStatsResp
   return data;
 }
 
+export async function createGovernorate(body: {
+  name: string;
+  displayOrder: number;
+  active: boolean;
+}): Promise<GovernorateResponse> {
+  const { data } = await api.post<GovernorateResponse>('/governorates', body);
+  return data;
+}
+
 export async function updateGovernorate(
   id: number,
   body: { name: string; displayOrder: number; active: boolean },

@@ -1,0 +1,87 @@
+You are editing `template.docx` directly.
+
+Before making any changes, read and analyze ALL provided files, including:
+
+* `template.docx`
+* `rules.docx`
+* The complete project source code
+* Configuration files
+* Database files and schema
+* Documentation files
+* Assets
+* API definitions
+* Frontend and backend code
+* Deployment files
+* Any additional project-related files
+
+Read the entire project before writing. Do not start writing or modifying any section until you have finished analyzing all files and can confirm the implemented features.
+
+Your task is to complete ONLY the following sections in `template.docx`:
+
+1. Introduction
+
+   * 1.1 Project Description
+   * 1.2 Project Overview
+   * 1.3 Tasks
+   * 1.4 Project Planning
+   * 1.5 Planning of the Development Phases
+   * 1.6 The Scope of the Work
+   * 1.7 Stakeholders
+   * 1.8 Scope
+   * 1.9 Definitions, Acronyms, and Abbreviations
+   * 1.10 References
+   * 1.11 Overview
+
+Requirements:
+
+* Strictly follow every rule, requirement, format, style, structure, heading level, numbering scheme, spacing, caption style, page layout, font, and writing convention defined in `rules.docx`.
+* Preserve all formatting already present in `template.docx`.
+* Match the writing style used throughout the existing document.
+* Ensure the completed sections appear naturally written as part of the original documentation.
+* Do not mention AI, automation, language models, assistants, generated content, or any similar wording anywhere in the document.
+* Do not leave traces, comments, notes, metadata, or indicators that automated assistance was used.
+* Write in a professional academic graduation-project style.
+* Use formal technical language appropriate for university documentation.
+* Ensure consistency with the terminology used throughout the project.
+Accuracy Requirements:
+
+* Verify all statements against the actual project implementation.
+* Do not assume functionality exists.
+* Do not invent features, modules, technologies, workflows, diagrams, requirements, stakeholders, or implementation details.
+* If information cannot be verified from the project files, derive it only from available evidence and documented implementation.
+* Base all descriptions on what is actually implemented.
+
+Figures, Screenshots, Tables, and Diagrams:
+
+Whenever a screenshot, figure, table, chart, architecture diagram, workflow diagram, ER diagram, use case diagram, activity diagram, sequence diagram, Gantt chart, or other visual element should appear, insert a placeholder at the exact location where it belongs.
+
+Use clear placeholders such as:
+
+[PLACEHOLDER: Figure X.X - System Architecture Diagram]
+Description: Show the actual architecture identified from the implemented system components.
+
+[PLACEHOLDER: Figure X.X - Login Page Screenshot]
+Description: Capture the implemented login page while the system is running.
+
+[PLACEHOLDER: Figure X.X - Database ER Diagram]
+Description: Show all entities, attributes, primary keys, foreign keys, and relationships extracted from the implemented database.
+
+For every placeholder:
+
+* Specify exactly what should be captured or drawn.
+* Explain what information the figure should contain.
+* Follow the caption format required by the template and rules.
+* Place it in the correct section and position.
+
+References:
+
+* Populate references using technologies, standards, frameworks, protocols, libraries, and sources actually used by the project.
+* Follow the citation format required by `rules.docx`.
+* Do not create fictional references.
+Output Requirements:
+
+* Edit `template.docx` directly.
+* Modify only the requested Introduction section and its subsections.
+* Keep all existing document formatting intact.
+* Produce content that is submission-ready.
+* Ensure the final document appears as a professionally written graduation project report created by the project team.
