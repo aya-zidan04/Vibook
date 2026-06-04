@@ -33,9 +33,6 @@ vibook:
     base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
     return-url: ${PAYPAL_RETURN_URL:vibook://paypal-return}
     cancel-url: ${PAYPAL_CANCEL_URL:vibook://paypal-cancel}
-  demo:
-    # Set to true to auto-create a sample CONFIRMED booking (first user + first event) for rating API tests.
-    rating-data: false
   # Dev-friendly CORS for Expo / local web. Tighten allowed-origin-patterns in production.
   cors:
     allowed-origin-patterns:

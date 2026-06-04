@@ -62,7 +62,6 @@ com/vibook/backend/dto/BusinessEventResponse.class
 com/vibook/backend/dto/AddPaymentMethodRequest.class
 com/vibook/backend/service/impl/PaymentMethodServiceImpl.class
 com/vibook/backend/controller/AdminCategoryController.class
-com/vibook/backend/config/RatingDemoDataConfigurer.class
 com/vibook/backend/service/impl/AdminUserServiceImpl.class
 com/vibook/backend/service/AdminAnalyticsService.class
 com/vibook/backend/entity/User.class

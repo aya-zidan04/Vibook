@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { VibookHeaderWordmark } from '@/components/branding/VibookHeaderWordmark';
+import {
+  VibookHeaderWordmark,
+  headerWordmarkLayout,
+} from '@/components/branding/VibookHeaderWordmark';
 import { AppText } from '@/components/ui/AppText';
 import { HeaderSeparationChrome } from '@/components/layout/HeaderSeparationChrome';
 import { CityPickerSheet } from '@/components/forms/CityPickerSheet';
@@ -34,6 +37,7 @@ export function ExploreHeader({
   const refStatus = useReferenceStore((s) => s.status);
   const governoratesFromApi = useReferenceStore((s) => s.governoratesFromApi);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const wordmarkLayout = useMemo(() => headerWordmarkLayout(26), []);
 
   const regionDisplay = useMemo(() => {
     if (refStatus === 'loading' && governorates.length === 0) {
@@ -55,12 +59,10 @@ export function ExploreHeader({
 
   return (
     <HeaderSeparationChrome>
-      <View style={styles.bar}>
-        <VibookHeaderWordmark
-          height={26}
-          accessibilityLabel={brandLabel}
-          style={styles.wordmark}
-        />
+      <View style={[styles.bar, styles.barLtr]}>
+        <View style={[styles.wordmarkSlot, { width: wordmarkLayout.width, minWidth: wordmarkLayout.width }]}>
+          <VibookHeaderWordmark height={26} accessibilityLabel={brandLabel} />
+        </View>
 
         <View style={styles.right}>
           <Pressable
@@ -121,23 +123,32 @@ function createStyles(colors: ThemeColors) {
     bar: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-start',
       backgroundColor: 'transparent',
       paddingHorizontal: 20,
       paddingTop: 14,
       paddingBottom: 14,
       marginBottom: spacing.lg,
+      overflow: 'visible',
     },
-    wordmark: {
-      flexShrink: 1,
-      minWidth: 0,
+    /** Logo stays left; governorate + search stay right (matches tab bar). */
+    barLtr: {
+      direction: 'ltr',
+    },
+    wordmarkSlot: {
+      flexShrink: 0,
+      flexGrow: 0,
       marginEnd: spacing.md,
+      justifyContent: 'center',
+      zIndex: 2,
     },
     right: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.md,
       flexShrink: 0,
+      flexGrow: 0,
+      marginStart: 'auto',
     },
     regionBtn: {
       flexDirection: 'row',

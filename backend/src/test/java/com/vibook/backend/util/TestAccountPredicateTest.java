@@ -11,8 +11,13 @@ class TestAccountPredicateTest {
     @Test
     void detectsSmokeAndPlaceholderEmails() {
         assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("smoke_runner@test.vibook")));
+        assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("smoke_1780446838@vibook.test")));
+        assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("smoke8080_1780446967@vibook.test")));
+        assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("smoke8080b_1780446971@vibook.test")));
+        assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("biz_1780446979@vibook.test")));
         assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("user+test@company.com")));
-        assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("qa@test.vibook")));
+        assertFalse(TestAccountPredicate.isTestAccount(userWithEmail("aya@test.com")));
+        assertFalse(TestAccountPredicate.isTestAccount(userWithEmail("admin@test.com")));
         assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("guest@example.com")));
         assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("demo@partner.io")));
         assertTrue(TestAccountPredicate.isTestAccount(userWithEmail("smoke_admin@vibook.com")));

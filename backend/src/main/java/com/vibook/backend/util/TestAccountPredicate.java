@@ -4,8 +4,9 @@ import com.vibook.backend.entity.User;
 import java.util.Locale;
 
 /**
- * Identifies smoke, E2E, and placeholder accounts that should not appear in the admin user list.
- * Real users remain in the database; only {@code getAllUsers} filters them out.
+ * Identifies smoke, E2E, and placeholder accounts for one-time DB cleanup scripts.
+ * Does not match general {@code @test.com} dev mailboxes — only {@code @vibook.test}, smoke/biz
+ * automation prefixes, {@code @example.*}, {@code demo@*}, and {@code +test} aliases.
  */
 public final class TestAccountPredicate {
 
@@ -20,13 +21,21 @@ public final class TestAccountPredicate {
             return false;
         }
         String normalized = email.trim().toLowerCase(Locale.ROOT);
-        if (normalized.startsWith("smoke_")) {
+        int at = normalized.indexOf('@');
+        String localPart = at > 0 ? normalized.substring(0, at) : normalized;
+        String domain = at > 0 ? normalized.substring(at + 1) : "";
+
+        // Smoke / E2E mailbox domain used in automated runs.
+        if ("vibook.test".equals(domain)) {
+            return true;
+        }
+        if (normalized.startsWith("smoke_") || localPart.startsWith("smoke")) {
+            return true;
+        }
+        if (localPart.startsWith("biz_") && ("vibook.test".equals(domain) || domain.endsWith(".test"))) {
             return true;
         }
         if (normalized.contains("+test")) {
-            return true;
-        }
-        if (normalized.contains("@test.")) {
             return true;
         }
         if (normalized.contains("@example.")) {
@@ -34,13 +43,6 @@ public final class TestAccountPredicate {
         }
         if (normalized.startsWith("demo@")) {
             return true;
-        }
-        int at = normalized.indexOf('@');
-        if (at > 0) {
-            String localPart = normalized.substring(0, at);
-            if (localPart.startsWith("smoke_")) {
-                return true;
-            }
         }
         return false;
     }

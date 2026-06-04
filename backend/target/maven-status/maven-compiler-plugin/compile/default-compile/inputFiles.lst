@@ -7,7 +7,6 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/config/GovernorateSeederConfig.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/config/PayPalConfig.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/config/PayPalProperties.java
-/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/config/RatingDemoDataConfigurer.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/config/RoleSeederConfig.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/config/SecurityConfig.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/config/StaticResourceConfig.java
@@ -230,3 +229,4 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/spec/BusinessEventSpecifications.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/spec/BusinessProfileAdminSpecs.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/util/AdminSecurityUtils.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/util/TestAccountPredicate.java

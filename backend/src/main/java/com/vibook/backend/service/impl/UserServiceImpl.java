@@ -9,7 +9,6 @@ import com.vibook.backend.mapper.UserMapper;
 import com.vibook.backend.repository.UserRepository;
 import com.vibook.backend.service.ProfileImageStorageService;
 import com.vibook.backend.service.UserService;
-import com.vibook.backend.util.TestAccountPredicate;
 import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -38,10 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-            .filter(user -> !TestAccountPredicate.isTestAccount(user))
-            .map(userMapper::toResponse)
-            .toList();
+        return userRepository.findAll().stream().map(userMapper::toResponse).toList();
     }
 
     @Override
