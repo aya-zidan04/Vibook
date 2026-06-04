@@ -73,6 +73,7 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 1,
       borderColor: colors.accentBorder,
       overflow: 'hidden',
+      fontWeight: '700',
     },
     section: { marginBottom: spacing.xl },
     list: {

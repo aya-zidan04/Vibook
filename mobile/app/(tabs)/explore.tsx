@@ -24,6 +24,7 @@ import { businessEventSummaryToEventItem } from '@/services/api/eventMap';
 import { useAppStore } from '@/store/appStore';
 import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
 import { localizedCityLabel } from '@/utils/governorateLabels';
+import { localizedCategoryLabel, localizedSubcategoryLabel } from '@/utils/taxonomyLabels';
 import type { EventItem } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -112,28 +113,21 @@ export default function ExploreScreen() {
     if (refStatus === 'idle') void loadReferenceData();
   }, [refStatus]);
 
-  const subsByParent = useMemo(() => {
-    const next: Record<string, ExploreSubcategory[]> = {};
-    for (const c of categories) {
-      next[c.id] = (subsByParentRaw[c.id] ?? []).map(({ id, parentId, name, nameAr }) => ({
-        id,
-        parentId,
-        name,
-        nameAr,
-      }));
-    }
-    return next;
-  }, [categories, subsByParentRaw]);
-
   const exploreCategories = useMemo<ExploreMainCategory[]>(() => {
     return categories.map((c) => ({
       id: c.id,
-      name: c.labelEn,
-      nameAr: c.labelAr,
+      name: localizedCategoryLabel(c.slug, 'en', c.labelEn),
+      nameAr: localizedCategoryLabel(c.slug, 'ar', c.labelAr),
       icon: backendIconToOutline(c.icon),
-      subcategories: subsByParent[c.id] ?? [],
+      subcategories: (subsByParentRaw[c.id] ?? []).map((sub) => ({
+        id: sub.id,
+        parentId: sub.parentId,
+        slug: sub.slug,
+        name: localizedSubcategoryLabel(sub.slug, 'en', sub.name),
+        nameAr: localizedSubcategoryLabel(sub.slug, 'ar', sub.nameAr),
+      })),
     }));
-  }, [categories, subsByParent]);
+  }, [categories, subsByParentRaw, locale]);
 
   useEffect(() => {
     if (exploreCategories.length === 0) return;
@@ -359,6 +353,7 @@ function createStyles(colors: ThemeColors) {
       borderWidth: 1,
       borderColor: colors.accentBorder,
       overflow: 'hidden',
+      fontWeight: '700',
     },
     safe: { flex: 1, backgroundColor: 'transparent' },
     root: { flex: 1 },

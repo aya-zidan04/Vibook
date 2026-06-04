@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { VibookHeaderWordmark } from '@/components/branding/VibookHeaderWordmark';
 import { AppText } from '@/components/ui/AppText';
 import { HeaderSeparationChrome } from '@/components/layout/HeaderSeparationChrome';
 import { CityPickerSheet } from '@/components/forms/CityPickerSheet';
@@ -55,59 +56,61 @@ export function ExploreHeader({
   return (
     <HeaderSeparationChrome>
       <View style={styles.bar}>
-      <AppText variant="h2" color="text" numberOfLines={1} style={styles.wordmark}>
-        {brandLabel}
-      </AppText>
+        <VibookHeaderWordmark
+          height={26}
+          accessibilityLabel={brandLabel}
+          style={styles.wordmark}
+        />
 
-      <View style={styles.right}>
-        <Pressable
-          onPress={() => setPickerOpen(true)}
-          style={({ pressed }) => [styles.regionBtn, pressed && styles.pressed]}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t('explore.a11yGovernorate')}
-          accessibilityState={{ expanded: pickerOpen }}
-        >
-          <AppText
-            variant="body-em"
-            color="text"
-            numberOfLines={1}
-            style={[styles.regionText, { textAlign: textAlignStart(isRTL) }]}
+        <View style={styles.right}>
+          <Pressable
+            onPress={() => setPickerOpen(true)}
+            style={({ pressed }) => [styles.regionBtn, pressed && styles.pressed]}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('explore.a11yGovernorate')}
+            accessibilityState={{ expanded: pickerOpen }}
           >
-            {regionDisplay}
-          </AppText>
-          <Ionicons name="chevron-down" size={14} color={colors.text} />
-        </Pressable>
+            <AppText
+              variant="body-em"
+              color="text"
+              numberOfLines={1}
+              style={[styles.regionText, { textAlign: textAlignStart(isRTL) }]}
+            >
+              {regionDisplay}
+            </AppText>
+            <Ionicons name="chevron-down" size={14} color={colors.text} />
+          </Pressable>
 
-        <Pressable
-          onPress={onSearch}
-          style={({ pressed }) => [styles.iconHit, pressed && styles.pressed]}
-          accessibilityLabel={a11ySearch}
-          hitSlop={12}
-        >
-          <Ionicons name="search-outline" size={24} color={colors.icon} />
-        </Pressable>
-      </View>
+          <Pressable
+            onPress={onSearch}
+            style={({ pressed }) => [styles.iconHit, pressed && styles.pressed]}
+            accessibilityLabel={a11ySearch}
+            hitSlop={12}
+          >
+            <Ionicons name="search-outline" size={24} color={colors.icon} />
+          </Pressable>
+        </View>
 
-      <CityPickerSheet
-        visible={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        cities={governorates}
-        selectedId={selectedCityId}
-        title={t('explore.pickGovernorate')}
-        locale={locale}
-        emptyHint={citySheetEmptyHint}
-        onSelect={(id) => {
-          setSelectedCityId(id);
-          if (__DEV__) {
-            console.log(
-              '[ExploreHeader] selected governorate id:',
-              id,
-              governoratesFromApi ? '(API)' : '(fallback)',
-            );
-          }
-        }}
-      />
+        <CityPickerSheet
+          visible={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          cities={governorates}
+          selectedId={selectedCityId}
+          title={t('explore.pickGovernorate')}
+          locale={locale}
+          emptyHint={citySheetEmptyHint}
+          onSelect={(id) => {
+            setSelectedCityId(id);
+            if (__DEV__) {
+              console.log(
+                '[ExploreHeader] selected governorate id:',
+                id,
+                governoratesFromApi ? '(API)' : '(fallback)',
+              );
+            }
+          }}
+        />
       </View>
     </HeaderSeparationChrome>
   );

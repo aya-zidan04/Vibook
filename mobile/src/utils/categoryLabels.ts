@@ -1,13 +1,14 @@
 import type { CategoryResponse, SubcategoryResponse } from '@/api/types';
 import type { Category } from '@/types';
+import { localizedCategoryLabel, localizedSubcategoryLabel } from '@/utils/taxonomyLabels';
 
 export function categoryFromApi(row: CategoryResponse): Category {
+  const slug = row.slug;
   return {
     id: String(row.id),
-    slug: row.slug,
-    labelEn: row.name,
-    /** Backend gap: categories have no `nameAr`; mirror English until API adds it. */
-    labelAr: row.name,
+    slug,
+    labelEn: localizedCategoryLabel(slug, 'en', row.name),
+    labelAr: localizedCategoryLabel(slug, 'ar', row.name),
     icon: row.icon || 'grid-outline',
   };
 }
@@ -40,7 +41,7 @@ export function subcategoriesFromApi(
       id: String(row.id),
       parentId: parentCategoryId,
       slug: row.slug,
-      name: row.name,
-      nameAr: row.name,
+      name: localizedSubcategoryLabel(row.slug, 'en', row.name),
+      nameAr: localizedSubcategoryLabel(row.slug, 'ar', row.name),
     }));
 }

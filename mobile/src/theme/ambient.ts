@@ -12,10 +12,10 @@ import { darkColors as darkSw, lightColors as lightSw } from './paletteColors';
 import type { ColorScheme } from '@/store/themeStore';
 
 export const cinematic = {
-  lightBase: lightSw.paleBone,
-  lightWash: lightSw.softMint,
-  lightSage: lightSw.pastelSage,
-  lightMint: lightSw.mintOffWhite,
+  lightBase: lightSw.creamCanvas,
+  lightWash: lightSw.creamCanvasAlt,
+  lightSage: lightSw.creamSection,
+  lightMint: lightSw.creamCard,
   lightAccent: lightSw.neonYellow,
   lightPrimary: lightSw.limeGreen,
   darkBase: darkSw.black,

@@ -1,11 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="32" height="32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
   <defs>
-    <linearGradient id="vb-favicon-grad" x1="8" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#d5a892" />
-      <stop offset="48%" stop-color="#c4896c" />
-      <stop offset="100%" stop-color="#5b3b4b" />
+    <linearGradient id="vb-icon-grad" x1="8" y1="6" x2="32" y2="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#d4ff1a" />
+      <stop offset="55%" stop-color="#e8f55a" />
+      <stop offset="100%" stop-color="#f2f0a0" />
     </linearGradient>
   </defs>
-  <rect x="1.5" y="1.5" width="37" height="37" rx="9" ry="9" fill="url(#vb-favicon-grad)" />
-  <path fill="#f7efe7" d="M11 10 20 27 29 10h-3.5L20 20l-5.5-10H11z" />
+  <rect width="40" height="40" rx="9" fill="#2a2a2c" />
+  <path
+    fill="url(#vb-icon-grad)"
+    d="M11.2 9.8 18.4 27.2 20.8 22.4 23.2 27.2 30.4 9.8 26.6 9.8 20.8 21.6 15 9.8Z"
+  />
+  <circle cx="28.6" cy="26.4" r="3.1" fill="url(#vb-icon-grad)" />
 </svg>

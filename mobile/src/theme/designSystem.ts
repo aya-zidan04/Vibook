@@ -1,6 +1,6 @@
 /**
  * Vibook design system — semantic tokens built from {@link paletteColors}.
- * Green/yellow brand · light mint canvas · dark cinematic night canvas.
+ * Green/yellow brand · light warm cream canvas · dark cinematic night canvas.
  */
 
 import { radii, spacing } from './spacing';
@@ -25,11 +25,11 @@ export const brand = {
   lightText: darkSw.white,
   white: darkSw.white,
   lightSurface: lightSw.softMint,
-  creamTint: 'rgba(233, 240, 221, 0.55)',
-  meshBase: lightSw.paleBone,
+  creamTint: 'rgba(232, 226, 215, 0.55)',
+  meshBase: lightSw.creamCanvas,
   ambientLight: {
-    base: lightSw.paleBone,
-    vertical: [lightSw.paleBone, lightSw.softMint, lightSw.pastelSage] as const,
+    base: lightSw.creamCanvas,
+    vertical: [lightSw.creamCanvas, lightSw.creamCanvasAlt, lightSw.creamCard] as const,
     locations: [0, 0.45, 1] as const,
   },
   ambientDark: {
@@ -134,16 +134,16 @@ export type AppTheme = {
 };
 
 const lightSemantic: SemanticColors = {
-  background: lightSw.paleBone,
-  surface: lightSw.white,
-  card: lightSw.white,
+  background: lightSw.creamCanvas,
+  surface: lightSw.creamCard,
+  card: lightSw.creamCard,
   primary: lightSw.limeGreen,
   primaryLight: lightSw.grassGreen,
   accent: lightSw.neonYellow,
   accentSoft: lightSw.grassGreen,
-  accentLight: lightSw.softMint,
+  accentLight: lightSw.creamSection,
   accentBg: 'rgba(139, 194, 73, 0.12)',
-  accentBorder: lightSw.pastelSage,
+  accentBorder: lightSw.creamBorder,
   accentText: lightSw.textPrimary,
   textPrimary: lightSw.textPrimary,
   textSecondary: lightSw.textSecondary,
@@ -155,7 +155,7 @@ const lightSemantic: SemanticColors = {
   chevron: lightSw.chevron,
   rowDescription: lightSw.rowDescription,
   iconContainerBg: lightSw.iconContainerBg,
-  border: lightSw.sageBorder,
+  border: lightSw.creamBorder,
   borderLight: lightSw.pastelSage,
   success: '#2E7D32',
   warning: '#B45309',
@@ -176,7 +176,7 @@ const darkSemantic: SemanticColors = {
   accentLight: darkMix.cardElevated,
   accentBg: darkMix.limeMuted12,
   accentBorder: darkMix.limeBorder32,
-  accentText: darkSw.black,
+  accentText: darkSw.white,
   textPrimary: darkSw.white,
   textSecondary: darkSw.lightGray,
   textMuted: darkMix.textMuted,
@@ -216,7 +216,7 @@ const darkShadows: ThemeShadowTokens = {
 const lightGradients: ThemeGradients = {
   primary: [lightSw.limeGreen, lightSw.grassGreen],
   pinkGradient: [lightSw.neonYellow, lightSw.limeGreen],
-  hero: [lightSw.paleBone, lightSw.softMint, lightSw.mintOffWhite],
+  hero: [lightSw.creamCanvas, lightSw.creamCanvasAlt, lightSw.creamCard],
   button: [lightSw.grassGreen, lightSw.limeGreen],
   cardOverlay: ['transparent', 'rgba(0, 0, 0, 0.72)'],
 };

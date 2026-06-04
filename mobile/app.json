@@ -4,11 +4,11 @@
     "slug": "vibook",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/vibook-wordmark.png",
+    "icon": "./assets/vibook-logo-mark.png",
     "scheme": "vibook",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/vibook-wordmark.png",
+      "image": "./assets/vibook-logo-mark.png",
       "resizeMode": "contain",
       "backgroundColor": "#0A0D14"
     },
@@ -21,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/vibook-wordmark.png",
+        "foregroundImage": "./assets/vibook-logo-mark.png",
         "backgroundColor": "#0A0D14"
       },
       "edgeToEdgeEnabled": true,

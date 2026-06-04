@@ -6,12 +6,11 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { hydrateAuthSession } from '@/bootstrap/hydrateAuthSession';
 import { loadReferenceData } from '@/store/referenceStore';
-import { Image } from 'expo-image';
+import { VibookLogoMark } from '@/components/branding/VibookLogoMark';
 import { spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
 const SPLASH_MS = 2200;
-const BRAND_LOGO = require('../assets/vibook-wordmark.png');
 
 /**
  * First screen on cold start: brand splash, then `/entry` (welcome).
@@ -69,7 +68,7 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.root}>
-      <Image source={BRAND_LOGO} style={styles.brandLogo} contentFit="contain" accessibilityIgnoresInvertColors />
+      <VibookLogoMark size={112} style={styles.brandLogo} accessibilityLabel={t('common.brandDisplay')} />
       <AppText variant="display" color="text" style={[styles.brand, splashText.title]}>
         {t('common.brandDisplay')}
       </AppText>

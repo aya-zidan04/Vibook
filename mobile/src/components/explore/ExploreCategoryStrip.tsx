@@ -81,7 +81,7 @@ export function ExploreCategoryStrip({
                 accessibilityLabel={locale === 'ar' ? s.nameAr : s.name}
                 style={[styles.subChip, active && styles.subChipActive]}
               >
-                <AppText variant="caption" color={active ? 'text' : 'rowDescription'}>
+                <AppText variant="caption" color={active ? 'textOnPrimary' : 'primaryLight'}>
                   {locale === 'ar' ? s.nameAr : s.name}
                 </AppText>
               </AnimatedChip>
@@ -183,11 +183,11 @@ function createStyles(colors: ThemeColors) {
       borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.border,
-      backgroundColor: colors.surfaceMuted,
+      backgroundColor: colors.card,
     },
     subChipActive: {
-      backgroundColor: colors.accentBg,
-      borderColor: colors.accentBorder,
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
     },
   });
 }

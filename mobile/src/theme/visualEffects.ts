@@ -5,16 +5,30 @@
  * Components should import from here — do not scatter duplicate rgba/shadow literals.
  */
 
+import { lightColors as lightSw } from './paletteColors';
+
+/** Light nav header — warm gray-beige slab above cream canvas. */
+export const headerChromeLight = {
+  fill: lightSw.creamHeader,
+  divider: 'rgba(0, 0, 0, 0.06)',
+  shadowColor: '#000000',
+  shadowOpacity: 0.06,
+  shadowRadius: 10,
+  shadowOffset: { width: 0, height: 3 } as const,
+  androidElevation: 3,
+  edgeFade: 'rgba(247, 244, 236, 0.6)',
+} as const;
+
 /** Navigation header layer separation — used by {@link HeaderSeparationChrome}. */
 export const headerSeparationEffect = {
-  fadeHeight: 14,
+  fadeHeight: 10,
   light: {
-    shadowColor: '#55644A',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 } as const,
-    androidElevation: 3,
-    fadeTop: 'rgba(85, 100, 74, 0.05)',
+    shadowColor: headerChromeLight.shadowColor,
+    shadowOpacity: headerChromeLight.shadowOpacity,
+    shadowRadius: headerChromeLight.shadowRadius,
+    shadowOffset: headerChromeLight.shadowOffset,
+    androidElevation: headerChromeLight.androidElevation,
+    fadeTop: headerChromeLight.edgeFade,
   },
   dark: {
     shadowColor: '#A6CD57',
@@ -33,9 +47,9 @@ export const heroAmbientEffect = {
   gradientEnd: { x: 1, y: 1 } as const,
   light: {
     colors: [
-      'rgba(167, 220, 43, 0.08)',
+      'rgba(0, 0, 0, 0.03)',
       'transparent',
-      'rgba(139, 194, 73, 0.06)',
+      'rgba(0, 0, 0, 0.02)',
     ] as const,
   },
   dark: {
@@ -47,9 +61,9 @@ export const heroAmbientEffect = {
   },
 } as const;
 
-/** Me tab profile header card — light-mode border + shadow tuning (base fill uses `sageBorder`). */
+/** Me tab profile header card — light-mode border + shadow tuning. */
 export const meProfileCardLightEffect = {
-  borderColor: '#B7C8A3',
+  borderColor: lightSw.creamBorder,
   shadowOpacity: 0.22,
   shadowRadius: 12,
   shadowOffset: { width: 0, height: 4 } as const,

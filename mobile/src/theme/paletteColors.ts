@@ -3,17 +3,25 @@
  * Light and dark palettes must not be mixed; semantic tokens in `designSystem.ts` map these per mode.
  */
 
-/** Light mode palette — approved swatches (left → right). */
+/** Light mode palette — brand greens + warm cream surfaces (no green-tinted canvas). */
 export const lightColors = {
   neonYellow: '#F0FB45',
   limeGreen: '#A7DC2B',
   grassGreen: '#8BC249',
-  mintOffWhite: '#EEF8E2',
-  paleBone: '#E9F0DD',
-  softMint: '#EEF8E2',
-  pastelSage: '#E4EFD4',
-  sageBorder: '#DCE7CC',
-  white: '#FFFFFF',
+  /** App canvas — soft cream / warm beige */
+  creamCanvas: '#F7F4EC',
+  creamCanvasAlt: '#F5F1E8',
+  creamCard: '#FCFBF8',
+  creamHeader: '#E8E2D7',
+  creamBorder: '#E4DDD2',
+  creamSection: '#F5F1E8',
+  /** @deprecated Surface aliases — map to cream tokens */
+  mintOffWhite: '#FCFBF8',
+  paleBone: '#F7F4EC',
+  softMint: '#F5F1E8',
+  pastelSage: '#F0EDE6',
+  sageBorder: '#E4DDD2',
+  white: '#FCFBF8',
   black: '#000000',
   /** Light-mode typography & chrome — olive/sage, not gray. */
   textPrimary: '#1F2A1A',

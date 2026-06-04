@@ -1,9 +1,12 @@
 import type { Category } from '@/types';
 import type { EventItem } from '@/types';
+import { pickCategoryLabel } from '@/utils/taxonomyLabels';
 
 /** Category labels from live catalog — clickable as search shortcuts. */
 export function trendingFromCategories(categories: Category[], locale: 'en' | 'ar', limit = 6): string[] {
-  return categories.slice(0, limit).map((c) => (locale === 'ar' ? c.labelAr : c.labelEn));
+  return categories
+    .slice(0, limit)
+    .map((c) => pickCategoryLabel(c.slug, locale, c.labelEn, c.labelAr));
 }
 
 function isMostlyLatin(text: string): boolean {

@@ -1,0 +1,40 @@
+.vb-brand-mark {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.vb-brand-mark__img {
+  position: absolute;
+  inset: 0;
+}
+
+.vb-brand-mark__img--dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .vb-brand-mark__img--light {
+    display: none;
+  }
+
+  :root:not([data-theme='light']) .vb-brand-mark__img--dark {
+    display: block;
+  }
+}
+
+[data-theme='dark'] .vb-brand-mark__img--light {
+  display: none;
+}
+
+[data-theme='dark'] .vb-brand-mark__img--dark {
+  display: block;
+}
+
+[data-theme='light'] .vb-brand-mark__img--dark {
+  display: none;
+}
+
+[data-theme='light'] .vb-brand-mark__img--light {
+  display: block;
+}

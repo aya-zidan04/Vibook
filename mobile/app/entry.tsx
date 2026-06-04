@@ -19,6 +19,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { fadeFromBackground, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import { fontFamilyForWeight, type AppLocaleFont } from '@/theme/typography';
 
 /** Time between automatic slide advances (manual swipe still uses native momentum). */
 const AUTO_MS = 3800;
@@ -29,29 +30,37 @@ const SLIDES = [
   { key: 'welcome-03', source: require('../assets/entry/entry_welcome_03.png') },
 ] as const;
 
-/** Entry hero typography — explicit line heights prevent Arabic glyph overlap when wrapping. */
-function entryHeroTextStyle(isRTL: boolean): { title: TextStyle; subtitle: TextStyle } {
+const HERO_HEADLINE_MAX = 52;
+const HERO_HEADLINE_MIN = 44;
+
+const heroTextShadow: TextStyle = {
+  textShadowColor: 'rgba(0, 0, 0, 0.42)',
+  textShadowOffset: { width: 0, height: 2 },
+  textShadowRadius: 10,
+};
+
+/** Scale headline so each line stays on one row (no third-line wrap on narrow widths). */
+function entryHeadlineFontSize(windowWidth: number): number {
+  const inner = windowWidth - spacing.screen * 2;
+  const scaled = Math.floor(inner / 7.1);
+  return Math.min(HERO_HEADLINE_MAX, Math.max(HERO_HEADLINE_MIN, scaled));
+}
+
+/** Two-line headline block — one sentence, equal weight per line. */
+function entryHeroHeadlineStyle(locale: AppLocaleFont, isRTL: boolean, fontSize: number): TextStyle {
   const direction: TextStyle = isRTL ? { writingDirection: 'rtl' } : { writingDirection: 'ltr' };
   return {
-    title: {
-      width: '100%',
-      maxWidth: '100%',
-      textAlign: 'center',
-      fontSize: 38,
-      fontWeight: '800',
-      lineHeight: 50,
-      letterSpacing: 0,
-      ...direction,
-    },
-    subtitle: {
-      width: '100%',
-      maxWidth: '100%',
-      textAlign: 'center',
-      fontSize: 18,
-      lineHeight: 28,
-      letterSpacing: 0,
-      ...direction,
-    },
+    width: '100%',
+    maxWidth: '100%',
+    textAlign: 'center',
+    fontSize,
+    fontWeight: '800',
+    fontFamily: fontFamilyForWeight(locale, '800'),
+    lineHeight: Math.round(fontSize * 1.05),
+    letterSpacing: -0.4,
+    color: '#FFFFFF',
+    ...heroTextShadow,
+    ...direction,
   };
 }
 
@@ -61,8 +70,12 @@ export default function AppEntryScreen() {
   const router = useRouter();
   const { width: winW, height: winH } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { t, isRTL } = useTranslation();
-  const heroText = useMemo(() => entryHeroTextStyle(isRTL), [isRTL]);
+  const { t, isRTL, locale } = useTranslation();
+  const headlineSize = useMemo(() => entryHeadlineFontSize(winW), [winW]);
+  const headlineStyle = useMemo(
+    () => entryHeroHeadlineStyle(locale, isRTL, headlineSize),
+    [locale, isRTL, headlineSize],
+  );
 
   /** Full physical page size so photos bleed behind status bar + home indicator. */
   const pageW = winW + insets.left + insets.right;
@@ -177,7 +190,7 @@ export default function AppEntryScreen() {
           fadeFromBackground(colors, 0.65),
           fadeFromBackground(colors, 0.97),
         ]}
-        locations={[0, 0.35, 0.72, 1]}
+        locations={[0, 0.32, 0.68, 1]}
         style={[StyleSheet.absoluteFill, bleedStyle]}
         pointerEvents="none"
       />
@@ -187,12 +200,26 @@ export default function AppEntryScreen() {
 
         <View style={styles.bottom}>
           <View style={styles.heroBlock}>
-            <AppText variant="display" color="textSecondary" style={heroText.title}>
-              {t('entry.title')}
-            </AppText>
-            <AppText variant="body-lg" color="textSecondary" style={heroText.subtitle}>
-              {t('entry.subtitle')}
-            </AppText>
+            <View style={styles.heroHeadlineBlock}>
+              <AppText
+                style={headlineStyle}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
+                maxFontSizeMultiplier={1}
+              >
+                {t('entry.titleLine1')}
+              </AppText>
+              <AppText
+                style={headlineStyle}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
+                maxFontSizeMultiplier={1}
+              >
+                {t('entry.titleLine2')}
+              </AppText>
+            </View>
           </View>
           <PrimaryButton title={t('entry.loginSignup')} onPress={goAuth} style={btnShape} />
           <SecondaryButton title={t('entry.browseFirst')} onPress={browseFirst} style={btnShape} />
@@ -217,8 +244,13 @@ function createStyles(colors: ThemeColors) {
       maxWidth: '100%',
       alignItems: 'center',
       alignSelf: 'center',
-      marginBottom: spacing.lg,
-      gap: spacing.md,
+      marginTop: 80,
+      marginBottom: spacing.md,
+    },
+    heroHeadlineBlock: {
+      width: '100%',
+      alignItems: 'center',
+      gap: 2,
     },
     bottom: {
       flexShrink: 0,

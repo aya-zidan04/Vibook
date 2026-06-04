@@ -1,5 +1,6 @@
 import type { GovernorateResponse } from '@/api/types';
 import type { City } from '@/types';
+import { translate } from '@/i18n/resolve';
 
 /** Backend seed names → slug for legacy `gov-{slug}` persisted city ids. */
 const BACKEND_NAME_TO_SLUG: Record<string, string> = {
@@ -38,6 +39,15 @@ export function cityIdToGovernorateSlug(cityId: string): string | undefined {
   return backendGovernorateNameToSlug(trimmed);
 }
 
+export function localizedGovernorateLabel(
+  slug: string | undefined,
+  locale: 'en' | 'ar',
+  apiFallbackName: string,
+): string {
+  const key = slug ? `explore.gov.${slug}` : '';
+  return (key ? translate(locale, key) : undefined) ?? apiFallbackName;
+}
+
 export function localizedCityLabel(
   cityId: string,
   locale: 'en' | 'ar',
@@ -48,19 +58,19 @@ export function localizedCityLabel(
   if (fromCatalog) {
     return locale === 'ar' ? fromCatalog.nameAr : fromCatalog.nameEn;
   }
-  return cityId;
+  const slug = cityIdToGovernorateSlug(cityId);
+  return localizedGovernorateLabel(slug, locale, cityId);
 }
 
 /** Map one API governorate row → UI city. */
 export function governorateFromApiRow(row: GovernorateResponse): City {
   const slug = backendGovernorateNameToSlug(row.name);
-  const nameEn = row.name.trim();
+  const apiName = row.name.trim();
   return {
     id: String(row.id),
     slug: slug ?? undefined,
-    nameEn,
-    /** Backend gap: governorates have no `nameAr`; mirror English until API adds it. */
-    nameAr: nameEn,
+    nameEn: localizedGovernorateLabel(slug, 'en', apiName),
+    nameAr: localizedGovernorateLabel(slug, 'ar', apiName),
     country: 'Jordan',
     displayOrder: row.displayOrder,
     active: row.active,

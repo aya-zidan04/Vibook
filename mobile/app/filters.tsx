@@ -9,6 +9,7 @@ import { useCatalogSubcategories } from '@/hooks/useCatalogSubcategories';
 import { useTranslation } from '@/i18n/useTranslation';
 import { backendIconToOutline } from '@/services/reference/mapReference';
 import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
+import { pickCategoryLabel, pickSubcategoryLabel } from '@/utils/taxonomyLabels';
 import { useSearchStore } from '@/store/searchStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -94,7 +95,7 @@ export default function FiltersScreen() {
             {categories.map((c) => (
               <CategoryChip
                 key={c.id}
-                label={locale === 'ar' ? c.labelAr : c.labelEn}
+                label={pickCategoryLabel(c.slug, locale, c.labelEn, c.labelAr)}
                 icon={backendIconToOutline(c.icon)}
                 selected={selectedCategoryIds.has(c.id)}
                 onPress={() => toggleCategory(c.id)}
@@ -114,13 +115,13 @@ export default function FiltersScreen() {
             return (
               <View key={c.id} style={styles.subGroup}>
                 <AppText variant="label" color="textMuted">
-                  {locale === 'ar' ? c.labelAr : c.labelEn}
+                  {pickCategoryLabel(c.slug, locale, c.labelEn, c.labelAr)}
                 </AppText>
                 <View style={styles.chips}>
                   {subs.map((sub) => (
                     <CategoryChip
                       key={sub.id}
-                      label={locale === 'ar' ? sub.nameAr : sub.name}
+                      label={pickSubcategoryLabel(sub.slug, locale, sub.name, sub.nameAr)}
                       selected={selectedSubcategoryIds.has(sub.id)}
                       onPress={() => toggleSubcategory(sub.id)}
                     />

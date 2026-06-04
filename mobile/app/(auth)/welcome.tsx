@@ -1,15 +1,13 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { VibookLogoMark } from '@/components/branding/VibookLogoMark';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-
-const BRAND_LOGO = require('../../assets/vibook-wordmark.png');
 
 /**
  * Optional auth-adjacent welcome (e.g. deep links). Primary first-run experience is `/entry`.
@@ -23,7 +21,7 @@ export default function WelcomeScreen() {
   return (
     <Screen edges={['top', 'bottom', 'left', 'right']}>
       <View style={styles.content}>
-        <Image source={BRAND_LOGO} style={styles.logo} contentFit="contain" accessibilityIgnoresInvertColors />
+        <VibookLogoMark size={96} style={styles.logo} accessibilityLabel={t('common.brandDisplay')} />
         <AppText variant="display" color="text" style={styles.title}>
           {t('common.brandDisplay')}
         </AppText>

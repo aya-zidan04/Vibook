@@ -21,8 +21,8 @@ import { useThemeStore } from '@/store/themeStore';
 import { textAlignStart } from '@/utils/rtlText';
 import type { ThemeColors } from '@/theme/palettes';
 
-/** Me profile card base — light mode sage (#DCE7CC). */
-const PROFILE_HEADER_BASE_LIGHT = lightSw.sageBorder;
+/** Me profile card base — light mode warm cream. */
+const PROFILE_HEADER_BASE_LIGHT = lightSw.creamCard;
 
 const MENU_AUTH_ONLY: { key: string; labelKey: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: 'membership', labelKey: 'me.menuMembership', icon: 'diamond-outline' },
