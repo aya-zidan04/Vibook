@@ -9,26 +9,6 @@ export type FavoritePreview = {
   currency?: string;
 };
 
-/** Deep-link segment for `app/{segment}/[id]`. */
-export function catalogRouteSegment(type: string): string {
-  switch (type) {
-    case 'event':
-      return 'event';
-    case 'restaurant':
-      return 'restaurant';
-    case 'experience':
-      return 'experience';
-    case 'stay':
-      return 'stay';
-    case 'package':
-      return 'package';
-    case 'organizer':
-      return 'organizer';
-    default:
-      return 'explore';
-  }
-}
-
 export async function loadFavoritePreview(
   type: string,
   refId: string,

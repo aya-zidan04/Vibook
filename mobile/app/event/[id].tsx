@@ -9,13 +9,12 @@ import { AppText } from '@/components/ui/AppText';
 import { Badge } from '@/components/ui/Badge';
 import { UserRatingBlock } from '@/components/ui/StarRatingInput';
 import { PrimaryButton } from '@/components/ui/Button';
-import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { DetailHeader } from '@/components/layout/DetailHeader';
 import { StickyBottomBar } from '@/components/layout/StickyBottomBar';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useEventPdp, useOrganizerForEvent } from '@/hooks/useCatalogPdp';
+import { useEventPdp } from '@/hooks/useCatalogPdp';
 import { localizedCityLabel } from '@/utils/governorateLabels';
 import { useAppStore } from '@/store/appStore';
 import { useReferenceStore } from '@/store/referenceStore';
@@ -41,7 +40,6 @@ export default function EventDetailScreen() {
   const cities = useReferenceStore((s) => s.cities);
 
   const { event, tiers, loading, error, apiDetail, refetchApiDetail } = useEventPdp(id);
-  const organizer = useOrganizerForEvent(event);
 
   const cityDisplay = useMemo(() => {
     if (!event) return '';
@@ -207,21 +205,6 @@ export default function EventDetailScreen() {
               <Row icon="navigate-outline" label={t('event.address')} value={event.address} />
             </View>
 
-            {organizer ? (
-              <Pressable style={styles.org} onPress={() => router.push(`/organizer/${organizer.id}`)}>
-                <Image source={{ uri: organizer.logoUrl }} style={styles.orgLogo} />
-                <View style={{ flex: 1 }}>
-                  <AppText variant="h3" color="text">
-                    {organizer.name}
-                  </AppText>
-                  <AppText variant="caption" color="textMuted">
-                    {t('event.organizer')} · {organizer.verified ? t('organizer.verified') : t('event.host')}
-                  </AppText>
-                </View>
-                <NavigationChevronForward size={18} color={colors.icon} />
-              </Pressable>
-            ) : null}
-
             <AppText variant="h3" color="text" style={styles.sectionTitle}>
               {t('event.about')}
             </AppText>
@@ -361,17 +344,6 @@ function createStyles(colors: ThemeColors) {
     gap: spacing.md,
   },
   metaRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
-  org: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.card,
-    padding: spacing.md,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  orgLogo: { width: 48, height: 48, borderRadius: 24 },
   desc: { lineHeight: 24 },
   sectionTitle: { marginTop: spacing.md },
   tier: {
