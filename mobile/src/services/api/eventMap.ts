@@ -1,6 +1,7 @@
 import { resolveBackendMediaUrl } from '@/api/env';
 import type { BusinessEventResponse, BusinessEventSummaryResponse, FavoriteEventResponse } from '@/api/types';
 import type { EventItem, TicketTier } from '@/types';
+import { backendGovernorateNameToSlug } from '@/utils/governorateLabels';
 
 function numPrice(v: string | number | undefined): number {
   if (v == null) return 0;
@@ -23,12 +24,33 @@ export function startIsoFromEventDateAndSlots(eventDate: string, timeSlots: stri
       const ap = m[3].toUpperCase();
       if (ap === 'PM' && h !== 12) h += 12;
       if (ap === 'AM' && h === 12) h = 0;
-      const iso = new Date(`${d}T${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:00.000Z`);
+      // Slot labels are local Jordan time — parse without Z so device locale shows the saved hour.
+      const iso = new Date(`${d}T${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:00`);
       if (!Number.isNaN(iso.getTime())) return iso.toISOString();
     }
   }
   const noon = new Date(`${d}T12:00:00.000Z`);
   return Number.isNaN(noon.getTime()) ? new Date().toISOString() : noon.toISOString();
+}
+
+function resolveCityIdFromSummary(row: {
+  governorateId?: number | null;
+  governorateName?: string | null;
+}): string {
+  if (row.governorateId != null) return String(row.governorateId);
+  const slug = backendGovernorateNameToSlug(row.governorateName);
+  return slug ? `gov-${slug}` : '';
+}
+
+function resolveVenueName(row: { businessName?: string | null; title?: string | null }): string {
+  const business = row.businessName?.trim();
+  if (business) return business;
+  const title = (row.title ?? '').trim();
+  const enDash = title.lastIndexOf(' – ');
+  if (enDash >= 0) return title.slice(enDash + 3).trim();
+  const hyphen = title.lastIndexOf(' - ');
+  if (hyphen >= 0) return title.slice(hyphen + 3).trim();
+  return '';
 }
 
 function resolveGalleryFromUrls(urls: string[]): { imageUrl: string; gallery: string[] } {
@@ -50,13 +72,13 @@ export function businessEventSummaryToEventItem(row: BusinessEventSummaryRespons
     id: String(row.id),
     title: row.title ?? '',
     categoryId: String(row.categoryId ?? row.subcategoryId ?? ''),
-    cityId: String(row.governorateId ?? ''),
+    cityId: resolveCityIdFromSummary(row),
     organizerId: 'api',
     imageUrl,
     gallery,
     startAt,
     endAt: end.toISOString(),
-    venueName: row.businessName || '',
+    venueName: resolveVenueName(row),
     address: '',
     description: row.description ?? '',
     priceFrom: numPrice(row.priceJod),
@@ -83,7 +105,7 @@ export function businessEventDetailToEventItem(row: BusinessEventResponse): Even
     gallery,
     startAt,
     endAt: end.toISOString(),
-    venueName: row.businessName || '',
+    venueName: resolveVenueName(row),
     address: row.googleMapsUrl || '',
     description: row.description ?? '',
     priceFrom: numPrice(row.priceJod),

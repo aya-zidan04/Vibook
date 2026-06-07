@@ -25,7 +25,7 @@ type AppState = {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      selectedCityId: '1',
+      selectedCityId: '5',
       setSelectedCityId: (id) => set({ selectedCityId: id }),
       hasCompletedOnboarding: false,
       setHasCompletedOnboarding: (v) => set({ hasCompletedOnboarding: v }),

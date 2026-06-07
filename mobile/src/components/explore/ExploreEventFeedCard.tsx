@@ -48,6 +48,7 @@ export function ExploreEventFeedCard({
         });
 
   const price = formatMoney(event.priceFrom, event.currency);
+  const locationLine = [event.venueName, cityName].map((p) => p?.trim()).filter(Boolean).join(' · ');
 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.94 }]}>
@@ -79,12 +80,14 @@ export function ExploreEventFeedCard({
             {dateStr}
           </AppText>
         </View>
-        <View style={styles.metaRow}>
-          <Ionicons name="location-outline" size={15} color={colors.icon} />
-          <AppText variant="caption" color="textMuted" numberOfLines={1}>
-            {event.venueName} · {cityName}
-          </AppText>
-        </View>
+        {locationLine ? (
+          <View style={styles.metaRow}>
+            <Ionicons name="location-outline" size={15} color={colors.icon} />
+            <AppText variant="caption" color="textMuted" numberOfLines={1}>
+              {locationLine}
+            </AppText>
+          </View>
+        ) : null}
         <View style={styles.priceRow}>
           <AppText variant="caption" color="textMuted">
             {t('common.from')}
