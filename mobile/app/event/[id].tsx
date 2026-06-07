@@ -30,6 +30,7 @@ import { EventPhotoGallery } from '@/components/event/EventPhotoGallery';
 import { ReportIssueModal } from '@/components/report/ReportIssueModal';
 import { favoriteStatus } from '@/api/favoritesApi';
 import { useFavoritesStore } from '@/store/favoritesStore';
+import { apiTimeSlotIdFromTier } from '@/services/api/eventMap';
 import { canIncreaseTicketQuantity, clampTicketQuantity } from '@/utils/eventTicketQuantity';
 
 export default function EventDetailScreen() {
@@ -181,6 +182,7 @@ export default function EventDetailScreen() {
       vertical: 'event',
       refId: event.id,
       apiEventId: apiDetail?.id,
+      apiTimeSlotId: apiTimeSlotIdFromTier(activeTier.id),
       title: event.title,
       imageUrl: event.imageUrl,
       currency,

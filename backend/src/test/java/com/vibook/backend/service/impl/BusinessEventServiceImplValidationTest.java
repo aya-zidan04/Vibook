@@ -282,6 +282,7 @@ class BusinessEventServiceImplValidationTest {
         return new BusinessEventResponse(
             42L,
             9L,
+            "Test Biz",
             "Summer brunch",
             1L,
             "Sub",
@@ -290,6 +291,7 @@ class BusinessEventServiceImplValidationTest {
             "A long enough description for validation.",
             LocalDate.now().plusDays(1),
             List.of("10:00 AM"),
+            List.of(),
             2L,
             "Amman",
             null,

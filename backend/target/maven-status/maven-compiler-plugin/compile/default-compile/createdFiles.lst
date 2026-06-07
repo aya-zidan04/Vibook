@@ -23,6 +23,7 @@ com/vibook/backend/service/impl/UserReportSubmissionServiceImpl.class
 com/vibook/backend/dto/NameCountResponse.class
 com/vibook/backend/service/AdminEventRatingModerationService.class
 com/vibook/backend/mapper/BookingMapper.class
+com/vibook/backend/dto/BusinessEventTimeSlotResponse.class
 com/vibook/backend/controller/EventRatingController.class
 com/vibook/backend/service/BusinessEventService.class
 com/vibook/backend/repository/ModerationReportRepository.class

@@ -202,6 +202,7 @@ class BusinessEventPhotoServiceImplTest {
         return new BusinessEventResponse(
             5L,
             10L,
+            "Biz",
             "E",
             1L,
             "Sub",
@@ -209,6 +210,7 @@ class BusinessEventPhotoServiceImplTest {
             "Cat",
             "d",
             LocalDate.now(),
+            List.of(),
             List.of(),
             1L,
             "Amman",

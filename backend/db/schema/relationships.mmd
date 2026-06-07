@@ -1,0 +1,161 @@
+erDiagram
+    users ||--o{ user_roles : "has"
+    roles ||--o{ user_roles : "assigned"
+    users ||--o{ refresh_tokens : "has"
+    users ||--o| business_profiles : "owns"
+    governorates ||--o{ business_profiles : "located_in"
+    categories ||--o{ business_profiles : "primary_category"
+    categories ||--o{ subcategories : "contains"
+    business_profiles ||--o{ business_events : "lists"
+    subcategories ||--o{ business_events : "classified_as"
+    governorates ||--o{ business_events : "held_in"
+    business_events ||--o{ business_event_time_slots : "offers"
+    business_events ||--o{ business_event_photos : "has"
+    users ||--o{ bookings : "makes"
+    business_events ||--o{ bookings : "booked"
+    business_event_time_slots ||--o{ bookings : "optional_slot"
+    bookings ||--o{ payments : "paid_via"
+    users ||--o{ event_favorites : "saves"
+    business_events ||--o{ event_favorites : "favorited"
+    users ||--o{ event_ratings : "rates"
+    business_events ||--o{ event_ratings : "rated"
+    users ||--o{ payment_methods : "stores"
+    users ||--o{ moderation_reports : "reports"
+    users ||--o{ user_reports : "submits"
+
+    users {
+        bigint id PK
+        varchar email UK
+        varchar first_name
+        varchar last_name
+        bit enabled
+    }
+
+    roles {
+        bigint id PK
+        enum name UK
+    }
+
+    user_roles {
+        bigint user_id PK_FK
+        bigint role_id PK_FK
+    }
+
+    refresh_tokens {
+        bigint id PK
+        bigint user_id FK
+        varchar token UK
+    }
+
+    governorates {
+        bigint id PK
+        varchar name UK
+        int display_order
+        bit active
+    }
+
+    categories {
+        bigint id PK
+        varchar slug UK
+        varchar name
+        bit active
+    }
+
+    subcategories {
+        bigint id PK
+        bigint category_id FK
+        varchar slug
+    }
+
+    business_profiles {
+        bigint id PK
+        bigint user_id FK_UK
+        bigint governorate_id FK
+        bigint primary_category_id FK
+        enum status
+    }
+
+    business_events {
+        bigint id PK
+        bigint business_profile_id FK
+        bigint subcategory_id FK
+        bigint governorate_id FK
+        date event_date
+        decimal price_jod
+        int capacity_guests
+    }
+
+    business_event_time_slots {
+        bigint id PK
+        bigint business_event_id FK
+        varchar slot_label
+        int sort_order
+    }
+
+    business_event_photos {
+        bigint id PK
+        bigint business_event_id FK
+        varchar image_url
+        int sort_order
+    }
+
+    bookings {
+        bigint id PK
+        bigint user_id FK
+        bigint event_id FK
+        bigint time_slot_id FK_NULL
+        enum status
+        decimal total_price_jod
+    }
+
+    payments {
+        bigint id PK
+        bigint booking_id FK
+        enum provider
+        enum status
+        decimal amount
+    }
+
+    event_favorites {
+        bigint id PK
+        bigint user_id FK
+        bigint event_id FK
+    }
+
+    event_ratings {
+        bigint id PK
+        bigint user_id FK
+        bigint event_id FK
+        int rating_value
+    }
+
+    payment_methods {
+        bigint id PK
+        bigint user_id FK
+        varchar brand
+        varchar card_last4
+    }
+
+    moderation_reports {
+        bigint id PK
+        bigint reporter_user_id FK
+        enum type
+        bigint target_id "polymorphic, no FK"
+        enum status
+    }
+
+    user_reports {
+        bigint id PK
+        bigint user_id FK
+        varchar subject
+        enum status
+    }
+
+    admin_activity_logs {
+        bigint id PK
+        bigint admin_user_id "no FK"
+        varchar admin_email
+        enum action
+        varchar entity_type
+        bigint entity_id
+    }

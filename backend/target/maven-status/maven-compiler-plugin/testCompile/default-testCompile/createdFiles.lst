@@ -13,3 +13,4 @@ com/vibook/backend/service/impl/BusinessEventPhotoServiceImplTest.class
 com/vibook/backend/service/impl/AdminBusinessProfileServiceImplRoleTest.class
 com/vibook/backend/dto/BusinessEventUpsertRequestValidationTest$SampleBuilder.class
 com/vibook/backend/service/impl/BusinessEventServiceImplManagementGuardTest.class
+com/vibook/backend/service/impl/BookingServiceImplTest.class

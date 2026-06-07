@@ -17,6 +17,7 @@ public record BusinessEventResponse(
     String description,
     LocalDate eventDate,
     List<String> timeSlots,
+    List<BusinessEventTimeSlotResponse> timeSlotDetails,
     Long governorateId,
     String governorateName,
     String googleMapsUrl,

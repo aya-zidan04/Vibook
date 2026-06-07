@@ -93,6 +93,12 @@ export type BusinessEventPhotoDto = {
   sortOrder: number;
 };
 
+export type BusinessEventTimeSlotDto = {
+  id: number;
+  slotLabel: string;
+  sortOrder: number;
+};
+
 export type BusinessEventResponse = {
   id: number;
   businessProfileId: number;
@@ -105,6 +111,7 @@ export type BusinessEventResponse = {
   description: string;
   eventDate: string;
   timeSlots: string[];
+  timeSlotDetails?: BusinessEventTimeSlotDto[];
   governorateId: number;
   governorateName: string;
   googleMapsUrl: string | null;

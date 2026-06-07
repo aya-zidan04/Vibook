@@ -98,6 +98,11 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequestException("You already have an active booking for this event");
         }
 
+        boolean eventHasSlots = event.getTimeSlots() != null && !event.getTimeSlots().isEmpty();
+        if (eventHasSlots && request.timeSlotId() == null) {
+            throw new BadRequestException("Time slot is required for this event");
+        }
+
         BusinessEventTimeSlot slot = null;
         if (request.timeSlotId() != null) {
             slot = businessEventTimeSlotRepository

@@ -3,7 +3,7 @@ import type { BookingResponse } from '@/api/types';
 
 export async function createBooking(body: {
   eventId: number;
-  timeSlotId?: number | null;
+  timeSlotId: number | null;
   guestsCount: number;
   note?: string | null;
 }): Promise<BookingResponse> {

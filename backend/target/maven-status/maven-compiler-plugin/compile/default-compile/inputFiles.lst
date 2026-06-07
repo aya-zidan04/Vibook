@@ -61,6 +61,7 @@
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventPhotoResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventSummaryResponse.java
+/Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventTimeSlotResponse.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessEventUpsertRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessProfileAdminNotesRequest.java
 /Users/ayazidan/Downloads/Vibook-main/Vibook/backend/src/main/java/com/vibook/backend/dto/BusinessProfileResponse.java

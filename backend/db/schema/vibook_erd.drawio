@@ -1,0 +1,172 @@
+<mxfile host="app.diagrams.net" agent="Vibook Schema" version="22.1.0">
+  <diagram name="Vibook ERD" id="vibook-erd">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=24;fontStyle=1" value="Vibook MySQL 8 — vibook_db (19 tables)" vertex="1">
+          <mxGeometry height="40" width="700" x="40" y="0" as="geometry" />
+        </mxCell>
+
+        <!-- AUTH & USERS -->
+        <mxCell id="t0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;users&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Auth &amp; Users&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;first_name VARCHAR(80) NOT NULL&lt;br&gt;last_name VARCHAR(80) NOT NULL&lt;br&gt;email VARCHAR(120) NOT NULL UNIQUE&lt;br&gt;password VARCHAR(255) NOT NULL&lt;br&gt;phone VARCHAR(20) NOT NULL&lt;br&gt;profile_image_url VARCHAR(512) NULL&lt;br&gt;enabled BIT(1) NOT NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="278" width="300" x="40" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="t1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;roles&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Auth &amp; Users&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;name ENUM('ROLE_USER','ROLE_BUSINESS','ROLE_ADMIN') NOT NULL UNIQUE&lt;/div&gt;" vertex="1">
+          <mxGeometry height="134" width="300" x="40" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;user_roles&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Auth &amp; Users&lt;/font&gt;&lt;br&gt;🔑 PK user_id BIGINT → users.id&lt;br&gt;🔑 PK role_id BIGINT → roles.id&lt;/div&gt;" vertex="1">
+          <mxGeometry height="134" width="300" x="40" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="t3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;refresh_tokens&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Auth &amp; Users&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK user_id → users.id&lt;br&gt;token VARCHAR(255) NOT NULL UNIQUE&lt;br&gt;expiry_date DATETIME(6) NOT NULL&lt;br&gt;revoked BIT(1) NOT NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="206" width="300" x="40" y="690" as="geometry" />
+        </mxCell>
+
+        <!-- REFERENCE DATA -->
+        <mxCell id="t4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;governorates&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Reference&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;name VARCHAR(120) NOT NULL UNIQUE&lt;br&gt;display_order INT NOT NULL&lt;br&gt;active BIT(1) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="170" width="300" x="380" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="t5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;categories&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Reference&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;name VARCHAR(120) NOT NULL&lt;br&gt;slug VARCHAR(80) NOT NULL UNIQUE&lt;br&gt;icon VARCHAR(64) NULL&lt;br&gt;active BIT(1) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="188" width="300" x="380" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="t6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;subcategories&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Reference&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK category_id → categories.id&lt;br&gt;name VARCHAR(120) NOT NULL&lt;br&gt;slug VARCHAR(80) NOT NULL&lt;br&gt;active BIT(1) NOT NULL&lt;br&gt;UNIQUE(category_id, slug)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="206" width="300" x="380" y="450" as="geometry" />
+        </mxCell>
+
+        <!-- BUSINESS -->
+        <mxCell id="t7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;business_profiles&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Business&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK user_id → users.id UNIQUE&lt;br&gt;🔗 FK governorate_id → governorates.id&lt;br&gt;🔗 FK primary_category_id → categories.id&lt;br&gt;business_name VARCHAR(150) NOT NULL&lt;br&gt;tagline VARCHAR(255) NULL&lt;br&gt;description VARCHAR(800) NULL&lt;br&gt;work_email VARCHAR(120) NULL&lt;br&gt;phone VARCHAR(30) NULL&lt;br&gt;website VARCHAR(512) NULL&lt;br&gt;google_maps_url VARCHAR(512) NULL&lt;br&gt;logo_image_url VARCHAR(512) NULL&lt;br&gt;banner_image_url VARCHAR(512) NULL&lt;br&gt;status ENUM('DRAFT','PENDING_REVIEW','APPROVED','REJECTED')&lt;br&gt;rejection_reason VARCHAR(500) NULL&lt;br&gt;admin_notes TEXT NULL&lt;br&gt;approved_at DATETIME(6) NULL&lt;br&gt;rejected_at DATETIME(6) NULL&lt;br&gt;requires_re_approval BIT(1) NOT NULL&lt;br&gt;previously_approved BIT(1) NOT NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="494" width="300" x="720" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="t8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;business_events&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Business&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK business_profile_id → business_profiles.id&lt;br&gt;🔗 FK subcategory_id → subcategories.id&lt;br&gt;🔗 FK governorate_id → governorates.id&lt;br&gt;title VARCHAR(255) NULL&lt;br&gt;description VARCHAR(4000) NOT NULL&lt;br&gt;event_date DATE NOT NULL&lt;br&gt;price_jod DECIMAL(12,2) NOT NULL&lt;br&gt;currency VARCHAR(8) NOT NULL&lt;br&gt;capacity_guests INT NOT NULL&lt;br&gt;hidden BIT(1) NOT NULL&lt;br&gt;average_rating DOUBLE NOT NULL&lt;br&gt;review_count INT NOT NULL&lt;br&gt;google_maps_url VARCHAR(512) NULL&lt;br&gt;admin_notes VARCHAR(2000) NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="404" width="300" x="720" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="t9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;business_event_time_slots&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Business&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK business_event_id → business_events.id&lt;br&gt;slot_label VARCHAR(32) NOT NULL&lt;br&gt;sort_order INT NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="170" width="300" x="1060" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="t10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;business_event_photos&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Business&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK business_event_id → business_events.id&lt;br&gt;image_url VARCHAR(1024) NOT NULL&lt;br&gt;sort_order INT NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="170" width="300" x="1060" y="760" as="geometry" />
+        </mxCell>
+
+        <!-- CONSUMER -->
+        <mxCell id="t11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;bookings&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Consumer&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK user_id → users.id&lt;br&gt;🔗 FK event_id → business_events.id&lt;br&gt;🔗 FK time_slot_id → business_event_time_slots.id NULL&lt;br&gt;guests_count INT NOT NULL&lt;br&gt;total_price_jod DECIMAL(14,2) NOT NULL&lt;br&gt;status ENUM('PENDING','CONFIRMED','COMPLETED','CANCELLED')&lt;br&gt;note VARCHAR(500) NULL&lt;br&gt;cancel_reason VARCHAR(500) NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="296" width="300" x="720" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="t12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;event_favorites&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Consumer&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK user_id → users.id&lt;br&gt;🔗 FK event_id → business_events.id&lt;br&gt;UNIQUE(user_id, event_id)&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="188" width="300" x="380" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="t13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;event_ratings&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Consumer&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK user_id → users.id&lt;br&gt;🔗 FK event_id → business_events.id&lt;br&gt;rating_value INT NOT NULL&lt;br&gt;flagged BIT(1) NOT NULL&lt;br&gt;moderation_hidden BIT(1) NOT NULL&lt;br&gt;UNIQUE(user_id, event_id)&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="260" width="300" x="380" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="t14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;payment_methods&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Consumer&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK user_id → users.id&lt;br&gt;brand VARCHAR(32) NOT NULL&lt;br&gt;card_last4 VARCHAR(4) NOT NULL&lt;br&gt;expiry_month INT NOT NULL&lt;br&gt;expiry_year INT NOT NULL&lt;br&gt;card_holder_name VARCHAR(120) NOT NULL&lt;br&gt;is_default BIT(1) NOT NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="278" width="300" x="40" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="t15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;payments&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Consumer&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK booking_id → bookings.id&lt;br&gt;provider ENUM('PAYPAL') NOT NULL&lt;br&gt;status ENUM('CREATED','APPROVED','CAPTURED','CANCELLED','FAILED')&lt;br&gt;paypal_order_id VARCHAR(64) NULL&lt;br&gt;paypal_capture_id VARCHAR(64) NULL&lt;br&gt;amount DECIMAL(14,2) NOT NULL&lt;br&gt;currency VARCHAR(8) NOT NULL&lt;br&gt;response_summary VARCHAR(2000) NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="296" width="300" x="1060" y="1000" as="geometry" />
+        </mxCell>
+
+        <!-- ADMIN -->
+        <mxCell id="t16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;moderation_reports&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Admin&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK reporter_user_id → users.id&lt;br&gt;type ENUM('EVENT','BOOKING','USER','BUSINESS_PROFILE','RATING','OTHER')&lt;br&gt;target_id BIGINT NULL &lt;i&gt;(polymorphic)&lt;/i&gt;&lt;br&gt;reason VARCHAR(2000) NOT NULL&lt;br&gt;description VARCHAR(4000) NULL&lt;br&gt;status ENUM('OPEN','REVIEWED','RESOLVED','DISMISSED')&lt;br&gt;admin_notes VARCHAR(2000) NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NULL&lt;br&gt;resolved_at DATETIME(6) NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="310" width="300" x="380" y="1200" as="geometry" />
+        </mxCell>
+        <mxCell id="t17" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;user_reports&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Admin&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;🔗 FK user_id → users.id&lt;br&gt;subject VARCHAR(200) NOT NULL&lt;br&gt;message VARCHAR(4000) NOT NULL&lt;br&gt;status ENUM('OPEN','IN_PROGRESS','RESOLVED')&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;br&gt;updated_at DATETIME(6) NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="224" width="300" x="40" y="1230" as="geometry" />
+        </mxCell>
+        <mxCell id="t18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="&lt;div style='text-align:left'&gt;&lt;b&gt;admin_activity_logs&lt;/b&gt;&lt;br&gt;&lt;font color='#666666'&gt;Admin&lt;/font&gt;&lt;br&gt;🔑 PK id BIGINT AUTO_INCREMENT&lt;br&gt;admin_user_id BIGINT NOT NULL &lt;i&gt;(no FK)&lt;/i&gt;&lt;br&gt;admin_email VARCHAR(120) NOT NULL&lt;br&gt;action ENUM (approve/reject/category/user actions)&lt;br&gt;entity_type VARCHAR(40) NOT NULL&lt;br&gt;entity_id BIGINT NOT NULL&lt;br&gt;details VARCHAR(2000) NULL&lt;br&gt;created_at DATETIME(6) NOT NULL&lt;/div&gt;" vertex="1">
+          <mxGeometry height="242" width="300" x="720" y="1330" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;🔑 PK = Primary Key&lt;br&gt;🔗 FK = Foreign Key (solid arrow)&lt;br&gt;┄┄ Logical ref (no DB FK)&lt;br&gt;Database: vibook_db (MySQL 8)&lt;br&gt;Collation: utf8mb4_0900_ai_ci" vertex="1">
+          <mxGeometry height="130" width="300" x="1060" y="50" as="geometry" />
+        </mxCell>
+
+        <!-- FK EDGES: Auth -->
+        <mxCell id="e01" parent="1" source="t2" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#6c8ebf;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e02" parent="1" source="t2" target="t1" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#6c8ebf;strokeWidth=1;" value="role_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e03" parent="1" source="t3" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#6c8ebf;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FK EDGES: Reference -->
+        <mxCell id="e04" parent="1" source="t6" target="t5" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#9673a6;strokeWidth=1;" value="category_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FK EDGES: Business profiles -->
+        <mxCell id="e05" parent="1" source="t7" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e06" parent="1" source="t7" target="t4" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="governorate_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e07" parent="1" source="t7" target="t5" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="primary_category_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FK EDGES: Business events -->
+        <mxCell id="e08" parent="1" source="t8" target="t7" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="business_profile_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e09" parent="1" source="t8" target="t6" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="subcategory_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" parent="1" source="t8" target="t4" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="governorate_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" parent="1" source="t9" target="t8" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="business_event_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" parent="1" source="t10" target="t8" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#82b366;strokeWidth=1;" value="business_event_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FK EDGES: Consumer -->
+        <mxCell id="e13" parent="1" source="t11" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" parent="1" source="t11" target="t8" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="event_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" parent="1" source="t11" target="t9" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="time_slot_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" parent="1" source="t12" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" parent="1" source="t12" target="t8" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="event_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" parent="1" source="t13" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" parent="1" source="t13" target="t8" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="event_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" parent="1" source="t14" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" parent="1" source="t15" target="t11" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#d6b656;strokeWidth=1;" value="booking_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FK EDGES: Admin -->
+        <mxCell id="e22" parent="1" source="t16" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#b85450;strokeWidth=1;" value="reporter_user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" parent="1" source="t17" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=blockThin;endFill=1;strokeColor=#b85450;strokeWidth=1;" value="user_id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Logical reference (no DB FK) -->
+        <mxCell id="e24" parent="1" source="t18" target="t0" edge="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;strokeColor=#b85450;strokeWidth=1;dashed=1;dashPattern=8 8;" value="admin_user_id (no FK)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

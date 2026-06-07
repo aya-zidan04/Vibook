@@ -4,6 +4,7 @@ import com.vibook.backend.dto.AdminEventRowResponse;
 import com.vibook.backend.dto.BusinessEventPhotoResponse;
 import com.vibook.backend.dto.BusinessEventResponse;
 import com.vibook.backend.dto.BusinessEventSummaryResponse;
+import com.vibook.backend.dto.BusinessEventTimeSlotResponse;
 import com.vibook.backend.entity.BusinessEvent;
 import com.vibook.backend.entity.BusinessEventPhoto;
 import com.vibook.backend.entity.BusinessEventTimeSlot;
@@ -35,6 +36,11 @@ public class BusinessEventMapper {
             entity.getDescription(),
             entity.getEventDate(),
             entity.getTimeSlots().stream().map(BusinessEventTimeSlot::getSlotLabel).toList(),
+            entity
+                .getTimeSlots()
+                .stream()
+                .map(s -> new BusinessEventTimeSlotResponse(s.getId(), s.getSlotLabel(), s.getSortOrder()))
+                .toList(),
             gov != null ? gov.getId() : null,
             gov != null ? gov.getName() : null,
             entity.getGoogleMapsUrl(),

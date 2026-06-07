@@ -119,6 +119,18 @@ export function businessEventDetailToEventItem(row: BusinessEventResponse): Even
 export function tiersFromBusinessEvent(row: BusinessEventResponse): TicketTier[] {
   const price = numPrice(row.priceJod);
   const currency = row.currency?.trim() || 'JOD';
+  const details = row.timeSlotDetails?.filter((s) => s?.slotLabel?.trim());
+  if (details?.length) {
+    return details.map((slot) => ({
+      id: String(slot.id),
+      eventId: String(row.id),
+      name: slot.slotLabel,
+      price,
+      currency,
+      benefits: [],
+      description: undefined,
+    }));
+  }
   const slots = row.timeSlots?.length ? row.timeSlots : ['General'];
   return slots.map((label, i) => ({
     id: `slot-${row.id}-${i}`,
@@ -129,6 +141,13 @@ export function tiersFromBusinessEvent(row: BusinessEventResponse): TicketTier[]
     benefits: [],
     description: undefined,
   }));
+}
+
+/** Parse API time slot id from a ticket tier (numeric id from `timeSlotDetails`). */
+export function apiTimeSlotIdFromTier(tierId: string | undefined): number | null {
+  if (!tierId || !/^\d+$/.test(tierId)) return null;
+  const n = Number(tierId);
+  return Number.isFinite(n) ? n : null;
 }
 
 export function favoriteEventRowToEventItem(row: FavoriteEventResponse): EventItem {
