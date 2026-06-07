@@ -9,12 +9,22 @@ from copy import deepcopy
 from pathlib import Path
 
 from docx import Document
+from docx.shared import Inches
 from docx.text.paragraph import Paragraph
 
 DEFAULT_SOURCE = Path(
     "/Users/ayazidan/Downloads/Graduation Project TEMPLATE (1)-2.docx"
 )
 DEFAULT_OUTPUT = Path("Vibook_Introduction_FIXED.docx")
+USE_CASE_IMAGE = Path(__file__).resolve().parent.parent / "docs" / "vibook-use-case-diagram.png"
+FIGURE_1_3_CAPTION = (
+    "Figure 1.3 illustrates Vibook actors and use cases inside the Vibook Platform boundary. "
+    "Guest users browse and view events without signing in. Consumer (USER) extends Guest with "
+    "registration, booking, favorites, ratings, and reporting. Business Partner (BUSINESS) extends "
+    "Consumer with profile application, event lifecycle management, photo uploads, and booking "
+    "status updates. Administrator (ADMIN) governs profile approval, content moderation, report "
+    "resolution, reference data, and analytics."
+)
 
 
 def _style_ref_cache(doc):
@@ -82,26 +92,44 @@ def find_chapter1_bounds(doc):
     return start, end
 
 
+def _ensure_table_columns(table, num_cols: int) -> None:
+    """Clone the last cell per row when the template has fewer columns."""
+    for row in table.rows:
+        while len(row.cells) < num_cols:
+            new_tc = deepcopy(row.cells[-1]._tc)
+            row._tr.append(new_tc)
+
+
 def update_timeline_table(doc):
     """Table 0: project timeline in Chapter 1."""
     if not doc.tables:
         return
     table = doc.tables[0]
     rows = [
-        ("WBS", "Task description", "Start date", "Finish date", "Progress"),
-        ("1", "Requirements analysis and domain modeling for event booking in Jordan", "Sep 2024", "Oct 2024", "100%"),
-        ("2", "System architecture and database design (MySQL, REST API)", "Oct 2024", "Nov 2024", "100%"),
-        ("3", "Backend implementation (Spring Boot, JWT, JPA entities)", "Nov 2024", "Feb 2025", "100%"),
-        ("4", "Mobile app implementation (Expo, consumer and partner flows)", "Jan 2025", "Apr 2025", "100%"),
-        ("5", "Admin web console and integration testing", "Mar 2025", "May 2025", "100%"),
-        ("6", "Documentation, UAT, and graduation report preparation", "May 2025", "Jun 2025", "90%"),
+        (
+            "WBS",
+            "Task Description",
+            "Start Date",
+            "Finish Date",
+            "Progress",
+            "Team Members Involved",
+        ),
+        ("1", "Research and Analysis", "1/3/2026", "14/3/2026", "14.3%", "Israa, Duha"),
+        ("2", "Requirements Gathering", "15/3/2026", "30/3/2026", "16.3%", "Israa, Duha"),
+        ("3", "Design and Planning", "31/3/2026", "18/4/2026", "19.4%", "Israa, Duha"),
+        ("4", "Implementation and Coding", "19/4/2026", "27/5/2026", "39.8%", "Aya"),
+        ("5", "Testing and Quality Assurance", "28/5/2026", "6/6/2026", "10.2%", "Aya"),
     ]
+    _ensure_table_columns(table, len(rows[0]))
     for ri, row_data in enumerate(rows):
         if ri >= len(table.rows):
             break
         for ci, val in enumerate(row_data):
             if ci < len(table.rows[ri].cells):
                 table.rows[ri].cells[ci].text = val
+    for ri in range(len(rows), len(table.rows)):
+        for ci in range(len(table.rows[ri].cells)):
+            table.rows[ri].cells[ci].text = ""
 
 
 SECTIONS = []  # populated in main
@@ -140,8 +168,8 @@ def build_sections():
                 "(Java 21, port 8080, prefix /api/v1), an Expo/React Native mobile application "
                 "(file-based routing via expo-router), and a Vite/React admin dashboard for users "
                 "with the ADMIN role. Persistent data is stored in MySQL database vibook_db using "
-                "Hibernate JPA with sixteen entity types including User, BusinessProfile, BusinessEvent, "
-                "Booking, Favorite, EventRating, ModerationReport, and reference data for governorates "
+                "Hibernate JPA with eighteen entity types and nine enumeration types including User, BusinessProfile, BusinessEvent, "
+                "Booking, Favorite, EventRating, ModerationReport, Payment, and reference data for governorates "
                 "and categories.\n\n"
                 "[PLACEHOLDER: Figure 1.1 - Vibook System Architecture Diagram]\n"
                 "Description: Diagram the three clients (mobile, admin-web), Spring Boot API, JWT "
@@ -162,16 +190,36 @@ def build_sections():
             "Tasks",
             "s70",
             (
-                "The project was decomposed into verifiable engineering tasks aligned with the repository "
-                "structure. Analysis and modeling tasks covered stakeholder needs, governorate/category "
-                "taxonomy, and booking state transitions. Backend tasks included security configuration, "
-                "JWT access and refresh tokens, twenty-three REST controllers, service-layer business rules, "
-                "and JPA repositories with admin list specifications. Mobile tasks covered authentication "
-                "hydration, Explore and search flows, event product-detail pages, checkout and payment, "
-                "favorites, ratings, reports, Arabic/English localization with RTL layout, and the business "
-                "partner hub under app/business/. Admin-web tasks included protected routing, Axios API client, "
-                "and pages for businesses, events, bookings, ratings, reports, and dashboard charts.\n\n"
-                "Table 1 summarizes the work breakdown schedule used for planning and tracking progress."
+                "The project was organized into five sequential work packages spanning March through June 2026, "
+                "as summarized in Table 1 and illustrated in Figure 1.2.\n\n"
+                "Task 1 — Research and Analysis (1 March – 14 March 2026): This initial task involved surveying "
+                "the regional lifestyle-booking market, reviewing comparable platforms, and analysing the technical "
+                "requirements of a full-stack mobile booking solution. The research identified the need for a "
+                "JWT-secured REST API, a file-based expo-router mobile architecture, and a React-based administrative "
+                "console. Outputs directly informed the technology selection and project scope.\n\n"
+                "Task 2 — Requirements Gathering (15 March – 30 March 2026): This phase captured functional and "
+                "non-functional requirements through structured analysis of the four target user personas. Use-case "
+                "scenarios were drafted for each role, covering event discovery, booking, partner onboarding, content "
+                "moderation, and analytics. Data entity requirements were identified and modeled, resulting in "
+                "eighteen JPA entities and nine enumeration types that collectively form the Vibook domain model.\n\n"
+                "Task 3 — Design and Planning (31 March – 18 April 2026): The team produced the system architecture, "
+                "entity-relationship model, REST API contract, and component designs for all three system components. "
+                "The layered backend architecture (controller, service, repository) was defined, the JWT authentication "
+                "flow was designed, and the mobile navigation structure using expo-router file-based routes was planned. "
+                "Wireframes for principal mobile screens and the admin dashboard were produced.\n\n"
+                "Task 4 — Implementation and Coding (19 April – 27 May 2026): Implementation was the most intensive "
+                "phase. The Spring Boot backend was built first, establishing the schema, security filter chain, JWT "
+                "generation, and all REST endpoints. The mobile application was developed in parallel, connecting each "
+                "screen to live API endpoints and removing all runtime mock data. The administrative console was built "
+                "subsequently, incorporating Recharts analytics visualisations and role-protected routing. Multipart "
+                "file-upload endpoints for profile images, logos, banners, and event photos were completed in this phase.\n\n"
+                "Task 5 — Testing and Quality Assurance (28 May – 6 June 2026): The final task focused on validating "
+                "the integrated system. Backend unit and integration tests were written for the role-lifecycle service "
+                "and the business-profile approval logic. End-to-end manual testing was conducted across the complete "
+                "booking workflow, the partner onboarding cycle, and the admin moderation pipeline. API endpoint coverage "
+                "was audited and discrepancies between mobile client calls and available backend routes were resolved.\n\n"
+                "Table 1 summarizes the work breakdown schedule used for planning and tracking progress. In Table 1, "
+                "the Progress column shows each task's WBS weight (percent of total project effort); weights sum to 100%."
             ),
         ),
         (
@@ -186,8 +234,8 @@ def build_sections():
                 "application.yml (datasource, JWT secret, upload directories, CORS patterns), mobile "
                 "EXPO_PUBLIC_API_URL, and admin VITE_API_BASE_URL.\n\n"
                 "[PLACEHOLDER: Figure 1.2 - Project Gantt Chart]\n"
-                "Description: Gantt chart derived from Table 1 timeline showing analysis, backend, mobile, "
-                "admin, and documentation phases with dependencies (API before client feature completion).\n\n"
+                "Description: Horizontal bar Gantt chart (see docs/vibook-project-gantt-chart.png) spanning "
+                "March – June 2026 with one row per Table 1 task and bars proportional to start and finish dates.\n\n"
                 "Quality activities included Spring Boot unit and integration tests, TypeScript type-checking "
                 "on mobile and admin, and manual end-to-end verification of booking, approval, and moderation "
                 "flows described in docs/GRADUATION_PROJECT_HANDOFF.md and docs/MOBILE_AND_ADMIN_GUIDE.md."
@@ -197,17 +245,17 @@ def build_sections():
             "Planning of the Development Phases",
             "s70",
             (
-                "Development phases were ordered to reduce integration risk:\n\n"
-                "Phase 1 — Foundation: MySQL schema via JPA entities, auth register/login/refresh/logout, "
-                "governorate and category seed data, and public catalog reads.\n\n"
-                "Phase 2 — Consumer experience: mobile Explore, search, filters, event PDP, favorites, "
-                "bookings API integration, ratings, and user reports.\n\n"
-                "Phase 3 — Business partner: business profile application and submit, admin approval, "
-                "ROLE_BUSINESS lifecycle, partner event CRUD, time slots, photo uploads, and booking status updates.\n\n"
-                "Phase 4 — Administration: admin-web authentication, moderation queues, user management patches, "
-                "and GET /admin/analytics/summary dashboard metrics.\n\n"
-                "Phase 5 — Stabilization: removal of runtime mock catalog in favor of API-only data, PayPal "
-                "Sandbox checkout wiring, production data cleanup, and graduation documentation."
+                "Development phases followed the five-task schedule in Table 1:\n\n"
+                "Phase 1 — Research and Analysis (1–14 March 2026): market and technical survey; selection of "
+                "Spring Boot, Expo/expo-router, and React admin stack.\n\n"
+                "Phase 2 — Requirements Gathering (15–30 March 2026): persona-based use cases; eighteen JPA "
+                "entities and nine enums modeled for the domain.\n\n"
+                "Phase 3 — Design and Planning (31 March – 18 April 2026): architecture, ER model, REST contract, "
+                "JWT flow, mobile route map, and admin wireframes.\n\n"
+                "Phase 4 — Implementation and Coding (19 April – 27 May 2026): backend, mobile, and admin-web "
+                "built against live APIs; mock catalog removed; multipart uploads completed.\n\n"
+                "Phase 5 — Testing and Quality Assurance (28 May – 6 June 2026): unit/integration tests, manual "
+                "E2E validation of booking, partner onboarding, and moderation; API audit and client alignment."
             ),
         ),
         (
@@ -371,8 +419,8 @@ def rebuild_chapter1_body(doc, intro_idx, chapter2_idx, style_refs):
             )
             anchor = insert_paragraph_after(
                 cap,
-                "Table 1 lists the work breakdown structure, schedule, and completion status for major Vibook "
-                "delivery tasks from requirements through documentation.",
+                "Table 1 lists the work breakdown structure, schedule, WBS weights, and team assignments for major "
+                "Vibook delivery tasks from requirements through documentation.",
                 "s70",
                 style_refs=style_refs,
             )
@@ -385,27 +433,15 @@ def rebuild_chapter1_body(doc, intro_idx, chapter2_idx, style_refs):
             )
 
     anchor = insert_paragraph_after(anchor, "", "Normal", style_refs=style_refs)
-    anchor = insert_paragraph_after(
-        anchor,
-        "[PLACEHOLDER: Figure 1.3 - Vibook Use Case Diagram]\n"
-        "Description: Show actors Guest, Consumer (USER), Business Partner, and Admin interacting with "
-        "use cases Discover Events, Book Event, Manage Business Profile, Publish Event, Moderate Content, "
-        "and View Analytics based on implemented mobile and admin flows.",
-        "InfoBlue",
-        style_refs=style_refs,
-    )
+    if USE_CASE_IMAGE.is_file():
+        pic_para = insert_paragraph_after(anchor, "", "Normal", style_refs=style_refs)
+        pic_para.add_run().add_picture(str(USE_CASE_IMAGE), width=Inches(6.4))
+        anchor = pic_para
     anchor = insert_paragraph_after(anchor, "", "Normal", style_refs=style_refs)
     anchor = insert_paragraph_after(
         anchor, "Figure 1.3 Vibook Use Case Diagram", "Caption", style_refs=style_refs
     )
-    insert_paragraph_after(
-        anchor,
-        "Figure 1.3 illustrates primary interactions between Vibook actors and the implemented booking, "
-        "partner onboarding, and administration capabilities. Replace the placeholder with the project-specific "
-        "diagram before submission.",
-        "InfoBlue",
-        style_refs=style_refs,
-    )
+    insert_paragraph_after(anchor, FIGURE_1_3_CAPTION, "s70", style_refs=style_refs)
 
 
 def validate_docx(path):

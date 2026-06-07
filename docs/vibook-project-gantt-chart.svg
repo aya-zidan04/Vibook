@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="460" viewBox="0 0 1280 460">
+<defs>
+<style type="text/css"><![CDATA[
+  .title { font: 700 22px 'Helvetica Neue', Arial, sans-serif; fill: #1B1B1B; }
+  .subtitle { font: 400 13px 'Helvetica Neue', Arial, sans-serif; fill: #555; }
+  .axis { font: 500 12px 'Helvetica Neue', Arial, sans-serif; fill: #444; }
+  .task-id { font: 700 12px 'Helvetica Neue', Arial, sans-serif; fill: #2D6A4F; }
+  .task-label { font: 400 11.5px 'Helvetica Neue', Arial, sans-serif; fill: #222; }
+  .grid { stroke: #E4DDD2; stroke-width: 1; }
+  .frame { fill: none; stroke: #CFC7BC; stroke-width: 1; }
+  .legend { font: 400 11px 'Helvetica Neue', Arial, sans-serif; fill: #555; }
+]]></style>
+</defs>
+<rect width="100%" height="100%" fill="#FCFBF8"/>
+<text x="40" y="42" class="title">Figure 1.2 — Vibook Project Gantt Chart</text>
+<text x="40" y="64" class="subtitle">Table 1 schedule · March – June 2026</text>
+<rect x="430" y="88" width="810" height="316" class="frame"/>
+<line x1="430.0" y1="88" x2="430.0" y2="404" class="grid"/>
+<text x="430.0" y="426" text-anchor="middle" class="axis">Mar 2026</text>
+<line x1="637.5" y1="88" x2="637.5" y2="404" class="grid"/>
+<text x="637.5" y="426" text-anchor="middle" class="axis">Apr 2026</text>
+<line x1="838.3" y1="88" x2="838.3" y2="404" class="grid"/>
+<text x="838.3" y="426" text-anchor="middle" class="axis">May 2026</text>
+<line x1="1045.9" y1="88" x2="1045.9" y2="404" class="grid"/>
+<text x="1045.9" y="426" text-anchor="middle" class="axis">Jun 2026</text>
+<text x="36" y="110.9" class="task-id">Task 1</text>
+<text x="78" y="110.9" class="task-label">Research and Analysis</text>
+<rect x="430.0" y="99.4" width="87.0" height="32.9" rx="4" fill="#2D6A4F" />
+<rect x="430.0" y="99.4" width="12.4" height="32.9" rx="4" fill="#1B4332" opacity="0.35" />
+<text x="523.0" y="123.0" class="axis">14.3%</text>
+<line x1="430" y1="151.2" x2="1240" y2="151.2" class="grid" opacity="0.55"/>
+<text x="36" y="174.1" class="task-id">Task 2</text>
+<text x="78" y="174.1" class="task-label">Requirements Gathering</text>
+<rect x="523.7" y="162.6" width="100.4" height="32.9" rx="4" fill="#40916C" />
+<rect x="523.7" y="162.6" width="16.4" height="32.9" rx="4" fill="#1B4332" opacity="0.35" />
+<text x="630.1" y="186.2" class="axis">16.3%</text>
+<line x1="430" y1="214.4" x2="1240" y2="214.4" class="grid" opacity="0.55"/>
+<text x="36" y="237.3" class="task-id">Task 3</text>
+<text x="78" y="237.3" class="task-label">Design and Planning</text>
+<rect x="630.8" y="225.8" width="120.5" height="32.9" rx="4" fill="#52B788" />
+<rect x="630.8" y="225.8" width="23.4" height="32.9" rx="4" fill="#1B4332" opacity="0.35" />
+<text x="757.3" y="249.4" class="axis">19.4%</text>
+<line x1="430" y1="277.6" x2="1240" y2="277.6" class="grid" opacity="0.55"/>
+<text x="36" y="300.5" class="task-id">Task 4</text>
+<text x="78" y="300.5" class="task-label">Implementation and Coding</text>
+<rect x="758.0" y="289.0" width="254.4" height="32.9" rx="4" fill="#74C69D" />
+<rect x="758.0" y="289.0" width="101.2" height="32.9" rx="4" fill="#1B4332" opacity="0.35" />
+<text x="1018.4" y="312.6" class="axis">39.8%</text>
+<line x1="430" y1="340.8" x2="1240" y2="340.8" class="grid" opacity="0.55"/>
+<text x="36" y="363.7" class="task-id">Task 5</text>
+<text x="78" y="363.7" class="task-label">Testing and Quality Assurance</text>
+<rect x="1019.1" y="352.2" width="60.2" height="32.9" rx="4" fill="#95D5B2" />
+<rect x="1019.1" y="352.2" width="6.1" height="32.9" rx="4" fill="#1B4332" opacity="0.35" />
+<text x="1085.3" y="375.8" class="axis">10.2%</text>
+<text x="430" y="442" class="legend">Source: Table 1 (WBS 1–5). Bars use exact start and finish dates; labels show WBS weights.</text>
+</svg>

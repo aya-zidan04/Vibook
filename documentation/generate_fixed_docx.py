@@ -17,6 +17,17 @@ DEFAULT_SOURCE = Path(
     "/Users/ayazidan/Downloads/Graduation Project TEMPLATE (1)-2.docx"
 )
 DEFAULT_OUTPUT = Path("Vibook_Introduction_FIXED.docx")
+USE_CASE_IMAGE = Path(__file__).resolve().parent.parent / "docs" / "vibook-use-case-diagram.png"
+USE_CASE_IMAGE_REL = "rIdVibookUseCase"
+USE_CASE_IMAGE_TARGET = "media/vibook-use-case-diagram.png"
+FIGURE_1_3_CAPTION = (
+    "Figure 1.3 illustrates Vibook actors and use cases inside the Vibook Platform boundary. "
+    "Guest users browse and view events without signing in. Consumer (USER) extends Guest with "
+    "registration, booking, favorites, ratings, and reporting. Business Partner (BUSINESS) extends "
+    "Consumer with profile application, event lifecycle management, photo uploads, and booking "
+    "status updates. Administrator (ADMIN) governs profile approval, content moderation, report "
+    "resolution, reference data, and analytics."
+)
 
 # Register Word namespace for readable output (not required for parsing).
 ET.register_namespace("w", "http://schemas.openxmlformats.org/wordprocessingml/2006/main")
@@ -77,6 +88,118 @@ STYLE_IDS = {
 }
 
 
+def make_image_para(
+    body: ET.Element,
+    refs: dict[str, ET.Element],
+    rel_id: str,
+    width_emu: int,
+    height_emu: int,
+    doc_pr_id: int = 9001,
+) -> ET.Element:
+    """Inline PNG paragraph for Word drawingML."""
+    p = make_para(body, refs, "Normal", "")
+    r = ET.SubElement(p, f"{W}r")
+    drawing = ET.SubElement(r, f"{W}drawing")
+    inline = ET.SubElement(
+        drawing,
+        "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}inline",
+    )
+    inline.set("distT", "0")
+    inline.set("distB", "0")
+    inline.set("distL", "0")
+    inline.set("distR", "0")
+    extent = ET.SubElement(
+        inline, "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}extent"
+    )
+    extent.set("cx", str(width_emu))
+    extent.set("cy", str(height_emu))
+    doc_pr = ET.SubElement(
+        inline, "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}docPr"
+    )
+    doc_pr.set("id", str(doc_pr_id))
+    doc_pr.set("name", "Figure 1.3 Use Case Diagram")
+    cnv = ET.SubElement(
+        inline,
+        "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}cNvGraphicFramePr",
+    )
+    ET.SubElement(
+        cnv,
+        "{http://schemas.openxmlformats.org/drawingml/2006/main}graphicFrameLocks",
+        {"noChangeAspect": "1"},
+    )
+    graphic = ET.SubElement(inline, "{http://schemas.openxmlformats.org/drawingml/2006/main}graphic")
+    graphic_data = ET.SubElement(
+        graphic,
+        "{http://schemas.openxmlformats.org/drawingml/2006/main}graphicData",
+        {"uri": "http://schemas.openxmlformats.org/drawingml/2006/picture"},
+    )
+    pic = ET.SubElement(
+        graphic_data, "{http://schemas.openxmlformats.org/drawingml/2006/picture}pic"
+    )
+    nv = ET.SubElement(pic, "{http://schemas.openxmlformats.org/drawingml/2006/picture}nvPicPr")
+    ET.SubElement(
+        nv, "{http://schemas.openxmlformats.org/drawingml/2006/picture}cNvPr", {"id": "0", "name": ""}
+    )
+    ET.SubElement(nv, "{http://schemas.openxmlformats.org/drawingml/2006/picture}cNvPicPr")
+    blip_fill = ET.SubElement(
+        pic, "{http://schemas.openxmlformats.org/drawingml/2006/picture}blipFill"
+    )
+    ET.SubElement(
+        blip_fill,
+        "{http://schemas.openxmlformats.org/drawingml/2006/main}blip",
+        {"{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed": rel_id},
+    )
+    stretch = ET.SubElement(blip_fill, "{http://schemas.openxmlformats.org/drawingml/2006/main}stretch")
+    ET.SubElement(stretch, "{http://schemas.openxmlformats.org/drawingml/2006/main}fillRect")
+    sp_pr = ET.SubElement(pic, "{http://schemas.openxmlformats.org/drawingml/2006/picture}spPr")
+    xfrm = ET.SubElement(sp_pr, "{http://schemas.openxmlformats.org/drawingml/2006/main}xfrm")
+    ET.SubElement(xfrm, "{http://schemas.openxmlformats.org/drawingml/2006/main}off", {"x": "0", "y": "0"})
+    ET.SubElement(
+        xfrm,
+        "{http://schemas.openxmlformats.org/drawingml/2006/main}ext",
+        {"cx": str(width_emu), "cy": str(height_emu)},
+    )
+    ET.SubElement(
+        sp_pr,
+        "{http://schemas.openxmlformats.org/drawingml/2006/main}prstGeom",
+        {"prst": "rect"},
+    ).append(ET.Element("{http://schemas.openxmlformats.org/drawingml/2006/main}avLst"))
+    return p
+
+
+def image_emu_size(png_path: Path, width_inches: float = 6.4) -> tuple[int, int]:
+    try:
+        from PIL import Image
+
+        with Image.open(png_path) as im:
+            w, h = im.size
+        height_inches = width_inches * (h / w)
+    except Exception:
+        height_inches = width_inches * 0.62
+    emu_per_inch = 914400
+    return int(width_inches * emu_per_inch), int(height_inches * emu_per_inch)
+
+
+def add_image_relationship(rels_xml: bytes, rel_id: str, target: str) -> bytes:
+    rel_ns = "http://schemas.openxmlformats.org/package/2006/relationships"
+    root = ET.fromstring(rels_xml)
+    for rel in root:
+        if rel.get("Id") == rel_id:
+            rel.set("Target", target)
+            break
+    else:
+        rel = ET.SubElement(
+            root,
+            f"{{{rel_ns}}}Relationship",
+            {
+                "Id": rel_id,
+                "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+                "Target": target,
+            },
+        )
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
 def make_para(body: ET.Element, refs: dict[str, ET.Element], style: str, text: str) -> ET.Element:
     ref = refs.get(style) or refs.get("Normal") or next(body.iter(f"{W}p"))
     p = clone_para(ref)
@@ -118,6 +241,16 @@ def chapter1_indices(body: ET.Element) -> tuple[int, int, int]:
     return ch1, intro, ch2
 
 
+def ensure_table_columns(tbl: ET.Element, num_cols: int) -> None:
+    """Clone the last w:tc per row when the template has fewer columns."""
+    for tr in tbl.findall(f"{W}tr"):
+        cells = tr.findall(f"{W}tc")
+        while len(cells) < num_cols:
+            new_tc = deepcopy(cells[-1])
+            tr.append(new_tc)
+            cells.append(new_tc)
+
+
 def first_table_in_range(body: ET.Element, start: int, end: int) -> ET.Element | None:
     children = list(body)
     for i in range(start, end):
@@ -126,7 +259,13 @@ def first_table_in_range(body: ET.Element, start: int, end: int) -> ET.Element |
     return None
 
 
-def rebuild_chapter1(document_xml: bytes, table_updates: list[tuple[int, list[str]]]) -> bytes:
+def rebuild_chapter1(
+    document_xml: bytes,
+    table_updates: list[tuple[int, list[str]]],
+    embed_use_case_image: bool = False,
+    image_rel_id: str = USE_CASE_IMAGE_REL,
+    image_emu: tuple[int, int] | None = None,
+) -> bytes:
     root = ET.fromstring(document_xml)
     body = root.find(f"{W}body")
     if body is None:
@@ -169,8 +308,8 @@ def rebuild_chapter1(document_xml: bytes, table_updates: list[tuple[int, list[st
                     body,
                     refs,
                     "s70",
-                    "Table 1 lists the work breakdown structure, schedule, and completion status for major Vibook "
-                    "delivery tasks from requirements through documentation.",
+                    "Table 1 lists the work breakdown structure, schedule, WBS weights, and team assignments for major "
+                    "Vibook delivery tasks from requirements through documentation.",
                 )
             )
             continue
@@ -179,33 +318,18 @@ def rebuild_chapter1(document_xml: bytes, table_updates: list[tuple[int, list[st
             append_after_anchor(make_para(body, refs, style, part))
 
     append_after_anchor(make_para(body, refs, "Normal", ""))
-    append_after_anchor(
-        make_para(
-            body,
-            refs,
-            "InfoBlue",
-            "[PLACEHOLDER: Figure 1.3 - Vibook Use Case Diagram]\n"
-            "Description: Show actors Guest, Consumer (USER), Business Partner, and Admin interacting with "
-            "use cases Discover Events, Book Event, Manage Business Profile, Publish Event, Moderate Content, "
-            "and View Analytics based on implemented mobile and admin flows.",
+    if embed_use_case_image and image_emu is not None:
+        append_after_anchor(
+            make_image_para(body, refs, image_rel_id, image_emu[0], image_emu[1])
         )
-    )
     append_after_anchor(make_para(body, refs, "Normal", ""))
     append_after_anchor(make_para(body, refs, "Caption", "Figure 1.3 Vibook Use Case Diagram"))
-    append_after_anchor(
-        make_para(
-            body,
-            refs,
-            "InfoBlue",
-            "Figure 1.3 illustrates primary interactions between Vibook actors and the implemented booking, "
-            "partner onboarding, and administration capabilities. Replace the placeholder with the project-specific "
-            "diagram before submission.",
-        )
-    )
+    append_after_anchor(make_para(body, refs, "s70", FIGURE_1_3_CAPTION))
 
     # Update first table in document (timeline) if present.
     tbl = body.find(f".//{W}tbl")
     if tbl is not None and table_updates:
+        ensure_table_columns(tbl, len(table_updates[0]))
         rows = tbl.findall(f"{W}tr")
         for ri, row_vals in enumerate(table_updates):
             if ri >= len(rows):
@@ -223,26 +347,49 @@ def rebuild_chapter1(document_xml: bytes, table_updates: list[tuple[int, list[st
 
 def patch_docx(source: Path, output: Path) -> None:
     table_rows = [
-        ("WBS", "Task description", "Start date", "Finish date", "Progress"),
-        ("1", "Requirements analysis and domain modeling for event booking in Jordan", "Sep 2024", "Oct 2024", "100%"),
-        ("2", "System architecture and database design (MySQL, REST API)", "Oct 2024", "Nov 2024", "100%"),
-        ("3", "Backend implementation (Spring Boot, JWT, JPA entities)", "Nov 2024", "Feb 2025", "100%"),
-        ("4", "Mobile app implementation (Expo, consumer and partner flows)", "Jan 2025", "Apr 2025", "100%"),
-        ("5", "Admin web console and integration testing", "Mar 2025", "May 2025", "100%"),
-        ("6", "Documentation, UAT, and graduation report preparation", "May 2025", "Jun 2025", "90%"),
+        (
+            "WBS",
+            "Task Description",
+            "Start Date",
+            "Finish Date",
+            "Progress",
+            "Team Members Involved",
+        ),
+        ("1", "Research and Analysis", "1/3/2026", "14/3/2026", "14.3%", "Israa, Duha"),
+        ("2", "Requirements Gathering", "15/3/2026", "30/3/2026", "16.3%", "Israa, Duha"),
+        ("3", "Design and Planning", "31/3/2026", "18/4/2026", "19.4%", "Israa, Duha"),
+        ("4", "Implementation and Coding", "19/4/2026", "27/5/2026", "39.8%", "Aya"),
+        ("5", "Testing and Quality Assurance", "28/5/2026", "6/6/2026", "10.2%", "Aya"),
     ]
 
-    new_document = None
+    embed_image = USE_CASE_IMAGE.is_file()
+    image_emu = image_emu_size(USE_CASE_IMAGE) if embed_image else None
+
     with zipfile.ZipFile(source, "r") as zin:
-        new_document = rebuild_chapter1(zin.read("word/document.xml"), table_rows)
+        new_document = rebuild_chapter1(
+            zin.read("word/document.xml"),
+            table_rows,
+            embed_use_case_image=embed_image,
+            image_emu=image_emu,
+        )
+        new_rels = None
+        if embed_image:
+            new_rels = add_image_relationship(
+                zin.read("word/_rels/document.xml.rels"),
+                USE_CASE_IMAGE_REL,
+                USE_CASE_IMAGE_TARGET,
+            )
         with zipfile.ZipFile(output, "w") as zout:
             for info in zin.infolist():
-                data = (
-                    new_document
-                    if info.filename == "word/document.xml"
-                    else zin.read(info.filename)
-                )
+                if info.filename == "word/document.xml":
+                    data = new_document
+                elif info.filename == "word/_rels/document.xml.rels" and new_rels is not None:
+                    data = new_rels
+                else:
+                    data = zin.read(info.filename)
                 zout.writestr(info, data)
+            if embed_image:
+                zout.writestr("word/media/vibook-use-case-diagram.png", USE_CASE_IMAGE.read_bytes())
 
 
 def validate_docx(path: Path) -> list[str]:
