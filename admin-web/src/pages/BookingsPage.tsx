@@ -1,22 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  cancelAdminBooking,
-  completeAdminBooking,
-  fetchAdminBookingsPage,
-  fetchBusinessProfilesPage,
-} from '@/api/adminApi';
+import { fetchAdminBookingsPage, fetchBusinessProfilesPage } from '@/api/adminApi';
 import type { AdminBookingResponse, BookingStatus, BusinessProfileResponse } from '@/api/types';
 import { useAdminChrome } from '@/components/layout/useAdminChrome';
 import { BookingStatusBadge, PaymentStatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useToast } from '@/components/ui/useToast';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
-
-type Dialog = null | { type: 'cancel' | 'complete'; row: AdminBookingResponse };
 
 const STATUS_OPTIONS: Array<BookingStatus | 'ALL'> = ['ALL', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'];
 
@@ -31,7 +22,6 @@ const STATUS_LABEL_KEY: Record<BookingStatus | 'ALL', string> = {
 export function BookingsPage() {
   const { t } = useAdminI18n();
   const { headerSearch } = useAdminChrome();
-  const { showToast } = useToast();
   const [rows, setRows] = useState<AdminBookingResponse[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -42,9 +32,6 @@ export function BookingsPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [businesses, setBusinesses] = useState<BusinessProfileResponse[]>([]);
-  const [dialog, setDialog] = useState<Dialog>(null);
-  const [busy, setBusy] = useState(false);
-
   useEffect(() => {
     void (async () => {
       try {
@@ -82,26 +69,6 @@ export function BookingsPage() {
   useEffect(() => {
     void load();
   }, [load]);
-
-  async function runDialog() {
-    if (!dialog) return;
-    setBusy(true);
-    try {
-      if (dialog.type === 'cancel') {
-        await cancelAdminBooking(dialog.row.id, t('bookings.adminOverrideReason'));
-        showToast(t('bookings.cancelledToast'), 'success');
-      } else {
-        await completeAdminBooking(dialog.row.id);
-        showToast(t('bookings.completedToast'), 'success');
-      }
-      setDialog(null);
-      await load();
-    } catch (e) {
-      showToast(getFriendlyErrorMessage(e, t('bookings.actionFailed')), 'error');
-    } finally {
-      setBusy(false);
-    }
-  }
 
   if (error) {
     return (
@@ -259,16 +226,6 @@ export function BookingsPage() {
                             {t('table.view')}
                           </Button>
                         </Link>
-                        {r.status !== 'CANCELLED' && r.status !== 'COMPLETED' ? (
-                          <>
-                            <Button variant="dangerOutline" size="sm" onClick={() => setDialog({ type: 'cancel', row: r })}>
-                              {t('bookings.cancelBtn')}
-                            </Button>
-                            <Button variant="primary" size="sm" onClick={() => setDialog({ type: 'complete', row: r })}>
-                              {t('bookings.completeBtn')}
-                            </Button>
-                          </>
-                        ) : null}
                       </div>
                     </td>
                   </tr>
@@ -293,25 +250,6 @@ export function BookingsPage() {
         </>
       )}
 
-      <ConfirmDialog
-        open={dialog?.type === 'cancel'}
-        title={t('bookings.cancelTitle')}
-        message={t('bookings.cancelMsg', { id: dialog?.type === 'cancel' ? dialog.row.id : '' })}
-        confirmLabel={t('bookings.cancelConfirm')}
-        danger
-        loading={busy}
-        onConfirm={() => void runDialog()}
-        onCancel={() => setDialog(null)}
-      />
-      <ConfirmDialog
-        open={dialog?.type === 'complete'}
-        title={t('bookings.completeTitle')}
-        message={t('bookings.completeMsg', { id: dialog?.type === 'complete' ? dialog.row.id : '' })}
-        confirmLabel={t('bookings.completeConfirm')}
-        loading={busy}
-        onConfirm={() => void runDialog()}
-        onCancel={() => setDialog(null)}
-      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { BusinessPartnerGateBanner } from '@/components/business/BusinessPartnerGateBanner';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/Button';
 import { Screen } from '@/components/layout/Screen';
@@ -19,6 +20,8 @@ export default function BusinessEventsIndexScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const events = useBusinessHubStore((s) => s.events);
+  const apiProfileStatus = useBusinessHubStore((s) => s.apiProfileStatus);
+  const canManage = apiProfileStatus === 'APPROVED';
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const row = (item: BusinessEventRecord) => {
@@ -28,8 +31,11 @@ export default function BusinessEventsIndexScreen() {
     return (
       <View key={item.id} style={styles.card}>
         <Pressable
-          onPress={() => router.push(`/business/events/${item.id}`)}
-          style={({ pressed }) => [styles.cardMain, pressed && styles.pressed]}
+          onPress={() => {
+            if (!canManage) return;
+            router.push(`/business/events/${item.id}`);
+          }}
+          style={({ pressed }) => [styles.cardMain, pressed && canManage && styles.pressed]}
         >
           <AppText variant="body-em" color="text">
             {item.title.trim() || t('businessHub.eventUntitled')}
@@ -43,6 +49,7 @@ export default function BusinessEventsIndexScreen() {
             </AppText>
           ) : null}
         </Pressable>
+        {canManage ? (
         <Pressable
           disabled={busyId === item.id}
           onPress={() => {
@@ -75,6 +82,7 @@ export default function BusinessEventsIndexScreen() {
             {item.hidden ? t('businessHub.eventShowPublic') : t('businessHub.eventHidePublic')}
           </AppText>
         </Pressable>
+        ) : null}
       </View>
     );
   };
@@ -94,7 +102,10 @@ export default function BusinessEventsIndexScreen() {
         </View>
       }
     >
-      <PrimaryButton title={t('businessHub.eventAdd')} onPress={() => router.push('/business/events/new')} />
+      <BusinessPartnerGateBanner />
+      {canManage ? (
+        <PrimaryButton title={t('businessHub.eventAdd')} onPress={() => router.push('/business/events/new')} />
+      ) : null}
       {events.length === 0 ? (
         <AppText variant="body" color="textMuted">
           {t('businessHub.eventsEmpty')}

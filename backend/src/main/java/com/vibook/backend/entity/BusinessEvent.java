@@ -14,6 +14,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.BatchSize;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -84,6 +85,7 @@ public class BusinessEvent {
 
     @OneToMany(mappedBy = "businessEvent", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
+    @BatchSize(size = 32)
     private List<BusinessEventPhoto> photos = new ArrayList<>();
 
     /** Internal moderation notes; not shown to consumers. */

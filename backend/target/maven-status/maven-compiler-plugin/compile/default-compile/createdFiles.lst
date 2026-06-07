@@ -89,6 +89,7 @@ com/vibook/backend/mapper/PaymentMethodMapper.class
 com/vibook/backend/entity/Role.class
 com/vibook/backend/repository/SubcategoryRepository.class
 com/vibook/backend/entity/Favorite.class
+com/vibook/backend/util/BookingCapacityPolicy.class
 com/vibook/backend/service/ModerationReportSubmissionService.class
 com/vibook/backend/security/JwtAuthenticationFilter.class
 com/vibook/backend/dto/PayPalCaptureOrderRequest.class
@@ -111,6 +112,7 @@ com/vibook/backend/service/impl/AdminActivityLogServiceImpl.class
 com/vibook/backend/controller/BusinessBookingController.class
 com/vibook/backend/repository/CategoryRepository.class
 com/vibook/backend/controller/GovernorateController.class
+com/vibook/backend/util/BusinessProfileAccessGuard.class
 com/vibook/backend/config/CategoryDataLoader.class
 com/vibook/backend/dto/BulkBusinessProfileRejectRequest.class
 com/vibook/backend/dto/BusinessEventPhotoResponse.class
@@ -159,7 +161,9 @@ com/vibook/backend/config/SecurityConfig.class
 com/vibook/backend/controller/AdminEventRatingModerationController.class
 com/vibook/backend/controller/AdminUserController.class
 com/vibook/backend/service/FavoriteService.class
+com/vibook/backend/migration/LegacyReapprovalDraftMigration.class
 com/vibook/backend/dto/SubcategoryResponse.class
+com/vibook/backend/config/LegacyReapprovalDraftMigrationConfig.class
 com/vibook/backend/dto/FavoriteEventResponse.class
 com/vibook/backend/service/UserService.class
 com/vibook/backend/service/AdminBookingModerationService.class
@@ -200,6 +204,7 @@ com/vibook/backend/service/impl/PayPalPaymentServiceImpl.class
 com/vibook/backend/exception/BadRequestException.class
 com/vibook/backend/controller/AuthController.class
 com/vibook/backend/entity/BusinessProfileStatus.class
+com/vibook/backend/util/BusinessEventValidation.class
 com/vibook/backend/controller/ModerationReportController.class
 com/vibook/backend/dto/ModerationReportCreatedResponse.class
 com/vibook/backend/entity/ModerationReport.class

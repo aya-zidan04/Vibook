@@ -27,6 +27,8 @@ import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.BusinessEventService;
 import com.vibook.backend.service.EventRatingService;
 import com.vibook.backend.service.ProfileImageStorageService;
+import com.vibook.backend.util.BusinessEventValidation;
+import com.vibook.backend.util.BusinessProfileAccessGuard;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -81,8 +83,8 @@ public class BusinessEventServiceImpl implements BusinessEventService {
             .findByUser(user)
             .orElseThrow(() -> new NotFoundException("Business profile not found"));
 
-        if (!isAdmin(user) && profile.getStatus() != BusinessProfileStatus.APPROVED) {
-            throw new ForbiddenException("Your business profile must be approved before you can create events");
+        if (!isAdmin(user)) {
+            BusinessProfileAccessGuard.requireApprovedForManagement(profile);
         }
 
         Subcategory subcategory = subcategoryRepository
@@ -98,12 +100,14 @@ public class BusinessEventServiceImpl implements BusinessEventService {
         if (slots.isEmpty()) {
             throw new BadRequestException("At least one time slot is required");
         }
+        BusinessEventValidation.validateEventDateNotPast(request.eventDate());
 
         BusinessEvent event = new BusinessEvent();
         event.setBusinessProfile(profile);
         applyScalars(event, request, subcategory, governorate);
         replaceTimeSlots(event, slots);
         replacePhotos(event, request.photoUrls());
+        validateEventState(event);
 
         BusinessEvent saved = businessEventRepository.save(event);
         BusinessEvent detailed = businessEventRepository.findWithDetailsById(saved.getId()).orElse(saved);
@@ -137,7 +141,7 @@ public class BusinessEventServiceImpl implements BusinessEventService {
     @Override
     @Transactional
     public BusinessEventResponse update(Long id, BusinessEventUpsertRequest request) {
-        BusinessEvent event = requireEventForAccess(id);
+        BusinessEvent event = requireEventForMutation(id);
 
         Subcategory subcategory = subcategoryRepository
             .findById(request.subcategoryId())
@@ -152,10 +156,12 @@ public class BusinessEventServiceImpl implements BusinessEventService {
         if (slots.isEmpty()) {
             throw new BadRequestException("At least one time slot is required");
         }
+        BusinessEventValidation.validateEventDateNotPast(request.eventDate());
 
         applyScalars(event, request, subcategory, governorate);
         replaceTimeSlots(event, slots);
         replacePhotos(event, request.photoUrls());
+        validateEventState(event);
 
         BusinessEvent saved = businessEventRepository.save(event);
         BusinessEvent detailed = businessEventRepository.findWithDetailsById(saved.getId()).orElse(saved);
@@ -165,14 +171,14 @@ public class BusinessEventServiceImpl implements BusinessEventService {
     @Override
     @Transactional
     public void delete(Long id) {
-        BusinessEvent event = requireEventForAccess(id);
+        BusinessEvent event = requireEventForMutation(id);
         businessEventRepository.delete(event);
     }
 
     @Override
     @Transactional
     public BusinessEventResponse hide(Long id) {
-        BusinessEvent event = requireEventForAccess(id);
+        BusinessEvent event = requireEventForMutation(id);
         event.setHidden(true);
         BusinessEvent saved = businessEventRepository.save(event);
         BusinessEvent detailed = businessEventRepository.findWithDetailsById(saved.getId()).orElse(saved);
@@ -182,8 +188,9 @@ public class BusinessEventServiceImpl implements BusinessEventService {
     @Override
     @Transactional
     public BusinessEventResponse unhide(Long id) {
-        BusinessEvent event = requireEventForAccess(id);
+        BusinessEvent event = requireEventForMutation(id);
         event.setHidden(false);
+        BusinessEventValidation.validateVisibleEventHasPhotos(event);
         BusinessEvent saved = businessEventRepository.save(event);
         BusinessEvent detailed = businessEventRepository.findWithDetailsById(saved.getId()).orElse(saved);
         return eventRatingService.attachViewerRatingFields(detailed, getCurrentAuthenticatedUser().getEmail());
@@ -192,7 +199,12 @@ public class BusinessEventServiceImpl implements BusinessEventService {
     @Override
     @Transactional
     public BusinessEventResponse uploadPhoto(Long eventId, MultipartFile image) {
-        BusinessEvent event = requireEventForAccess(eventId);
+        BusinessEvent event = requireEventForMutation(eventId);
+        if (event.getPhotos().size() >= BusinessEventValidation.MAX_PHOTOS) {
+            throw new BadRequestException(
+                "At most " + BusinessEventValidation.MAX_PHOTOS + " photos are allowed per event"
+            );
+        }
         String publicPath = profileImageStorageService.saveBusinessEventPhoto(image);
         int nextOrder =
             event.getPhotos().stream().map(BusinessEventPhoto::getSortOrder).max(Comparator.naturalOrder()).orElse(-1) + 1;
@@ -209,7 +221,7 @@ public class BusinessEventServiceImpl implements BusinessEventService {
     @Override
     @Transactional
     public BusinessEventResponse deletePhoto(Long eventId, Long photoId) {
-        BusinessEvent event = requireEventForAccess(eventId);
+        BusinessEvent event = requireEventForMutation(eventId);
         BusinessEventPhoto photo = businessEventPhotoRepository
             .findByIdAndBusinessEvent_Id(photoId, eventId)
             .orElseThrow(() -> new NotFoundException("Event photo not found"));
@@ -237,13 +249,21 @@ public class BusinessEventServiceImpl implements BusinessEventService {
         return event;
     }
 
+    private BusinessEvent requireEventForMutation(Long id) {
+        BusinessEvent event = requireEventForAccess(id);
+        if (!isAdmin(getCurrentAuthenticatedUser())) {
+            BusinessProfileAccessGuard.requireApprovedForManagement(event.getBusinessProfile());
+        }
+        return event;
+    }
+
     private void applyScalars(
         BusinessEvent entity,
         BusinessEventUpsertRequest request,
         Subcategory subcategory,
         Governorate governorate
     ) {
-        entity.setTitle(StringUtils.hasText(request.title()) ? request.title().trim() : null);
+        entity.setTitle(request.title().trim());
         entity.setSubcategory(subcategory);
         entity.setDescription(request.description().trim());
         entity.setEventDate(request.eventDate());
@@ -269,8 +289,11 @@ public class BusinessEventServiceImpl implements BusinessEventService {
     }
 
     private static void replacePhotos(BusinessEvent event, List<String> photoUrls) {
+        if (photoUrls == null) {
+            return;
+        }
         event.getPhotos().clear();
-        if (photoUrls == null || photoUrls.isEmpty()) {
+        if (photoUrls.isEmpty()) {
             return;
         }
         int order = 0;
@@ -288,6 +311,12 @@ public class BusinessEventServiceImpl implements BusinessEventService {
             photo.setSortOrder(order++);
             event.getPhotos().add(photo);
         }
+        BusinessEventValidation.validatePhotoCount(event.getPhotos().size());
+    }
+
+    private static void validateEventState(BusinessEvent event) {
+        BusinessEventValidation.validatePhotoCount(event.getPhotos().size());
+        BusinessEventValidation.validateVisibleEventHasPhotos(event);
     }
 
     private static List<String> normalizeTimeSlots(List<String> raw) {

@@ -12,6 +12,8 @@ export type EventSearchParams = {
   minPrice?: string;
   maxPrice?: string;
   includeHidden?: boolean;
+  /** Spring Pageable sort, e.g. `createdAt,desc`. */
+  sort?: string;
 };
 
 function toQuery(p: EventSearchParams): string {
@@ -26,12 +28,24 @@ function toQuery(p: EventSearchParams): string {
   if (p.minPrice) q.set('minPrice', p.minPrice);
   if (p.maxPrice) q.set('maxPrice', p.maxPrice);
   if (p.includeHidden) q.set('includeHidden', 'true');
+  if (p.sort) q.set('sort', p.sort);
   const s = q.toString();
   return s ? `?${s}` : '';
 }
 
 export async function searchEvents(params: EventSearchParams = {}): Promise<PageResponse<BusinessEventSummaryResponse>> {
   return apiFetch<PageResponse<BusinessEventSummaryResponse>>(`/events${toQuery(params)}`, { auth: false });
+}
+
+/** Latest / top-rated visible events for Explore hero — not category-scoped. */
+export async function fetchCuratedExploreEvents(governorateId?: number): Promise<BusinessEventSummaryResponse[]> {
+  const page = await searchEvents({
+    page: 0,
+    size: 24,
+    governorateId,
+    sort: 'createdAt,desc',
+  });
+  return page.content;
 }
 
 export async function getEventById(eventId: number): Promise<BusinessEventResponse> {

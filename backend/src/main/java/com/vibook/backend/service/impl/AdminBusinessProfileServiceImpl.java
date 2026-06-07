@@ -96,6 +96,8 @@ public class AdminBusinessProfileServiceImpl implements AdminBusinessProfileServ
         entity.setRejectionReason(null);
         entity.setApprovedAt(Instant.now());
         entity.setRejectedAt(null);
+        entity.setRequiresReApproval(false);
+        entity.setPreviouslyApproved(true);
         BusinessProfile saved = businessProfileRepository.save(entity);
         businessUserRoleService.grantBusinessRole(saved.getUser());
         adminActivityLogService.log(
@@ -129,6 +131,7 @@ public class AdminBusinessProfileServiceImpl implements AdminBusinessProfileServ
         }
         entity.setRejectedAt(Instant.now());
         entity.setApprovedAt(null);
+        entity.setRequiresReApproval(false);
         BusinessProfile saved = businessProfileRepository.save(entity);
         adminActivityLogService.log(
             admin.getUser().getId(),

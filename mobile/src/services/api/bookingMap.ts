@@ -1,5 +1,7 @@
+import { resolveBackendMediaUrl } from '@/api/env';
 import type { BookingResponse } from '@/api/types';
 import type { Booking, BookingStatus } from '@/types';
+import { startIsoFromEventDateAndSlots } from '@/services/api/eventMap';
 
 function mapStatus(s: BookingResponse['status']): BookingStatus {
   switch (s) {
@@ -15,15 +17,19 @@ function mapStatus(s: BookingResponse['status']): BookingStatus {
   }
 }
 
-function eventDateToStartsAtIso(eventDate: string): string {
-  const d = (eventDate || '').slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return new Date().toISOString();
-  const dt = new Date(`${d}T12:00:00.000Z`);
-  return Number.isNaN(dt.getTime()) ? new Date().toISOString() : dt.toISOString();
+function resolveEventPhotoUrls(row: BookingResponse): string[] {
+  const fromList = (row.eventPhotoUrls ?? [])
+    .map((url) => resolveBackendMediaUrl(url))
+    .filter((url): url is string => Boolean(url));
+  if (fromList.length > 0) return fromList;
+
+  const primary = resolveBackendMediaUrl(row.eventPrimaryPhotoUrl);
+  return primary ? [primary] : [];
 }
 
 export function bookingResponseToBooking(row: BookingResponse): Booking {
   const total = Number(row.totalPriceJod);
+  const gallery = resolveEventPhotoUrls(row);
   return {
     id: String(row.id),
     userId: String(row.userId),
@@ -31,12 +37,16 @@ export function bookingResponseToBooking(row: BookingResponse): Booking {
     refId: String(row.eventId),
     refTitle: row.eventTitle,
     refTitleAr: row.eventTitle,
-    imageUrl: 'https://images.unsplash.com/photo-1540039155733-5bb30b53a388?w=800&q=80',
+    imageUrl: gallery[0] ?? '',
+    gallery,
     status: mapStatus(row.status),
-    startsAt: eventDateToStartsAtIso(row.eventDate),
+    startsAt: startIsoFromEventDateAndSlots(
+      row.eventDate,
+      row.timeSlotLabel?.trim() ? [row.timeSlotLabel.trim()] : [],
+    ),
     cityName: '',
     cityNameAr: '',
     totalPaid: Number.isFinite(total) ? total : 0,
-    currency: 'JOD',
+    currency: row.currency?.trim() || 'JOD',
   };
 }

@@ -27,8 +27,37 @@ export function StatusBadge({ status }: { status: BusinessProfileStatus }) {
   return <span className={`vb-badge ${statusTone[status]}`}>{label}</span>;
 }
 
+export function BusinessProfileStatusBadge({
+  status,
+  requiresReApproval,
+  previouslyApproved,
+}: {
+  status: BusinessProfileStatus;
+  requiresReApproval?: boolean;
+  previouslyApproved?: boolean;
+}) {
+  const { t } = useAdminI18n();
+
+  if (status === 'PENDING_REVIEW' && requiresReApproval) {
+    return <span className="vb-badge vb-badge--reapproval">{t('status.updatedProfile')}</span>;
+  }
+  if (status === 'PENDING_REVIEW') {
+    return <span className="vb-badge vb-badge--pending">{t('status.newApplication')}</span>;
+  }
+  if (status === 'REJECTED' && previouslyApproved) {
+    return <span className="vb-badge vb-badge--rejected">{t('status.profileUpdateRejected')}</span>;
+  }
+
+  return <StatusBadge status={status} />;
+}
+
 export function RoleBadge({ label }: { label: string }) {
   return <span className="vb-badge vb-badge--neutral">{label}</span>;
+}
+
+export function ReApprovalBadge() {
+  const { t } = useAdminI18n();
+  return <span className="vb-badge vb-badge--reapproval-accent">{t('businessProfiles.requiresReApproval')}</span>;
 }
 
 export function EventVisibilityBadge({ status }: { status: string }) {

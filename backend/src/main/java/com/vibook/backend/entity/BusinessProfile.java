@@ -87,6 +87,14 @@ public class BusinessProfile {
 
     private Instant rejectedAt;
 
+    /** True when an approved profile was edited and must be re-submitted for admin review. */
+    @Column(name = "requires_re_approval", nullable = false)
+    private boolean requiresReApproval = false;
+
+    /** Set on first admin approval; never cleared — distinguishes returning partners from first-time applicants. */
+    @Column(name = "previously_approved", nullable = false)
+    private boolean previouslyApproved = false;
+
     @Column(nullable = false)
     private Instant createdAt;
 

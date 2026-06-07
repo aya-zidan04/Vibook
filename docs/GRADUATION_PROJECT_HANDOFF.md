@@ -411,7 +411,7 @@ Columns: **Route file** | **Purpose** | **APIs** | **Stores / hooks** | **Key co
 | `app/business/(dashboard)/events/index.tsx` | Event list             | hide/unhide + sync                             | hub store          | —                                    |
 | `app/business/(dashboard)/events/[id].tsx`  | Event editor           | CRUD `business/events`                         | hub store          | `EventPhotosField`, calendar sheets  |
 | `app/business/(dashboard)/bookings.tsx`     | Partner bookings       | `PATCH /business/bookings/{id}/status`         | hub store          | —                                    |
-| `app/business/(dashboard)/profile.tsx`      | Partner brand UI       | Mostly local store                             | `businessHubStore` | —                                    |
+| `app/business/(dashboard)/profile.tsx`      | Partner brand UI       | `PUT /business-profile/me` (+ logo/banner)     | `businessHubStore` | rejected resubmit uses `PATCH /me/submit` |
 
 
 **Layouts:** `business/_layout.tsx` syncs approval from API; `(dashboard)/_layout.tsx` calls `refreshBusinessHubLists()` on focus.
@@ -519,7 +519,7 @@ Returns `ErrorResponse` with timestamp, status, title, message, path, optional f
 | `POST /business-profile/me/banner` | `image` | `uploads/business-banners/` |
 
 
-**Not multipart:** event photos — `BusinessEventUpsertRequest.photoUrls` (URL strings only).
+**Event photos:** partners upload via `POST /business/events/{id}/photos` (multipart). `photoUrls` on upsert accepts stored HTTP paths only; mobile uses create-hidden → upload → final `PUT` so visible events always have photos.
 
 ---
 
@@ -589,7 +589,9 @@ Implementations primarily in `service/impl/`*.
 | PATCH  | `/{id}/hide`, `/unhide` | USER       | —                            | `BusinessEventResponse`              | Visibility                    |
 
 
-`**BusinessEventUpsertRequest` fields:** title, subcategoryId, description, eventDate, timeSlots[], governorateId, googleMapsUrl, priceJod, currency, capacityGuests, hidden, photoUrls[].
+`**BusinessEventUpsertRequest` fields:** title (required, 3–255), description (required, 10–4000), subcategoryId, eventDate (today or future), timeSlots[] (≥1), governorateId, googleMapsUrl (optional, ≤512), priceJod (≥0, one standard entry price — no ticket tiers), currency, capacityGuests (≥1), hidden, photoUrls[] (max 12; visible events need ≥1 photo after upload).
+
+**Event visibility:** There is **no event approval status**. Partners and admins control visibility with `hidden` / hide / unhide only. Mobile requires ≥1 photo before Save; backend allows create-as-hidden with zero server photos, then enforces photo rules on visible publish.
 
 ### Business bookings — `BusinessBookingController` `/api/v1/business/bookings`
 
@@ -739,6 +741,7 @@ erDiagram
 | status                                | `BusinessProfileStatus` enum |
 | rejectionReason, adminNotes           |                              |
 | approvedAt, rejectedAt                | Instant?                     |
+| requires_re_approval                  | boolean; true after approved profile is edited |
 
 
 ### `business_events` — `BusinessEvent.java`
@@ -905,15 +908,37 @@ erDiagram
 
 # 7. Business Partner Flow
 
-## Lifecycle states
+## Status flow
+
+**Initial application**
+
+```
+DRAFT → Submit for review → PENDING_REVIEW → Admin approves → APPROVED + ROLE_BUSINESS granted
+DRAFT/PENDING_REVIEW → Admin rejects → REJECTED
+```
+
+**Re-approval flow**
+
+```
+APPROVED → Owner edits and saves → PENDING_REVIEW + requiresReApproval=true + ROLE_BUSINESS kept
+Admin approves → APPROVED + requiresReApproval=false + approvedAt updated
+Admin rejects → REJECTED + requiresReApproval=false
+```
+
+`DRAFT` is for first-time / unfinished onboarding only.
+
+Admin reject does **not** call `revokeBusinessRole`; `ROLE_BUSINESS` remains on the owner after a rejected re-approval.
+
+## Mobile hub mapping
 
 
-| Backend `BusinessProfileStatus` | Mobile `applicationStatus` | UI route                         |
-| ------------------------------- | -------------------------- | -------------------------------- |
-| DRAFT                           | `none`                     | `/business` intro → join         |
-| PENDING_REVIEW                  | `pending`                  | `/business/application-pending`  |
-| REJECTED                        | `rejected`                 | `/business/application-rejected` |
-| APPROVED                        | `approved`                 | `/business/(dashboard)/`*        |
+| Backend `BusinessProfileStatus` | `requiresReApproval` | `previouslyApproved` | Mobile `applicationStatus` | UI route / access                                      |
+| ------------------------------- | -------------------- | -------------------- | -------------------------- | ------------------------------------------------------ |
+| `DRAFT`                         | any                  | any                  | `none`                     | `/business` intro → join                               |
+| `PENDING_REVIEW`                | any                  | any                  | `pending`                  | `/business/application-pending` (no management APIs)   |
+| `REJECTED`                      | any                  | `false`              | `rejected`                 | `/business/application-rejected`                       |
+| `REJECTED`                      | any                  | `true`               | `approved` (hub gate)      | Dashboard profile + submit; events/bookings blocked    |
+| `APPROVED`                      | any                  | any                  | `approved`                 | `/business/(dashboard)/`* full partner tools           |
 
 
 ## Step-by-step (frontend + backend)
@@ -925,12 +950,13 @@ erDiagram
   - `PUT /business-profile/me` with `BusinessProfileUpsertRequest`
   - `PATCH /business-profile/me/submit` → status `PENDING_REVIEW`
   - Local `submitApplication()` updates hub profile snapshot
-5. **Admin** — `BusinessProfilesPage` / detail → `PATCH /admin/business-profiles/{id}/approve` or `reject`
-6. **Mobile polls** — pending screen refetches `/business-profile/me`; approved users redirected to dashboard
-7. **Dashboard** — `(dashboard)/_layout.tsx` `refreshBusinessHubLists()`:
+5. **Admin** — `BusinessProfilesPage` / detail → `PATCH /admin/business-profiles/{id}/approve` or `reject` (re-submissions show **Requires re-approval** when `requiresReApproval=true`)
+6. **Re-edit (approved owner)** — `(dashboard)/profile.tsx` → `PUT /business-profile/me` (+ logo/banner) → `PENDING_REVIEW` + `requiresReApproval` → pending screen
+7. **Mobile polls** — pending screen refetches `/business-profile/me`; approved users redirected to dashboard
+8. **Dashboard** — `(dashboard)/_layout.tsx` `refreshBusinessHubLists()`:
   - `GET /business/events`, `GET /business/bookings`
-8. **Create event** — editor `POST /business/events` (requires APPROVED)
-9. **Manage bookings** — `PATCH /business/bookings/{id}/status`
+9. **Create event** — editor `POST /business/events` (requires APPROVED profile status on server)
+10. **Manage bookings** — `PATCH /business/bookings/{id}/status`
 
 ## Gaps (in-scope)
 

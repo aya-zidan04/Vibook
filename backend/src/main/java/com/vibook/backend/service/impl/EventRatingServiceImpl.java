@@ -18,6 +18,7 @@ import com.vibook.backend.repository.BusinessEventRepository;
 import com.vibook.backend.repository.EventRatingRepository;
 import com.vibook.backend.repository.UserRepository;
 import com.vibook.backend.service.EventRatingService;
+import com.vibook.backend.util.BookingCapacityPolicy;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -127,7 +128,7 @@ public class EventRatingServiceImpl implements EventRatingService {
         if (event.isHidden()) {
             throw new ResourceNotFoundException("Event not found");
         }
-        return businessEventMapper.toResponse(event);
+        return businessEventMapper.toResponse(event, remainingCapacityFor(event));
     }
 
     @Override
@@ -163,7 +164,12 @@ public class EventRatingServiceImpl implements EventRatingService {
             event,
             RATING_ELIGIBLE_STATUSES
         );
-        return businessEventMapper.toResponse(event, myRating, myRatingId, canRate);
+        return businessEventMapper.toResponse(event, myRating, myRatingId, canRate, remainingCapacityFor(event));
+    }
+
+    private int remainingCapacityFor(BusinessEvent event) {
+        int used = bookingRepository.sumGuestsByEventIdAndStatusIn(event.getId(), BookingCapacityPolicy.OCCUPYING_STATUSES);
+        return BookingCapacityPolicy.remainingCapacity(event.getCapacityGuests(), used);
     }
 
     private static boolean canViewerSeeEvent(User viewer, BusinessEvent event) {

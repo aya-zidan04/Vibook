@@ -15,17 +15,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class BusinessEventMapper {
 
-    public BusinessEventResponse toResponse(BusinessEvent entity) {
-        return toResponse(entity, null, null, null);
+    public BusinessEventResponse toResponse(BusinessEvent entity, int remainingCapacity) {
+        return toResponse(entity, null, null, null, remainingCapacity);
     }
 
-    public BusinessEventResponse toResponse(BusinessEvent entity, Integer myRating, Long myRatingId, Boolean canRate) {
+    public BusinessEventResponse toResponse(BusinessEvent entity, Integer myRating, Long myRatingId, Boolean canRate, int remainingCapacity) {
         Subcategory sub = entity.getSubcategory();
         Category cat = sub != null ? sub.getCategory() : null;
         Governorate gov = entity.getGovernorate();
         return new BusinessEventResponse(
             entity.getId(),
             entity.getBusinessProfile().getId(),
+            entity.getBusinessProfile().getBusinessName(),
             entity.getTitle(),
             sub != null ? sub.getId() : null,
             sub != null ? sub.getName() : null,
@@ -40,6 +41,7 @@ public class BusinessEventMapper {
             entity.getPriceJod(),
             entity.getCurrency(),
             entity.getCapacityGuests(),
+            remainingCapacity,
             entity.isHidden(),
             entity.getAverageRating(),
             entity.getReviewCount(),
@@ -69,9 +71,11 @@ public class BusinessEventMapper {
             entity.getBusinessProfile().getBusinessName(),
             cat != null ? cat.getName() : null,
             gov != null ? gov.getName() : null,
+            entity.getEventDate(),
             entity.getPriceJod(),
             entity.getCurrency(),
             entity.getCapacityGuests(),
+            entity.getPhotos() != null ? entity.getPhotos().size() : 0,
             visibility,
             entity.getCreatedAt()
         );
@@ -79,6 +83,7 @@ public class BusinessEventMapper {
 
     public BusinessEventSummaryResponse toSummary(BusinessEvent entity) {
         Subcategory sub = entity.getSubcategory();
+        Category cat = sub != null ? sub.getCategory() : null;
         Governorate gov = entity.getGovernorate();
         String primaryPhoto = entity.getPhotos().isEmpty() ? null : entity.getPhotos().get(0).getImageUrl();
         return new BusinessEventSummaryResponse(
@@ -89,8 +94,15 @@ public class BusinessEventMapper {
             entity.getPriceJod(),
             entity.getCurrency(),
             entity.getCapacityGuests(),
+            gov != null ? gov.getId() : null,
             gov != null ? gov.getName() : null,
+            sub != null ? sub.getId() : null,
             sub != null ? sub.getName() : null,
+            cat != null ? cat.getId() : null,
+            cat != null ? cat.getName() : null,
+            entity.getBusinessProfile().getBusinessName(),
+            entity.getTimeSlots().stream().map(BusinessEventTimeSlot::getSlotLabel).toList(),
+            entity.getDescription(),
             primaryPhoto,
             entity.getAverageRating(),
             entity.getReviewCount(),

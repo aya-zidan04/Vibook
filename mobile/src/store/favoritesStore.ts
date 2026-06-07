@@ -13,6 +13,8 @@ type FavoritesState = {
   listHydrating: boolean;
   toggleFavorite: (type: RatingVertical, refId: string) => Promise<void>;
   hasFavorite: (type: RatingVertical, refId: string) => boolean;
+  setFavoriteState: (type: RatingVertical, refId: string, favorited: boolean) => void;
+  mergeFavoriteEventIds: (eventIds: number[]) => void;
   listEntries: () => FavoriteListEntry[];
   setListHydrating: (v: boolean) => void;
   reset: () => void;
@@ -48,6 +50,24 @@ export const useFavoritesStore = create<FavoritesState>()(
         }
       },
       hasFavorite: (type, refId) => !!get().keys[ratingKey(type, refId)],
+      setFavoriteState: (type, refId, favorited) => {
+        const key = ratingKey(type, refId);
+        set((s) => {
+          const k = { ...s.keys };
+          if (favorited) k[key] = true;
+          else delete k[key];
+          return { keys: k };
+        });
+      },
+      mergeFavoriteEventIds: (eventIds) => {
+        set((s) => {
+          const k = { ...s.keys };
+          for (const id of eventIds) {
+            k[ratingKey('event', String(id))] = true;
+          }
+          return { keys: k };
+        });
+      },
       listEntries: () =>
         Object.keys(get().keys).map((key) => {
           const colon = key.indexOf(':');

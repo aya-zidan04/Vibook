@@ -26,6 +26,8 @@ public record BusinessProfileResponse(
     Long ownerUserId,
     String adminNotes,
     Instant approvedAt,
-    Instant rejectedAt
+    Instant rejectedAt,
+    boolean requiresReApproval,
+    boolean previouslyApproved
 ) {
 }

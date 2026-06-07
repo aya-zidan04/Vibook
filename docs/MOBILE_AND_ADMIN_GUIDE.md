@@ -117,36 +117,48 @@ Users can file complaints that appear in the admin **Reports** queue.
 
 Partners apply for a business profile, get approved by admin, then manage events and bookings.
 
-```mermaid
-stateDiagram-v2
-  [*] --> none: No profile
-  none --> pending: Submit join form
-  pending --> approved: Admin approves
-  pending --> rejected: Admin rejects
-  rejected --> none: Re-apply
-  approved --> Dashboard: business/(dashboard)/*
+### Status flow (backend)
+
+**Initial application**
+
+```
+DRAFT → Submit for review → PENDING_REVIEW → Admin approves → APPROVED + ROLE_BUSINESS granted
+DRAFT/PENDING_REVIEW → Admin rejects → REJECTED
 ```
 
+**Re-approval flow** (owner edits an already-approved profile)
 
+```
+APPROVED → Owner edits and saves → PENDING_REVIEW + requiresReApproval=true + ROLE_BUSINESS kept
+Admin approves → APPROVED + requiresReApproval=false + approvedAt updated
+Admin rejects → REJECTED + requiresReApproval=false
+```
 
+`DRAFT` is reserved for first-time / unfinished onboarding only — not for returning partners.
+
+`ROLE_BUSINESS` is **not** revoked on owner save, re-submit, or admin reject. It is granted on admin approve (`AdminBusinessProfileServiceImpl.approve`).
 
 | Step               | Screen                                                | API / store                                                |
 | ------------------ | ----------------------------------------------------- | ---------------------------------------------------------- |
 | Intro              | `app/business/index.tsx`                              | Redirects by `applicationStatus` in hub store              |
-| Apply              | `app/business/join.tsx`                               | `PUT /business-profile/me`, governorates/categories        |
+| Apply              | `app/business/join.tsx`                               | `PUT /business-profile/me`, `PATCH /me/submit`             |
 | Pending / rejected | `application-pending.tsx`, `application-rejected.tsx` | `GET /business-profile/me` → `syncBusinessApprovalFromApi` |
-| Dashboard          | `business/(dashboard)/*`                              | Only if `applicationStatus === 'approved'`                 |
+| Dashboard          | `business/(dashboard)/*`                              | When `applicationStatus === 'approved'`                    |
+| Re-submit          | `business/application-pending.tsx`                      | Save approved profile → auto `PENDING_REVIEW`; rejected resubmit via profile |
 
 
-**Profile gate** is driven by `BusinessProfileResponseDto.status` mapped in `businessHubStore.syncBusinessApprovalFromApi`:
+**Profile gate** — `businessHubStore.syncBusinessApprovalFromApi` maps `BusinessProfileResponseDto`:
 
 
-| Backend status   | Hub `applicationStatus`          |
-| ---------------- | -------------------------------- |
-| `DRAFT`          | `none`                           |
-| `PENDING_REVIEW` | `pending`                        |
-| `APPROVED`       | `approved`                       |
-| `REJECTED`       | `rejected` (+ `rejectionReason`) |
+| Backend status   | `requiresReApproval` | `previouslyApproved` | Hub `applicationStatus`          | Partner hub access                          |
+| ---------------- | -------------------- | -------------------- | -------------------------------- | ------------------------------------------- |
+| `DRAFT`          | any                  | any                  | `none`                           | Intro / join only                           |
+| `PENDING_REVIEW` | any                  | any                  | `pending`                        | Pending screen only (no events/bookings)    |
+| `APPROVED`       | any                  | any                  | `approved`                       | Full dashboard + management APIs            |
+| `REJECTED`       | any                  | `false`              | `rejected` (+ `rejectionReason`) | Rejected screen                             |
+| `REJECTED`       | any                  | `true`               | `approved` (hub gate)            | Profile edit + submit; management blocked   |
+
+`canAccessPartnerDashboard` / `canManageBusinessOperations` in `mobile/src/utils/businessPartnerAccess.ts` enforce the last column. Backend `BusinessProfileAccessGuard` blocks events/bookings unless status is `APPROVED`.
 
 
 Persisted in AsyncStorage key `**vibook-business-hub-v2`** (profile + listings only — **not** events/bookings).
@@ -185,10 +197,21 @@ When the dashboard tab layout is focused, lists refresh from the server:
 | PATCH  | `.../hide`, `.../unhide` | Visibility toggle on list |
 
 
-**Upsert body** (`BusinessEventUpsertPayload`): `subcategoryId`, `eventDate`, `timeSlots[]`, `governorateId`, `priceJod`, `capacityGuests`, `photoUrls` (HTTP paths only — `file://` stripped), `hidden`, etc.
+**Event model (partner):**
+
+- **One standard entry price** per event (`priceJod` in JOD; `0` = free). There is no multi-ticket-type UI.
+- **Multiple time slots** on the same event date (`timeSlots[]`).
+- **At least one photo** required in the mobile editor before Save; max **12** photos (JPEG/PNG/WebP, 5 MB each).
+- **No event approval workflow** — visibility is `hidden` / show-unhide only (partner, admin hide/show).
+- Event date must be **today or future** (mobile calendar + backend validation).
+
+**Upsert body** (`BusinessEventUpsertPayload`): `title` (3–255), `description` (10–4000), `subcategoryId`, `eventDate`, `timeSlots[]`, `governorateId`, `priceJod`, `capacityGuests` (≥1), `googleMapsUrl` (optional, ≤512), `hidden`, `photoUrls` (HTTP paths only — `file://` stripped).
+
+**Create flow (photos):** mobile creates the event as `hidden: true`, uploads photos via `POST .../photos`, then `PUT` with the final payload (including `hidden` as chosen). Visible events without photos are rejected by the backend.
 
 **Editor helpers:**
 
+- `businessEventFormValidation.ts` — required-field rules; Save stays disabled until valid
 - `resolveHubSubcategory.ts` — category picker label `"Category · Subcategory"` → `subcategoryId`
 - `resolveGovernorateId.ts` — Jordan slug → governorate id
 - `splitEditorPhotos()` — separates server URLs from local `file://` for multipart upload flow

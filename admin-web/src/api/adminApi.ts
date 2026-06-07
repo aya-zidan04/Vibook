@@ -273,18 +273,6 @@ export async function fetchAdminBooking(id: number): Promise<AdminBookingRespons
   return data;
 }
 
-export async function cancelAdminBooking(id: number, reason?: string | null): Promise<AdminBookingResponse> {
-  const { data } = await api.patch<AdminBookingResponse>(`/admin/bookings/${id}/cancel`, {
-    reason: reason ?? undefined,
-  });
-  return data;
-}
-
-export async function completeAdminBooking(id: number): Promise<AdminBookingResponse> {
-  const { data } = await api.patch<AdminBookingResponse>(`/admin/bookings/${id}/complete`);
-  return data;
-}
-
 /* —— Ratings moderation —— */
 
 export type AdminRatingQuery = {

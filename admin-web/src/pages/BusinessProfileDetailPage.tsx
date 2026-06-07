@@ -10,7 +10,12 @@ import { resolveMediaUrl } from '@/api/mediaUrl';
 import type { BusinessProfileResponse } from '@/api/types';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { StatusBadge } from '@/components/ui/Badge';
+import {
+  FirstTimeApplicationCallout,
+  ReapprovalReviewCallout,
+} from '@/components/business-profiles/ReapprovalReviewCallout';
+import { BusinessProfileStatusBadge, ReApprovalBadge } from '@/components/ui/Badge';
+import { isFirstTimePending, isReapprovalPending } from '@/utils/businessProfilePresentation';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
@@ -82,7 +87,12 @@ export function BusinessProfileDetailPage() {
     try {
       const updated = await approveBusinessProfile(profile.id);
       setProfile(updated);
-      showToast(t('businessProfileDetail.approvedToast'), 'success');
+      showToast(
+        isReapprovalPending(profile)
+          ? t('businessProfiles.approvedChangesToast')
+          : t('businessProfileDetail.approvedToast'),
+        'success',
+      );
       setDialog(null);
     } catch (e) {
       showToast(getFriendlyErrorMessage(e, t('businessProfiles.approveFailed')), 'error');
@@ -97,7 +107,12 @@ export function BusinessProfileDetailPage() {
     try {
       const updated = await rejectBusinessProfile(profile.id, rejectReason.trim() || undefined);
       setProfile(updated);
-      showToast(t('businessProfileDetail.rejectedToast'), 'success');
+      showToast(
+        isReapprovalPending(profile)
+          ? t('businessProfiles.rejectedChangesToast')
+          : t('businessProfileDetail.rejectedToast'),
+        'success',
+      );
       setDialog(null);
       setRejectReason('');
     } catch (e) {
@@ -154,6 +169,9 @@ export function BusinessProfileDetailPage() {
     { label: t('businessProfileDetail.rejected'), at: profile.rejectedAt },
   ].filter((item) => item.at);
 
+  const reapprovalPending = isReapprovalPending(profile);
+  const firstTimePending = isFirstTimePending(profile);
+
   return (
     <div className="vb-page">
       <div style={{ marginBottom: 'var(--vb-space-lg)' }}>
@@ -161,6 +179,9 @@ export function BusinessProfileDetailPage() {
           {t('businessProfileDetail.back')}
         </Button>
       </div>
+
+      {reapprovalPending ? <ReapprovalReviewCallout /> : null}
+      {!reapprovalPending && firstTimePending ? <FirstTimeApplicationCallout /> : null}
 
       {bannerSrc ? (
         <div className="vb-detail-hero vb-animate-in">
@@ -184,13 +205,20 @@ export function BusinessProfileDetailPage() {
         <div className="vb-detail-title">
           <h1>{profile.businessName}</h1>
           {profile.tagline ? <p className="vb-muted">{profile.tagline}</p> : null}
-          <div style={{ marginTop: 'var(--vb-space-md)' }}>
-            <StatusBadge status={profile.status} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: 'var(--vb-space-md)', alignItems: 'center' }}>
+            <BusinessProfileStatusBadge
+              status={profile.status}
+              requiresReApproval={profile.requiresReApproval}
+              previouslyApproved={profile.previouslyApproved}
+            />
+            {reapprovalPending ? <ReApprovalBadge /> : null}
           </div>
           {profile.status === 'PENDING_REVIEW' ? (
             <div style={{ display: 'flex', gap: 'var(--vb-space-sm)', marginTop: 'var(--vb-space-lg)' }}>
               <Button variant="primary" onClick={() => setDialog('approve')}>
-                {t('businessProfileDetail.approve')}
+                {reapprovalPending
+                  ? t('businessProfiles.approveChangesReactivate')
+                  : t('businessProfileDetail.approve')}
               </Button>
               <Button
                 variant="dangerOutline"
@@ -199,7 +227,9 @@ export function BusinessProfileDetailPage() {
                   setDialog('reject');
                 }}
               >
-                {t('businessProfileDetail.reject')}
+                {reapprovalPending
+                  ? t('businessProfiles.rejectChanges')
+                  : t('businessProfileDetail.reject')}
               </Button>
             </div>
           ) : null}
@@ -311,9 +341,21 @@ export function BusinessProfileDetailPage() {
 
       <ConfirmDialog
         open={dialog === 'approve'}
-        title={t('businessProfileDetail.approveTitle')}
-        message={t('businessProfileDetail.approveMsg', { name: profile.businessName })}
-        confirmLabel={t('businessProfileDetail.approve')}
+        title={
+          reapprovalPending
+            ? t('businessProfiles.approveChangesTitle')
+            : t('businessProfileDetail.approveTitle')
+        }
+        message={
+          reapprovalPending
+            ? t('businessProfiles.approveChangesMsg', { name: profile.businessName })
+            : t('businessProfileDetail.approveMsg', { name: profile.businessName })
+        }
+        confirmLabel={
+          reapprovalPending
+            ? t('businessProfiles.approveChangesConfirm')
+            : t('businessProfileDetail.approve')
+        }
         onConfirm={() => void runApprove()}
         onCancel={() => setDialog(null)}
         loading={busy}
@@ -321,9 +363,21 @@ export function BusinessProfileDetailPage() {
 
       <ConfirmDialog
         open={dialog === 'reject'}
-        title={t('businessProfileDetail.rejectTitle')}
-        message={t('businessProfileDetail.rejectMsg')}
-        confirmLabel={t('businessProfiles.rejectConfirm')}
+        title={
+          reapprovalPending
+            ? t('businessProfiles.rejectChangesTitle')
+            : t('businessProfileDetail.rejectTitle')
+        }
+        message={
+          reapprovalPending
+            ? t('businessProfiles.rejectChangesMsg', { name: profile.businessName })
+            : t('businessProfileDetail.rejectMsg')
+        }
+        confirmLabel={
+          reapprovalPending
+            ? t('businessProfiles.rejectChangesConfirm')
+            : t('businessProfiles.rejectConfirm')
+        }
         onConfirm={() => void runReject()}
         onCancel={() => {
           setDialog(null);

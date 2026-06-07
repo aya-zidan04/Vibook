@@ -18,7 +18,6 @@ public interface BusinessEventRepository extends JpaRepository<BusinessEvent, Lo
             "subcategory.category",
             "governorate",
             "timeSlots",
-            "photos",
         }
     )
     List<BusinessEvent> findAllByBusinessProfileOrderByCreatedAtDesc(BusinessProfile businessProfile);
@@ -29,11 +28,11 @@ public interface BusinessEventRepository extends JpaRepository<BusinessEvent, Lo
             "subcategory.category",
             "governorate",
             "timeSlots",
-            "photos",
         }
     )
     List<BusinessEvent> findAllByOrderByCreatedAtDesc();
 
+    /** Photos load via {@link BusinessEvent#photos} @BatchSize — avoid dual-bag EntityGraph fetch. */
     @EntityGraph(
         attributePaths = {
             "businessProfile",
@@ -42,7 +41,6 @@ public interface BusinessEventRepository extends JpaRepository<BusinessEvent, Lo
             "subcategory.category",
             "governorate",
             "timeSlots",
-            "photos",
         }
     )
     @Query("SELECT e FROM BusinessEvent e WHERE e.id = :id")

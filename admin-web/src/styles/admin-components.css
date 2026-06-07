@@ -218,6 +218,23 @@
   border: 1px solid var(--vb-badge-rejected-border);
 }
 
+.vb-badge--reapproval {
+  background: var(--vb-primary-muted);
+  color: var(--vb-primary-dark);
+  border: 1px solid var(--vb-primary);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.vb-badge--reapproval-accent {
+  background: var(--vb-badge-reapproval-bg, var(--vb-primary-muted));
+  color: var(--vb-badge-reapproval-fg, var(--vb-primary-dark));
+  border: 1px solid var(--vb-badge-reapproval-border, var(--vb-primary));
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
 .vb-badge--neutral {
   background: var(--vb-badge-neutral-bg, var(--vb-primary-muted));
   color: var(--vb-badge-neutral-fg, var(--vb-primary-dark));
@@ -1640,6 +1657,33 @@ html[dir='rtl'] .vb-timeline__dot {
   right: 0;
 }
 
+/* Business profile list — re-approval rows */
+.vb-table tbody tr.vb-table-row--reapproval {
+  background: var(--vb-row-reapproval-bg, var(--vb-primary-muted));
+}
+
+.vb-table tbody tr.vb-table-row--reapproval:hover {
+  background: var(--vb-row-reapproval-hover-bg, var(--vb-primary-muted));
+}
+
+.vb-business-cell__subtitle {
+  font-size: 0.75rem;
+  margin-top: 4px;
+  color: var(--vb-text-secondary);
+}
+
+.vb-business-cell__subtitle--reapproval {
+  color: var(--vb-primary-dark);
+  font-weight: 600;
+}
+
+.vb-profile-row--reapproval {
+  background: var(--vb-row-reapproval-bg, var(--vb-primary-muted));
+  border-radius: var(--vb-radius-md);
+  padding: var(--vb-space-sm) var(--vb-space-md);
+  margin: 0 calc(-1 * var(--vb-space-md));
+}
+
 /* Table selection */
 .vb-table tbody tr.vb-table-row--selected {
   background: var(--vb-hover-row-selected);
@@ -1739,9 +1783,32 @@ html[dir='rtl'] .vb-timeline__dot {
   margin-bottom: var(--vb-space-xl);
 }
 
+.vb-callout__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--vb-text-primary);
+}
+
+.vb-callout__body {
+  margin: var(--vb-space-sm) 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--vb-text-secondary);
+}
+
 .vb-callout--warning {
   background: var(--vb-callout-warning-bg);
   border-color: var(--vb-callout-warning-border);
+}
+
+.vb-callout--reapproval {
+  background: var(--vb-callout-reapproval-bg, var(--vb-primary-muted));
+  border: 1px solid var(--vb-callout-reapproval-border, var(--vb-primary));
+}
+
+.vb-callout--neutral {
+  background: var(--vb-surface-muted);
+  border: 1px solid var(--vb-border);
 }
 
 /* Pagination */

@@ -20,6 +20,8 @@ import com.vibook.backend.repository.BusinessEventRepository;
 import com.vibook.backend.repository.BusinessEventTimeSlotRepository;
 import com.vibook.backend.repository.BusinessProfileRepository;
 import com.vibook.backend.repository.UserRepository;
+import com.vibook.backend.util.BookingCapacityPolicy;
+import com.vibook.backend.util.BusinessProfileAccessGuard;
 import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.BookingService;
 import java.math.BigDecimal;
@@ -35,9 +37,6 @@ import org.springframework.util.StringUtils;
 
 @Service
 public class BookingServiceImpl implements BookingService {
-
-    /** Bookings that consume capacity (guests counted toward {@link BusinessEvent#getCapacityGuests()}). */
-    private static final List<BookingStatus> CAPACITY_COUNT_STATUSES = List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED);
 
     /**
      * At most one "open" booking per user per event: while PENDING or CONFIRMED.
@@ -107,8 +106,9 @@ public class BookingServiceImpl implements BookingService {
         }
 
         int guests = request.guestsCount();
-        int used = bookingRepository.sumGuestsByEventIdAndStatusIn(event.getId(), CAPACITY_COUNT_STATUSES);
-        if (used + guests > event.getCapacityGuests()) {
+        int used = bookingRepository.sumGuestsByEventIdAndStatusIn(event.getId(), BookingCapacityPolicy.OCCUPYING_STATUSES);
+        int remaining = BookingCapacityPolicy.remainingCapacity(event.getCapacityGuests(), used);
+        if (guests > remaining) {
             throw new BadRequestException("Not enough capacity for this event");
         }
 
@@ -224,6 +224,7 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getBusinessEvent().getBusinessProfile().getId().equals(profile.getId())) {
             throw new AccessDeniedException("You do not have access to this booking");
         }
+        BusinessProfileAccessGuard.requireApprovedForManagement(profile);
         return booking;
     }
 

@@ -1,10 +1,8 @@
 package com.vibook.backend.service.impl;
 
-import com.vibook.backend.dto.AdminBookingCancelRequest;
 import com.vibook.backend.dto.AdminBookingResponse;
 import com.vibook.backend.entity.Booking;
 import com.vibook.backend.entity.BookingStatus;
-import com.vibook.backend.exception.BadRequestException;
 import com.vibook.backend.exception.NotFoundException;
 import com.vibook.backend.mapper.BookingMapper;
 import com.vibook.backend.repository.BookingRepository;
@@ -15,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 public class AdminBookingModerationServiceImpl implements AdminBookingModerationService {
@@ -47,30 +44,5 @@ public class AdminBookingModerationServiceImpl implements AdminBookingModeration
     public AdminBookingResponse getById(Long id) {
         Booking booking = bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Booking not found"));
         return bookingMapper.toAdminResponse(booking);
-    }
-
-    @Override
-    @Transactional
-    public AdminBookingResponse cancel(Long id, AdminBookingCancelRequest request) {
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Booking not found"));
-        if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new BadRequestException("Booking is already cancelled");
-        }
-        booking.setStatus(BookingStatus.CANCELLED);
-        if (request != null && StringUtils.hasText(request.reason())) {
-            booking.setCancelReason(request.reason().trim());
-        }
-        return bookingMapper.toAdminResponse(bookingRepository.save(booking));
-    }
-
-    @Override
-    @Transactional
-    public AdminBookingResponse complete(Long id) {
-        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Booking not found"));
-        if (booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new BadRequestException("Cannot complete a cancelled booking");
-        }
-        booking.setStatus(BookingStatus.COMPLETED);
-        return bookingMapper.toAdminResponse(bookingRepository.save(booking));
     }
 }

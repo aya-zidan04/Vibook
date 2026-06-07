@@ -8,8 +8,10 @@ import { Badge } from '@/components/ui/Badge';
 import type { EventItem } from '@/types';
 import { createShadows, fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
+import { EventFavoriteButton } from '@/components/event/EventFavoriteButton';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useRouter } from 'expo-router';
 
 type Props = {
   event: EventItem;
@@ -22,6 +24,7 @@ export function ExploreEventFeedCard({
   cityName,
   onPress,
 }: Props) {
+  const router = useRouter();
   const { t, locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
   const colors = useThemeColors();
@@ -49,13 +52,22 @@ export function ExploreEventFeedCard({
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.94 }]}>
       <View style={styles.thumbWrap}>
-        <Image source={{ uri: event.imageUrl }} style={styles.thumb} contentFit="cover" />
+        {event.imageUrl ? (
+          <Image source={{ uri: event.imageUrl }} style={styles.thumb} contentFit="cover" />
+        ) : (
+          <View style={[styles.thumb, styles.thumbPlaceholder]} />
+        )}
         <LinearGradient colors={['transparent', fadeFromBackground(colors, 0.55)]} style={StyleSheet.absoluteFill} />
         {event.badge ? (
           <View style={styles.badge}>
             <Badge tone={event.badge} />
           </View>
         ) : null}
+        <EventFavoriteButton
+          eventId={event.id}
+          style={styles.fav}
+          onRequiresAuth={() => router.push('/login')}
+        />
       </View>
       <View style={styles.body}>
         <AppText variant="h3" color="text" numberOfLines={2}>
@@ -106,10 +118,16 @@ function createStyles(colors: ThemeColors) {
       position: 'relative',
     },
     thumb: { ...StyleSheet.absoluteFillObject },
+    thumbPlaceholder: { backgroundColor: colors.surfaceMuted },
     badge: {
       position: 'absolute',
       top: spacing.sm,
-      end: spacing.md,
+      start: spacing.sm,
+    },
+    fav: {
+      position: 'absolute',
+      top: spacing.sm,
+      end: spacing.sm,
     },
     body: {
       flex: 1,

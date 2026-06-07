@@ -14,14 +14,15 @@ import java.util.List;
  * Request body for creating or fully replacing a business-owned event (POST / PUT).
  */
 public record BusinessEventUpsertRequest(
-    @Size(max = 255, message = "Title must not exceed 255 characters")
+    @NotBlank(message = "Title is required")
+    @Size(min = 3, max = 255, message = "Title must be between 3 and 255 characters")
     String title,
 
     @NotNull(message = "Category (subcategory) is required")
     Long subcategoryId,
 
     @NotBlank(message = "Description is required")
-    @Size(max = 4000, message = "Description must not exceed 4000 characters")
+    @Size(min = 10, max = 4000, message = "Description must be between 10 and 4000 characters")
     String description,
 
     @NotNull(message = "Event date is required")

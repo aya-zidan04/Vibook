@@ -9,6 +9,10 @@ import { transparentTabScreenOptions } from '@/navigation/navigationCanvas';
 import { bottomTabSoftCrossFade } from '@/navigation/transitionPresets';
 import { refreshBusinessHubLists } from '@/services/businessHubSync';
 import { useBusinessHubStore } from '@/store/businessHubStore';
+import {
+  canAccessPartnerDashboard,
+  canManageBusinessOperations,
+} from '@/utils/businessPartnerAccess';
 import { useLocaleStore } from '@/store/localeStore';
 import { useThemeColors } from '@/theme';
 import { useThemeStore } from '@/store/themeStore';
@@ -71,18 +75,23 @@ export default function BusinessDashboardLayout() {
   const colors = useThemeColors();
   const colorScheme = useThemeStore((s) => s.colorScheme);
   const locale = useLocaleStore((s) => s.locale);
-  const applicationStatus = useBusinessHubStore((s) => s.applicationStatus);
+  const apiProfileStatus = useBusinessHubStore((s) => s.apiProfileStatus);
+  const requiresReApproval = useBusinessHubStore((s) => s.requiresReApproval);
+  const previouslyApproved = useBusinessHubStore((s) => s.previouslyApproved);
+
+  const hubOpen = canAccessPartnerDashboard(apiProfileStatus, requiresReApproval, previouslyApproved);
+  const canManage = canManageBusinessOperations(apiProfileStatus);
 
   useFocusEffect(
     useCallback(() => {
-      if (applicationStatus !== 'approved') return;
+      if (!canManage) return;
       void refreshBusinessHubLists().catch(() => {
         /* offline / session — screens still show last fetch */
       });
-    }, [applicationStatus]),
+    }, [canManage]),
   );
 
-  if (applicationStatus !== 'approved') {
+  if (!hubOpen) {
     return <Redirect href="/business" />;
   }
 

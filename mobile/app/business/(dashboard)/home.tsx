@@ -9,8 +9,10 @@ import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
+import { BusinessPartnerGateBanner } from '@/components/business/BusinessPartnerGateBanner';
 import { MicroBars, MicroSparkline } from '@/components/business/DashboardMicroViz';
 import { useBusinessHubStore } from '@/store/businessHubStore';
+import { canManageBusinessOperations } from '@/utils/businessPartnerAccess';
 import type { BusinessEventRecord } from '@/types/businessHub';
 import { bookingBucketsLast7Days, eventBucketsNext7Days } from '@/utils/dashboardVitals';
 import { createShadows, radii, spacing, useThemeColors, useThemeGradients } from '@/theme';
@@ -48,8 +50,10 @@ export default function BusinessDashboardHomeScreen() {
   const router = useRouter();
   const { t, isRTL } = useTranslation();
   const profile = useBusinessHubStore((s) => s.profile);
+  const apiProfileStatus = useBusinessHubStore((s) => s.apiProfileStatus);
   const events = useBusinessHubStore((s) => s.events);
   const bookings = useBusinessHubStore((s) => s.bookings);
+  const canManage = canManageBusinessOperations(apiProfileStatus);
 
   const pendingBookings = useMemo(
     () => bookings.filter((b) => b.status === 'pending').length,
@@ -91,7 +95,7 @@ export default function BusinessDashboardHomeScreen() {
       urgent?: boolean;
     };
     const blocks: Block[] = [];
-    if (pendingBookings > 0) {
+    if (canManage && pendingBookings > 0) {
       blocks.push({
         key: 'bookings',
         icon: 'notifications-outline',
@@ -104,7 +108,7 @@ export default function BusinessDashboardHomeScreen() {
         urgent: true,
       });
     }
-    if (upcomingEvents.length > 0) {
+    if (canManage && upcomingEvents.length > 0) {
       const next = upcomingEvents[0];
       blocks.push({
         key: 'events',
@@ -115,7 +119,7 @@ export default function BusinessDashboardHomeScreen() {
       });
     }
     return blocks;
-  }, [pendingBookings, upcomingEvents, t, router]);
+  }, [canManage, pendingBookings, upcomingEvents, t, router]);
 
   const recentActivity = useMemo(() => {
     const rows: { id: string; icon: keyof typeof Ionicons.glyphMap; title: string; meta: string }[] =
@@ -157,6 +161,7 @@ export default function BusinessDashboardHomeScreen() {
 
   return (
     <Screen scroll contentStyle={styles.screenPad}>
+      <BusinessPartnerGateBanner />
       <View style={[styles.hero, sh.lg]}>
         <LinearGradient
           colors={[...gradients.hero]}
@@ -192,11 +197,13 @@ export default function BusinessDashboardHomeScreen() {
             {t('businessHub.dashVizTrend')}
           </AppText>
         </View>
-        <PrimaryButton
-          title={t('businessHub.dashCreateEventCta')}
-          onPress={() => router.push('/business/events/new')}
-          style={styles.heroCta}
-        />
+        {canManage ? (
+          <PrimaryButton
+            title={t('businessHub.dashCreateEventCta')}
+            onPress={() => router.push('/business/events/new')}
+            style={styles.heroCta}
+          />
+        ) : null}
       </View>
 
       <AppText variant="overline" color="textMuted" style={styles.sectionEyebrow}>

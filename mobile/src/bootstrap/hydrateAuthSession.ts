@@ -1,5 +1,6 @@
 import { fetchCurrentUser } from '@/api/authApi';
 import { clearTokens, getTokensSync, loadTokensFromStorage } from '@/api/authSession';
+import { syncFavoritesFromServer } from '@/services/favorites/syncFavoritesFromServer';
 import { useAppStore } from '@/store/appStore';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -17,6 +18,7 @@ export async function hydrateAuthSession(): Promise<void> {
     useSessionStore.getState().setSessionFromAuthResponse(me);
     useAppStore.getState().setAuthenticated(true);
     useAppStore.getState().setGuest(false);
+    await syncFavoritesFromServer();
   } catch {
     await clearTokens();
     useSessionStore.getState().clearSession();

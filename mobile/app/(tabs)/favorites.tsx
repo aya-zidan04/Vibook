@@ -12,6 +12,7 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { favoriteEventRowToEventItem } from '@/services/api/eventMap';
+import { useFavoritesStore } from '@/store/favoritesStore';
 import { useAppStore } from '@/store/appStore';
 import type { EventItem } from '@/types';
 import { spacing, useThemeColors } from '@/theme';
@@ -39,6 +40,7 @@ export default function FavoritesTabScreen() {
       try {
         const page = await listMyFavorites(0, 50);
         setRows(page.content.map(favoriteEventRowToEventItem));
+        useFavoritesStore.getState().mergeFavoriteEventIds(page.content.map((row) => row.id));
         setError(null);
       } catch (e) {
         setRows([]);

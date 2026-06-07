@@ -13,7 +13,8 @@ import type { BusinessProfileResponse, BusinessProfileStatus, CategoryResponse, 
 import { BusinessProfileFilterBar } from '@/components/business-profiles/BusinessProfileFilterBar';
 import { useAdminChrome } from '@/components/layout/useAdminChrome';
 import { Button } from '@/components/ui/Button';
-import { StatusBadge } from '@/components/ui/Badge';
+import { BusinessProfileStatusBadge, ReApprovalBadge } from '@/components/ui/Badge';
+import { isFirstTimePending, isReapprovalPending } from '@/utils/businessProfilePresentation';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/useToast';
@@ -24,7 +25,7 @@ import { formatDateTime } from '@/utils/format';
 
 type DialogState =
   | null
-  | { type: 'approve' | 'reject'; id: number; name: string }
+  | { type: 'approve' | 'reject'; id: number; name: string; requiresReApproval?: boolean }
   | { type: 'bulk-approve' | 'bulk-reject' };
 
 const SORT_VALUES = [
@@ -156,7 +157,12 @@ export function BusinessProfilesPage() {
     setBusyId(dialog.id);
     try {
       await approveBusinessProfile(dialog.id);
-      showToast(t('businessProfiles.approvedToast'), 'success');
+      showToast(
+        dialog.requiresReApproval
+          ? t('businessProfiles.approvedChangesToast')
+          : t('businessProfiles.approvedToast'),
+        'success',
+      );
       setDialog(null);
       await loadRows();
     } catch (e) {
@@ -171,7 +177,12 @@ export function BusinessProfilesPage() {
     setBusyId(dialog.id);
     try {
       await rejectBusinessProfile(dialog.id, rejectReason.trim() || undefined);
-      showToast(t('businessProfiles.rejectedToast'), 'success');
+      showToast(
+        dialog.requiresReApproval
+          ? t('businessProfiles.rejectedChangesToast')
+          : t('businessProfiles.rejectedToast'),
+        'success',
+      );
       setDialog(null);
       setRejectReason('');
       await loadRows();
@@ -390,11 +401,18 @@ export function BusinessProfilesPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((p) => (
-                <tr
-                  key={p.id}
-                  className={selected.has(p.id) ? 'vb-table-row--selected' : undefined}
-                >
+              {filteredRows.map((p) => {
+                const reapproval = isReapprovalPending(p);
+                const firstTimePending = isFirstTimePending(p);
+                const rowClass = [
+                  selected.has(p.id) ? 'vb-table-row--selected' : '',
+                  reapproval ? 'vb-table-row--reapproval' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ');
+
+                return (
+                <tr key={p.id} className={rowClass || undefined}>
                   <td>
                     <input
                       type="checkbox"
@@ -405,7 +423,16 @@ export function BusinessProfilesPage() {
                     />
                   </td>
                   <td>
-                    <strong>{p.businessName}</strong>
+                    <div className="vb-business-cell">
+                      <strong>{p.businessName}</strong>
+                      {reapproval ? (
+                        <div className="vb-business-cell__subtitle vb-business-cell__subtitle--reapproval">
+                          {t('businessProfiles.updatedProfileSubmissionSubtitle')}
+                        </div>
+                      ) : firstTimePending ? (
+                        <div className="vb-business-cell__subtitle">{t('status.newApplication')}</div>
+                      ) : null}
+                    </div>
                   </td>
                   <td>
                     <div
@@ -469,7 +496,14 @@ export function BusinessProfilesPage() {
                   <td>{p.primaryCategoryName ?? t('common.dash')}</td>
                   <td>{localizedGovernorateName(p.governorateName, locale) || t('common.dash')}</td>
                   <td>
-                    <StatusBadge status={p.status} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', alignItems: 'center' }}>
+                      <BusinessProfileStatusBadge
+                        status={p.status}
+                        requiresReApproval={p.requiresReApproval}
+                        previouslyApproved={p.previouslyApproved}
+                      />
+                      {reapproval ? <ReApprovalBadge /> : null}
+                    </div>
                   </td>
                   <td>{formatDateTime(p.createdAt)}</td>
                   <td>
@@ -485,9 +519,18 @@ export function BusinessProfilesPage() {
                             variant="primary"
                             size="sm"
                             disabled={busyId === p.id}
-                            onClick={() => setDialog({ type: 'approve', id: p.id, name: p.businessName })}
+                            onClick={() =>
+                              setDialog({
+                                type: 'approve',
+                                id: p.id,
+                                name: p.businessName,
+                                requiresReApproval: reapproval,
+                              })
+                            }
                           >
-                            {t('businessProfiles.approve')}
+                            {reapproval
+                              ? t('businessProfiles.approveChangesReactivate')
+                              : t('businessProfiles.approve')}
                           </Button>
                           <Button
                             variant="dangerOutline"
@@ -495,17 +538,23 @@ export function BusinessProfilesPage() {
                             disabled={busyId === p.id}
                             onClick={() => {
                               setRejectReason('');
-                              setDialog({ type: 'reject', id: p.id, name: p.businessName });
+                              setDialog({
+                                type: 'reject',
+                                id: p.id,
+                                name: p.businessName,
+                                requiresReApproval: reapproval,
+                              });
                             }}
                           >
-                            {t('businessProfiles.reject')}
+                            {reapproval ? t('businessProfiles.rejectChanges') : t('businessProfiles.reject')}
                           </Button>
                         </>
                       ) : null}
                     </div>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>
@@ -513,11 +562,23 @@ export function BusinessProfilesPage() {
 
       <ConfirmDialog
         open={dialog?.type === 'approve'}
-        title={t('businessProfiles.approveTitle')}
-        message={t('businessProfiles.approveMsg', {
-          name: dialog?.type === 'approve' ? dialog.name : '',
-        })}
-        confirmLabel={t('businessProfiles.approveConfirm')}
+        title={
+          dialog?.type === 'approve' && dialog.requiresReApproval
+            ? t('businessProfiles.approveChangesTitle')
+            : t('businessProfiles.approveTitle')
+        }
+        message={
+          dialog?.type === 'approve' && dialog.requiresReApproval
+            ? t('businessProfiles.approveChangesMsg', { name: dialog.name })
+            : t('businessProfiles.approveMsg', {
+                name: dialog?.type === 'approve' ? dialog.name : '',
+              })
+        }
+        confirmLabel={
+          dialog?.type === 'approve' && dialog.requiresReApproval
+            ? t('businessProfiles.approveChangesConfirm')
+            : t('businessProfiles.approveConfirm')
+        }
         onConfirm={() => void runApprove()}
         onCancel={() => setDialog(null)}
         loading={busyId != null}
@@ -525,11 +586,23 @@ export function BusinessProfilesPage() {
 
       <ConfirmDialog
         open={dialog?.type === 'reject'}
-        title={t('businessProfiles.rejectTitle')}
-        message={t('businessProfiles.rejectMsg', {
-          name: dialog?.type === 'reject' ? dialog.name : '',
-        })}
-        confirmLabel={t('businessProfiles.rejectConfirm')}
+        title={
+          dialog?.type === 'reject' && dialog.requiresReApproval
+            ? t('businessProfiles.rejectChangesTitle')
+            : t('businessProfiles.rejectTitle')
+        }
+        message={
+          dialog?.type === 'reject' && dialog.requiresReApproval
+            ? t('businessProfiles.rejectChangesMsg', { name: dialog.name })
+            : t('businessProfiles.rejectMsg', {
+                name: dialog?.type === 'reject' ? dialog.name : '',
+              })
+        }
+        confirmLabel={
+          dialog?.type === 'reject' && dialog.requiresReApproval
+            ? t('businessProfiles.rejectChangesConfirm')
+            : t('businessProfiles.rejectConfirm')
+        }
         onConfirm={() => void runReject()}
         onCancel={() => {
           setDialog(null);

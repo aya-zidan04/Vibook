@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { cancelAdminBooking, completeAdminBooking, fetchAdminBooking } from '@/api/adminApi';
+import { fetchAdminBooking } from '@/api/adminApi';
 import type { AdminBookingPaymentInfo, AdminBookingResponse } from '@/api/types';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { BookingStatusBadge, PaymentStatusBadge } from '@/components/ui/Badge';
 import { formatPaymentAmount } from '@/utils/bookingPayment';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useToast } from '@/components/ui/useToast';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { formatDateTime } from '@/utils/format';
@@ -17,16 +15,12 @@ export function BookingDetailPage() {
   const { t } = useAdminI18n();
   const { id: idParam } = useParams();
   const navigate = useNavigate();
-  const { showToast } = useToast();
   const id = idParam ? Number(idParam) : NaN;
   const valid = Number.isFinite(id);
 
   const [row, setRow] = useState<AdminBookingResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dialog, setDialog] = useState<null | 'cancel' | 'complete'>(null);
-  const [busy, setBusy] = useState(false);
-
   useEffect(() => {
     if (!valid) return;
     let c = false;
@@ -46,27 +40,6 @@ export function BookingDetailPage() {
       c = true;
     };
   }, [id, valid, t]);
-
-  async function run() {
-    if (!dialog || !valid) return;
-    setBusy(true);
-    try {
-      if (dialog === 'cancel') {
-        const b = await cancelAdminBooking(id, t('bookings.adminOverrideReason'));
-        setRow(b);
-        showToast(t('bookingDetail.cancelledToast'), 'success');
-      } else {
-        const b = await completeAdminBooking(id);
-        setRow(b);
-        showToast(t('bookingDetail.completedToast'), 'success');
-      }
-      setDialog(null);
-    } catch (e) {
-      showToast(getFriendlyErrorMessage(e, t('bookings.actionFailed')), 'error');
-    } finally {
-      setBusy(false);
-    }
-  }
 
   if (!valid) {
     return (
@@ -139,17 +112,6 @@ export function BookingDetailPage() {
         </p>
       </Card>
 
-      {row.status !== 'CANCELLED' && row.status !== 'COMPLETED' ? (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-          <Button variant="dangerOutline" onClick={() => setDialog('cancel')}>
-            {t('bookingDetail.cancelAdmin')}
-          </Button>
-          <Button variant="primary" onClick={() => setDialog('complete')}>
-            {t('bookingDetail.markCompleted')}
-          </Button>
-        </div>
-      ) : null}
-
       <div className="vb-detail-sections">
         <Card padding="lg">
           <CardHeader title={t('bookingDetail.guestEvent')} />
@@ -215,25 +177,6 @@ export function BookingDetailPage() {
         </Card>
       </div>
 
-      <ConfirmDialog
-        open={dialog === 'cancel'}
-        title={t('bookingDetail.cancelTitle')}
-        message={t('bookingDetail.cancelMsg')}
-        confirmLabel={t('bookingDetail.cancelConfirm')}
-        danger
-        loading={busy}
-        onConfirm={() => void run()}
-        onCancel={() => setDialog(null)}
-      />
-      <ConfirmDialog
-        open={dialog === 'complete'}
-        title={t('bookingDetail.completeTitle')}
-        message={t('bookingDetail.completeMsg')}
-        confirmLabel={t('bookingDetail.completeConfirm')}
-        loading={busy}
-        onConfirm={() => void run()}
-        onCancel={() => setDialog(null)}
-      />
     </div>
   );
 }

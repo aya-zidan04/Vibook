@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -29,7 +30,8 @@ import { GovernorateSelectField } from '@/components/forms/GovernorateSelectFiel
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
 import { AppText } from '@/components/ui/AppText';
 import { HeroAmbientOverlay } from '@/components/ui/HeroAmbientOverlay';
-import { PrimaryButton } from '@/components/ui/Button';
+import { BusinessPartnerGateBanner } from '@/components/business/BusinessPartnerGateBanner';
+import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
 import { listCategories } from '@/api/categoriesApi';
 import {
@@ -38,6 +40,7 @@ import {
   fetchMyBusinessProfile,
   uploadMyBusinessBanner,
   uploadMyBusinessLogo,
+  submitMyBusinessProfileForReview,
   upsertMyBusinessProfile,
 } from '@/api/businessProfileApi';
 import { listActiveGovernorates } from '@/api/governoratesApi';
@@ -63,9 +66,12 @@ export default function BusinessProfileScreen() {
   const sh = useMemo(() => createShadows(colors), [colors]);
   const styles = useMemo(() => createStyles(colors, sh), [colors, sh]);
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { t, isRTL } = useTranslation();
   const locale = useLocaleStore((s) => s.locale);
   const profile = useBusinessHubStore((s) => s.profile);
+  const apiProfileStatus = useBusinessHubStore((s) => s.apiProfileStatus);
+  const previouslyApproved = useBusinessHubStore((s) => s.previouslyApproved);
   const updateProfile = useBusinessHubStore((s) => s.updateProfile);
   const syncBusinessApprovalFromApi = useBusinessHubStore((s) => s.syncBusinessApprovalFromApi);
 
@@ -81,7 +87,9 @@ export default function BusinessProfileScreen() {
   const [coverImageUri, setCoverImageUri] = useState(profile.coverImageUri ?? '');
   const [logoUri, setLogoUri] = useState(profile.logoUri ?? '');
   const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const showRejectedResubmit = apiProfileStatus === 'REJECTED' && previouslyApproved;
   const [descFocused, setDescFocused] = useState(false);
 
   useFocusEffect(
@@ -240,11 +248,34 @@ export default function BusinessProfileScreen() {
 
       syncBusinessApprovalFromApi(dto);
       updateProfile(hubProfilePatchFromApiDto(dto));
-      setToast(t('businessHub.profileSaved'));
+      if (dto.status === 'PENDING_REVIEW' && dto.requiresReApproval) {
+        router.replace('/business/application-pending');
+        return;
+      }
+      if (dto.status === 'REJECTED' && dto.previouslyApproved) {
+        setToast(t('businessHub.profileSavedNeedsResubmit'));
+      } else {
+        setToast(t('businessHub.profileSaved'));
+      }
     } catch (e) {
       Alert.alert(t('common.error'), mapApiError(e, t));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const submitForReview = async () => {
+    if (submitting || saving) return;
+    setSubmitting(true);
+    try {
+      const dto = await submitMyBusinessProfileForReview();
+      syncBusinessApprovalFromApi(dto);
+      updateProfile(hubProfilePatchFromApiDto(dto));
+      router.replace('/business/application-pending');
+    } catch (e) {
+      Alert.alert(t('common.error'), mapApiError(e, t));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -478,6 +509,8 @@ export default function BusinessProfileScreen() {
           </View>
         </View>
 
+        <BusinessPartnerGateBanner />
+
         <View style={styles.saveSection}>
           <PrimaryButton
             title={t('businessHub.profileSaveCta')}
@@ -485,6 +518,18 @@ export default function BusinessProfileScreen() {
             loading={saving}
             style={styles.saveFull}
           />
+          {showRejectedResubmit ? (
+            <SecondaryButton
+              title={
+                submitting
+                  ? t('businessHub.profileSubmittingForReview')
+                  : t('businessHub.profileSubmitForReview')
+              }
+              onPress={() => void submitForReview()}
+              disabled={saving || submitting}
+              style={styles.saveFull}
+            />
+          ) : null}
         </View>
 
         {toast ? (
@@ -512,6 +557,7 @@ function createStyles(colors: ThemeColors, sh: ReturnType<typeof createShadows>)
     saveSection: {
       marginTop: spacing.lg,
       paddingHorizontal: spacing.screen,
+      gap: spacing.md,
     },
     heroWrap: {
       alignItems: 'center',

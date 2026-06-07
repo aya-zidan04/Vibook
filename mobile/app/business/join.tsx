@@ -26,7 +26,8 @@ import { useLocaleStore } from '@/store/localeStore';
 import { inputTextStyle } from '@/theme/typography';
 import { textAlignStart } from '@/utils/rtlText';
 import { useBusinessHubStore } from '@/store/businessHubStore';
-import { isValidEmail } from '@/utils/authValidation';
+import { isValidEmail, isValidJordanLocalPhone } from '@/utils/authValidation';
+import { normalizePhoneForApi } from '@/utils/profilePatch';
 import { resolveGovernorateId } from '@/utils/resolveGovernorateId';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -37,11 +38,6 @@ const MAX = {
   phone: 32,
   message: 800,
 } as const;
-
-function isValidBusinessPhone(raw: string): boolean {
-  const t = raw.trim();
-  return t.length >= 6 && t.length <= MAX.phone;
-}
 
 type FieldKey = 'companyName' | 'email' | 'phone' | 'category' | 'message';
 
@@ -111,8 +107,9 @@ export default function BusinessJoinScreen() {
     else if (!isValidEmail(email)) next.email = t('businessJoin.errEmail');
     else if (email.trim().length > MAX.email) next.email = t('businessJoin.errTooLong');
 
-    if (!isValidBusinessPhone(phone)) {
-      next.phone = phone.trim() ? t('businessJoin.errPhone') : t('businessJoin.errRequired');
+    const phoneDigits = phone.replace(/\D/g, '').slice(-9);
+    if (!isValidJordanLocalPhone(phoneDigits)) {
+      next.phone = phoneDigits.length > 0 ? t('businessJoin.errPhone') : t('businessJoin.errRequired');
     }
 
     if (!category.trim()) next.category = t('businessJoin.errRequired');
@@ -140,10 +137,13 @@ export default function BusinessJoinScreen() {
 
     const description = (message.trim() || t('businessJoin.messageDefault')).slice(0, MAX.message);
 
+    const phoneDigits = phone.replace(/\D/g, '').slice(-9);
+    const phoneE164 = normalizePhoneForApi(phoneDigits);
+
     const localBody = {
       companyName: companyName.trim(),
       email: email.trim(),
-      phone: phone.trim(),
+      phone: phoneE164,
       category: category.trim(),
       message: description,
     };
@@ -156,7 +156,7 @@ export default function BusinessJoinScreen() {
         primaryCategoryId,
         description,
         workEmail: email.trim(),
-        phone: phone.trim(),
+        phone: phoneE164,
         governorateId,
         googleMapsUrl: null,
         website: null,
@@ -228,7 +228,7 @@ export default function BusinessJoinScreen() {
         placeholder={t('businessJoin.phonePh')}
         value={phone}
         onChangeText={(v) => {
-          setPhone(v);
+          setPhone(v.replace(/\D/g, '').slice(0, 9));
           clearError('phone');
         }}
         appearance="business"

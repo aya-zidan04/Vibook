@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { EmptyState } from '@/components/feedback/EmptyState';
@@ -12,11 +11,11 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { listMyBookings } from '@/api/bookingsApi';
 import { mapApiError } from '@/utils/mapApiError';
 import { bookingResponseToBooking } from '@/services/api/bookingMap';
+import { enrichBookingsWithEventPhotos } from '@/utils/enrichBookingEventPhotos';
 import { useAppStore } from '@/store/appStore';
 import type { Booking } from '@/types';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-import { googleCalendarEventUrl, primaryShortcutBooking } from '@/utils/bookingQuickActions';
 import { formatDateShort } from '@/utils/format';
 import { NavigationChevronForward } from '@/components/ui/NavigationChevron';
 
@@ -24,7 +23,7 @@ export default function BookingTabScreen() {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loadError, setLoadError] = useState<unknown | null>(null);
@@ -38,7 +37,8 @@ export default function BookingTabScreen() {
     void (async () => {
       try {
         const rows = await listMyBookings();
-        setBookings(rows.map(bookingResponseToBooking));
+        const mapped = rows.map(bookingResponseToBooking);
+        setBookings(await enrichBookingsWithEventPhotos(mapped));
         setLoadError(null);
       } catch (e) {
         setBookings([]);
@@ -56,46 +56,6 @@ export default function BookingTabScreen() {
   const upcoming = bookings.filter((b) => b.status === 'upcoming');
   const past = bookings.filter((b) => b.status === 'past');
   const pending = bookings.filter((b) => b.status === 'pending_payment');
-  const shortcutBooking = primaryShortcutBooking(upcoming, pending, past);
-
-  const alertNoBooking = () =>
-    Alert.alert(t('booking.shortcutNoBookingTitle'), t('booking.shortcutNoBookingBody'), [
-      { text: t('common.ok') },
-    ]);
-
-  const onQrPreview = () => {
-    if (!shortcutBooking) {
-      alertNoBooking();
-      return;
-    }
-    router.push(`/booking/${shortcutBooking.id}`);
-  };
-
-  const onAddToCalendar = () => {
-    if (!shortcutBooking) {
-      alertNoBooking();
-      return;
-    }
-    void Linking.openURL(googleCalendarEventUrl(shortcutBooking));
-  };
-
-  const onShareTicket = async () => {
-    if (!shortcutBooking) {
-      alertNoBooking();
-      return;
-    }
-    const title =
-      locale === 'ar' && shortcutBooking.refTitleAr ? shortcutBooking.refTitleAr : shortcutBooking.refTitle;
-    const city =
-      locale === 'ar' && shortcutBooking.cityNameAr ? shortcutBooking.cityNameAr : shortcutBooking.cityName;
-    const when = formatDateShort(shortcutBooking.startsAt, locale);
-    const message = `${title}\n${when} · ${city}\n${t('common.brandDisplay')} · ${shortcutBooking.id}`;
-    try {
-      await Share.share({ title: t('booking.ticketShareTitle'), message });
-    } catch {
-      /* user dismissed share sheet */
-    }
-  };
 
   if (!isAuthenticated) {
     return (
@@ -187,42 +147,6 @@ export default function BookingTabScreen() {
           <BookingCard key={b.id} booking={b} narrow onOpen={() => router.push(`/booking/${b.id}`)} />
         ))}
       </ScrollView>
-
-      <View style={styles.actions}>
-        <Pressable
-          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
-          onPress={onQrPreview}
-          accessibilityRole="button"
-          accessibilityLabel={t('booking.qr')}
-        >
-          <Ionicons name="qr-code-outline" size={22} color={colors.icon} />
-          <AppText variant="label" color="textSecondary">
-            {t('booking.qr')}
-          </AppText>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
-          onPress={onAddToCalendar}
-          accessibilityRole="button"
-          accessibilityLabel={t('booking.calendar')}
-        >
-          <Ionicons name="calendar-outline" size={22} color={colors.icon} />
-          <AppText variant="label" color="textSecondary">
-            {t('booking.calendar')}
-          </AppText>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
-          onPress={() => void onShareTicket()}
-          accessibilityRole="button"
-          accessibilityLabel={t('booking.ticket')}
-        >
-          <Ionicons name="download-outline" size={22} color={colors.icon} />
-          <AppText variant="label" color="textSecondary">
-            {t('booking.ticket')}
-          </AppText>
-        </Pressable>
-      </View>
     </Screen>
   );
 }
@@ -242,10 +166,15 @@ function BookingCard({
   const { formatMoney } = useFormatMoney();
   const title = locale === 'ar' && booking.refTitleAr ? booking.refTitleAr : booking.refTitle;
   const cityLine = locale === 'ar' && booking.cityNameAr ? booking.cityNameAr : booking.cityName;
+  const coverUrl = booking.gallery[0] ?? booking.imageUrl;
 
   return (
     <Pressable style={[styles.card, narrow && styles.cardNarrow]} onPress={onOpen}>
-      <Image source={{ uri: booking.imageUrl }} style={styles.img} contentFit="cover" />
+      {coverUrl ? (
+        <Image source={{ uri: coverUrl }} style={styles.img} contentFit="cover" />
+      ) : (
+        <View style={[styles.img, styles.imgPlaceholder]} />
+      )}
       <View style={styles.body}>
         <View style={styles.row}>
           <AppText variant="h3" color="text" numberOfLines={2} style={{ flex: 1 }}>
@@ -317,27 +246,15 @@ function createStyles(colors: ThemeColors) {
       marginEnd: spacing.md,
     },
     img: { width: 104, height: 120 },
+    imgPlaceholder: {
+      backgroundColor: colors.surfaceMuted,
+      borderRightWidth: 1,
+      borderRightColor: colors.border,
+    },
     body: { flex: 1, padding: spacing.md, gap: 6 },
     row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
     price: { marginTop: 4 },
     detailBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: spacing.sm },
-    actions: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      marginTop: spacing.lg,
-      marginBottom: spacing.xxxl,
-    },
-    actionBtn: {
-      alignItems: 'center',
-      gap: 6,
-      padding: spacing.md,
-      backgroundColor: colors.card,
-      borderRadius: radii.full,
-      borderWidth: 1,
-      borderColor: colors.border,
-      minWidth: 96,
-    },
-    actionBtnPressed: { opacity: 0.88 },
     pill: {
       paddingHorizontal: 8,
       paddingVertical: 4,

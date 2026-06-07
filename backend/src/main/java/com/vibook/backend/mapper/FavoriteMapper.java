@@ -45,6 +45,7 @@ public class FavoriteMapper {
             gov != null ? gov.getName() : null,
             sub != null ? sub.getName() : null,
             cat != null ? cat.getName() : null,
+            event.getBusinessProfile().getBusinessName(),
             event.getPriceJod(),
             event.getCurrency(),
             cover,

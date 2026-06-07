@@ -224,6 +224,8 @@ export function EventDetailPage() {
             </dd>
             <dt>{t('eventDetail.capacity')}</dt>
             <dd>{t('eventDetail.guests', { count: ev.capacityGuests })}</dd>
+            <dt>{t('eventDetail.photos')}</dt>
+            <dd>{ev.photoUrls?.length ?? 0}</dd>
             <dt>{t('eventDetail.created')}</dt>
             <dd>{formatDateTime(ev.createdAt)}</dd>
             <dt>{t('eventDetail.updated')}</dt>

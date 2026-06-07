@@ -40,6 +40,8 @@ public class ConsumerEventServiceImpl implements ConsumerEventService {
         Pageable pageable
     ) {
         Specification<BusinessEvent> spec = BusinessEventSpecifications.visibleForViewer(includeHidden, viewerIsAdmin);
+        spec = BusinessEventSpecifications.combine(spec, BusinessEventSpecifications.eventDateOnOrAfter(LocalDate.now()));
+        spec = BusinessEventSpecifications.combine(spec, BusinessEventSpecifications.businessProfileApproved());
         spec = BusinessEventSpecifications.combine(spec, BusinessEventSpecifications.governorateIdEquals(governorateId));
         spec = BusinessEventSpecifications.combine(spec, BusinessEventSpecifications.categoryIdEquals(categoryId));
         spec = BusinessEventSpecifications.combine(spec, BusinessEventSpecifications.subcategoryIdEquals(subcategoryId));

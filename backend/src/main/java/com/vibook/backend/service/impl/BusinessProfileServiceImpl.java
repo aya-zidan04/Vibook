@@ -17,7 +17,6 @@ import com.vibook.backend.repository.GovernorateRepository;
 import com.vibook.backend.repository.UserRepository;
 import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.BusinessProfileService;
-import com.vibook.backend.service.BusinessUserRoleService;
 import com.vibook.backend.service.ProfileImageStorageService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +34,6 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
     private final GovernorateRepository governorateRepository;
     private final BusinessProfileMapper businessProfileMapper;
     private final ProfileImageStorageService profileImageStorageService;
-    private final BusinessUserRoleService businessUserRoleService;
 
     public BusinessProfileServiceImpl(
         BusinessProfileRepository businessProfileRepository,
@@ -43,8 +41,7 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
         CategoryRepository categoryRepository,
         GovernorateRepository governorateRepository,
         BusinessProfileMapper businessProfileMapper,
-        ProfileImageStorageService profileImageStorageService,
-        BusinessUserRoleService businessUserRoleService
+        ProfileImageStorageService profileImageStorageService
     ) {
         this.businessProfileRepository = businessProfileRepository;
         this.userRepository = userRepository;
@@ -52,7 +49,6 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
         this.governorateRepository = governorateRepository;
         this.businessProfileMapper = businessProfileMapper;
         this.profileImageStorageService = profileImageStorageService;
-        this.businessUserRoleService = businessUserRoleService;
     }
 
     @Override
@@ -87,14 +83,8 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
                 return created;
             });
 
-        BusinessProfileStatus previousStatus = entity.getStatus();
         businessProfileMapper.updateEntity(entity, request, category, governorate);
-        if (previousStatus == BusinessProfileStatus.APPROVED) {
-            entity.setStatus(BusinessProfileStatus.DRAFT);
-            entity.setRejectionReason(null);
-            entity.setApprovedAt(null);
-            businessUserRoleService.revokeBusinessRole(user);
-        }
+        queueApprovedProfileForReapproval(entity);
         BusinessProfile saved = businessProfileRepository.save(entity);
         return businessProfileMapper.toResponse(saved);
     }
@@ -115,7 +105,6 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
 
         entity.setStatus(BusinessProfileStatus.PENDING_REVIEW);
         entity.setRejectionReason(null);
-        entity.setApprovedAt(null);
         entity.setRejectedAt(null);
         BusinessProfile saved = businessProfileRepository.save(entity);
         return businessProfileMapper.toResponse(saved);
@@ -149,6 +138,7 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
             profileImageStorageService.tryDeleteStoredFile(previous);
         }
         profile.setLogoImageUrl(publicPath);
+        queueApprovedProfileForReapproval(profile);
         return businessProfileMapper.toResponse(businessProfileRepository.save(profile));
     }
 
@@ -160,6 +150,7 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
             profileImageStorageService.tryDeleteStoredFile(profile.getLogoImageUrl());
         }
         profile.setLogoImageUrl(null);
+        queueApprovedProfileForReapproval(profile);
         return businessProfileMapper.toResponse(businessProfileRepository.save(profile));
     }
 
@@ -173,6 +164,7 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
             profileImageStorageService.tryDeleteStoredFile(previous);
         }
         profile.setBannerImageUrl(publicPath);
+        queueApprovedProfileForReapproval(profile);
         return businessProfileMapper.toResponse(businessProfileRepository.save(profile));
     }
 
@@ -184,7 +176,23 @@ public class BusinessProfileServiceImpl implements BusinessProfileService {
             profileImageStorageService.tryDeleteStoredFile(profile.getBannerImageUrl());
         }
         profile.setBannerImageUrl(null);
+        queueApprovedProfileForReapproval(profile);
         return businessProfileMapper.toResponse(businessProfileRepository.save(profile));
+    }
+
+    /**
+     * Approved profiles go straight to pending review after owner edits (re-approval queue).
+     * {@code ROLE_BUSINESS} is preserved; admin reject does not revoke it (see {@code AdminBusinessProfileServiceImpl#reject}).
+     */
+    private static void queueApprovedProfileForReapproval(BusinessProfile entity) {
+        if (entity.getStatus() != BusinessProfileStatus.APPROVED) {
+            return;
+        }
+        validateReadyForReview(entity);
+        entity.setStatus(BusinessProfileStatus.PENDING_REVIEW);
+        entity.setRejectionReason(null);
+        entity.setRejectedAt(null);
+        entity.setRequiresReApproval(true);
     }
 
     private BusinessProfile requireProfileForCurrentUser() {

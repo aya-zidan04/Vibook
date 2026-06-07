@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import type { BusinessProfileResponseDto } from '@/api/types';
+import type { BusinessProfileResponseDto, BusinessProfileStatusDto } from '@/api/types';
 import type {
   ApplicationStatus,
   BusinessBookingRecord,
@@ -37,6 +37,9 @@ function newId(prefix: string) {
 type State = {
   applicationStatus: ApplicationStatus;
   rejectedReason: string;
+  apiProfileStatus: BusinessProfileStatusDto | null;
+  requiresReApproval: boolean;
+  previouslyApproved: boolean;
   profile: BusinessProfile;
   listings: BusinessListing[];
   /** Partner events from `GET /business/events` (not persisted). */
@@ -69,6 +72,9 @@ export const useBusinessHubStore = create<State>()(
     (set) => ({
       applicationStatus: 'none',
       rejectedReason: '',
+      apiProfileStatus: null,
+      requiresReApproval: false,
+      previouslyApproved: false,
       profile: emptyProfile(),
       listings: [],
       events: [],
@@ -97,6 +103,9 @@ export const useBusinessHubStore = create<State>()(
         set({
           applicationStatus: 'none',
           rejectedReason: '',
+          apiProfileStatus: null,
+          requiresReApproval: false,
+          previouslyApproved: false,
         }),
 
       syncBusinessApprovalFromApi: (profile: BusinessProfileResponseDto | null | undefined) =>
@@ -105,18 +114,35 @@ export const useBusinessHubStore = create<State>()(
             return s;
           }
           if (profile === null) {
-            return { applicationStatus: 'none', rejectedReason: '' };
+            return {
+              applicationStatus: 'none',
+              rejectedReason: '',
+              apiProfileStatus: null,
+              requiresReApproval: false,
+              previouslyApproved: false,
+            };
           }
           const reason = profile.rejectionReason?.trim() ?? '';
           const profilePatch = hubProfilePatchFromApiDto(profile);
-          const base = { profile: { ...s.profile, ...profilePatch }, rejectedReason: reason };
+          const requiresReApproval = profile.requiresReApproval === true;
+          const previouslyApproved = profile.previouslyApproved === true;
+          const base = {
+            profile: { ...s.profile, ...profilePatch },
+            rejectedReason: reason,
+            apiProfileStatus: profile.status,
+            requiresReApproval,
+            previouslyApproved,
+          };
           switch (profile.status) {
             case 'APPROVED':
               return { ...base, applicationStatus: 'approved' as const };
             case 'PENDING_REVIEW':
               return { ...base, applicationStatus: 'pending' as const };
             case 'REJECTED':
-              return { ...base, applicationStatus: 'rejected' as const };
+              return {
+                ...base,
+                applicationStatus: previouslyApproved ? ('approved' as const) : ('rejected' as const),
+              };
             case 'DRAFT':
             default:
               return { ...base, applicationStatus: 'none' as const };
@@ -188,6 +214,9 @@ export const useBusinessHubStore = create<State>()(
       partialize: (s) => ({
         applicationStatus: s.applicationStatus,
         rejectedReason: s.rejectedReason,
+        apiProfileStatus: s.apiProfileStatus,
+        requiresReApproval: s.requiresReApproval,
+        previouslyApproved: s.previouslyApproved,
         profile: s.profile,
         listings: s.listings,
       }),

@@ -1,8 +1,10 @@
 package com.vibook.backend.spec;
 
 import com.vibook.backend.entity.BusinessEvent;
+import com.vibook.backend.entity.BusinessProfileStatus;
 import jakarta.persistence.criteria.JoinType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -46,11 +48,27 @@ public final class BusinessEventSpecifications {
         };
     }
 
-    public static Specification<BusinessEvent> eventDateEquals(java.time.LocalDate date) {
+    public static Specification<BusinessEvent> eventDateEquals(LocalDate date) {
         if (date == null) {
             return null;
         }
         return (root, query, cb) -> cb.equal(root.get("eventDate"), date);
+    }
+
+    /** Consumer explore: only upcoming events (inclusive of today). */
+    public static Specification<BusinessEvent> eventDateOnOrAfter(LocalDate minDate) {
+        if (minDate == null) {
+            return null;
+        }
+        return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("eventDate"), minDate);
+    }
+
+    /** Consumer explore: only events from admin-approved business profiles. */
+    public static Specification<BusinessEvent> businessProfileApproved() {
+        return (root, query, cb) -> {
+            var profile = root.join("businessProfile", JoinType.INNER);
+            return cb.equal(profile.get("status"), BusinessProfileStatus.APPROVED);
+        };
     }
 
     public static Specification<BusinessEvent> keywordContains(String keyword) {

@@ -153,6 +153,8 @@ export type Booking = {
   refTitle: string;
   refTitleAr?: string;
   imageUrl: string;
+  /** Event photos for slider / thumbnails (events only). */
+  gallery: string[];
   status: BookingStatus;
   startsAt: string;
   cityName: string;

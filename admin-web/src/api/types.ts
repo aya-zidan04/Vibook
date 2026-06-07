@@ -46,6 +46,8 @@ export type BusinessProfileResponse = {
   adminNotes?: string | null;
   approvedAt?: string | null;
   rejectedAt?: string | null;
+  requiresReApproval?: boolean;
+  previouslyApproved?: boolean;
 };
 
 export type TimeSeriesPointResponse = {
@@ -120,14 +122,16 @@ export type GovernorateAdminStatsResponse = {
 /** Event list row from admin moderation API. */
 export type AdminEventRowResponse = {
   id: number;
-  title: string | null;
+  title: string;
   businessProfileId: number;
   businessName: string | null;
   categoryName: string | null;
   governorateName: string | null;
+  eventDate: string;
   priceJod: number;
   currency: string;
   capacityGuests: number;
+  photoCount: number;
   visibilityStatus: 'VISIBLE' | 'HIDDEN' | string;
   createdAt: string;
 };

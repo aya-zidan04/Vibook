@@ -20,7 +20,10 @@ export default function BusinessApplicationPendingScreen() {
   const { t } = useTranslation();
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const applicationStatus = useBusinessHubStore((s) => s.applicationStatus);
+  const requiresReApproval = useBusinessHubStore((s) => s.requiresReApproval);
+  const previouslyApproved = useBusinessHubStore((s) => s.previouslyApproved);
   const profile = useBusinessHubStore((s) => s.profile);
+  const isReapprovalPending = requiresReApproval || previouslyApproved;
   const syncBusinessApprovalFromApi = useBusinessHubStore((s) => s.syncBusinessApprovalFromApi);
 
   const [serverName, setServerName] = useState<string | null>(null);
@@ -93,11 +96,17 @@ export default function BusinessApplicationPendingScreen() {
         </AppText>
       ) : null}
 
+      {isReapprovalPending ? (
+        <AppText variant="body-em" color="primary" style={styles.banner}>
+          {t('businessHub.profileSubmittedForReview')}
+        </AppText>
+      ) : null}
+
       <AppText variant="h2" color="text">
-        {t('businessHub.pendingHeadline')}
+        {isReapprovalPending ? t('businessHub.pendingReapprovalHeadline') : t('businessHub.pendingHeadline')}
       </AppText>
       <AppText variant="body" color="textSecondary">
-        {t('businessHub.pendingBody')}
+        {isReapprovalPending ? t('businessHub.pendingReapprovalBody') : t('businessHub.pendingBody')}
       </AppText>
       <View style={styles.summary}>
         <AppText variant="caption" color="textMuted">

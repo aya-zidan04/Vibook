@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppText } from '@/components/ui/AppText';
@@ -9,9 +8,12 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
+import { getEventById } from '@/api/eventsApi';
 import { cancelMyBooking, getMyBooking } from '@/api/bookingsApi';
+import { EventPhotoGallery } from '@/components/event/EventPhotoGallery';
 import { mapApiError } from '@/utils/mapApiError';
 import { bookingResponseToBooking } from '@/services/api/bookingMap';
+import { businessEventDetailToEventItem } from '@/services/api/eventMap';
 import { useAppStore } from '@/store/appStore';
 import type { Booking, BookingStatus } from '@/types';
 import { canCancelBookingStatus } from '@/utils/bookingApiMap';
@@ -66,6 +68,31 @@ export default function BookingDetailScreen() {
     setBooking(undefined);
     setLoading(false);
   }, [id, isApiId, isAuthenticated]);
+
+  useEffect(() => {
+    if (!booking || booking.type !== 'event' || booking.gallery.length > 0) return;
+    const eventId = Number(booking.refId);
+    if (!Number.isFinite(eventId)) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const raw = await getEventById(eventId);
+        if (cancelled) return;
+        const item = businessEventDetailToEventItem(raw);
+        if (item.gallery.length === 0) return;
+        setBooking((prev) =>
+          prev
+            ? { ...prev, gallery: item.gallery, imageUrl: item.gallery[0] ?? prev.imageUrl }
+            : prev,
+        );
+      } catch {
+        /* keep booking without photos */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [booking?.id, booking?.type, booking?.refId, booking?.gallery.length]);
 
   if (!id) {
     return (
@@ -131,7 +158,11 @@ export default function BookingDetailScreen() {
       contentStyle={styles.pad}
       header={<DetailHeader title={t('bookingDetail.title')} />}
     >
-      <Image source={{ uri: booking.imageUrl }} style={styles.hero} contentFit="cover" />
+      {booking.gallery.length > 0 ? (
+        <EventPhotoGallery photos={booking.gallery} height={200} />
+      ) : (
+        <View style={[styles.hero, styles.heroPlaceholder]} />
+      )}
       <AppText variant="h1" color="text" style={styles.mt}>
         {refTitle}
       </AppText>
@@ -225,7 +256,17 @@ function Row({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.sm },
-    hero: { width: '100%', height: 200, borderRadius: radii.xl, marginTop: spacing.md },
+    hero: {
+      width: '100%',
+      height: 200,
+      borderRadius: radii.xl,
+      marginTop: spacing.md,
+      backgroundColor: colors.card,
+    },
+    heroPlaceholder: {
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
     mt: { marginTop: spacing.md },
     cancelPress: { marginTop: spacing.md, paddingVertical: spacing.sm, alignItems: 'center' },
     reportPress: { marginTop: spacing.sm, paddingVertical: spacing.sm, alignItems: 'center' },

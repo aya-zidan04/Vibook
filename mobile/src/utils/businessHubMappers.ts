@@ -46,6 +46,14 @@ export function editorPhotosFromApiResponse(r: BusinessEventResponse): EventEdit
   }));
 }
 
+/** Stored photo paths from API (for upsert after multipart upload). */
+export function photoUrlsFromApiResponse(r: BusinessEventResponse): string[] {
+  if (r.photos?.length) {
+    return r.photos.map((p) => p.url);
+  }
+  return r.photoUrls ?? [];
+}
+
 export function splitEditorPhotos(photos: EventEditorPhoto[]): {
   serverUrls: string[];
   localUris: string[];
@@ -74,13 +82,14 @@ export function businessEventSummaryToRecord(row: BusinessEventSummaryResponse):
       currency: row.currency || 'JOD',
     },
   ];
+  const time = row.timeSlots?.[0]?.trim() ?? '';
   return {
     id: String(row.id),
     title: row.title,
     category: row.subcategoryName ?? '',
-    description: '',
+    description: row.description ?? '',
     date: row.eventDate,
-    time: '',
+    time,
     governorateSlug: governorateNameToSlug(row.governorateName),
     mapsUrl: '',
     ticketOptions,
@@ -140,14 +149,24 @@ export function bookingStatusToLocal(s: BookingStatusApi): BusinessBookingStatus
   }
 }
 
+function resolveGuestName(b: BookingResponse): string | null {
+  const full = b.userFullName?.trim();
+  if (full) return full;
+  const parts = [b.userFirstName, b.userLastName].map((p) => p?.trim()).filter(Boolean) as string[];
+  return parts.length > 0 ? parts.join(' ') : null;
+}
+
 export function businessBookingResponseToRecord(b: BookingResponse): BusinessBookingRecord {
   return {
     id: String(b.id),
-    guestEmail: b.userEmail,
+    guestName: resolveGuestName(b),
+    guestPhone: b.userPhone?.trim() || null,
     partySize: b.guestsCount,
     status: bookingStatusToLocal(b.status),
     serverStatus: b.status,
     listingTitle: b.eventTitle,
+    eventDate: b.eventDate,
+    timeSlotLabel: b.timeSlotLabel,
     createdAt: b.createdAt,
   };
 }

@@ -1,5 +1,11 @@
 import { apiFetch } from '@/api/http';
 import { apiUploadMultipart } from '@/api/multipartUpload';
+import {
+  traceEventSaveError,
+  traceEventSaveRequest,
+  traceEventSaveResponse,
+  type EventSaveTraceStep,
+} from '@/api/eventSaveTrace';
 import type { BusinessEventResponse, BusinessEventSummaryResponse } from '@/api/types';
 
 export type BusinessEventUpsertPayload = {
@@ -22,24 +28,50 @@ export async function listMyBusinessEvents(): Promise<BusinessEventSummaryRespon
 }
 
 export async function getMyBusinessEvent(id: number): Promise<BusinessEventResponse> {
-  return apiFetch<BusinessEventResponse>(`/business/events/${id}`, { method: 'GET' });
+  const path = `/business/events/${id}`;
+  return tracedEventCall('get', 'GET', path, undefined, () =>
+    apiFetch<BusinessEventResponse>(path, { method: 'GET' }),
+  );
+}
+
+async function tracedEventCall<T>(
+  step: EventSaveTraceStep,
+  method: string,
+  path: string,
+  payload: unknown | undefined,
+  call: () => Promise<T>,
+): Promise<T> {
+  traceEventSaveRequest(step, method, path, payload);
+  try {
+    const result = await call();
+    traceEventSaveResponse(step, 200, result);
+    return result;
+  } catch (e) {
+    traceEventSaveError(step, e);
+    throw e;
+  }
 }
 
 export async function createMyBusinessEvent(payload: BusinessEventUpsertPayload): Promise<BusinessEventResponse> {
-  return apiFetch<BusinessEventResponse>('/business/events', {
-    method: 'POST',
-    jsonBody: payload,
-  });
+  return tracedEventCall('create', 'POST', '/business/events', payload, () =>
+    apiFetch<BusinessEventResponse>('/business/events', {
+      method: 'POST',
+      jsonBody: payload,
+    }),
+  );
 }
 
 export async function updateMyBusinessEvent(
   id: number,
   payload: BusinessEventUpsertPayload,
 ): Promise<BusinessEventResponse> {
-  return apiFetch<BusinessEventResponse>(`/business/events/${id}`, {
-    method: 'PUT',
-    jsonBody: payload,
-  });
+  const path = `/business/events/${id}`;
+  return tracedEventCall('update', 'PUT', path, payload, () =>
+    apiFetch<BusinessEventResponse>(path, {
+      method: 'PUT',
+      jsonBody: payload,
+    }),
+  );
 }
 
 export async function deleteMyBusinessEvent(id: number): Promise<void> {
@@ -58,14 +90,26 @@ export async function uploadMyBusinessEventPhoto(
   eventId: number,
   localUri: string,
 ): Promise<BusinessEventResponse> {
-  return apiUploadMultipart<BusinessEventResponse>(`/business/events/${eventId}/photos`, 'image', localUri);
+  const path = `/business/events/${eventId}/photos`;
+  traceEventSaveRequest('upload', 'POST', path, { image: localUri });
+  try {
+    const result = await apiUploadMultipart<BusinessEventResponse>(path, 'image', localUri);
+    traceEventSaveResponse('upload', 200, result);
+    return result;
+  } catch (e) {
+    traceEventSaveError('upload', e);
+    throw e;
+  }
 }
 
 export async function deleteMyBusinessEventPhoto(
   eventId: number,
   photoId: number,
 ): Promise<BusinessEventResponse> {
-  return apiFetch<BusinessEventResponse>(`/business/events/${eventId}/photos/${photoId}`, {
-    method: 'DELETE',
-  });
+  const path = `/business/events/${eventId}/photos/${photoId}`;
+  return tracedEventCall('deletePhoto', 'DELETE', path, undefined, () =>
+    apiFetch<BusinessEventResponse>(path, {
+      method: 'DELETE',
+    }),
+  );
 }

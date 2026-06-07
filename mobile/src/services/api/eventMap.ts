@@ -9,7 +9,7 @@ function numPrice(v: string | number | undefined): number {
 }
 
 /** YYYY-MM-DD + first time slot → ISO start; fallback noon UTC on event date. */
-function startIsoFromEventDateAndSlots(eventDate: string, timeSlots: string[]): string {
+export function startIsoFromEventDateAndSlots(eventDate: string, timeSlots: string[]): string {
   const d = (eventDate || '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) {
     return new Date().toISOString();
@@ -31,25 +31,34 @@ function startIsoFromEventDateAndSlots(eventDate: string, timeSlots: string[]): 
   return Number.isNaN(noon.getTime()) ? new Date().toISOString() : noon.toISOString();
 }
 
+function resolveGalleryFromUrls(urls: string[]): { imageUrl: string; gallery: string[] } {
+  const gallery = urls
+    .map((p) => resolveBackendMediaUrl(p) ?? p)
+    .filter((url): url is string => Boolean(url));
+  return { imageUrl: gallery[0] ?? '', gallery };
+}
+
 export function businessEventSummaryToEventItem(row: BusinessEventSummaryResponse): EventItem {
-  const startAt = startIsoFromEventDateAndSlots(row.eventDate, []);
+  const startAt = startIsoFromEventDateAndSlots(row.eventDate, row.timeSlots ?? []);
   const end = new Date(startAt);
   end.setUTCHours(end.getUTCHours() + 2);
-  const img = resolveBackendMediaUrl(row.primaryPhotoUrl) ?? '';
+  const { imageUrl, gallery } = resolveGalleryFromUrls(
+    row.primaryPhotoUrl ? [row.primaryPhotoUrl] : [],
+  );
   const currency = row.currency?.trim() || 'JOD';
   return {
     id: String(row.id),
-    title: row.title,
-    categoryId: String(row.subcategoryName || 'event'),
-    cityId: String(row.governorateName || 'unknown'),
+    title: row.title ?? '',
+    categoryId: String(row.categoryId ?? row.subcategoryId ?? ''),
+    cityId: String(row.governorateId ?? ''),
     organizerId: 'api',
-    imageUrl: img || 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80',
-    gallery: img ? [img] : [],
+    imageUrl,
+    gallery,
     startAt,
     endAt: end.toISOString(),
-    venueName: row.subcategoryName || '',
+    venueName: row.businessName || '',
     address: '',
-    description: '',
+    description: row.description ?? '',
     priceFrom: numPrice(row.priceJod),
     currency,
     rating: row.averageRating ?? 0,
@@ -62,20 +71,19 @@ export function businessEventDetailToEventItem(row: BusinessEventResponse): Even
   const startAt = startIsoFromEventDateAndSlots(row.eventDate, row.timeSlots ?? []);
   const end = new Date(startAt);
   end.setUTCHours(end.getUTCHours() + 2);
-  const urls = (row.photoUrls ?? []).map((p) => resolveBackendMediaUrl(p) ?? p).filter(Boolean);
-  const img = urls[0] ?? '';
+  const { imageUrl, gallery } = resolveGalleryFromUrls(row.photoUrls ?? []);
   const currency = row.currency?.trim() || 'JOD';
   return {
     id: String(row.id),
-    title: row.title,
+    title: row.title ?? '',
     categoryId: String(row.categoryId),
     cityId: String(row.governorateId),
     organizerId: String(row.businessProfileId),
-    imageUrl: img || 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80',
-    gallery: urls.length > 0 ? urls : img ? [img] : [],
+    imageUrl,
+    gallery,
     startAt,
     endAt: end.toISOString(),
-    venueName: row.subcategoryName || '',
+    venueName: row.businessName || '',
     address: row.googleMapsUrl || '',
     description: row.description ?? '',
     priceFrom: numPrice(row.priceJod),
@@ -105,19 +113,19 @@ export function favoriteEventRowToEventItem(row: FavoriteEventResponse): EventIt
   const startAt = startIsoFromEventDateAndSlots(row.eventDate, row.timeSlots ?? []);
   const end = new Date(startAt);
   end.setUTCHours(end.getUTCHours() + 2);
-  const img = resolveBackendMediaUrl(row.coverPhotoUrl) ?? '';
+  const { imageUrl, gallery } = resolveGalleryFromUrls(row.coverPhotoUrl ? [row.coverPhotoUrl] : []);
   const currency = row.currency?.trim() || 'JOD';
   return {
     id: String(row.id),
-    title: row.title,
-    categoryId: row.subcategoryName || 'event',
+    title: row.title ?? '',
+    categoryId: row.categoryName || row.subcategoryName || 'event',
     cityId: row.governorateName || 'unknown',
     organizerId: 'api',
-    imageUrl: img || 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80',
-    gallery: img ? [img] : [],
+    imageUrl,
+    gallery,
     startAt,
     endAt: end.toISOString(),
-    venueName: row.subcategoryName || '',
+    venueName: row.businessName || '',
     address: '',
     description: row.description ?? '',
     priceFrom: numPrice(row.priceJod),

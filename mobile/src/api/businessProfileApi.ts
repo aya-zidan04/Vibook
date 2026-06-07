@@ -25,7 +25,7 @@ export async function upsertMyBusinessProfile(
   });
 }
 
-/** Sets status to {@code PENDING_REVIEW} when the profile is {@code DRAFT} or {@code REJECTED}. */
+/** Sets status to {@code PENDING_REVIEW} when the profile is {@code DRAFT} or {@code REJECTED}. Approved-profile edits go to {@code PENDING_REVIEW} automatically on save. */
 export async function submitMyBusinessProfileForReview(): Promise<BusinessProfileResponseDto> {
   return apiFetch<BusinessProfileResponseDto>('/business-profile/me/submit', {
     method: 'PATCH',

@@ -2,6 +2,7 @@ package com.vibook.backend.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,5 +85,22 @@ class AdminBusinessProfileServiceImplRoleTest {
         service.approve(5L);
 
         verify(businessUserRoleService).grantBusinessRole(eq(owner));
+    }
+
+    @Test
+    void reject_doesNotRevokeBusinessRole_evenForReapprovalSubmission() {
+        BusinessProfile profile = new BusinessProfile();
+        profile.setId(5L);
+        profile.setUser(owner);
+        profile.setStatus(BusinessProfileStatus.PENDING_REVIEW);
+        profile.setRequiresReApproval(true);
+
+        when(businessProfileRepository.findById(5L)).thenReturn(Optional.of(profile));
+        when(businessProfileRepository.save(any(BusinessProfile.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(businessProfileMapper.toResponse(any())).thenReturn(null);
+
+        service.reject(5L, null);
+
+        verify(businessUserRoleService, never()).revokeBusinessRole(any());
     }
 }

@@ -11,6 +11,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { registerRequest } from '@/api/authApi';
 import { saveAuthResponse } from '@/api/authSession';
 import { mapApiError } from '@/utils/mapApiError';
+import { syncFavoritesFromServer } from '@/services/favorites/syncFavoritesFromServer';
 import { useAppStore } from '@/store/appStore';
 import { useSessionStore } from '@/store/sessionStore';
 import {
@@ -86,6 +87,7 @@ export default function SignupScreen() {
         setAuthenticated(true);
         setGuest(false);
         setHasCompletedOnboarding(true);
+        await syncFavoritesFromServer();
         router.replace('/(tabs)/explore');
       } catch (e) {
         Alert.alert(t('auth.signupTitle'), mapApiError(e, t));

@@ -39,7 +39,9 @@ public class BusinessProfileMapper {
             user != null ? user.getId() : null,
             entity.getAdminNotes(),
             entity.getApprovedAt(),
-            entity.getRejectedAt()
+            entity.getRejectedAt(),
+            entity.isRequiresReApproval(),
+            entity.isPreviouslyApproved()
         );
     }
 

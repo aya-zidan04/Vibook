@@ -72,8 +72,15 @@ export type BusinessEventSummaryResponse = {
   priceJod: string;
   currency: string;
   capacityGuests: number;
+  governorateId: number | null;
   governorateName: string;
+  subcategoryId: number | null;
   subcategoryName: string;
+  categoryId: number | null;
+  categoryName: string;
+  businessName: string;
+  timeSlots: string[];
+  description: string;
   primaryPhotoUrl: string | null;
   averageRating: number;
   reviewCount: number;
@@ -89,6 +96,7 @@ export type BusinessEventPhotoDto = {
 export type BusinessEventResponse = {
   id: number;
   businessProfileId: number;
+  businessName: string;
   title: string;
   subcategoryId: number;
   subcategoryName: string;
@@ -103,6 +111,7 @@ export type BusinessEventResponse = {
   priceJod: string;
   currency: string;
   capacityGuests: number;
+  remainingCapacity: number;
   hidden: boolean;
   averageRating: number;
   reviewCount: number;
@@ -132,14 +141,21 @@ export type BookingResponse = {
   id: number;
   eventId: number;
   eventTitle: string;
+  eventPrimaryPhotoUrl: string | null;
+  eventPhotoUrls: string[];
   userId: number;
   userEmail: string;
+  userFirstName: string | null;
+  userLastName: string | null;
+  userFullName: string | null;
+  userPhone: string | null;
   status: BookingStatusApi;
   eventDate: string;
   timeSlotId: number | null;
   timeSlotLabel: string | null;
   guestsCount: number;
   totalPriceJod: string;
+  currency: string;
   note: string | null;
   cancelReason: string | null;
   createdAt: string;
@@ -155,6 +171,7 @@ export type FavoriteEventResponse = {
   governorateName: string;
   subcategoryName: string;
   categoryName: string;
+  businessName: string;
   priceJod: string;
   currency: string;
   coverPhotoUrl: string | null;
@@ -246,6 +263,8 @@ export type BusinessProfileResponseDto = {
   adminNotes?: string | null;
   approvedAt?: string | null;
   rejectedAt?: string | null;
+  requiresReApproval?: boolean;
+  previouslyApproved?: boolean;
 };
 
 /** @deprecated Use {@link BusinessProfileResponseDto}; kept for narrow imports. */

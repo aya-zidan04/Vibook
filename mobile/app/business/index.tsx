@@ -10,6 +10,7 @@ import { DetailHeader } from '@/components/layout/DetailHeader';
 import { Screen } from '@/components/layout/Screen';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useBusinessHubStore } from '@/store/businessHubStore';
+import { canAccessPartnerDashboard } from '@/utils/businessPartnerAccess';
 import { createShadows, radii, spacing, useThemeColors, useThemeGradients } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -22,10 +23,15 @@ export default function BusinessIntroScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const applicationStatus = useBusinessHubStore((s) => s.applicationStatus);
+  const apiProfileStatus = useBusinessHubStore((s) => s.apiProfileStatus);
+  const requiresReApproval = useBusinessHubStore((s) => s.requiresReApproval);
+  const previouslyApproved = useBusinessHubStore((s) => s.previouslyApproved);
 
+  if (canAccessPartnerDashboard(apiProfileStatus, requiresReApproval, previouslyApproved)) {
+    return <Redirect href="/business/home" />;
+  }
   if (applicationStatus === 'pending') return <Redirect href="/business/application-pending" />;
   if (applicationStatus === 'rejected') return <Redirect href="/business/application-rejected" />;
-  if (applicationStatus === 'approved') return <Redirect href="/business/home" />;
 
   const blocks = [
     { icon: BENEFIT_ICONS[0], titleKey: 'business.b1Title', bodyKey: 'business.b1Body' },

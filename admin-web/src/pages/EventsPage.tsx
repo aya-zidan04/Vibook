@@ -183,8 +183,10 @@ export function EventsPage() {
                   t('table.business'),
                   t('table.category'),
                   t('table.gov'),
+                  t('table.eventDate'),
                   t('table.price'),
                   t('table.capacity'),
+                  t('table.photos'),
                   t('table.status'),
                   t('table.created'),
                   t('table.actions'),
@@ -196,7 +198,7 @@ export function EventsPage() {
             <tbody>
               {Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i}>
-                  <td colSpan={9}>
+                  <td colSpan={11}>
                     <div className="vb-skeleton" style={{ height: 20 }} />
                   </td>
                 </tr>
@@ -220,8 +222,10 @@ export function EventsPage() {
                   <th>{t('table.business')}</th>
                   <th>{t('table.category')}</th>
                   <th>{t('table.gov')}</th>
+                  <th>{t('table.eventDate')}</th>
                   <th>{t('table.price')}</th>
                   <th>{t('table.capacity')}</th>
+                  <th>{t('table.photos')}</th>
                   <th>{t('table.status')}</th>
                   <th>{t('table.created')}</th>
                   <th>{t('table.actions')}</th>
@@ -231,15 +235,17 @@ export function EventsPage() {
                 {filteredRows.map((r) => (
                   <tr key={r.id}>
                     <td>
-                      <strong>{r.title ?? t('common.dash')}</strong>
+                      <strong>{r.title}</strong>
                     </td>
                     <td>{r.businessName ?? t('common.dash')}</td>
                     <td>{r.categoryName ?? t('common.dash')}</td>
                     <td>{localizedGovernorateName(r.governorateName, locale) || t('common.dash')}</td>
+                    <td>{r.eventDate}</td>
                     <td>
                       {r.priceJod} {r.currency}
                     </td>
                     <td>{r.capacityGuests}</td>
+                    <td>{r.photoCount}</td>
                     <td>
                       <EventVisibilityBadge status={r.visibilityStatus} />
                     </td>

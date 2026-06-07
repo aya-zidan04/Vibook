@@ -18,7 +18,8 @@ import { UsersLineChart } from '@/components/charts/UsersLineChart';
 import { DashboardHero } from '@/components/dashboard/DashboardHero';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { Card } from '@/components/ui/Card';
-import { StatusBadge } from '@/components/ui/Badge';
+import { BusinessProfileStatusBadge, ReApprovalBadge } from '@/components/ui/Badge';
+import { isFirstTimePending, isReapprovalPending } from '@/utils/businessProfilePresentation';
 import {
   IconBriefcase,
   IconCalendar,
@@ -307,17 +308,38 @@ export function DashboardPage() {
           {pendingPreview.length === 0 ? (
             <EmptyState title={t('dashboard.allCaughtUp')} description={t('dashboard.noPending')} decor />
           ) : (
-            pendingPreview.map((p) => (
-              <div key={p.id} className="vb-profile-row">
+            pendingPreview.map((p) => {
+              const reapproval = isReapprovalPending(p);
+              const firstTimePending = isFirstTimePending(p);
+              return (
+              <div
+                key={p.id}
+                className={reapproval ? 'vb-profile-row vb-profile-row--reapproval' : 'vb-profile-row'}
+              >
                 <div>
                   <Link to={`/business-profiles/${p.id}`}>{p.businessName}</Link>
+                  {reapproval ? (
+                    <div className="vb-business-cell__subtitle vb-business-cell__subtitle--reapproval">
+                      {t('businessProfiles.updatedProfileSubmissionSubtitle')}
+                    </div>
+                  ) : firstTimePending ? (
+                    <div className="vb-business-cell__subtitle">{t('status.newApplication')}</div>
+                  ) : null}
                   <div className="vb-muted" style={{ fontSize: '0.8125rem', marginTop: 4 }}>
                     {p.ownerEmail ?? t('dashboard.ownerEmailUnavailable')} · {formatDateTime(p.createdAt)}
                   </div>
                 </div>
-                <StatusBadge status={p.status} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', justifyContent: 'flex-end' }}>
+                  <BusinessProfileStatusBadge
+                    status={p.status}
+                    requiresReApproval={p.requiresReApproval}
+                    previouslyApproved={p.previouslyApproved}
+                  />
+                  {reapproval ? <ReApprovalBadge /> : null}
+                </div>
               </div>
-            ))
+            );
+            })
           )}
         </Card>
       </section>
@@ -341,7 +363,11 @@ export function DashboardPage() {
                       : t('dashboard.governorateFallback')}
                   </div>
                 </div>
-                <StatusBadge status={p.status} />
+                <BusinessProfileStatusBadge
+                  status={p.status}
+                  requiresReApproval={p.requiresReApproval}
+                  previouslyApproved={p.previouslyApproved}
+                />
               </div>
             ))
           )}

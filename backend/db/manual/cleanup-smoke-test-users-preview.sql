@@ -49,6 +49,9 @@ BEGIN
     IF v_norm LIKE 'demo@%' THEN
         RETURN 1;
     END IF;
+    IF v_local LIKE 'eventdebug-%' AND v_domain = 'test.com' THEN
+        RETURN 1;
+    END IF;
 
     RETURN 0;
 END$$

@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -28,6 +29,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     Optional<Booking> findByIdAndUser(Long id, User user);
 
+    @EntityGraph(attributePaths = { "user", "businessEvent", "timeSlot" })
     List<Booking> findByBusinessEvent_BusinessProfileOrderByCreatedAtDesc(BusinessProfile businessProfile);
 
     Optional<Booking> findByIdAndBusinessEvent_BusinessProfile(Long id, BusinessProfile businessProfile);
@@ -37,6 +39,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
     )
     int sumGuestsByEventIdAndStatusIn(@Param("eventId") Long eventId, @Param("statuses") Collection<BookingStatus> statuses);
 
+    @EntityGraph(attributePaths = { "user", "businessEvent", "timeSlot" })
     List<Booking> findAllByOrderByCreatedAtDesc();
 
     List<Booking> findByCreatedAtGreaterThanEqual(Instant from);

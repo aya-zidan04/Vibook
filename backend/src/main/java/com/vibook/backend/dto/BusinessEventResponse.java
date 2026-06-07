@@ -8,6 +8,7 @@ import java.util.List;
 public record BusinessEventResponse(
     Long id,
     Long businessProfileId,
+    String businessName,
     String title,
     Long subcategoryId,
     String subcategoryName,
@@ -22,6 +23,8 @@ public record BusinessEventResponse(
     BigDecimal priceJod,
     String currency,
     int capacityGuests,
+    /** Spots still bookable (capacity minus pending/confirmed guest counts). */
+    int remainingCapacity,
     boolean hidden,
     double averageRating,
     int reviewCount,

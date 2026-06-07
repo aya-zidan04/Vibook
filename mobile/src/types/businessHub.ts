@@ -76,12 +76,15 @@ export type BusinessBookingStatus = 'pending' | 'confirmed' | 'completed' | 'can
 
 export type BusinessBookingRecord = {
   id: string;
-  guestEmail: string;
+  guestName: string | null;
+  guestPhone: string | null;
   partySize: number;
   status: BusinessBookingStatus;
   /** Raw API status for partner actions (advance PENDING → CONFIRMED → COMPLETED). */
   serverStatus?: BookingStatusApi;
   listingTitle: string;
+  eventDate: string;
+  timeSlotLabel: string | null;
   createdAt: string;
 };
 

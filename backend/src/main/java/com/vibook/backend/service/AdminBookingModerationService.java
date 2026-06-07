@@ -1,6 +1,5 @@
 package com.vibook.backend.service;
 
-import com.vibook.backend.dto.AdminBookingCancelRequest;
 import com.vibook.backend.dto.AdminBookingResponse;
 import com.vibook.backend.entity.BookingStatus;
 import java.time.LocalDate;
@@ -19,8 +18,4 @@ public interface AdminBookingModerationService {
     );
 
     AdminBookingResponse getById(Long id);
-
-    AdminBookingResponse cancel(Long id, AdminBookingCancelRequest request);
-
-    AdminBookingResponse complete(Long id);
 }

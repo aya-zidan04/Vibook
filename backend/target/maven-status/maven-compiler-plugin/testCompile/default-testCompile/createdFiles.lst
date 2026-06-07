@@ -1,7 +1,15 @@
 com/vibook/backend/service/PayPalPaymentServiceImplTest.class
-com/vibook/backend/entity/RoleNameTest.class
 com/vibook/backend/service/impl/JwtServiceImplTest.class
-com/vibook/backend/service/impl/BusinessEventPhotoServiceImplTest.class
+com/vibook/backend/service/impl/BusinessProfileServiceImplReapprovalTest.class
+com/vibook/backend/util/BookingCapacityPolicyTest.class
+com/vibook/backend/dto/BusinessEventUpsertRequestValidationTest.class
 com/vibook/backend/VibookApplicationTests.class
 com/vibook/backend/service/impl/BusinessUserRoleServiceImplTest.class
+com/vibook/backend/migration/LegacyReapprovalDraftMigrationTest.class
+com/vibook/backend/entity/RoleNameTest.class
+com/vibook/backend/service/impl/BusinessEventServiceImplValidationTest.class
+com/vibook/backend/util/BusinessProfileAccessGuardTest.class
+com/vibook/backend/service/impl/BusinessEventPhotoServiceImplTest.class
 com/vibook/backend/service/impl/AdminBusinessProfileServiceImplRoleTest.class
+com/vibook/backend/dto/BusinessEventUpsertRequestValidationTest$SampleBuilder.class
+com/vibook/backend/service/impl/BusinessEventServiceImplManagementGuardTest.class

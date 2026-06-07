@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,7 +25,12 @@ import { useLocaleStore } from '@/store/localeStore';
 import { fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import type { ModerationReportType } from '@/api/types';
+import { EventFavoriteButton } from '@/components/event/EventFavoriteButton';
+import { EventPhotoGallery } from '@/components/event/EventPhotoGallery';
 import { ReportIssueModal } from '@/components/report/ReportIssueModal';
+import { favoriteStatus } from '@/api/favoritesApi';
+import { useFavoritesStore } from '@/store/favoritesStore';
+import { canIncreaseTicketQuantity, clampTicketQuantity } from '@/utils/eventTicketQuantity';
 
 export default function EventDetailScreen() {
   const colors = useThemeColors();
@@ -50,6 +54,23 @@ export default function EventDetailScreen() {
     if (!id || !apiDetail?.myRating) return;
     useUserRatingsStore.getState().setRating(ratingKey('event', id), apiDetail.myRating);
   }, [id, apiDetail?.myRating]);
+
+  useEffect(() => {
+    if (!id || !/^\d+$/.test(id) || !isAuthenticated) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const status = await favoriteStatus(Number(id));
+        if (cancelled) return;
+        useFavoritesStore.getState().setFavoriteState('event', id, status.favorited);
+      } catch {
+        /* keep local state */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isAuthenticated]);
   const [tierId, setTierId] = useState('');
   const [qty, setQty] = useState(1);
   const [reportCtx, setReportCtx] = useState<{
@@ -70,12 +91,21 @@ export default function EventDetailScreen() {
     setTierId(tiers[0]?.id ?? '');
   }, [tiers]);
 
+  const maxQuantity = apiDetail?.remainingCapacity ?? null;
+  const soldOut = maxQuantity === 0;
+  const canIncreaseQty = canIncreaseTicketQuantity(qty, maxQuantity);
+  const atMaxQuantity = maxQuantity != null && maxQuantity > 0 && qty >= maxQuantity;
+
+  useEffect(() => {
+    if (maxQuantity == null) return;
+    setQty((current) => clampTicketQuantity(current, maxQuantity));
+  }, [maxQuantity]);
+
   const activeTier = useMemo(() => tiers.find((te) => te.id === tierId) ?? tiers[0], [tiers, tierId]);
 
   const displayCurrency = useLocaleStore((s) => s.currency);
   const lineTotal = activeTier ? activeTier.price * qty : 0;
   const currency = event?.currency ?? displayCurrency;
-  const fees = Math.round(lineTotal * 0.05);
 
   if (loading) {
     return (
@@ -124,8 +154,29 @@ export default function EventDetailScreen() {
   const dateLocale = locale === 'ar' ? 'ar-JO' : 'en-US';
   const dateStr = new Date(event.startAt).toLocaleString(dateLocale, { dateStyle: 'medium', timeStyle: 'short' });
 
+  const onShareEvent = async () => {
+    const priceLine =
+      activeTier && activeTier.price > 0
+        ? `${t('common.from')} ${formatMoney(activeTier.price, currency)}`
+        : null;
+    const lines = [
+      event.title,
+      `${dateStr} · ${event.venueName}, ${cityDisplay}`,
+      priceLine,
+      `${t('common.brandDisplay')} · vibook://event/${event.id}`,
+    ].filter(Boolean);
+    try {
+      await Share.share({
+        title: t('event.shareTitle'),
+        message: lines.join('\n'),
+      });
+    } catch {
+      /* user dismissed share sheet */
+    }
+  };
+
   const onBook = () => {
-    if (!activeTier) return;
+    if (!activeTier || soldOut) return;
     setDraft({
       vertical: 'event',
       refId: event.id,
@@ -135,12 +186,12 @@ export default function EventDetailScreen() {
       currency,
       unitPrice: activeTier.price,
       quantity: qty,
-      fees,
+      fees: 0,
       startsAt: event.startAt,
       cityName: localizedCityLabel(event.cityId, 'en', cities),
       cityNameAr: localizedCityLabel(event.cityId, 'ar', cities),
       tierName: activeTier.name,
-      metaLine: `${formatMoney(lineTotal, currency)} ${t('event.plusFees')}`,
+      metaLine: formatMoney(lineTotal, currency),
     });
     router.push('/checkout');
   };
@@ -154,14 +205,34 @@ export default function EventDetailScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.hero}>
-            <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
-            <LinearGradient colors={['transparent', fadeFromBackground(colors, 1)]} style={StyleSheet.absoluteFill} />
-            <View style={styles.heroHeader}>
+            <EventPhotoGallery photos={event.gallery} />
+            <LinearGradient
+              colors={['transparent', fadeFromBackground(colors, 0.15), fadeFromBackground(colors, 1)]}
+              locations={[0, 0.55, 1]}
+              style={StyleSheet.absoluteFillObject}
+              pointerEvents="none"
+            />
+            <View style={styles.heroHeader} pointerEvents="box-none">
               <DetailHeader
+                iconColor={colors.primary}
                 right={
-                  <Pressable hitSlop={8}>
-                    <Ionicons name="share-outline" size={22} color={colors.icon} />
-                  </Pressable>
+                  <View style={styles.headerActions}>
+                    <EventFavoriteButton
+                      eventId={event.id}
+                      variant="plain"
+                      iconColor={colors.primary}
+                      size={22}
+                      onRequiresAuth={() => router.push('/login')}
+                    />
+                    <Pressable
+                      hitSlop={8}
+                      onPress={() => void onShareEvent()}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('event.shareA11y')}
+                    >
+                      <Ionicons name="share-outline" size={22} color={colors.primary} />
+                    </Pressable>
+                  </View>
                 }
               />
             </View>
@@ -202,7 +273,22 @@ export default function EventDetailScreen() {
             <View style={styles.card}>
               <Row icon="calendar-outline" label={t('event.date')} value={dateStr} />
               <Row icon="location-outline" label={t('event.venue')} value={`${event.venueName}, ${cityDisplay}`} />
-              <Row icon="navigate-outline" label={t('event.address')} value={event.address} />
+              {event.address.trim() ? (
+                <Row
+                  icon="navigate-outline"
+                  label={t('event.address')}
+                  value={
+                    /^https?:\/\//i.test(event.address.trim())
+                      ? t('event.openInMaps')
+                      : event.address
+                  }
+                  onPress={
+                    /^https?:\/\//i.test(event.address.trim())
+                      ? () => void Linking.openURL(event.address.trim())
+                      : undefined
+                  }
+                />
+              ) : null}
             </View>
 
             <AppText variant="h3" color="text" style={styles.sectionTitle}>
@@ -258,11 +344,26 @@ export default function EventDetailScreen() {
                 <AppText variant="h3" color="text">
                   {qty}
                 </AppText>
-                <Pressable style={styles.qtyBtn} onPress={() => setQty((q) => q + 1)}>
-                  <AppText variant="h3">+</AppText>
+                <Pressable
+                  style={[styles.qtyBtn, !canIncreaseQty && styles.qtyBtnDisabled]}
+                  disabled={!canIncreaseQty}
+                  onPress={() => setQty((q) => clampTicketQuantity(q + 1, maxQuantity))}
+                >
+                  <AppText variant="h3" color={canIncreaseQty ? 'text' : 'textMuted'}>
+                    +
+                  </AppText>
                 </Pressable>
               </View>
             </View>
+            {soldOut ? (
+              <AppText variant="caption" color="textMuted">
+                {t('event.soldOut')}
+              </AppText>
+            ) : atMaxQuantity ? (
+              <AppText variant="caption" color="warning">
+                {t('event.ticketsRemaining').replace('{n}', formatIntForLocale(maxQuantity!, locale))}
+              </AppText>
+            ) : null}
 
             <AppText variant="h3" color="text" style={styles.sectionTitle}>
               {t('event.similar')}
@@ -280,14 +381,14 @@ export default function EventDetailScreen() {
                 {t('event.total')}
               </AppText>
               <AppText variant="h3" color="text">
-                {formatMoney(lineTotal + fees, currency)}
+                {formatMoney(lineTotal, currency)}
               </AppText>
             </View>
             <PrimaryButton
-              title={t('event.bookNow')}
+              title={soldOut ? t('event.soldOut') : t('event.bookNow')}
               onPress={onBook}
               style={styles.cta}
-              disabled={!activeTier}
+              disabled={!activeTier || soldOut}
             />
           </View>
         </StickyBottomBar>
@@ -305,22 +406,48 @@ export default function EventDetailScreen() {
   );
 }
 
-function Row({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string }) {
+function Row({
+  icon,
+  label,
+  value,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+  onPress?: () => void;
+}) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  return (
-    <View style={styles.metaRow}>
+  const content = (
+    <>
       <Ionicons name={icon} size={18} color={colors.primary} />
       <View style={{ flex: 1 }}>
         <AppText variant="caption" color="textMuted">
           {label}
         </AppText>
-        <AppText variant="body-em" color="text">
+        <AppText variant="body-em" color={onPress ? 'primaryLight' : 'text'}>
           {value}
         </AppText>
       </View>
-    </View>
+      {onPress ? <Ionicons name="open-outline" size={16} color={colors.primaryLight} /> : null}
+    </>
   );
+
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [styles.metaRow, styles.metaRowLink, pressed && { opacity: 0.85 }]}
+        accessibilityRole="link"
+        accessibilityLabel={`${label}: ${value}`}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+
+  return <View style={styles.metaRow}>{content}</View>;
 }
 
 function createStyles(colors: ThemeColors) {
@@ -329,8 +456,16 @@ function createStyles(colors: ThemeColors) {
   root: { flex: 1, backgroundColor: 'transparent' },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 120 },
-  hero: { height: 280 },
-  heroHeader: { paddingHorizontal: spacing.screen, paddingTop: spacing.md },
+  hero: { height: 280, overflow: 'hidden' },
+  heroHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    paddingHorizontal: spacing.screen,
+    paddingTop: spacing.md,
+  },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   body: { paddingHorizontal: spacing.screen, paddingTop: spacing.lg, gap: spacing.sm },
   title: { marginTop: spacing.xs },
@@ -344,6 +479,12 @@ function createStyles(colors: ThemeColors) {
     gap: spacing.md,
   },
   metaRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' },
+  metaRowLink: {
+    borderRadius: radii.md,
+    marginHorizontal: -spacing.xs,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs,
+  },
   desc: { lineHeight: 24 },
   sectionTitle: { marginTop: spacing.md },
   tier: {
@@ -373,6 +514,9 @@ function createStyles(colors: ThemeColors) {
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  qtyBtnDisabled: {
+    opacity: 0.45,
   },
   bottomRow: {
     flexDirection: 'row',

@@ -12,6 +12,7 @@ import {
   type EventCategoryOption,
 } from '@/hooks/useBusinessEventCategoryGroups';
 import type { JordanGovernorateSlug } from '@/constants/jordanGovernorates';
+import { BusinessPartnerGateBanner } from '@/components/business/BusinessPartnerGateBanner';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
@@ -26,13 +27,24 @@ import {
   uploadMyBusinessEventPhoto,
   type BusinessEventUpsertPayload,
 } from '@/api/businessEventsApi';
+import { mapEventSaveError, runEventSaveStep } from '@/utils/mapApiError';
+import {
+  isBusinessEventFormValid,
+  parseCapacity,
+  parsePriceJod,
+  todayIsoDateLocal,
+  validateBusinessEventForm,
+} from '@/utils/businessEventFormValidation';
 import { listActiveGovernorates } from '@/api/governoratesApi';
 import { refreshBusinessHubLists } from '@/services/businessHubSync';
+import { useBusinessHubStore } from '@/store/businessHubStore';
+import { canManageBusinessOperations } from '@/utils/businessPartnerAccess';
 import { radii, spacing, useThemeColors, type ThemeColors } from '@/theme';
 import type { BusinessEventRecord } from '@/types/businessHub';
 import {
   businessEventResponseToRecord,
   editorPhotosFromApiResponse,
+  photoUrlsFromApiResponse,
   splitEditorPhotos,
   type EventEditorPhoto,
 } from '@/utils/businessHubMappers';
@@ -43,20 +55,13 @@ import { NavigationChevronPrev, NavigationChevronNext } from '@/components/ui/Na
 import { navigationRowStyle } from '@/utils/rtl';
 import { formatEventTimeSlotLabel } from '@/utils/formatEventTimeSlot';
 
-type TicketFormRow = {
-  key: string;
-  persistedId?: string;
-  name: string;
-  description: string;
-  priceStr: string;
-};
-
-function newTicketRowKey(): string {
-  return `tk-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-function emptyTicketFormRow(): TicketFormRow {
-  return { key: newTicketRowKey(), name: '', description: '', priceStr: '' };
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <AppText variant="caption" color="error" style={{ marginTop: 4, marginBottom: 8 }}>
+      {message}
+    </AppText>
+  );
 }
 
 const CALENDAR_WEEKDAY_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
@@ -77,6 +82,8 @@ export default function BusinessEventEditorScreen() {
   const { t, locale } = useTranslation();
   const { groups: eventCategoryGroups, options: eventCategoryOptions } =
     useBusinessEventCategoryGroups();
+  const apiProfileStatus = useBusinessHubStore((s) => s.apiProfileStatus);
+  const canManage = canManageBusinessOperations(apiProfileStatus);
   const numericEdit = !isNew && !!id && /^\d+$/.test(String(id));
   const [remoteLoading, setRemoteLoading] = useState(false);
   const [remoteError, setRemoteError] = useState(false);
@@ -84,6 +91,7 @@ export default function BusinessEventEditorScreen() {
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
+  const [subcategoryId, setSubcategoryId] = useState<number | null>(null);
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   /** Canonical slot labels from {@link EVENT_TIME_OPTIONS}, plus any legacy tokens that could not be normalized. */
@@ -91,7 +99,7 @@ export default function BusinessEventEditorScreen() {
   const [timeSlotsError, setTimeSlotsError] = useState(false);
   const [governorateSlug, setGovernorateSlug] = useState<JordanGovernorateSlug>('amman');
   const [mapsUrl, setMapsUrl] = useState('');
-  const [ticketRows, setTicketRows] = useState<TicketFormRow[]>([emptyTicketFormRow()]);
+  const [priceStr, setPriceStr] = useState('');
   const [capacity, setCapacity] = useState('');
   const [editorPhotos, setEditorPhotos] = useState<EventEditorPhoto[]>([]);
   const loadedPhotoIdsRef = useRef<number[]>([]);
@@ -119,13 +127,14 @@ export default function BusinessEventEditorScreen() {
     setRemoteError(false);
     setTitle('');
     setCategory('');
+    setSubcategoryId(null);
     setDescription('');
     setDate('');
     setSelectedTimeSlots([]);
     setTimeSlotsError(false);
     setGovernorateSlug('amman');
     setMapsUrl('');
-    setTicketRows([emptyTicketFormRow()]);
+    setPriceStr('0');
     setCapacity('');
     setEditorPhotos([]);
     loadedPhotoIdsRef.current = [];
@@ -160,22 +169,15 @@ export default function BusinessEventEditorScreen() {
         setLoadedRecord(rec);
         setTitle(rec.title);
         setCategory(rec.category);
+        setSubcategoryId(rec.apiSubcategoryId ?? null);
         setDescription(rec.description);
         setDate(rec.date);
         setSelectedTimeSlots(parseStoredTimes(rec.time));
         setTimeSlotsError(false);
         setGovernorateSlug(rec.governorateSlug);
         setMapsUrl(rec.mapsUrl);
-        setTicketRows(
-          rec.ticketOptions?.length
-            ? rec.ticketOptions.map((opt) => ({
-                key: opt.id,
-                persistedId: opt.id,
-                name: opt.name,
-                description: opt.description ?? '',
-                priceStr: String(opt.priceJod),
-              }))
-            : [emptyTicketFormRow()],
+        setPriceStr(
+          rec.ticketOptions?.length ? String(rec.ticketOptions[0]?.priceJod ?? '') : '',
         );
         setCapacity(String(rec.capacityGuests ?? ''));
         const photos = editorPhotosFromApiResponse(r);
@@ -199,6 +201,26 @@ export default function BusinessEventEditorScreen() {
       cancelled = true;
     };
   }, [numericEdit, id]);
+
+  const formErrors = useMemo(
+    () =>
+      validateBusinessEventForm(
+        {
+          title,
+          category,
+          description,
+          date,
+          selectedTimeSlots,
+          priceStr,
+          capacity,
+          mapsUrl,
+          photoCount: editorPhotos.filter((p) => p.uri.trim()).length,
+        },
+        { t },
+      ),
+    [title, category, description, date, selectedTimeSlots, priceStr, capacity, mapsUrl, editorPhotos, t],
+  );
+  const canSaveForm = useMemo(() => isBusinessEventFormValid(formErrors), [formErrors]);
 
   if (!id) {
     return (
@@ -239,64 +261,26 @@ export default function BusinessEventEditorScreen() {
   }
 
   const save = async () => {
-    if (saveLockRef.current || saving) return;
-    if (!category.trim()) {
-      Alert.alert(t('common.error'), t('businessHub.eventValidationCategory'));
-      return;
-    }
-    if (!description.trim()) {
-      Alert.alert(t('common.error'), t('businessHub.eventValidationDescription'));
-      return;
-    }
-    const dateTrim = date.trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateTrim)) {
-      Alert.alert(t('common.error'), t('businessHub.eventValidationDate'));
-      return;
-    }
-    if (selectedTimeSlots.length === 0) {
-      setTimeSlotsError(true);
-      return;
-    }
-    setTimeSlotsError(false);
-    if (ticketRows.length === 0) {
-      Alert.alert(t('common.error'), t('businessHub.eventValidationTickets'));
-      return;
-    }
-    for (const row of ticketRows) {
-      if (!row.name.trim()) {
-        Alert.alert(t('common.error'), t('businessHub.eventValidationTicketName'));
-        return;
-      }
-      const p = parseFloat(row.priceStr.replace(/[^\d.]/g, ''));
-      if (!Number.isFinite(p) || p < 0) {
-        Alert.alert(t('common.error'), t('businessHub.eventValidationTicketPrice'));
-        return;
-      }
-    }
-    const capNum = parseInt(capacity.replace(/\D/g, ''), 10);
-    if (!Number.isFinite(capNum) || capNum < 1) {
-      Alert.alert(t('common.error'), t('businessHub.eventValidationCapacity'));
+    if (saveLockRef.current || saving || !canSaveForm) return;
+    if (!canManage) {
+      Alert.alert(t('common.error'), t('businessHub.gateManagementBlocked'));
       return;
     }
 
-    const baseTicketIds = Date.now();
-    const ticketOptions = ticketRows.map((row, idx) => {
-      const priceJod = parseFloat(row.priceStr.replace(/[^\d.]/g, ''));
-      return {
-        id: row.persistedId ?? `tkt-${baseTicketIds}-${idx}`,
-        name: row.name.trim(),
-        description: row.description.trim() || undefined,
-        priceJod,
-        currency: 'JOD' as const,
-      };
-    });
+    const dateTrim = date.trim();
+    const capNum = parseCapacity(capacity);
+    const priceNum = parsePriceJod(priceStr);
+    if (capNum == null || priceNum == null) return;
 
     saveLockRef.current = true;
     setSaving(true);
     try {
-      const subcategoryId =
-        (await resolveSubcategoryIdForHubCategory(category.trim())) ?? loadedRecord?.apiSubcategoryId ?? null;
-      if (subcategoryId == null) {
+      const resolvedSubcategoryId =
+        subcategoryId ??
+        (await resolveSubcategoryIdForHubCategory(category.trim())) ??
+        loadedRecord?.apiSubcategoryId ??
+        null;
+      if (resolvedSubcategoryId == null) {
         Alert.alert(t('common.error'), t('businessHub.eventValidationCategory'));
         return;
       }
@@ -306,36 +290,39 @@ export default function BusinessEventEditorScreen() {
         Alert.alert(t('common.error'), t('businessHub.eventGovernorateError'));
         return;
       }
-      const priceJod = String(ticketOptions[0]?.priceJod ?? '');
-      const apiPayload: BusinessEventUpsertPayload = {
-        title: title.trim() || t('businessHub.eventUntitled'),
-        subcategoryId,
-        description: description.trim(),
-        eventDate: dateTrim,
-        timeSlots: selectedTimeSlots.map((slot) => canonicalizeToEventTimeSlot(slot) ?? slot),
-        governorateId,
-        googleMapsUrl: mapsUrl.trim() ? mapsUrl.trim() : null,
-        priceJod,
-        currency: 'JOD',
-        capacityGuests: capNum,
-        hidden,
-        photoUrls: (() => {
-          const { serverUrls } = splitEditorPhotos(editorPhotos);
-          return serverUrls.length ? serverUrls : null;
-        })(),
-      };
+
       const { localUris } = splitEditorPhotos(editorPhotos);
       const currentPhotoIds = editorPhotos
         .map((p) => p.photoId)
         .filter((pid): pid is number => pid != null);
 
+      const buildPayload = (photoUrls: string[] | null): BusinessEventUpsertPayload => ({
+        title: title.trim(),
+        subcategoryId: resolvedSubcategoryId,
+        description: description.trim(),
+        eventDate: dateTrim,
+        timeSlots: selectedTimeSlots.map((slot) => canonicalizeToEventTimeSlot(slot) ?? slot),
+        governorateId,
+        googleMapsUrl: mapsUrl.trim() ? mapsUrl.trim() : null,
+        priceJod: String(priceNum),
+        currency: 'JOD',
+        capacityGuests: capNum,
+        hidden,
+        photoUrls,
+      });
+
       if (isNew) {
-        const created = await createMyBusinessEvent(apiPayload);
-        let eventId = created.id;
+        const created = await runEventSaveStep('create', () =>
+          createMyBusinessEvent({ ...buildPayload(null), hidden: true }),
+        );
+        const eventId = created.id;
         for (const uri of localUris) {
-          const updated = await uploadMyBusinessEventPhoto(eventId, uri);
-          eventId = updated.id;
+          await runEventSaveStep('upload', () => uploadMyBusinessEventPhoto(eventId, uri));
         }
+        const afterUpload = await getMyBusinessEvent(eventId);
+        await runEventSaveStep('update', () =>
+          updateMyBusinessEvent(eventId, buildPayload(photoUrlsFromApiResponse(afterUpload))),
+        );
         const refreshed = await getMyBusinessEvent(eventId);
         loadedPhotoIdsRef.current = (refreshed.photos ?? []).map((p) => p.id);
         setEditorPhotos(editorPhotosFromApiResponse(refreshed));
@@ -345,20 +332,23 @@ export default function BusinessEventEditorScreen() {
         const eventId = Number(id);
         const toDelete = loadedPhotoIdsRef.current.filter((pid) => !currentPhotoIds.includes(pid));
         for (const photoId of toDelete) {
-          await deleteMyBusinessEventPhoto(eventId, photoId);
+          await runEventSaveStep('deletePhoto', () => deleteMyBusinessEventPhoto(eventId, photoId));
         }
-        await updateMyBusinessEvent(eventId, apiPayload);
         for (const uri of localUris) {
-          await uploadMyBusinessEventPhoto(eventId, uri);
+          await runEventSaveStep('upload', () => uploadMyBusinessEventPhoto(eventId, uri));
         }
+        const afterUpload = await getMyBusinessEvent(eventId);
+        await runEventSaveStep('update', () =>
+          updateMyBusinessEvent(eventId, buildPayload(photoUrlsFromApiResponse(afterUpload))),
+        );
         const refreshed = await getMyBusinessEvent(eventId);
         loadedPhotoIdsRef.current = (refreshed.photos ?? []).map((p) => p.id);
         setEditorPhotos(editorPhotosFromApiResponse(refreshed));
         await refreshBusinessHubLists();
         router.back();
       }
-    } catch {
-      Alert.alert(t('common.error'), t('businessHub.eventSaveError'));
+    } catch (e) {
+      Alert.alert(t('common.error'), mapEventSaveError(e, t));
     } finally {
       saveLockRef.current = false;
       setSaving(false);
@@ -366,6 +356,10 @@ export default function BusinessEventEditorScreen() {
   };
 
   const del = () => {
+    if (!canManage) {
+      Alert.alert(t('common.error'), t('businessHub.gateManagementBlocked'));
+      return;
+    }
     if (!id || isNew) return;
     const nid = Number(id);
     if (!Number.isFinite(nid)) return;
@@ -397,12 +391,14 @@ export default function BusinessEventEditorScreen() {
         <DetailHeader title={isNew ? t('businessHub.eventNew') : t('businessHub.eventEdit')} />
       }
     >
+      <BusinessPartnerGateBanner />
       <BusinessIconTextField
         icon="text-outline"
         label={t('businessHub.fieldTitle')}
         value={title}
         onChangeText={setTitle}
       />
+      <FieldError message={formErrors.title} />
       <PickerField
         icon={findCategoryOption(category, eventCategoryOptions)?.icon ?? 'pricetag-outline'}
         label={t('businessHub.fieldCategory')}
@@ -414,6 +410,7 @@ export default function BusinessEventEditorScreen() {
         placeholder={t('businessHub.profileCategorySheet')}
         onPress={() => setCategorySheetOpen(true)}
         trailingIcon="chevron-down"
+        errorText={formErrors.category}
       />
       <BusinessIconMultiline
         icon="document-text-outline"
@@ -423,11 +420,13 @@ export default function BusinessEventEditorScreen() {
         placeholder={t('businessHub.fieldDescriptionPh')}
         minHeight={112}
       />
+      <FieldError message={formErrors.description} />
       <PickerField
         icon="calendar-outline"
         label={t('businessHub.fieldDate')}
         value={date}
         placeholder={t('businessHub.fieldDatePh')}
+        errorText={formErrors.date}
         onPress={() => {
           const base = parseIsoDate(date) ?? new Date();
           base.setDate(1);
@@ -442,8 +441,11 @@ export default function BusinessEventEditorScreen() {
         label={t('businessHub.fieldTime')}
         value={selectedTimeSlots.map((s) => formatEventTimeSlotLabel(s, locale)).join(', ')}
         placeholder={t('businessHub.fieldTimePh')}
-        errorText={timeSlotsError ? t('businessHub.eventValidationTime') : undefined}
-        onPress={() => setTimeSheetOpen(true)}
+        errorText={formErrors.timeSlots ?? (timeSlotsError ? t('businessHub.eventValidationTime') : undefined)}
+        onPress={() => {
+          setTimeSlotsError(false);
+          setTimeSheetOpen(true);
+        }}
         trailingIcon="chevron-down"
       />
       <GovernorateSelectField
@@ -462,68 +464,16 @@ export default function BusinessEventEditorScreen() {
         autoCapitalize="none"
         autoCorrect={false}
       />
-      <AppText variant="label" color="text" style={styles.ticketsSectionLabel}>
-        {t('businessHub.fieldTicketsSection')}
-      </AppText>
-      {ticketRows.map((row, index) => (
-        <View
-          key={row.key}
-          style={[
-            styles.ticketCard,
-            { borderColor: colors.borderLight, backgroundColor: colors.surfaceMuted },
-          ]}
-        >
-          <View style={styles.ticketCardHead}>
-            <AppText variant="caption" color="textMuted">
-              {t('businessHub.ticketOptionLabel').replace('{n}', String(index + 1))}
-            </AppText>
-            {ticketRows.length > 1 ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('businessHub.removeTicketTypeA11y')}
-                hitSlop={10}
-                onPress={() =>
-                  setTicketRows((prev) => (prev.length <= 1 ? prev : prev.filter((r) => r.key !== row.key)))
-                }
-              >
-                <Ionicons name="trash-outline" size={20} color={colors.icon} />
-              </Pressable>
-            ) : null}
-          </View>
-          <BusinessIconTextField
-            icon="pricetag-outline"
-            label={t('businessHub.fieldTicketName')}
-            value={row.name}
-            onChangeText={(text) =>
-              setTicketRows((prev) => prev.map((r) => (r.key === row.key ? { ...r, name: text } : r)))
-            }
-            placeholder={t('businessHub.ticketNamePlaceholder')}
-          />
-          <BusinessIconMultiline
-            icon="list-outline"
-            label={t('businessHub.fieldTicketDescription')}
-            value={row.description}
-            onChangeText={(text) =>
-              setTicketRows((prev) => prev.map((r) => (r.key === row.key ? { ...r, description: text } : r)))
-            }
-            placeholder=""
-            minHeight={72}
-          />
-          <BusinessIconTextField
-            icon="cash-outline"
-            label={t('businessHub.fieldTicketPrice')}
-            value={row.priceStr}
-            onChangeText={(text) =>
-              setTicketRows((prev) => prev.map((r) => (r.key === row.key ? { ...r, priceStr: text } : r)))
-            }
-            keyboardType="number-pad"
-          />
-        </View>
-      ))}
-      <SecondaryButton
-        title={t('businessHub.addTicketType')}
-        onPress={() => setTicketRows((prev) => [...prev, emptyTicketFormRow()])}
+      <FieldError message={formErrors.mapsUrl} />
+      <BusinessIconTextField
+        icon="cash-outline"
+        label={t('businessHub.fieldEntryPrice')}
+        value={priceStr}
+        onChangeText={setPriceStr}
+        placeholder={t('businessHub.fieldEntryPricePh')}
+        keyboardType="number-pad"
       />
+      <FieldError message={formErrors.priceJod} />
       <BusinessIconTextField
         icon="people-outline"
         label={t('businessHub.fieldCapacity')}
@@ -531,18 +481,25 @@ export default function BusinessEventEditorScreen() {
         onChangeText={setCapacity}
         keyboardType="number-pad"
       />
+      <FieldError message={formErrors.capacity} />
       <EventPhotosField
         label={t('businessHub.fieldImages')}
         hint={t('businessHub.fieldImagesHint')}
         uris={editorPhotos.map((p) => p.uri)}
         onUrisChange={(uris) =>
-          setEditorPhotos(uris.map((uri, index) => ({ uri, photoId: editorPhotos[index]?.photoId })))
+          setEditorPhotos(
+            uris.map((uri) => {
+              const existing = editorPhotos.find((p) => p.uri === uri);
+              return { uri, photoId: existing?.photoId };
+            }),
+          )
         }
         addAccessibilityLabel={t('businessHub.eventPhotosAddA11y')}
         removeAccessibilityLabel={t('businessHub.eventPhotosRemoveA11y')}
         permissionTitle={t('businessHub.profilePhotoPermissionTitle')}
         permissionBody={t('businessHub.eventPhotosPermissionBody')}
       />
+      <FieldError message={formErrors.photos} />
       <View style={[styles.switchRow, { borderColor: colors.borderLight, backgroundColor: colors.surfaceMuted }]}>
         <View style={styles.switchLeft}>
           <View style={[styles.switchIcon, { backgroundColor: colors.primaryMuted }]}>
@@ -559,10 +516,12 @@ export default function BusinessEventEditorScreen() {
         onPress={() => {
           void save();
         }}
-        disabled={saving}
+        disabled={saving || !canSaveForm}
         loading={saving}
       />
-      {!isNew ? <SecondaryButton title={t('businessHub.deleteEvent')} onPress={del} /> : null}
+      {!isNew && canManage ? (
+        <SecondaryButton title={t('businessHub.deleteEvent')} onPress={del} />
+      ) : null}
 
       <CalendarDateSheet
         visible={dateSheetOpen}
@@ -609,6 +568,8 @@ export default function BusinessEventEditorScreen() {
                       key={opt.id}
                       onPress={() => {
                         setCategory(opt.valueEn);
+                        const sid = Number(opt.id);
+                        setSubcategoryId(Number.isFinite(sid) ? sid : null);
                         setCategorySheetOpen(false);
                       }}
                       style={({ pressed }) => [
@@ -861,18 +822,21 @@ function CalendarDateSheet({
               if (!cell.iso || !cell.day) return <View key={cell.key} style={styles.calendarDayCell} />;
               const isSelected = selected === cell.iso;
               const isToday = todayIso === cell.iso;
+              const isPast = cell.iso < todayIsoDateLocal();
               return (
                 <Pressable
                   key={cell.key}
+                  disabled={isPast}
                   onPress={() => onSelectDate(cell.iso!)}
                   style={[
                     styles.calendarDayCell,
                     styles.calendarDayBtn,
-                    isToday && !isSelected && { borderColor: colors.primary, borderWidth: 1.5 },
+                    isPast && { opacity: 0.35 },
+                    isToday && !isSelected && !isPast && { borderColor: colors.primary, borderWidth: 1.5 },
                     isSelected && { backgroundColor: colors.primary, borderColor: colors.primary },
                   ]}
                 >
-                  <AppText variant="body" color={isSelected ? 'textOnPrimary' : 'text'}>
+                  <AppText variant="body" color={isSelected ? 'textOnPrimary' : isPast ? 'textMuted' : 'text'}>
                     {String(cell.day)}
                   </AppText>
                 </Pressable>
@@ -1011,18 +975,6 @@ function parseStoredTimes(raw: string): string[] {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md, paddingBottom: spacing.xxxl },
-    ticketsSectionLabel: { marginBottom: -4 },
-    ticketCard: {
-      borderRadius: radii.xl,
-      borderWidth: 1,
-      padding: spacing.md,
-      gap: spacing.sm,
-    },
-    ticketCardHead: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
     switchRow: {
       flexDirection: 'row',
       alignItems: 'center',

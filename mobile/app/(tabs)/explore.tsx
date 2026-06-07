@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -19,6 +19,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import type { CatalogRouter } from '@/services/catalog/mapCatalog';
 import type { ExploreMainCategory, ExploreSubcategory } from '@/types/exploreCategories';
 import { useCatalogSubcategories } from '@/hooks/useCatalogSubcategories';
+import { useCuratedExploreEvents } from '@/hooks/useCuratedExploreEvents';
 import { backendIconToOutline } from '@/services/reference/mapReference';
 import { businessEventSummaryToEventItem } from '@/services/api/eventMap';
 import { useAppStore } from '@/store/appStore';
@@ -26,6 +27,7 @@ import { loadReferenceData, useReferenceStore } from '@/store/referenceStore';
 import { localizedCityLabel } from '@/utils/governorateLabels';
 import { localizedCategoryLabel, localizedSubcategoryLabel } from '@/utils/taxonomyLabels';
 import type { EventItem } from '@/types';
+import { pickCuratedHeroEvents } from '@/utils/exploreCurated';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 
@@ -106,8 +108,11 @@ export default function ExploreScreen() {
   const subsByParentRaw = useCatalogSubcategories(categories);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
+  const { events: curatedEvents, loading: loadingCurated } = useCuratedExploreEvents(selectedCityId);
   const [apiEvents, setApiEvents] = useState<EventItem[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(false);
+  /** Last non-empty curated list — keeps hero mounted if a transient empty state occurs. */
+  const stableCuratedRef = useRef<EventItem[]>([]);
 
   useEffect(() => {
     if (refStatus === 'idle') void loadReferenceData();
@@ -137,6 +142,7 @@ export default function ExploreScreen() {
     }
   }, [exploreCategories, selectedCategoryId]);
 
+  // Happening soon feed only — category / subcategory scoped.
   useEffect(() => {
     let cancelled = false;
     setLoadingFeed(true);
@@ -155,7 +161,7 @@ export default function ExploreScreen() {
         if (cancelled) return;
         setApiEvents(page.content.map(businessEventSummaryToEventItem));
       } catch {
-        if (!cancelled) setApiEvents([]);
+        // Keep prior feed on error; do not touch curated state.
       } finally {
         if (!cancelled) setLoadingFeed(false);
       }
@@ -165,18 +171,50 @@ export default function ExploreScreen() {
     };
   }, [selectedCityId, selectedCategoryId, selectedSubcategoryId]);
 
+  const curatedForHero =
+    curatedEvents.length > 0 ? curatedEvents : stableCuratedRef.current;
+
+  useEffect(() => {
+    if (curatedEvents.length > 0) {
+      stableCuratedRef.current = curatedEvents;
+    }
+  }, [curatedEvents]);
+
+  const heroEvents = useMemo(() => pickCuratedHeroEvents(curatedForHero), [curatedForHero]);
+
   const heroSlides: HeroSlideItem[] = useMemo(() => {
-    return apiEvents.slice(0, 4).map((e, i) => ({
+    return heroEvents.map((e, i) => ({
       id: `hero-${e.id}-${i}`,
       imageUrl: e.imageUrl,
       title: e.title,
       subtitle: e.venueName,
-      eyebrow: t('explore.event'),
+      eyebrow: e.reviewCount > 0 && e.rating > 0 ? t('explore.featured') : t('explore.event'),
       onPress: () => router.push(`/event/${e.id}`),
     }));
-  }, [apiEvents, router, t]);
+  }, [heroEvents, router, t]);
 
-  const promo = useMemo(() => promoFromEvents(apiEvents, r, t), [apiEvents, r, t]);
+  const promo = useMemo(() => promoFromEvents(curatedForHero, r, t), [curatedForHero, r, t]);
+
+  useEffect(() => {
+    if (!__DEV__) return;
+    console.log('[explore-curated]', {
+      selectedCityId,
+      selectedCategoryId,
+      selectedSubcategoryId,
+      curatedEventsLength: curatedEvents.length,
+      apiEventsLength: apiEvents.length,
+      heroEventsLength: heroEvents.length,
+      curatedIds: curatedEvents.map((e) => e.id),
+      heroIds: heroEvents.map((e) => e.id),
+    });
+  }, [
+    selectedCityId,
+    selectedCategoryId,
+    selectedSubcategoryId,
+    curatedEvents,
+    apiEvents.length,
+    heroEvents,
+  ]);
 
   const selectedCategory = useMemo(
     () => exploreCategories.find((c) => c.id === selectedCategoryId),
@@ -220,7 +258,11 @@ export default function ExploreScreen() {
             </AppText>
           </View>
 
-          {heroSlides.length > 0 ? <ExploreHeroCarousel slides={heroSlides} /> : null}
+          {heroSlides.length > 0 ? (
+            <ExploreHeroCarousel slides={heroSlides} />
+          ) : loadingCurated ? (
+            <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.lg }} />
+          ) : null}
 
           {!isAuthenticated ? (
             <View style={[styles.guestBanner, styles.padH]}>

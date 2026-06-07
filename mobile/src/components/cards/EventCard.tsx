@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { createShadows, fadeFromBackground, radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
 import type { EventItem } from '@/types';
-import { useFavoritesStore } from '@/store/favoritesStore';
+import { EventFavoriteButton } from '@/components/event/EventFavoriteButton';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { formatDateShort, formatDecimalForLocale } from '@/utils/format';
@@ -22,11 +22,8 @@ type Props = {
 
 export function EventCard({ event, onPress, variant = 'compact' }: Props) {
   const router = useRouter();
-  const { locale, t } = useTranslation();
+  const { locale } = useTranslation();
   const { formatMoney } = useFormatMoney();
-  const favKey = `event:${event.id}`;
-  const isFav = useFavoritesStore((s) => !!s.keys[favKey]);
-  const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
   const wide = variant === 'wide';
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors, wide), [colors, wide]);
@@ -48,7 +45,11 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
       ]}
     >
       <View style={[styles.imageWrap, wide && styles.imageWide]}>
-        <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+        {event.imageUrl ? (
+          <Image source={{ uri: event.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
+        ) : (
+          <View style={[StyleSheet.absoluteFill, styles.imagePlaceholder]} />
+        )}
         <LinearGradient
           colors={['transparent', fadeFromBackground(colors, 0.85)]}
           style={styles.grad}
@@ -58,19 +59,11 @@ export function EventCard({ event, onPress, variant = 'compact' }: Props) {
             <Badge tone={event.badge} />
           </View>
         ) : null}
-        <Pressable
-          style={[styles.fav, isFav && styles.favActive]}
-          onPress={() => void toggleFavorite('event', event.id)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={isFav ? t('common.a11yRemoveFavorite') : t('common.a11yAddFavorite')}
-        >
-          <Ionicons
-            name={isFav ? 'heart' : 'heart-outline'}
-            size={18}
-            color={isFav ? colors.accent : colors.textOnPrimary}
-          />
-        </Pressable>
+        <EventFavoriteButton
+          eventId={event.id}
+          style={styles.fav}
+          onRequiresAuth={() => router.push('/login')}
+        />
       </View>
       <View style={styles.body}>
         <AppText variant="h3" color="text" numberOfLines={2}>
@@ -116,6 +109,9 @@ function createStyles(colors: ThemeColors, wide: boolean) {
       height: wide ? 160 : 140,
       backgroundColor: colors.surfaceMuted,
     },
+    imagePlaceholder: {
+      backgroundColor: colors.surfaceMuted,
+    },
     imageWide: {},
     grad: {
       ...StyleSheet.absoluteFillObject,
@@ -135,11 +131,6 @@ function createStyles(colors: ThemeColors, wide: boolean) {
       backgroundColor: colors.iconOverlay,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    favActive: {
-      backgroundColor: colors.accentBg,
-      borderWidth: 1,
-      borderColor: colors.accentBorder,
     },
     body: {
       padding: spacing.md,

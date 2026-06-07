@@ -90,7 +90,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Transactional(readOnly = true)
     public Page<FavoriteEventResponse> getMyFavorites(Pageable pageable) {
         User user = getCurrentAuthenticatedUser();
-        return favoriteRepository.findByUserOrderByCreatedAtDesc(user, pageable).map(favoriteMapper::toFavoriteEventResponse);
+        return favoriteRepository.findConsumerVisibleByUserOrderByCreatedAtDesc(user, pageable).map(favoriteMapper::toFavoriteEventResponse);
     }
 
     @Override

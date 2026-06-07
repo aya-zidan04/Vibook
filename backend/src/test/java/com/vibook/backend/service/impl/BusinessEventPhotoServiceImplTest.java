@@ -11,6 +11,7 @@ import com.vibook.backend.dto.BusinessEventResponse;
 import com.vibook.backend.entity.BusinessEvent;
 import com.vibook.backend.entity.BusinessEventPhoto;
 import com.vibook.backend.entity.BusinessProfile;
+import com.vibook.backend.entity.BusinessProfileStatus;
 import com.vibook.backend.entity.Role;
 import com.vibook.backend.entity.RoleName;
 import com.vibook.backend.entity.User;
@@ -93,6 +94,7 @@ class BusinessEventPhotoServiceImplTest {
         ownerProfile = new BusinessProfile();
         ownerProfile.setId(10L);
         ownerProfile.setUser(owner);
+        ownerProfile.setStatus(BusinessProfileStatus.APPROVED);
 
         event = new BusinessEvent();
         event.setId(5L);
@@ -213,6 +215,7 @@ class BusinessEventPhotoServiceImplTest {
             null,
             BigDecimal.TEN,
             "JOD",
+            10,
             10,
             false,
             0.0,

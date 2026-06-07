@@ -6,7 +6,7 @@ Expo + React Native frontend for **Vibook** — an **events marketplace** in Jor
 
 **Presentation-only (no backend expected):** Premium membership screens, wallet, vouchers, and legacy PDP routes (`restaurant/`, `stay/`, `experience/`, `package/`, `organizer/`) kept for UI/navigation — not separate product verticals.
 
-Configure `EXPO_PUBLIC_API_URL` in `.env` (see `.env.example`).
+Configure `EXPO_PUBLIC_API_URL` in `.env` (see `.env.example`). Use your laptop **LAN IP**, not `localhost` or `127.0.0.1`, so Expo Go on a physical phone can reach the API.
 
 ## Tech stack
 
@@ -30,7 +30,18 @@ npx expo start
 
 Then press `i` (iOS simulator), `a` (Android), or scan the QR code with **Expo Go**.
 
-Start the backend first (default `http://localhost:8080/api/v1`). Copy `.env.example` to `.env` and set your API URL.
+**Backend + API URL**
+
+1. Start Spring Boot on port **8080** (`backend/`).
+2. Copy `.env.example` to `.env`.
+3. Set `EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:8080/api/v1` (e.g. `http://192.168.1.5:8080/api/v1`).
+4. Phone and laptop must be on the **same Wi‑Fi**.
+
+**Reload after `.env` changes** — Expo bakes env vars at bundle time; restart with a clean cache:
+
+```bash
+npx expo start -c
+```
 
 If **port 8081 is busy**:
 

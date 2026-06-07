@@ -15,6 +15,7 @@ public record FavoriteEventResponse(
     String governorateName,
     String subcategoryName,
     String categoryName,
+    String businessName,
     BigDecimal priceJod,
     String currency,
     String coverPhotoUrl,

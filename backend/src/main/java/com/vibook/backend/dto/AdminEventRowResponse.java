@@ -2,6 +2,7 @@ package com.vibook.backend.dto;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record AdminEventRowResponse(
     Long id,
@@ -10,10 +11,12 @@ public record AdminEventRowResponse(
     String businessName,
     String categoryName,
     String governorateName,
+    LocalDate eventDate,
     BigDecimal priceJod,
     String currency,
     int capacityGuests,
-    /** VISIBLE or HIDDEN (DRAFT is reserved for a future lifecycle state). */
+    int photoCount,
+    /** VISIBLE or HIDDEN (no separate approval workflow). */
     String visibilityStatus,
     Instant createdAt
 ) {

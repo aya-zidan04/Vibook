@@ -66,7 +66,9 @@ export default function CheckoutScreen() {
             <Row label={t('checkout.quantity')} value={String(draft.quantity)} />
             <Row label={t('checkout.unit')} value={formatMoney(draft.unitPrice, draft.currency)} />
             <Row label={t('checkout.subtotal')} value={formatMoney(subtotal, draft.currency)} />
-            <Row label={t('checkout.taxes')} value={formatMoney(draft.fees, draft.currency)} />
+            {draft.fees > 0 ? (
+              <Row label={t('checkout.taxes')} value={formatMoney(draft.fees, draft.currency)} />
+            ) : null}
             <View style={styles.divider} />
             <Row label={t('common.total')} value={formatMoney(total, draft.currency)} bold />
           </View>

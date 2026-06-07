@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BusinessProfileRepository extends JpaRepository<BusinessProfile, Long>, JpaSpecificationExecutor<BusinessProfile> {
 
@@ -38,6 +39,20 @@ public interface BusinessProfileRepository extends JpaRepository<BusinessProfile
     Page<BusinessProfile> findAll(Pageable pageable);
 
     Page<BusinessProfile> findByStatus(BusinessProfileStatus status, Pageable pageable);
+
+    /**
+     * Legacy re-approval rows stuck in {@code DRAFT} before save went straight to {@code PENDING_REVIEW}.
+     * Returning partners only ({@code previouslyApproved} or prior {@code approvedAt}).
+     */
+    @Query(
+        """
+        SELECT b FROM BusinessProfile b
+        WHERE b.status = :status
+        AND b.requiresReApproval = true
+        AND (b.previouslyApproved = true OR b.approvedAt IS NOT NULL)
+        """
+    )
+    List<BusinessProfile> findLegacyReapprovalDraftSubmissions(@Param("status") BusinessProfileStatus status);
 
     @Override
     Optional<BusinessProfile> findById(Long id);

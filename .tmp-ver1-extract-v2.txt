@@ -1,0 +1,2187 @@
+ 
+Vibook 
+A Full-Stack Event Discovery and Booking Platform 
+ 
+ 
+Al-Zaytoonah University of Jordan 
+Faculty of Science and Information Technology 
+Department of Software Engineering 
+Prepared by: 
+Aya Zidan 202221490 
+Israa Alafieshat 20222760 
+Duha Abu Saqri 2022210638 
+Supervisor 
+Prof. Ahmad Althunibat 
+Academic Year 2025 – 2026 
+Second Semester 
+
+ABSTRACT 
+Vibook is a full-stack event discovery and booking platform developed for the Jordanian market. The 
+system is composed of three interconnected components: a mobile application built with Expo and 
+React Native, a Spring Boot REST API backend secured with JWT authentication, and a React-based 
+administrative console. The platform enables consumers to browse and book events across all twelve 
+Jordanian governorates, allows verified business partners to manage event listings and bookings 
+through a dedicated partner dashboard, and provides administrators with tools for moderation, 
+analytics, and reference-data management. The project demonstrates practical application of layered 
+architecture, role-based access control, bilingual right-to-left interface design, and multipart file 
+upload workflows. 
+Table of Contents 
+Chapter 1   Introduction 5 .................................................................................................................
+    1.1   Project Description 5 ................................................................................................................
+    1.2   Project Overview 6 ...................................................................................................................
+    1.3   Tasks 7 ......................................................................................................................................
+    1.4   Project Planning 9 ....................................................................................................................
+    1.5   Planning of the Development Phases 9 ....................................................................................
+    1.6   The Scope of the Work 11 ........................................................................................................
+    1.7   Stakeholders 12 ........................................................................................................................
+    1.8   Scope 16 ...................................................................................................................................
+    1.9   Definitions, Acronyms, and Abbreviations 16 .........................................................................
+    1.10   References 18 .........................................................................................................................
+    1.11   Overview 20 ...........................................................................................................................
+Chapter 2   Positioning 21 .................................................................................................................
+    2.1   Business Opportunity 21 ..........................................................................................................
+    2.2   Problem Statement 22 ..............................................................................................................
+    2.3   Product Position Statement 23 .................................................................................................
+Chapter 3   Stakeholder and User Descriptions 24 .........................................................................
+    3.1   Market Demographics 24 .........................................................................................................
+    3.2   Stakeholder Summary 25 .........................................................................................................
+    3.3   User Summary 25 .....................................................................................................................
+    3.4   User Environment 26 ...............................................................................................................
+    3.5   Stakeholder Profiles 27 ............................................................................................................
+        3.5.1   University Supervisor and Examiner 27 ...........................................................................
+        3.5.2   Development Team 28 ......................................................................................................
+    3.6   User Profiles 29 ........................................................................................................................
+        3.6.1   Guest User 29 ....................................................................................................................
+        3.6.2   Registered Consumer 30 ...................................................................................................
+        3.6.3   Business Partner 31 ...........................................................................................................
+        3.6.4   Platform Administrator 32 ................................................................................................
+    3.7   Key Stakeholder or User Needs 33 ..........................................................................................
+    3.8   Alternatives and Competition 34 ..............................................................................................
+        3.8.1   International Event Platforms 34 ......................................................................................
+        3.8.2   Social Media Event Promotion 35 ....................................................................................
+Chapter 4   Product Overview 36 .....................................................................................................
+    4.1   Product Perspective 36 .............................................................................................................
+    4.2   Summary of Capabilities 37 .....................................................................................................
+    4.3   Assumptions and Dependencies 38 ..........................................................................................
+    4.4   Cost and Pricing 38 ..................................................................................................................
+    4.5   Licensing and Installation 39 ...................................................................................................
+Chapter 5   Product Features 40 .......................................................................................................
+    5.1   User Registration and Authentication 40 .................................................................................
+    5.2   Public Event Discovery and Search 40 ....................................................................................
+    5.3   Event Detail View 41 ...............................................................................................................
+    5.4   Event Booking 41 .....................................................................................................................
+    5.5   Booking Management and Status Tracking 41 ........................................................................
+    5.6   Favorites Management 41 ........................................................................................................
+    5.7   Event Rating 42 ........................................................................................................................
+    5.8   Content Reporting 42 ...............................................................................................................
+    5.9   Business Partner Onboarding 42 ..............................................................................................
+    5.10   Partner Business Profile Management 42 ..............................................................................
+    5.11   Partner Event Management 43 ...............................................................................................
+    5.12   Partner Booking Management 43 ..........................................................................................
+    5.13   Administrative Business Profile Moderation 43 ....................................................................
+    5.14   Administrative Event Moderation 44 .....................................................................................
+    5.15   Administrative Content Report Resolution 44 .......................................................................
+    5.16   Administrative Analytics Dashboard 44 ................................................................................
+    5.17   Administrative Reference Data Management 44 ...................................................................
+    5.18   Administrative User Management 45 ....................................................................................
+    5.19   Bilingual Interface and RTL Layout Support 45 ....................................................................
+    5.20   Multipart File Upload and Asset Serving 45 ..........................................................................
+Chapter 6   Constraints 46 .................................................................................................................
+Chapter 7   Quality Ranges 47 ..........................................................................................................
+Chapter 8   Precedence and Priority 48 ...........................................................................................
+Chapter 9   Other Product Requirements 49 ...................................................................................
+    9.1   Applicable Standards 49 ...........................................................................................................
+    9.2   System Requirements 49 ..........................................................................................................
+    9.3   Performance Requirements 50 .................................................................................................
+    9.4   Environmental Requirements 50 ..............................................................................................
+Chapter 10   Documentation Requirements 51 ...............................................................................
+    10.1   User Manual 51 ......................................................................................................................
+    10.2   Online Help 51 .......................................................................................................................
+    10.3   Installation Guides, Configuration, and Read Me File 52 .....................................................
+    10.4   Labeling and Packaging 52 ....................................................................................................
+Appendix A   Feature Attributes 53 ..................................................................................................
+    A.1   Status 53 ..................................................................................................................................
+    A.2   Benefit 53 ................................................................................................................................
+    A.3   Effort 54 ...................................................................................................................................
+    A.4   Risk 54 .....................................................................................................................................
+    A.5   Stability 54 ..............................................................................................................................
+    A.6   Target Release 54 .....................................................................................................................
+    A.7   Assigned To 55 ........................................................................................................................
+    A.8   Reason 55 ................................................................................................................................
+Table of Figures 
+Figure 1  System Architecture Diagram 6 ..........................................................................................................................
+Figure 2  Project Gantt Chart 9 ..........................................................................................................................................
+Figure 3  Use Case Diagram 15 .........................................................................................................................................
+Figure 4  Component Interaction Diagram 38 ...................................................................................................................
+Figure 5  Data Flow Diagram – Level 0 38 .......................................................................................................................
+Figure 6  Mobile Application Navigation Structure 39 .....................................................................................................
+Figure 7  Authentication Flow – Sequence Diagram 41 ....................................................................................................
+Figure 8  JWT Token Lifecycle Diagram 42 .....................................................................................................................
+Figure 9  Mobile Registration Screen 42 ...........................................................................................................................
+Figure 10  Mobile Login Screen 43 ...................................................................................................................................
+Figure 11  Event Catalog and Filter Screen 44 ..................................................................................................................
+Figure 12  Event Search Results Screen 44 .......................................................................................................................
+Figure 13  Event Detail Screen 45 .....................................................................................................................................
+Figure 14  Event Booking Activity Diagram 46 ................................................................................................................
+Figure 15  Time Slot Selection Screen 47 ..........................................................................................................................
+Figure 16  Booking Confirmation Screen 47 .....................................................................................................................
+Figure 17  Booking Status State Machine Diagram 48 ......................................................................................................
+Figure 18  Booking History Screen 49 ..............................................................................................................................
+Figure 19  Booking Detail View 49 ...................................................................................................................................
+Figure 20  Favorites List Screen 50 ...................................................................................................................................
+Figure 21  Star Rating Submission Dialog 50 ...................................................................................................................
+Figure 22  Content Report Submission Form 51 ...............................................................................................................
+Figure 23  Business Partner Onboarding Workflow Diagram 52 ......................................................................................
+Figure 24  Business Profile Lifecycle State Machine 53 ...................................................................................................
+Figure 25  Business Profile Application Form 53 ..............................................................................................................
+Figure 26  Partner Event Management Dashboard 55 .......................................................................................................
+Figure 27  Event Photo Upload Interface 56 .....................................................................................................................
+Figure 28  Partner Booking Management Screen 57 .........................................................................................................
+Figure 29  Admin Business Profile Review Screen 58 ......................................................................................................
+Figure 30  Admin Event Moderation Screen 59 ................................................................................................................
+Figure 31  Moderation Report Lifecycle State Machine 60 ..............................................................................................
+Figure 32  Admin Content Report Queue Screen 60 .........................................................................................................
+Figure 33  Admin Analytics Dashboard 61 ........................................................................................................................
+Figure 34  Admin Reference Data Management Screen 62 ...............................................................................................
+Figure 35  Admin User Management Screen 63 ................................................................................................................
+Figure 36  Language Selection and RTL Arabic Layout 64 ...............................................................................................
+Figure 37  Multipart File Upload Interface 65 ...................................................................................................................
+Figure 38  Security Architecture Diagram 70 ....................................................................................................................
+Figure 39  Deployment and Network Architecture Diagram 71 ........................................................................................
+Figure 40  REST API Interaction Diagram 80 ...................................................................................................................
+Figure 41  Database Entity-Relationship Diagram 81 .......................................................................................................
+Chapter 1 : Introduction 
+1.1   Project Description 
+Vibook is a full-stack event discovery and booking platform designed to serve consumers, business 
+partners, and platform administrators in Jordan. The application addresses a clear need in the 
+Jordanian digital-services market: the absence of a unified, mobile-first channel through which 
+residents can browse locally available events across all governorates, place bookings, and interact 
+with verified business partners while business owners self-manage their listings from a single 
+dashboard and platform operators oversee the entire ecosystem through a dedicated administrative 
+console. 
+The significance of this project lies in its end-to-end implementation of a real-world software product 
+spanning three interconnected deployable components: a mobile application, a RESTful backend API, 
+and a web-based administrative portal. The platform demonstrates practical application of modern 
+software engineering principles, including layered architecture, stateless JWT authentication, role-
+based access control, relational data modelling, file-upload workflows, and bilingual (English and 
+Arabic) support with right-to-left layout rendering. 
+The target users of Vibook fall into four distinct personas: 
+Guest users: Individuals who browse the public event catalog without creating an account, enabling 
+frictionless discovery before requiring any personal information. 
+Registered consumers (USER role): Users who create accounts, book events, manage their booking 
+history, add events to favorites, submit star ratings, and report inappropriate content. 
+Business partners (BUSINESS role): Verified event organizers who submit a business profile for 
+administrative approval and, once approved, publish events, upload photos, configure time slots, set 
+capacity and pricing, and manage incoming bookings through a dedicated partner dashboard. 
+Platform administrators (ADMIN role): Operators who use a separate web console to review and 
+approve or reject business applications, moderate events and ratings, resolve user-submitted content 
+reports, view analytics dashboards, and manage the reference data that structures the catalog. 
+The primary goals and objectives of the Vibook project are: (1) design and implement a complete 
+booking platform connecting consumers with bookable events across all twelve Jordanian 
+governorates; (2) implement secure, stateless authentication with JWT access tokens and revocable 
+refresh tokens, enforcing role-based permissions throughout the API; (3) build a governed business-
+partner onboarding workflow in which profile applications progress through DRAFT, 
+PENDING_REVIEW, APPROVED, and REJECTED states under administrator control; (4) provide 
+administrators with moderation tooling covering business profiles, events, event ratings, and content 
+reports; (5) deliver a bilingual, RTL-aware mobile interface that consumes live API data with no 
+hard-coded mock catalog at runtime; and (6) expose an analytics summary to platform operators 
+covering bookings, events, users, and business profiles. 
+Success for this project is measured against the following criteria: the booking workflow operates 
+end-to-end from event discovery through booking confirmation and partner status update; the 
+administrative approval cycle transitions a business profile from pending to approved and grants the 
+corresponding ROLE_BUSINESS to the owning account; the moderation report queue accepts 
+consumer submissions and allows administrators to transition reports from OPEN to RESOLVED or 
+DISMISSED; and the mobile application loads all in-scope data from the live API without falling 
+back to static mock data. 
+1.2   Project Overview 
+Vibook is a full-stack event discovery and booking platform composed of three integrated components: 
+a mobile application, a backend application programming interface (API), and a web-based 
+administrative console. These components operate together to support event discovery, booking 
+management, business-partner operations, and platform administration. 
+The mobile application serves consumers and business partners, providing access to event browsing, 
+booking activities, profile management, business onboarding, and event management features. The 
+application supports both English and Arabic languages and provides an interface designed for a broad 
+range of users across Jordan. 
+The backend component acts as the central system of the platform. It manages user authentication, 
+business rules, data processing, booking workflows, content moderation, and communication between 
+all platform components. It also stores and manages platform data, including user accounts, business 
+profiles, events, bookings, ratings, reports, and uploaded media assets. 
+The administrative console provides platform operators with the tools required to manage and monitor 
+the system. Through this interface, administrators can review business applications, moderate platform 
+content, manage reference data, oversee user activity, and monitor overall platform operations. 
+Together, these three components provide a unified platform that enables consumers to discover and 
+book events, allows business partners to manage their services, and supports administrators in 
+maintaining a secure and well-governed digital ecosystem. 
+1.3   Tasks 
+The development of Vibook was divided into five sequential tasks, each contributing directly to the 
+project objectives. Table 1 summarises these tasks with their planned start and finish dates and 
+progress indicators. 
+Table 1.1   Project Timeline 
+WBS Task 
+Description Start Date Finish Date Progress
+Team 
+Members 
+Involved
+1 Research and 
+Analysis 1/3/2026 14/3/2026 14.3% Israa , Duha
+2 Requirements 
+Gathering 15/3/2026 30/3/2026 16.3% Israa , Duha
+3 Design and 
+Planning 31/3/2026 18/4/2026 19.4% Israa , Duha
+4 Implementation 
+and Coding 19/4/2026 27/5/2026 39.8% Aya
+5
+Testing and 
+Quality 
+Assurance
+28/5/2026 6/6/2026 10.2% Aya 
+[PLACEHOLDER: Figure 1  System Architecture Diagram]
+Task 1 – Research and Analysis (1/3/2026 – 14/3/2026):  This initial task involved surveying the 
+regional lifestyle-booking market, reviewing comparable platforms, and analysing the technical 
+requirements of a full-stack mobile booking solution. The research identified the need for a JWT-
+secured REST API, a file-based expo-router mobile architecture, and a React-based administrative 
+console. Outputs directly informed the technology selection and project scope. 
+Task 2 – Requirements Gathering (15/3/2026 – 30/3/2026):  This phase captured functional and 
+non-functional requirements through structured analysis of the four target user personas. Use-case 
+scenarios were drafted for each role, covering event discovery, booking, partner onboarding, content 
+moderation, and analytics. Data entity requirements were identified and modeled, resulting in 
+eighteen JPA entities and nine enumeration types that collectively form the Vibook domain model. 
+Task 3 – Design and Planning (31/3/2026 – 18/4/2026):  The team produced the system 
+architecture, entity-relationship model, REST API contract, and component designs for all three 
+system components. The layered backend architecture (controller, service, repository) was defined, 
+the JWT authentication flow was designed, and the mobile navigation structure using expo-router 
+file-based routes was planned. Wireframes for principal mobile screens and the admin dashboard 
+were produced. 
+Task 4 – Implementation and Coding (19/4/2026 – 27/5/2026):  Implementation was the most 
+intensive phase. The Spring Boot backend was built first, establishing the schema, security filter 
+chain, JWT generation, and all REST endpoints. The mobile application was developed in parallel, 
+connecting each screen to live API endpoints and removing all runtime mock data. The administrative 
+console was built subsequently, incorporating Recharts analytics visualisations and role-protected 
+routing. Multipart file-upload endpoints for profile images, logos, banners, and event photos were 
+completed in this phase. 
+Task 5 – Testing and Quality Assurance (28/5/2026 – 6/6/2026):  The final task focused on 
+validating the integrated system. Backend unit and integration tests were written for the role-lifecycle 
+service and the business-profile approval logic. End-to-end manual testing was conducted across the 
+complete booking workflow, the partner onboarding cycle, and the admin moderation pipeline. API 
+endpoint coverage was audited and discrepancies between mobile client calls and available backend 
+routes were resolved. 
+1.4   Project Planning 
+The project followed a sequential phase model derived from the five tasks described above. The 
+schedule spans March 2026 through June 2026. Figure 2 illustrates the planned timeline as a Gantt 
+chart, with each bar proportional to the task duration. 
+[PLACEHOLDER: Figure 2  Project Gantt Chart] 
+Resource allocation was managed by assigning the backend API and database design to one primary 
+workstream and the mobile application to a parallel workstream. The administrative console was 
+developed after the core API was stable, allowing both client applications to integrate against a 
+known, tested API surface and minimising late-stage integration defects. 
+1.5   Planning of the Development Phases 
+Phase 1 – Foundation (Research and Requirements).  The first phase established the project 
+context through market analysis and stakeholder identification. Functional requirements were 
+captured as use-case narratives for each role. Non-functional requirements including security, 
+bilingual support, upload size limits, and stateless API design were documented as explicit 
+constraints. 
+Phase 2 – Architecture and Design.  The second phase focused on defining the overall system 
+architecture and producing the primary design artefacts. These included the database model, system 
+component structure, application navigation design, and interface layouts. The security architecture, 
+
+user access model, authentication approach, and interaction between the platform components were 
+also defined during this phase to provide a clear foundation for implementation. 
+Phase 3 – Backend Development.  The Spring Boot application was implemented incrementally by 
+domain area. Authentication functionality was developed first, followed by reference-data endpoints 
+and database seeders. The core booking domain was then implemented, covering users, business 
+profiles, events, bookings, favorites, ratings, and payment processing. Finally, the administrator 
+REST API was completed, including analytics summaries, moderation-report management, and user-
+report resolution endpoints, providing the administrative capabilities required for platform 
+monitoring, content moderation, and operational oversight. 
+Phase 4 – Mobile and Admin Development.  With the backend stable, the mobile application and 
+administrative console were developed simultaneously. Mobile features were integrated with live 
+APIs, while the admin console was built with role-based access control, analytics dashboards, 
+moderation tools, and reporting capabilities. 
+Phase 5 – Integration Testing and Defect Resolution.  The final phase focused on validating the 
+integrated system. Backend unit and integration tests were executed for key business workflows, 
+including authentication, role management, and business-profile approval processes. Manual end-to-
+end testing covered user registration and login, event discovery, bookings, payment processing, 
+business partner onboarding, administrative review workflows, and content moderation. Identified 
+defects were documented, corrected, and re-tested before final project submission. 
+1.6   The Scope of the Work 
+This document describes the complete Vibook platform as implemented. The scope covers all 
+features backed by implemented API endpoints and explicitly identifies functionality present as static 
+user-interface presentation only. 
+The following functional areas are fully within scope: 
+•  User registration, login, JWT access-token issuance, refresh-token based authentication, and 
+logout with token revocation. 
+•  Public event discovery: browsing and filtering by governorate, category, and subcategory for 
+unauthenticated guests, with authenticated users additionally able to perform keyword-based 
+event searches. 
+• Event detail view with server-maintained star-rating average and user content reporting. 
+•  Consumer bookings: creation, cancellation, and per-booking detail view with optional 
+moderation report. 
+•  Favorites (wishlist): add, remove, and list, backed by a dedicated database table. 
+•  Business partner application workflow: profile creation and editing, logo and banner multipart 
+uploads, and status transitions through DRAFT, PENDING_REVIEW, APPROVED, and 
+REJECTED. 
+•  Partner event management: full create, read, update, and delete for business events including 
+subcategory, description, governorate, date, price, capacity, time slots, and multi-photo uploads 
+with hide and unhide control. 
+•  Partner booking management: status transitions through PENDING, CONFIRMED, 
+COMPLETED, and CANCELLED via the business bookings API. 
+•  Administrative moderation: business profile approval and rejection with automatic 
+ROLE_BUSINESS grant and revoke. 
+•  Administrative event moderation: note attachment and visibility control. 
+•  Administrative content-report queue: OPEN, REVIEWED, RESOLVED, and DISMISSED 
+lifecycle for ModerationReport and UserReport entities. 
+•  Administrative analytics summary : providing platform metrics related to bookings, users, and 
+business profiles. 
+•  Administrative reference-data management: for categories and governorates, together with 
+subcategory support used throughout the event catalog. 
+•  Administrative user management: listing, profile viewing, and role assignment. 
+• Bilingual English and Arabic interface with right-to-left (RTL) support for Arabic content. 
+• Multipart file upload and local-filesystem serving for profile images, business logos, banners, 
+and event photos. 
+The following areas are present in the mobile application as static presentation only, without 
+supporting backend feature implementations: 
+• Premium membership subscription and resell: screens are present but no subscription backend 
+exists. 
+1.7   Stakeholders 
+The Vibook platform involves several key stakeholders who contribute to its development, operation, 
+and evaluation. The primary stakeholder group consists of registered consumers who browse and 
+book events, manage their bookings, submit ratings, and report inappropriate content. Business 
+partners (event organisers) use the platform to create and manage event listings, maintain business 
+profiles, and handle customer bookings. Platform administrators oversee moderation activities, 
+approve business applications, manage reference data, and ensure the overall integrity of the system 
+through the administrative web console. Academic supervisors and examiners provide guidance 
+throughout the project lifecycle and evaluate the final system and documentation against graduation 
+requirements. Finally, the development team is responsible for designing, implementing, testing, and 
+documenting the Vibook platform. Detailed stakeholder profiles and responsibilities are presented in 
+Chapter 2. 
+ 
+[PLACEHOLDER: Figure 3  Use Case Diagram]
+1.8   Scope 
+This Vision document covers the complete Vibook platform as delivered for the final-year graduation 
+requirement of the Bachelor of Software Engineering programme at Al-Zaytoonah University of 
+Jordan. It is associated with the single software project contained in the Vibook source repository, 
+encompassing the backend, mobile, and admin-web components and all associated configuration and 
+documentation files. 
+The document is influenced by the following external elements: the academic graduation 
+requirements of the university, which define the expected structure of this Vision document; the 
+technical constraints of the Expo managed workflow; and the PayPal Sandbox API, which governs 
+the payment-simulation flow implemented in the backend. 
+Sections that describe static-only mobile user-interface features (premium membership and resell) 
+explicitly note that no corresponding backend implementation exists. Examiners should treat those 
+features as demonstrations of planned future functionality, not as defects in the implemented system 
+scope. 
+1.9   Definitions, Acronyms, and Abbreviations 
+The following terms, acronyms, and abbreviations are used throughout this document and the 
+associated source code. 
+Table	1.2			Definitions,	Acronyms,	and	Abbreviations
+Term / Acronym Definition
+API Application Programming Interface; the set of HTTP 
+endpoints exposed by the Spring Boot backend at /api/
+v1
+AR Arabic locale identifier; triggers right-to-left layout in 
+the mobile application
+AsyncStorage React Native asynchronous key-value storage used to 
+persist Zustand stores, authentication tokens, and 
+application settings across app launches
+BCrypt Adaptive password-hashing algorithm used by Spring 
+Security to hash and verify user passwords
+DTO Data Transfer Object; a Java record that carries data 
+between the HTTP layer and service layer
+EN English locale identifier; the default locale of the 
+Vibook mobile application
+Expo Framework and platform for React Native applications 
+providing managed build tooling and native module 
+abstractions
+expo-router File-system-based routing library that maps files in the 
+app/ directory to navigable routes
+Governorate One of the twelve administrative divisions of Jordan 
+used for geographic event filtering
+JOD Jordanian Dinar; the primary currency used for event 
+pricing within the platform
+USD United States Dollar; supported display currency 
+used in the Vibook mobile application through 
+currency conversion
+JPA Jakarta Persistence API; implemented by Hibernate for 
+relational object mapping
+JWT JSON Web Token; a compact token format used to 
+authenticate API requests without server-side sessions
+LTR Left-to-Right; text and layout direction for English 
+content
+MySQL Open-source relational database management system 
+storing all Vibook data in the vibook_db schema
+PDP Product Detail Page; the event detail screen from 
+which consumers rate, favorite, or book an event
+REST Representational State Transfer; the architectural style 
+used by the Vibook HTTP API
+ROLE_ADMIN Spring Security authority granting access to all 
+administrative endpoints under /api/v1/admin/
+ROLE_BUSINESS Spring Security authority granted on business-profile 
+approval and revoked when an approved profile is 
+edited and returned to DRAFT
+ROLE_USER Spring Security authority assigned to every account at 
+registration
+RTL Right-to-Left; text and layout direction active when 
+Arabic locale is selected
+SPA Single-Page Application; the architectural pattern used 
+by the admin-web console
+Spring Boot Java framework hosting the Vibook REST API on port 
+8080
+TypeScript Statically typed superset of JavaScript used in both 
+client applications
+UUID Universally Unique Identifier; used for refresh-token 
+values in the database
+Vite Frontend build tool used to compile and serve the 
+admin-web console
+WBS Work Breakdown Structure; hierarchical 
+decomposition of project tasks used in planning
+Zustand Lightweight React state-management library used for 
+in-memory and persisted stores in the mobile app
+1.10   References 
+The following references document the technologies, standards, frameworks, protocols, and 
+specifications used in the implementation of Vibook. 
+[1] Spring Boot Reference Documentation, version 3.3.x, VMware Tanzu, 2024. 
+[2] Spring Security Reference Documentation, version 6.x, VMware Tanzu, 2024. 
+[3]   JJWT: Java JWT Library, version 0.12.6, jwtk contributors, 2024. 
+[4]   Expo Documentation, Expo SDK 54, Expo Inc., 2024. 
+[5]   React Native Documentation, version 0.81, Meta Platforms Inc., 2024. 
+[6]   expo-router: File-based routing for React Native and Expo, Expo Inc., 2024. 
+[7]   Zustand State Management, version 5.0, pmndrs collective, 2024. 
+[8]   Vite Frontend Build Tool Documentation, version 8.0, Vite team, 2024. 
+[9]   React Documentation, version 19, Meta Platforms Inc., 2024. 
+[10]  React Router Documentation, version 7, Remix Software Inc., 2024. 
+[11]  Recharts: A composable charting library built with React, version 3.x, 2024. 
+[12]  Axios HTTP Client Documentation, version 1.x, axios contributors, 2024. 
+[13]  MySQL 8.0 Reference Manual, Oracle Corporation, 2024. 
+[14]  Hibernate ORM Documentation, version 6.x, Red Hat Inc., 2024. 
+[15]  Jakarta Persistence API Specification, version 3.1, Eclipse Foundation, 2022. 
+[16]  Jakarta Bean Validation Specification, version 3.0, Eclipse Foundation, 2023. 
+[17]  PayPal Developer: Orders API v2 Reference, PayPal Inc., 2024. 
+[18]  TypeScript Language Documentation, version 5.9, Microsoft Corporation, 2024. 
+[19]  AsyncStorage for React Native, React Native Community, version 2.x, 2024. 
+[20]  Project Lombok, version 1.18.x, The Project Lombok Authors, 2024. 
+[21]  RFC 7519: JSON Web Token (JWT), IETF, M. Jones, J. Bradley, N. Sakimura, May 2015. 
+[22]  RFC 6750: The OAuth 2.0 Authorization Framework: Bearer Token Usage, IETF, M. Jones, 
+D.Hardt, October 2012. 
+[23] PayPal Developer Documentation, PayPal Sandbox Testing Guide, PayPal Inc., 2024. 
+1.11   Overview 
+This Vision document is organised into four chapters, each addressing a distinct aspect of the Vibook 
+graduation project. 
+Chapter 1 – Introduction establishes the project context, describes the overall purpose and 
+significance of Vibook, identifies the target users and stakeholders, defines the boundaries of the 
+implemented scope, provides a project planning timeline, and supplies the terminology glossary and 
+reference list. 
+Chapter 2 – Positioning describes the business opportunity addressed by the platform, presents the 
+problem statement and product position statement in standard Vision document format. 
+Chapter 3 – Stakeholder and User Descriptions provides market demographic analysis, 
+stakeholder and user summary tables, the working environment of each user type, detailed 
+stakeholder and user profiles, a key needs analysis, and an assessment of competitive alternatives. 
+Chapter 4 – Requirements specifies the functional requirements through structured use-case 
+descriptions for each actor. Data requirements are documented including entity types, attributes, 
+relationships, and constraints enforced at the database and validation layers. 
+Supporting material including the API audit report, production-critical fixes report, and the complete 
+developer handoff guide are located in the docs/ directory of the project repository and are referenced 
+where relevant throughout this document. 
+Chapter 2 :  Positioning 
+2.1   Business Opportunity 
+Jordan's leisure and entertainment sector has expanded steadily in recent years, driven by a growing 
+urban population, rising smartphone penetration across all twelve governorates, and increasing 
+consumer expectation for digital-first service delivery. Despite this growth, no unified, mobile-first 
+channel exists through which Jordanian residents can discover, filter, and book local events—whether 
+in entertainment, dining, sports, or learning—across the full geographic breadth of the country. 
+The business opportunity addressed by Vibook is threefold. First, consumers are underserved by 
+fragmented discovery mechanisms: events are announced through individual social-media accounts, 
+single-vendor websites, and word of mouth, with no cross-platform aggregation or booking 
+capability. Second, small and medium-sized event businesses lack a self-service onboarding channel 
+to publish listings, upload promotional assets, set pricing and capacity, and receive digital booking 
+confirmations. Third, there is no existing platform providing platform operators with the moderation, 
+analytics, and reference-data management tools needed to maintain a trusted, well-governed event 
+marketplace in the Jordanian context. 
+Vibook addresses all three dimensions simultaneously by connecting consumers, business partners, 
+and platform administrators through a single governed ecosystem. The mobile application serves the 
+consumer and business-partner audience across iOS and Android, while a separate administrative 
+console gives platform operators the tooling needed to approve business applications, moderate 
+content, and monitor platform health. The addressable audience spans all registered smartphone users 
+in Jordan who seek local event experiences, and all local event businesses seeking digital booking 
+infrastructure. 
+2.2   Problem Statement 
+The following table summarises the core problem addressed by the Vibook platform in the standard 
+Vision document format. 
+Table	2.1			Problem	Statement
+The problem of the absence of a unified, mobile-first platform through which Jordanian 
+consumers can discover and book local events across all twelve 
+governorates, and through which event businesses can self-manage 
+listings, capacity, and incoming bookings under a governed approval 
+process
+affects Jordanian consumers who cannot access a single curated channel for 
+event discovery and booking; small and medium event businesses that 
+lack a digital self-service listing and booking tool; and platform 
+administrators who have no centralised interface for content moderation, 
+business partner vetting, and platform analytics
+the impact of which is missed booking opportunities for consumers, high manual overhead for 
+business partners seeking digital presence, an absence of cross-
+governorate event visibility, and no platform-level quality control to 
+protect consumers from unverified or inappropriate listings
+a successful solution would bea three-component platform providing live, filter-capable event 
+discovery on a mobile application; a governed onboarding workflow that 
+transitions business profiles through DRAFT, PENDING_REVIEW, 
+APPROVED, and REJECTED states under administrator control; 
+stateless JWT-secured role-based access for ROLE_USER, 
+ROLE_BUSINESS, and ROLE_ADMIN; and a web-based 
+administrative console offering moderation, analytics, and reference-
+data management
+2.3   Product Position Statement 
+The following table provides the product position statement for Vibook, communicating the intent of 
+the platform and its unique position in the marketplace. 
+Table	2.2			Product	Position	Statement
+For Jordanian consumers seeking bookable local event experiences and 
+verified event businesses seeking a self-service digital listing and 
+booking channel
+Who require a reliable, bilingual, mobile-first platform to discover, book, 
+and manage events across all twelve Jordanian governorates, with 
+role-appropriate access controls and a governed partner approval 
+process
+The Vibook platform is a full-stack event discovery and booking system composed of a 
+React Native mobile application, a Spring Boot REST API backend, 
+and a React administrative console
+That provides consumers with end-to-end booking from public event 
+discovery through booking confirmation and cancellation; enables 
+verified business partners to publish events, upload promotional 
+assets, set pricing and capacity, and manage booking statuses; and 
+gives administrators comprehensive moderation, analytics, and 
+reference-data management through a dedicated web console
+Unlike fragmented social-media event promotions that provide no booking 
+or verification capability, and international ticketing platforms that 
+lack Arabic RTL support, Jordanian governorate-level filtering, and 
+a governed partner onboarding workflow
+Our product delivers a governed, bilingual, three-component platform that 
+enables consumers, business partners, and administrators to interact 
+through a unified set of integrated services, supported by secure 
+authentication, role-based access control, and media management 
+capabilities.
+Chapter 3 :  Stakeholder and User Descriptions 
+3.1   Market Demographics 
+Jordan has a population of approximately 10.9 million, distributed across twelve governorates 
+ranging from the high-density capital Amman through mid-size urban centres such as Irbid, Zarqa, 
+and Aqaba to lower-density rural governorates. Smartphone penetration has grown consistently, with 
+mobile internet access now the primary channel for digital service consumption among urban 
+residents aged 18 to 45. This demographic represents the core addressable market for Vibook's 
+consumer product. 
+The primary target market segment comprises mobile-connected Jordanian residents who participate 
+in or seek out entertainment, dining, sports, and learning events. Vibook's four event categories—
+Entertainment, Dining, Sports, and Learning—were selected to cover the highest-frequency leisure 
+expenditure patterns in the Jordanian urban market. The platform's bilingual English and Arabic 
+interface with full right-to-left layout support ensures accessibility across the Arabic-speaking 
+majority and the English-proficient professional minority. 
+The secondary market segment comprises small and medium-sized event businesses, venues, and 
+independent organizers operating across Jordan who currently rely on social media accounts, word of 
+mouth, or individual websites to attract bookings. These businesses lack access to a self-service 
+digital platform that provides listing management, promotional asset hosting, capacity control, and 
+digital booking workflows. Vibook targets this segment with its governed business partner 
+onboarding workflow and partner-facing dashboard within the mobile application. 
+The major industry trend motivating Vibook is the accelerating digital transformation of local service 
+businesses in Jordan, combined with consumer demand for mobile-first commerce. The platform 
+positions itself to capture early-mover advantage in the Jordanian market before international 
+platforms adapt their offerings to include regional language support and local business verification 
+workflows. 
+3.2   Stakeholder Summary 
+The following table summarises the non-user stakeholders who have an interest in the development 
+and success of the Vibook platform but who do not directly operate the system as end users. 
+3.3   User Summary 
+The following table summarises all identified user types who directly interact with the Vibook system 
+through the mobile application or the administrative console. 
+Table	3.1			Stakeholder	Summary
+Name Description Responsibilities
+University Supervisor and 
+Examiner
+Academic supervisory and 
+examination staff at Al-Zaytoonah 
+University of Jordan responsible for 
+guiding the project team and 
+evaluating the delivered system
+Provide technical and academic 
+guidance throughout the 
+development phases; evaluate the 
+completeness and quality of the 
+implemented system and its 
+documentation; assign the final 
+project grade
+Development Team The student developers who 
+designed, implemented, tested, and 
+documented the complete Vibook 
+platform as a graduation project 
+requirement
+Implement all three system 
+components; conduct automated 
+and manual testing; produce this 
+documentation; deliver the final 
+project demonstration
+Platform Administrator Operations personnel who will 
+manage the live Vibook platform 
+via the admin-web console after 
+deployment
+Approve and reject business partner 
+applications; moderate events, 
+ratings, and content reports; 
+manage reference data; monitor 
+platform analytics
+Table	3.2			User	Summary
+Name Description Responsibilities Stakeholder
+Guest User Unauthenticated visitor 
+who browses the public 
+event catalog via the 
+mobile application
+Browse events; view 
+event detail pages; initiate 
+registration
+Development Team
+Registered Consumer Account holder assigned 
+ROLE_USER at 
+registration; primary end 
+user of the platform
+Browse and search events; 
+place and cancel 
+bookings; submit ratings 
+and content reports; 
+manage favorites
+Development Team
+Business Partner Verified event organiser 
+assigned 
+ROLE_BUSINESS upon 
+profile approval; manages 
+listings through the 
+partner hub
+Submit and maintain a 
+business profile; create 
+and manage events; 
+upload promotional 
+assets; update booking 
+statuses
+Development Team
+Platform AdministratorOperator assigned 
+ROLE_ADMIN; accesses 
+the dedicated React-based 
+administrative console
+Approve or reject 
+business profiles; 
+moderate events and 
+ratings; resolve content 
+reports; manage reference 
+data and user accounts
+Development Team
+3.4   User Environment 
+Consumer and business-partner users access Vibook through a mobile application available on both 
+Android and iOS devices. Each user operates the application individually on a personal mobile device 
+and requires an internet connection to access platform services, browse events, manage bookings, and 
+interact with business-related features. No separate desktop application is provided for these user 
+groups. 
+A typical consumer interaction involves discovering events, viewing event details, selecting available 
+booking options, and managing bookings through a simple mobile workflow. The application is 
+designed to support both English- and Arabic-speaking users and provides an accessible experience 
+across a wide range of modern smartphones. 
+Business partners use the same mobile application as consumers but gain access to additional features 
+after their business profile has been reviewed and approved by platform administrators. These 
+features enable partners to manage business information, create and update event listings, upload 
+promotional media, and manage booking requests. 
+Platform administrators access Vibook through a dedicated web-based administrative console using a 
+modern desktop web browser. The administrative environment provides tools for reviewing business 
+applications, moderating platform content, managing reference data, monitoring platform activity, 
+and overseeing overall platform operations. 
+The overall system environment consists of mobile devices for consumers and business partners, 
+desktop browsers for administrators, and a central backend infrastructure responsible for 
+authentication, data management, business processing, and communication between all platform 
+components. 
+3.5   Stakeholder Profiles 
+This section provides a detailed profile of each non-user stakeholder. Each profile uses the standard 
+eight-attribute format defined in the project template. 
+3.5.1   University Supervisor and Examiner 
+3.5.2   Development Team 
+Table	3.3			Stakeholder	Profile	–	University	Supervisor	and	Examiner
+Attribute Detail
+Representative Academic supervisor and examination committee, Faculty of Science 
+and Information Technology, Al-Zaytoonah University of Jordan
+Description Academic staff responsible for guiding the project team throughout the 
+development phases and evaluating the completed system and its 
+documentation against the graduation requirements of the Bachelor of 
+Software Engineering programme
+Type Expert stakeholder; high technical and academic expertise in software 
+engineering; evaluates both technical quality and documentation 
+completeness
+Responsibilities Provide guidance during requirements, design, and implementation 
+phases; review and validate the Vision document and associated 
+deliverables; conduct the final project examination and assign a grade
+Success Criteria The delivered system demonstrates mastery of full-stack software 
+engineering including layered architecture, security implementation, 
+relational data modelling, bilingual interface design, and 
+comprehensive documentation
+Involvement Supervisor; Requirements Reviewer; Final Examiner
+Deliverables Technical and academic feedback during development; evaluation 
+grade at project conclusion
+Comments / Issues Examined artefacts include this Vision document, the complete source 
+code repository, and a live demonstration of the running integrated 
+system
+Table	3.4			Stakeholder	Profile	–	Development	Team
+Attribute Detail
+Representative Student developers of the Vibook graduation project, Department of 
+Software Engineering, Al-Zaytoonah University of Jordan
+Description The student team responsible for the complete design, implementation, 
+testing, and documentation of the Vibook platform, comprising the 
+Spring Boot backend, Expo React Native mobile application, and Vite 
+React administrative console
+Type Expert stakeholder; final-year software engineering students with full-
+stack capability in Java backend, React Native mobile, and React web 
+development
+Responsibilities Implement all three system components to specification; write 
+automated unit and integration tests for critical backend services; 
+conduct manual end-to-end testing across all primary workflows; 
+produce and maintain this Vision document and all associated project 
+documentation
+3.6   User Profiles 
+This section provides a detailed profile of each user type who directly interacts with the Vibook 
+system. Each profile uses the standard eight-attribute format. 
+3.6.1   Guest User 
+Success Criteria A fully functional, demonstrable integrated system is delivered by the 
+project deadline with complete and accurate documentation; all in-
+scope features are backed by live API endpoints with no reliance on 
+runtime mock data
+Involvement System architect; backend, mobile, and admin-web implementors; test 
+engineers; authors of all project documentation
+Deliverables Complete source code for all three components; this Vision document; 
+test plans and results; final project demonstration
+Comments / Issues None
+Table	3.5			User	Profile	–	Guest	User
+Attribute Detail
+Representative Any visitor to the mobile application who has not created an account
+Description An unauthenticated individual who accesses the public event catalog 
+through the mobile application to browse event listings and view event 
+detail pages without making a booking
+Type Casual user; variable technical sophistication; browses via touchscreen 
+mobile device; no account or credentials required
+Responsibilities Navigate the public event catalog; use governorate, category, and 
+subcategory filters to locate events of interest; sign in to access 
+keyword search and booking functionality
+Success Criteria Can browse events, apply available filters, and view event details 
+without creating an account. Authentication is required for booking and 
+other personalised features.
+Involvement Passive consumer of public platform content; primary motivator for 
+frictionless unauthenticated discovery
+Deliverables None; guest users do not produce system artefacts
+Comments / Issues Guests can browse publicly available events and related information 
+without creating an account or signing in.
+3.6.2   Registered Consumer 
+3.6.3   Business Partner 
+Table	3.6			User	Profile	–	Registered	Consumer
+Attribute Detail
+Representative Jordanian residents who create an account and use the platform to 
+discover and book events
+Description An authenticated user assigned ROLE_USER at registration, who uses 
+the mobile application to browse events, place and cancel bookings, 
+submit star ratings for events they have booked, add events to a 
+personal favorites list, and report inappropriate content
+Type Casual to regular user; varying levels of technical sophistication; 
+primary interaction through mobile touchscreen; bilingual EN/AR 
+interface available
+Responsibilities Provide accurate personal information at registration; use the booking 
+workflow as intended; submit event ratings honestly; submit content 
+reports in good faith when appropriate
+Success Criteria Can discover events in their governorate using filters, complete a 
+booking through the PENDING and CONFIRMED states, view their 
+booking history, manage their favorites list, submit content reports, and 
+submit event ratings after a confirmed or completed booking.
+Involvement Primary acceptance tester for all consumer-facing features; 
+Requirements Reviewer for the booking, rating, and reporting 
+workflows
+Deliverables Completed bookings; event star ratings; content reports; favorites list 
+entries
+Comments / Issues Arabic-speaking consumers require full support for Arabic language 
+content and right-to-left interface presentation.
+Table	3.7			User	Profile	–	Business	Partner
+Attribute Detail
+Representative Event organizers and venue operators in Jordan who apply for a 
+business profile and manage event listings through the partner hub
+Description An authenticated user who submits a BusinessProfile for administrative 
+review and, upon approval, is granted ROLE_BUSINESS, unlocking 
+access to the partner hub navigation stack in the mobile application
+Type Casual to intermediate user; moderately technical; accesses partner 
+features through a dedicated navigation stack within the same mobile 
+application used by consumers
+Responsibilities Submit an accurate and complete business profile; logo and banner 
+image uploads are supported through the partner hub; publish events 
+with correct descriptions, subcategory, governorate, date, pricing, and 
+capacity; configure time slots; upload event photos; update booking 
+statuses in a timely manner
+3.6.4   Platform Administrator 
+Success Criteria Business profile application is approved by an administrator; events are 
+discoverable by consumers in the public catalog when the business 
+profile is approved and the event is visible (not hidden); booking status 
+updates are reflected correctly in the consumer booking detail view; all 
+uploaded images are served correctly by the backend
+Involvement Requirements Reviewer for partner onboarding, hub management, and 
+booking management features; primary acceptance tester for business-
+partner-facing workflows
+Deliverables Published business profile; event listings with photos and time slots; 
+booking status updates
+Comments / Issues Business management features become available after administrative 
+approval of the business profile. Partners can upload and manage 
+promotional media associated with their business and events.
+Table	3.8			User	Profile	–	Platform	Administrator
+Attribute Detail
+Representative Platform operations staff who access the Vibook administrative console 
+in a desktop web browser
+Description An authenticated user assigned ROLE_ADMIN who uses the dedicated 
+React-based administrative console to moderate business profiles, 
+events, ratings, and content reports, and to manage platform reference 
+data and user accounts
+Type Expert user; high technical proficiency; operates exclusively through a 
+desktop web browser; familiar with moderation workflows and 
+administrative data management
+Responsibilities Review and approve or reject business profile applications; moderate 
+events by attaching admin notes and toggling visibility; resolve or 
+dismiss moderation reports; update user problem-report status; manage 
+the category, subcategory, and governorate reference data; view 
+platform analytics; manage user accounts and role assignments
+Success Criteria Business applications are processed without undue delay; inappropriate 
+content is removed or flagged within the moderation report queue; 
+analytics reflect the current platform state accurately; reference data 
+changes are reflected in the mobile event catalog on the next data fetch
+Involvement Requirements Reviewer for all administrator-facing features; primary 
+acceptance tester for the admin console; system operator after 
+deployment
+Deliverables Approved business profiles; resolved or dismissed content reports; 
+updated reference data; platform analytics
+Comments / Issues Administrative functionality is restricted to authorised platform 
+operators and provides access to moderation, user management, 
+analytics, and platform administration capabilities.
+3.7   Key Stakeholder or User Needs 
+The following table identifies the key problems perceived by stakeholders and users with existing 
+solutions, the current workaround adopted, and the solution provided by the Vibook platform. Needs 
+are ranked by priority relative to the platform's core value proposition. 
+Table	3.9			Key	Stakeholder	or	User	Needs
+Need Priority Concerns Current SolutionProposed Solutions
+Unified event 
+discovery across 
+all Jordanian 
+governorates with 
+category and 
+subcategory 
+filtering
+High
+Consumers cannot 
+find a single 
+curated channel; 
+events are scattered 
+across social media 
+and individual 
+websites
+Manual search 
+across multiple 
+unconnected social-
+media accounts and 
+vendor websites
+Centralised event 
+discovery with filtering 
+capabilities based on 
+location and event 
+category.
+Secure account 
+creation and 
+stateless API 
+authentication High
+User credentials 
+and session tokens 
+must be protected; 
+unauthorised access 
+to booking and 
+partner endpoints 
+must be prevented
+No unified identity 
+solution; individual 
+platforms manage 
+authentication 
+independently
+Secure authentication 
+and role-based access 
+control to protect user 
+accounts and platform 
+resources.
+End-to-end 
+booking workflow 
+with visible status 
+tracking for both 
+consumer and 
+partner
+High
+Booking 
+confirmation 
+depends on phone 
+contact or manual 
+processes; no 
+digital record exists 
+for either party
+Direct phone or in-
+person contact with 
+the event organiser
+A structured booking 
+workflow that provides 
+clear status visibility 
+and booking 
+management 
+capabilities for both 
+consumers and 
+business partners.
+Governed business 
+partner 
+onboarding with 
+automatic role 
+propagation High
+Unverified 
+businesses reduce 
+platform trust; 
+manual vetting has 
+no digital audit trail
+Email or phone 
+enquiries with no 
+standardised 
+approval workflow
+A controlled business 
+application and 
+approval process that 
+allows administrators 
+to verify business 
+partners before 
+granting access to 
+partner management 
+features.Centralised 
+content 
+moderation for 
+business profiles, 
+events, ratings, 
+and user reports
+High
+Inappropriate 
+listings and 
+fraudulent ratings 
+harm platform 
+reputation and 
+consumer trust
+No moderation 
+infrastructure exists 
+on competing 
+informal channels
+Admin moderation queue for 
+ModerationReport (OPEN 
+→ REVIEWED → 
+RESOLVED / DISMISSED) 
+and UserReport (OPEN → 
+IN_PROGRESS → 
+RESOLVED); admin notes, 
+event visibility control, and 
+business profile approval 
+workflow
+3.8   Alternatives and Competition 
+This section identifies the principal alternatives available to stakeholders and users as potential 
+substitutes for the Vibook platform. The competitive landscape is divided into two categories: 
+international event-management platforms and Jordanian event and experience platforms. These 
+alternatives were selected based on their relevance to the Jordanian market and their similarity to 
+Vibook’s event discovery, booking, and business-partner management services. 
+3.8.1   International Event Platforms 
+International event platforms such as Eventbrite represent a major alternative to Vibook. These 
+platforms provide event discovery, ticketing, and payment services at a global scale, but are not 
+specifically tailored to the Jordanian market. 
+Vibook differentiates from international platforms through its localisation to the Jordanian market: 
+twelve governorate filters, Jordanian Dinar pricing, a full Arabic RTL interface, and a governed local 
+business partner approval workflow that international platforms do not provide. 
+Bilingual English 
+and Arabic 
+interface with full 
+right-to-left layout 
+support
+Medium
+Arabic-speaking 
+consumers cannot 
+effectively use 
+English-only 
+platforms
+Arabic-speaking 
+users are excluded 
+from English-only 
+alternatives
+Full bilingual support 
+in English and 
+Arabic, including 
+right-to-left interface 
+presentation for 
+Arabic-speaking 
+users.Platform analytics 
+for administrator 
+oversight
+Medium
+Operators cannot 
+monitor platform 
+health or growth 
+without aggregated 
+metrics
+No centralised 
+analytics; data is 
+siloed across 
+individual platform 
+components
+Aggregated platform 
+metrics and activity 
+summaries presented 
+through the 
+administrative analytics 
+dashboard to support 
+operational oversight 
+and decision-making.
+Table	3.10			Competitor	Analysis	–	International	Event	Platforms
+Dimension Assessment
+Strengths Established global brand with proven payment and ticketing infrastructure; 
+broad event category coverage; integration with external calendar and 
+payment providers; large existing organiser and attendee community
+Weaknesses No Jordanian governorate-level geographic filtering; no native Arabic RTL 
+interface; no governed business partner approval workflow tailored to local 
+market verification needs; international pricing and payment models not 
+optimised for Jordanian Dinar transactions; no integrated administrative 
+moderation console for platform operators
+3.8.2   Social Media Event Promotion 
+The most widely used alternative in the Jordanian market is informal event promotion through social 
+media platforms such as Facebook Events and Instagram. This approach requires no dedicated 
+platform investment and leverages existing user bases. 
+Vibook addresses the core deficiencies of social media alternatives by providing a structured booking 
+API with end-to-end status tracking, a verified business partner onboarding workflow that establishes 
+trust, platform-level content moderation, and structured event discovery with reliable category and 
+governorate filters—capabilities that social media promotion channels cannot provide. 
+Table	3.11			Competitor	Analysis	–	Social	Media	Event	Promotion
+Dimension Assessment
+Strengths Very large existing user base in Jordan; familiar to the target demographic; no 
+onboarding cost for event organisers; supports Arabic content natively; free to 
+use for both consumers and event businesses
+Weaknesses No integrated booking or payment workflow; no verified business partner 
+process; no platform-level content moderation or quality control; no 
+structured category or governorate filtering; booking relies entirely on direct 
+messaging or phone contact; event discovery is algorithmic and unpredictable; 
+no booking history or status tracking for consumers or organisers
+Chapter 4 : Product Overview 
+4.1   Product Perspective 
+Vibook is an independent, self-contained software platform. It is not a component of a larger pre-
+existing system and has no mandatory integration with external enterprise software. The three 
+deployable components—the mobile application, the backend API, and the administrative console—
+together constitute the complete product. All three components are developed and maintained within 
+the same project repository and are designed to be deployed together as a unified platform. 
+The mobile application and the administrative console operate as client components that depend on 
+the backend for authentication, business processing, data management, and platform services. The 
+backend acts as the central component of the architecture and coordinates communication between all 
+parts of the system. All platform data, including user accounts, business profiles, events, bookings, 
+ratings, reports, and uploaded media assets, is managed centrally by the backend. 
+The platform also integrates with external services when required to support specific business 
+functions. In the current implementation, payment-related workflows are demonstrated through 
+integration with the PayPal Sandbox environment for testing and educational purposes. 
+The Vibook platform has been designed as a unified solution that can be deployed and operated as a 
+complete system. The current deployment configuration supports the graduation-project environment, 
+while future production deployment may require additional infrastructure, security, and hosting 
+considerations. 
+4.2   Summary of Capabilities 
+The following table summarises the major benefits that the Vibook platform provides to each user 
+group and the supporting features that deliver those benefits. 
+Table	4.1	Summary	of	Capabilities
+Customer Benefit Supporting Features
+Jordanian consumers can discover and book 
+local events without fragmented searching 
+across multiple channels
+Public event catalog with filters for governorate (12 
+options), category (Entertainment, Dining, Sports, 
+Learning), subcategory, and keyword search. Public 
+catalog endpoints are accessible without 
+authentication, while booking and account-related 
+features require user sign-in
+Consumers can place, track, and cancel 
+bookings with full status visibility
+Booking API with PENDING, CONFIRMED, 
+COMPLETED, and CANCELLED status 
+transitions; per-booking detail view and booking 
+history list in the mobile application
+Consumers can save events of interest and 
+submit ratings (after eligible bookings) and 
+reports
+Favorites (wishlist) add/remove/list backed by a 
+dedicated database table; star-rating submission with 
+server-maintained running average; content 
+reporting against events, users, ratings, bookings, 
+and business profiles
+Event businesses can self-onboard and 
+manage their presence with no manual 
+intermediary
+BusinessProfile application workflow (DRAFT → 
+PENDING_REVIEW → APPROVED / 
+REJECTED); multipart logo and banner upload; 
+partner hub dashboard for event and booking 
+management in the mobile application
+[PLACEHOLDER: Figure 4  Component Interaction Diagram]
+4.3 Assumptions and Dependencies 
+The following assumptions and dependencies affect the features described in this document. A 
+change to any of these factors would require a corresponding update to the Vision document and 
+potentially to the system design. 
+MySQL 8.0 availability: A MySQL 8.0 or compatible database server is assumed to be running and 
+accessible to the backend host. The schema is managed by Hibernate `ddl-auto=update` and does not 
+require a manual migration script. 
+Local filesystem write access: The backend host machine provides write access to the configured 
+upload directories for profile images, business logos, banners, and event photos. File serving relies on 
+Spring Boot static resource mappings and local filesystem paths. 
+Port 8080 network accessibility:The backend is assumed to be reachable from both client devices 
+on port 8080. CORS is configured for LAN development IP patterns. This assumption does not hold 
+for production or public deployment scenarios. 
+Expo SDK 54 compatibility: Mobile devices are assumed to run an iOS or Android version 
+compatible with the Expo SDK 54 managed workflow. Devices with unsupported operating system 
+versions are outside the scope of this document. 
+JWT signing key: A JWT secret of at least 32 characters is required for token signing. For local 
+development, a default value is provided through the application configuration. Production 
+deployments are expected to provide a strong `JWT_SECRET` environment variable. 
+PayPal Sandbox configuration and accessibility: The PayPal Sandbox API is assumed to be 
+accessible from the backend host machine, and valid sandbox credentials (`PAYPAL_CLIENT_ID` 
+and `PAYPAL_CLIENT_SECRET`) must be configured. The payment simulation feature depends on 
+this external service and will fail if either the API or credentials are unavailable. 
+Business partners can publish detailed, photo-
+rich event listings and manage bookings in 
+real time
+Full event CRUD with subcategory, governorate, 
+date, price, capacity, time slots, and multi-photo 
+upload; event visibility toggle; booking status 
+update from the partner hub
+Platform administrators can maintain content 
+quality and trust with a centralised 
+moderation interface
+Admin console with dedicated pages for business 
+profile approval, event moderation, moderation 
+report queue (OPEN → REVIEWED → 
+RESOLVED / DISMISSED), user report 
+management, and rating controls
+Platform operators can monitor platform 
+health and manage reference data without 
+direct database access
+Analytics summary endpoint visualised in Recharts 
+dashboard; full CRUD for categories and 
+governorates; read-only subcategory management 
+through the public categories API; user listing and 
+role assignment interface
+Mobile API endpoint configuration: The mobile application depends on a valid 
+`EXPO_PUBLIC_API_URL` configuration pointing to the backend service. Mobile functionality is 
+unavailable if the API endpoint is misconfigured or unreachable. 
+Single backend instance: The platform is assumed to operate as a single backend instance during the 
+graduation project demonstration. No clustering, load balancing, or high-availability configuration is 
+assumed. 
+4.4   Cost and Pricing 
+Vibook is developed as a graduation project and carries no commercial distribution cost model. All 
+technologies used in the implementation are available under open-source or free-tier licences 
+appropriate for academic use: 
+•Spring Boot 3.3 and the Spring ecosystem are released under the Apache License 2.0 and are free to 
+use. 
+• MySQL Community Edition is GPL-licensed and available free of charge for development, testing, 
+and demonstration purposes. No commercial database licence fee applies to this graduation project. 
+• React Native and Expo are released under the MIT License and are free to use and distribute. 
+• Vite, React, and the front-end dependencies used by the project are released under MIT or MIT-
+compatible licences. 
+• JJWT 0.12.6 is released under the Apache License 2.0. 
+• PayPal Sandbox API access is provided free of charge for development and testing purposes. 
+Future deployment costs—including server hosting, domain registration, HTTPS certificate 
+provisioning, and Google Play or Apple App Store developer accounts for mobile distribution—are 
+not within the scope of this graduation project. Any commercial deployment of the Vibook platform 
+would require a separate cost and pricing analysis. 
+4.5   Licensing and Installation 
+The Vibook platform does not implement any serialisation, license key, or network licensing 
+mechanism. Access control is implemented entirely through the role-based JWT security model 
+described in this document. There is no per-seat or per-device licensing model. 
+Installation of the backend requires a Java 21 runtime environment, a running MySQL 8.0 or 
+compatible database instance, and a JWT signing key. A development default signing key is provided 
+through the application configuration, while production deployments are expected to define a secure 
+JWT_SECRET environment variable. The backend is packaged as a Spring Boot executable JAR 
+and can be started with a single command. 
+Installation and configuration details are documented in docs/
+GRADUATION_PROJECT_HANDOFF.md, while local development and execution procedures 
+are provided in docs/MOBILE_AND_ADMIN_GUIDE.md and mobile/README.md. 
+The mobile application is distributed as an Expo managed-workflow build. During development and 
+demonstration, the application is executed through Expo Go or a local development build on a 
+connected device. The mobile application depends on a valid EXPO_PUBLIC_API_URL 
+configuration that points to the backend service. 
+The admin-web console is built with Vite and deployed as a collection of static HTML, CSS, and 
+JavaScript assets that can be served by any standard HTTP server or development server. No installer 
+or packaging artefact beyond the generated build output is required for the graduation project 
+demonstration. 
+Chapter 5 :  Product Features
+This chapter lists and describes the high-level capabilities of the Vibook platform. Each feature is an 
+externally visible service available to one or more user roles. Features are described at a level of 
+abstraction sufficient for requirements tracing; detailed behavioural specifications are captured in the 
+use-case model. All features listed below are fully implemented and backed by live API endpoints 
+unless explicitly stated otherwise. 
+5.1 User Registration and Authentication 
+Users can create an account by providing their personal information, including their first name, last 
+name, email address, password, and phone number. The system securely stores user credentials and 
+automatically assigns a standard user role upon registration. After successful authentication, users 
+receive secure access credentials that allow them to access protected system features. 
+To maintain continuous access, the system provides a mechanism for obtaining new access 
+credentials when required, without requiring users to log in again. These credentials remain valid 
+according to predefined security policies and may be invalidated when a user logs out. User sessions 
+are protected through secure authentication and authorization mechanisms, and all restricted 
+resources are accessible only to authenticated users with appropriate permissions. 
+ 
+[PLACEHOLDER: Figure 9  Mobile 
+Registration Screen]
+ 
+[PLACEHOLDER: Figure 10  Mobile Login 
+Screen]
+5.2   Public Event Discovery and Search 
+Unauthenticated guests and authenticated users can browse the public event catalog through the 
+platform. The catalog supports filtering by governorate, category, subcategory, and keyword search, 
+allowing users to quickly discover relevant events. Available categories include Entertainment, 
+Dining, Sports, and Learning. 
+Search results display key event information, including the event title, primary image, price, average 
+rating, and governorate. Additional event details, such as descriptions, available time slots, and 
+booking information, are provided on the event details page. Public event discovery does not require 
+user authentication, enabling visitors to explore the platform before creating an account or signing in. 
+[PLACEHOLDER: Figure 11  Event Catalog and Filter Screen] 
+Figure 11: Screenshot of the mobile application event discovery screen showing a scrollable list or grid of event cards. Each 
+card shows the event primary photo, title, category, governorate, price in JOD, and average star rating. The filter bar at the 
+top shows the governorate dropdown and category selector. A keyword search field is visible. 
+[PLACEHOLDER: Figure 12  Event Search Results Screen] 
+Figure 12: Screenshot of the mobile application event catalog after applying a governorate or category filter, showing the 
+filtered result set. The active filter is indicated in the filter bar. At least one event card is shown with photo, title, price, and 
+star rating. 
+5.3   Event Detail View 
+Users can view detailed information about any published event through the platform’s event details 
+page. The event details include the event title, description, date, price, category, governorate, available 
+time slots, image gallery, location information, and booking-related details. The page also displays the 
+event’s average user rating and review count, which are maintained automatically by the system.
+Event images are delivered through the platform’s ﬁle-serving mechanism, allowing uploaded media to 
+be displayed within the application. Location information may include an external map link to help users 
+locate the venue.
+Event details are publicly accessible and can be viewed without user authentication, allowing visitors to 
+explore available events before registering or signing in.
+[PLACEHOLDER: Figure 13  Event Detail Screen] 
+Figure 13: Screenshot of the mobile application event detail page showing the event title, primary photo or photo gallery 
+carousel, description, event date, price in JOD, total and remaining capacity, governorate, available time slots, and the 
+average star rating with review count. The Book Now button, Add to Favorites icon, and Report button are visible. 
+5.4   Event Booking 
+Authenticated users can create a booking for an available event by selecting the desired attendance 
+option and specifying the number of guests. Users may also include an optional note with their 
+booking request. During the booking process, the system validates the submitted information, verifies 
+event availability, and ensures that capacity limits are not exceeded. 
+After the booking details are confirmed, the user proceeds to the payment stage, which is integrated 
+with the PayPal Sandbox environment for demonstration and testing purposes. The backend creates a 
+booking record in a pending state and initiates the payment process. Upon successful payment 
+approval and capture, the booking status is updated accordingly and becomes available through the 
+user's booking history and the business partner booking-management interface. 
+All booking records are associated with both the user account and the selected event, enabling 
+consumers and business partners to track booking activity and status throughout the booking 
+lifecycle. 
+[PLACEHOLDER: Figure 15  Time Slot Selection Screen] 
+Figure 15: Screenshot of the time slot selection step in the booking flow showing the list of available time slots for the 
+selected event. Each slot shows the start time and end time. The selected slot is highlighted. A guest count number input and 
+an optional booking note text field are also visible below the slot list. 
+[PLACEHOLDER: Figure 16  Booking Confirmation Screen] 
+Figure 16: Screenshot of the booking confirmation screen displayed after a successful booking submission. Shows the 
+booking reference or ID, event name, selected time slot, guest count, total price in JOD, and the initial booking status 
+(Pending). A View My Bookings navigation button is present. 
+5.5   Booking Management and Status Tracking 
+Consumers can view their booking history and access individual booking details through the application. 
+Booking records include status information, event details, and pricing information.
+The booking lifecycle follows the sequence PENDING → CONFIRMED → COMPLETED or 
+CANCELLED. Consumers may cancel eligible bookings, while business partners can update booking 
+statuses through the business dashboard. Status changes become visible to consumers when booking 
+information is refreshed.
+[PLACEHOLDER: Figure 18  Booking History Screen] 
+Figure 18: Screenshot of the consumer booking history list in the mobile application showing multiple booking entries. Each 
+entry displays the event name, date, booking status badge (colour-coded: yellow PENDING, green CONFIRMED, grey 
+COMPLETED, red CANCELLED), total price in JOD, and guest count. 
+[PLACEHOLDER: Figure 19  Booking Detail View] 
+Figure 19: Screenshot of the individual booking detail screen showing the full booking record: event title and primary photo, 
+business partner name, time slot, guest count, total price in JOD, current status, booking note if provided, and the Cancel 
+Booking button (active only for PENDING or CONFIRMED bookings). 
+5.6   Favorites Management 
+Authenticated consumers can add events to a personal favorites list and remove them when desired. 
+Favorite associations are stored in the database and linked to both the user and the selected event. The 
+mobile application provides a dedicated favorites view that displays saved events with updated event 
+information and pricing. 
+[PLACEHOLDER: Figure 20  Favorites List Screen] 
+Figure 20: Screenshot of the consumer favorites (wishlist) screen in the mobile application showing saved event cards. Each 
+card displays the event primary photo, title, category, price in JOD, and average rating. A filled heart icon on each card 
+allows removal from favorites. An empty-state illustration is shown when the list is empty. 
+5.7   Event Rating 
+Authenticated consumers can submit a star rating for events associated with their bookings. Ratings 
+are linked to the submitting user and stored in the database. The system automatically updates the 
+event's rating statistics when a rating is submitted, and the updated values are displayed when event 
+information is refreshed. Ratings are subject to administrative moderation. 
+[PLACEHOLDER: Figure 21  Star Rating Submission Dialog] 
+Figure 21: Screenshot of the star rating submission dialog or screen in the mobile application showing the event name, a 
+five-star interactive selector with the selected rating highlighted, and a Submit Rating button. The dialog is accessed from the 
+event detail page or the booking detail view. 
+5.8   Content Reporting 
+Authenticated consumers can submit reports regarding events, bookings, users, ratings, business 
+profiles, or other concerns. Reports include a reason and may include additional details describing the 
+issue. Submitted reports enter the administrative moderation queue for review and resolution. 
+Consumers may also submit general support reports, which are managed separately by 
+administrators. 
+ 
+[PLACEHOLDER: Figure 22  Content 
+Report Submission Form]
+5.9   Business Partner Onboarding 
+Authenticated users can apply to become business partners by submitting a business profile 
+containing the required business information and contact details. New profiles are initially created in 
+DRAFT status and may then be submitted for administrative review. The profile status changes to 
+PENDING_REVIEW until an administrator approves or rejects the application. Approved applicants 
+are granted business partner privileges while retaining their standard user account permissions. 
+[PLACEHOLDER: Figure 25  Business Profile Application Form] 
+Figure 25: Screenshot of the business profile application form in the partner hub showing input fields for business name, 
+primary category selector, description textarea, tagline, work email, phone number, governorate selector, and optional 
+website URL. Logo upload and banner upload controls are visible at the bottom of the form. 
+5.10   Partner Business Profile Management 
+Business partners with an approved profile may view and edit their BusinessProfile record through 
+the partner profile dashboard. Partners can update profile text and metadata fields, including business 
+name, category, description, tagline, contact information, governorate, website URL, and Google 
+Maps URL. Logo and banner images are uploaded or deleted through separate multipart endpoints, 
+with a maximum upload size of 5 MB per image. 
+When an approved partner updates profile metadata through the profile upsert operation, the profile 
+status is reverted to DRAFT, the ROLE_BUSINESS authority is revoked, and the partner must re-
+submit the profile for administrative review. Logo or banner upload/delete operations alone do not 
+trigger re-review. If an application is rejected, the partner can view the rejection reason and update 
+the profile before submitting it again. 
+5.11   Partner Event Management 
+Business partners with an approved BusinessProfile and ROLE_BUSINESS manage events through 
+the partner hub dashboard. They can create, read, update, and delete business events using the partner 
+event management endpoints. Each event includes a title, subcategory, description, event date, 
+governorate, optional Google Maps URL, price in JOD, guest capacity, currency, visibility status, and 
+one or more required time slots. 
+Partners can upload multiple event photos through multipart endpoints, with a maximum upload size 
+of 5 MB per photo. The first photo in the event photo sort order is used as the primary listing image; 
+there is no separate “set as primary” endpoint. Partners can also remove photos and toggle events 
+between visible and hidden status without deleting the event record. Hidden events are excluded from 
+public discovery but remain available in the partner’s event list. 
+[PLACEHOLDER: Figure 26  Partner Event Management Dashboard] 
+Figure 26: Screenshot of the partner hub event management screen in the mobile application showing the list of the partner's 
+events. Each event card shows the event title, primary photo thumbnail, subcategory, date, price in JOD, remaining capacity, 
+and a visible/hidden status badge. Create Event and Edit action buttons are visible. 
+[PLACEHOLDER: Figure 27  Event Photo Upload Interface] 
+Figure 27: Screenshot of the event photo upload section within the partner event creation or editing form. Shows thumbnail 
+previews of previously uploaded event photos, an Add Photo button that triggers the device image picker, a Set as Primary 
+control per photo, and a delete button per photo. The 5 MB per-file limit is indicated. 
+5.12   Partner Booking Management 
+Business partners view booking records associated with their events through the partner booking 
+management dashboard and API. Booking information includes the consumer email address, selected 
+time slot, guest count, total booking price, optional booking note, booking status, and any recorded 
+cancellation reason. 
+Partners update booking status through the partner booking management endpoint by setting the 
+booking to CONFIRMED, COMPLETED, or CANCELLED. The typical booking lifecycle is 
+PENDING → CONFIRMED → COMPLETED, although cancellation is also permitted for non-
+cancelled bookings. Once a booking has been cancelled, its status cannot be modified further. 
+Cancellation reasons may be recorded when consumers cancel their bookings through the consumer 
+booking management functionality. The partner booking status update endpoint does not accept or 
+store a cancellation reason. 
+[PLACEHOLDER: Figure 28  Partner Booking Management Screen] 
+Figure 28: Screenshot of the partner hub booking management screen showing a list of booking records for the partner's 
+events. Each entry shows the consumer name, event name, time slot, guest count, total price in JOD, and current status 
+badge. Status update action buttons (Confirm, Complete, Cancel) are shown for eligible bookings. 
+5.13   Administrative Business Profile Moderation 
+Administrators access all business profile records through the admin console regardless of their 
+current status. Administrators may filter profiles by status and review detailed profile information, 
+including business details, uploaded images, application history, and administrative notes. 
+For profiles in PENDING_REVIEW status, administrators approve or reject the application. 
+Approval changes the profile status to APPROVED, records the approval timestamp, and grants 
+ROLE_BUSINESS to the owning user account. Rejection changes the profile status to REJECTED 
+and may optionally record a rejection reason that is made available to the partner for future 
+resubmission. 
+Administrators may also create and update administrative notes associated with any business profile 
+for operational record-keeping and moderation purposes. 
+[PLACEHOLDER: Figure 29  Admin Business Profile Review Screen] 
+Figure 29: Screenshot of the admin console business profile detail page showing the full BusinessProfile record: business 
+name, primary category, description, tagline, work email, phone, governorate, website URL, logo image preview, and banner 
+image preview. Approve and Reject action buttons are shown for profiles in PENDING_REVIEW status. A rejection reason 
+input field appears when Reject is selected. 
+5.14   Administrative Event Moderation 
+Administrators view all business events through the admin console regardless of event visibility 
+status. The administrative event management interface provides access to event details, associated 
+business information, uploaded event images, moderation history, and administrative notes. 
+Administrators may create and update internal administrative notes for any event to support 
+moderation and operational record-keeping. They may also set or clear the event hidden flag to 
+remove an event from public discovery without deleting the underlying event record. Hidden events 
+remain stored in the system and continue to be accessible through administrative interfaces. 
+The hidden flag used by administrators is the same visibility control available to business partners 
+through the partner event management interface. In addition, administrators may permanently delete 
+event records when required for platform moderation purposes. 
+[PLACEHOLDER: Figure 30  Admin Event Moderation Screen] 
+Figure 30: Screenshot of the admin console event moderation detail page showing the full event record: title, description, 
+date, price, capacity, subcategory, governorate, and photo gallery. Admin moderation controls include an admin notes text 
+field, a Save Notes button, and a Toggle Visibility switch to hide or show the event independently of the partner's setting. 
+5.15   Administrative Content Report Resolution 
+Administrators manage platform reports through the admin console using two separate reporting 
+systems: moderation reports and user problem reports. Moderation reports are created for content 
+moderation purposes and are classified by report type, including BOOKING, EVENT, USER, 
+RATING, BUSINESS_PROFILE, and OTHER. User problem reports are submitted by users to 
+report application issues or request assistance. 
+For moderation reports, administrators review report details and update report status to REVIEWED, 
+RESOLVED, or DISMISSED. Resolution and dismissal actions may be performed directly from 
+OPEN or REVIEWED status. Administrators may also attach administrative notes during the review, 
+resolution, or dismissal process to document moderation decisions. 
+User problem reports follow a separate workflow with statuses OPEN, IN_PROGRESS, and 
+RESOLVED. Administrators review submitted issues and update their status as investigation and 
+resolution activities progress. 
+Both reporting systems provide paginated administrative views for monitoring and managing report 
+activity across the platform. 
+[PLACEHOLDER: Figure 31  Moderation Report Lifecycle State Machine] 
+Figure 31: State machine diagram for the ModerationReportStatus enumeration showing four states: OPEN (initial state on 
+consumer submission), REVIEWED (administrator has read the report), RESOLVED (administrator has taken corrective 
+action), DISMISSED (administrator determined no action is required). Transition arrows are labelled with the administrator 
+action that triggers each change. The same lifecycle applies to both ModerationReport and UserReport entities. 
+[PLACEHOLDER: Figure 32  Admin Content Report Queue Screen] 
+Figure 32: Screenshot of the admin console content moderation report queue showing a filterable table of ModerationReport 
+and UserReport records. Columns show report type badge, status badge, submitting user, target entity description, and 
+submission date. Filter controls for report type and status are at the top of the table. A row action links to the report detail 
+page. 
+5.16   Administrative Analytics Dashboard 
+The admin console dashboard visualises platform metrics retrieved from the administrative analytics 
+summary endpoint. The endpoint provides aggregate statistics including total registered users, active 
+users, business profile counts by status, approval and rejection rates, and 30-day activity trends for 
+new users, business profiles, and bookings. 
+Additional analytics include the most active event categories and governorates based on platform 
+activity. These metrics are presented through summary cards, ranked lists, and interactive charts 
+implemented using the Recharts 3.x charting library. 
+The dashboard provides administrators with an operational snapshot of platform activity through 
+authenticated API access without requiring direct database access. Analytics data reflects the current 
+state of the system when the dashboard is loaded or refreshed and is not streamed in real time. 
+[PLACEHOLDER: Figure 33  Admin Analytics Dashboard] 
+Figure 33: Screenshot of the admin console main analytics dashboard showing platform-wide metrics: total registered users, 
+business profiles broken down by status (Approved/Pending/Rejected), events broken down by visibility (Visible/Hidden), and 
+bookings broken down by status (Pending/Confirmed/Completed/Cancelled). Recharts bar charts or pie charts visualise each 
+breakdown alongside numeric summary cards. 
+5.17   Administrative Reference Data Management 
+Administrators manage the reference data that structures the event catalog through the admin console. 
+Category management supports full create, read, update, and delete operations, while governorate 
+management supports creating governorates and controlling their active status. Categories and 
+governorates are exposed through public API endpoints and are consumed by both the mobile event 
+catalog filters and the business partner event creation interface. 
+Subcategories are also used to structure the event catalog and are required during event creation. 
+However, subcategories are seeded during platform setup and are currently exposed as read-only 
+reference data through the API; administrative create, update, and delete operations for subcategories 
+are not implemented in the current system. 
+Updates to categories and governorates become available to client applications when reference data is 
+retrieved from the API. As a result, changes appear after the next client data refresh rather than 
+through real-time synchronization. This architecture allows administrators to manage most catalog 
+and geographic reference data without requiring application code changes or platform redeployment. 
+[PLACEHOLDER: Figure 34  Admin Reference Data Management Screen] 
+Figure 34: Screenshot of the admin console reference data management page (categories or governorates). Shows a table 
+listing existing entries with Edit and Delete buttons per row, and a form above or in a modal dialog for creating a new entry. 
+The page title identifies the reference data type being managed. 
+5.18   Administrative User Management 
+Administrators manage registered user accounts through the admin console. The user management 
+interface provides a searchable list of user accounts and allows administrators to view detailed user 
+profile information, including account details, assigned roles, and activity-related information. 
+Administrators may grant or revoke administrative privileges by adding or removing the 
+ROLE_ADMIN authority from user accounts. All users retain the mandatory ROLE_USER authority 
+required for platform access. Business partner privileges (ROLE_BUSINESS) are primarily assigned 
+and revoked through the business profile approval workflow rather than through direct role 
+management in the administrative interface. 
+The user management functionality enables administrators to monitor user accounts, review account 
+details, and control administrative access without requiring direct database access. 
+[PLACEHOLDER: Figure 35  Admin User Management Screen] 
+Figure 35: Screenshot of the admin console user management page showing a paginated table of registered user accounts 
+with columns for user ID, full name, email address, assigned roles, and registration date. A search field for filtering by name 
+or email is visible. Each row has an action button to view the user profile or manage role assignments. 
+5.19   Bilingual Interface and RTL Layout Support 
+The Vibook platform provides bilingual user interfaces in both English and Arabic. Mobile 
+application users select their preferred language through the settings interface, and all user-interface 
+text is loaded from dedicated localization resources maintained for both languages. 
+When Arabic is selected, the application enables right-to-left (RTL) layout support through the React 
+Native internationalization framework. Layout direction, navigation structure, and text presentation 
+are adapted to support Arabic-language usage, while English uses the standard left-to-right (LTR) 
+layout. Language changes may require the application interface to reload in order to apply RTL 
+configuration changes consistently across all screens. 
+The administrative console also supports both English and Arabic through its localization framework, 
+allowing administrators to switch languages without requiring a separate application deployment. 
+User-interface labels, navigation elements, settings screens, and administrative workflows are 
+available in both supported languages. 
+Event titles, descriptions, and other content originating from backend data are displayed using the 
+language stored in the underlying record and are not automatically translated by the platform. 
+[PLACEHOLDER: Figure 36  Language Selection and RTL Arabic Layout] 
+Figure 36: Side-by-side screenshots of the same Vibook mobile screen in English (left, left-to-right layout) and Arabic (right, 
+right-to-left layout). The Arabic layout shows mirrored navigation elements, right-aligned text, and reversed component 
+order. The language selection option in the account settings screen is also shown alongside the two layout examples. 
+
+5.20   Multipart File Upload and Asset Serving 
+The backend accepts multipart/form-data file uploads for four asset categories: user profile images 
+(POST /api/v1/users/me/profile-image), business logos (POST /api/v1/business-profile/me/logo), 
+business banners (POST /api/v1/business-profile/me/banner), and event photos (POST /api/v1/
+business/events/{id}/photos). Each upload is limited to a maximum file size of 5 MB. 
+Uploaded files are stored on the backend host's local filesystem within the configured upload 
+directory structure. The platform also provides endpoints for deleting previously uploaded assets 
+associated with user profiles, business profiles, and business events. 
+Uploaded assets are served publicly through dedicated file-serving endpoints, including profile 
+images, business logos, business banners, and business event images. These resources are accessible 
+without authentication and can be referenced directly by the mobile application and administrative 
+console for image rendering and content display. 
+[PLACEHOLDER: Figure 37  Multipart File Upload Interface] 
+Figure 37: Screenshot of a file upload workflow in the Vibook mobile application (business profile logo upload or event 
+photo upload context). Shows the image picker trigger button, a thumbnail preview of the selected image, an upload progress 
+indicator, and a success confirmation state after the upload completes. The 5 MB per-file size limit notice is visible. 
+Chapter 6 : Constraints 
+This chapter documents the design constraints, platform limitations, external dependencies, and 
+deployment boundaries that govern the Vibook platform. These constraints were identified during the 
+architecture and requirements phases of the project and represent non-negotiable boundaries for the 
+current graduation project release. Table 6.1 provides an overview; the following paragraphs describe 
+each constraint in detail. 
+Expo Managed Workflow: The Vibook mobile application is implemented using the Expo managed 
+workflow (SDK 54). This approach simplifies development and deployment by providing a 
+Table	6.1			System	Constraints	Summary
+Constraint Category Summary
+Expo Managed Workflow Platform Mobile application is restricted to the Expo managed 
+workflow (SDK 54); custom native modules outside 
+SDK scope are not supported.
+File Upload Size Limit – 
+5 MB
+Technical All multipart uploads are capped at 5 MB per file, 
+enforced through backend validation, returning an 
+HTTP 400 validation error when limits are exceeded.
+Stateless Backend 
+Architecture
+Technical No server-side session state is maintained; all 
+authentication context is derived from the Bearer JWT 
+on every request.
+Single MySQL Database 
+Schema
+Technical All platform data resides in a single vibook_db schema 
+managed by Hibernate ddl-auto=update; no manual 
+migrations.
+PayPal Sandbox API 
+Only
+DeploymentPayment processing is limited to the PayPal Sandbox; 
+live transactions and alternative gateways are out of 
+scope.
+Local Filesystem File 
+Storage
+DeploymentUploaded assets are stored on the backend host's local 
+filesystem; cloud object storage is not used.
+LAN Development 
+Environment
+DeploymentThe platform targets a local area network; HTTPS 
+termination, DNS, and public CORS are outside scope.
+Java Platform Version – 
+JDK 21
+Technical The Spring Boot 3 backend requires JDK 21 or later; 
+earlier versions are incompatible with  
+The backend is developed and tested using JDK 21. 
+Earlier Java versions may not provide full 
+compatibility with the current project configuration.
+JWT_SECRET 
+Environment Variable
+Security JWT authentication relies on an HS256 signing secret 
+configured through application settings. Invalid or 
+missing configuration prevents successful 
+authentication token generation and validation.
+Admin Console Session 
+Persistence
+Technical The admin console persists authentication information 
+in browser local storage, allowing sessions to remain 
+available across browser restarts until logout or token 
+expiration.
+standardized React Native environment, but limits the application to Expo-compatible native modules 
+and APIs. 
+File Upload Size Limit: Multipart uploads, including profile images, business assets, and event 
+photos, are limited to 5 MB per file. Requests exceeding this limit are rejected by backend validation 
+mechanisms to protect server resources and maintain predictable storage requirements. 
+Stateless Backend Architecture: The backend follows a stateless architecture and does not maintain 
+server-side HTTP sessions. Authentication and authorization are performed using JWT bearer tokens 
+supplied with each request. Real-time communication features such as notifications and server-push 
+messaging are not implemented in the current release. 
+Single MySQL Database Schema: Platform data is stored within a single MySQL database schema 
+(vibook_db). Entity persistence is managed through Hibernate ORM using automatic schema update 
+functionality. Multi-database and distributed database configurations are outside the scope of the 
+project. 
+PayPal Sandbox API Only: Payment processing is implemented exclusively through the PayPal 
+Sandbox environment for testing and demonstration purposes. Live payment gateways and real 
+financial transactions are not supported in the current release. 
+Local Filesystem File Storage: Uploaded assets are stored on the backend host filesystem and 
+served through dedicated file-serving endpoints. Cloud-based object storage services are not used in 
+the current implementation. 
+LAN Development Environment: The platform is designed and demonstrated within a local area 
+network environment. Production deployment concerns such as public DNS, HTTPS infrastructure, 
+and load balancing are outside the scope of this project. 
+Java Platform Version: The backend is developed and tested using JDK 21. The application requires 
+a Java runtime compatible with Spring Boot 3 and the Jakarta EE platform. 
+JWT_SECRET Environment Variable: JWT authentication relies on a configured signing secret 
+used for token generation and validation. Invalid or missing configuration prevents successful 
+authentication operations. 
+Admin Console Session Persistence: The administrative console stores authentication information 
+in browser local storage, allowing administrator sessions to remain available across page refreshes 
+and browser restarts until logout or token expiration. 
+Chapter 7 : Quality Ranges 
+This chapter defines the acceptable quality ranges and performance targets for the Vibook platform 
+within the graduation project demonstration environment. Ranges are expressed as a minimum 
+acceptable threshold and an expected target. All values are defined for a single-host, single-user LAN 
+deployment; production-scale targets are outside the scope of this document. 
+Note: The values presented in Table 7.1 represent target quality objectives for the graduation project 
+demonstration environment and should not be interpreted as guaranteed runtime performance metrics. 
+Table	7.1			Quality	Ranges
+Quality 
+Attribute
+Definition Minimum 
+Acceptable
+Target
+Performance Response time for API requests 
+returning data or accepting file 
+uploads, measured under single-
+user load on the LAN 
+development network.
+All endpoints respond 
+within 5 seconds; file 
+uploads within 10 
+seconds.
+Target response time under 
+2 seconds for data 
+endpoints and under 5 
+seconds for file uploads 
+during demonstration 
+testing.
+Availability Operational continuity of the 
+backend application during the 
+graduation project demonstration 
+period.
+Application starts and 
+remains operational for 
+the full duration of 
+each demonstration 
+session without restart.
+Single-instance 
+deployment; application 
+runs continuously once 
+started; no formal uptime 
+SLA required.
+Reliability Correctness of all lifecycle state-
+machine transitions 
+(BookingStatus, 
+BusinessProfileStatus, 
+ModerationReportStatus) and 
+absence of data corruption on 
+valid operations.
+All JPA write 
+operations are atomic; 
+no partial database 
+updates occur on 
+transaction failure.
+All valid state transitions 
+are enforced through 
+service-layer validation 
+and transactional 
+boundaries.
+Security Strength of credential protection 
+and enforcement of access 
+control on all protected API 
+endpoints.
+All protected endpoints 
+reject requests that lack 
+a valid Bearer JWT; 
+passwords are never 
+stored in plaintext.
+BCrypt adaptive hashing 
+for passwords; HS256 
+JWT signing with role-
+based access control; 
+every non-public 
+endpoint enforces the 
+appropriate role check.
+Usability Number of screen transitions 
+required for a first-time 
+consumer user to complete the 
+primary booking journey from 
+event discovery to booking 
+confirmation.
+Target booking journey 
+completion in five or 
+fewer screen 
+transitions.
+Booking journey 
+completable in five or 
+fewer screen transitions in 
+the mobile application.
+MaintainabilitySeparation of concerns between 
+the HTTP layer, business logic, 
+and data access layers in the 
+backend codebase.
+Business logic resides 
+in the service layer; 
+controllers contain no 
+domain logic; 
+repositories contain no 
+business rules.
+Service-layer separation 
+maintained throughout all 
+backend controllers
+Fault ToleranceAbility of the system to recover 
+from transient infrastructure 
+failures without data loss or 
+corruption.
+Database connection 
+failures are handled by 
+the HikariCP 
+connection pool 
+without application 
+crash; no partial writes 
+occur.
+HikariCP retries on 
+transient connection drop; 
+all database write 
+operations are wrapped in 
+@Transactional 
+boundaries; JPA ensures 
+atomic commits.
+Bilingual 
+Coverage
+Proportion of user-facing string 
+resources in the mobile 
+application available in both 
+English and Arabic locales.
+All screens in the 
+primary consumer 
+booking and partner 
+hub navigation stacks 
+are available in both 
+EN and AR.
+Application interface 
+strings are available in 
+both English and Arabic. 
+Arabic layouts use RTL 
+support, while backend-
+provided content is 
+displayed in its stored 
+language.
+Upload 
+Reliability
+Success rate for well-formed 
+multipart file uploads within the 
+5 MB per-file size constraint 
+under normal LAN conditions.
+99% or higher success 
+rate for conforming 
+upload requests under 
+stable LAN conditions.
+100% success rate for 
+conforming uploads; 
+oversized uploads are 
+rejected with HTTP 400 
+validation responses 
+without affecting system 
+stability.
+Chapter 8 : Precedence and Priority 
+This chapter defines the priority of each Vibook product feature for the graduation project release. 
+Priority is assigned using three levels: Critical (the feature must be delivered; its absence prevents the 
+system from fulfilling its core purpose), Important (the feature delivers significant value and is 
+expected by stakeholders, but its omission does not block the core booking workflow), and Useful 
+(the feature addresses less-frequent scenarios with acceptable workarounds). In the current release, all 
+twenty product features are classified as Critical or Important, reflecting the deliberate and well-
+scoped nature of the implemented system. Features are grouped by priority level and ordered by 
+feature number within each group. 
+Critical features form the minimum viable system; without them, the platform cannot connect 
+consumers with bookable events under a governed business partner model. Important features 
+enhance platform value, trust, and operational capability and are included in the current release. 
+While implementation coverage varies by feature, all Important features are sufficiently implemented 
+to support the objectives of the graduation project demonstration environment. Table 8.1 lists all 
+twenty features with their assigned priority and the business or technical justification for that 
+classification. 
+Table	8.1			Feature	Precedence	and	Priority
+No. Feature Priority Justification
+5.1User Registration and 
+Authentication
+CriticalCore identity infrastructure; all protected 
+endpoints depend on valid JWT sessions. 
+Without this feature, no authenticated user 
+can access any booking, partner, or admin 
+workflow.
+5.2Public Event Discovery and SearchCriticalPrimary consumer entry point and the 
+platform's core value proposition. Without 
+event discovery, there is nothing for 
+consumers to view or book.
+5.3Event Detail View CriticalRequired for informed booking decisions. 
+Consumers cannot review event information, 
+pricing, available booking options, and 
+supporting media before placing a booking.
+5.4Event Booking CriticalThe core transactional capability. The 
+platform's primary purpose is to facilitate 
+bookings; this feature is the direct fulfilment 
+of that purpose.
+5.5Booking Management and Status 
+Tracking
+CriticalRequired for post-booking lifecycle 
+management. Consumers and partners rely 
+on booking status visibility, while 
+cancellation and completion actions support 
+the booking lifecycle according to system 
+rules.
+5.6Business Partner Onboarding CriticalGateway to all partner-generated content. 
+Without the governed onboarding workflow 
+and ROLE_BUSINESS grant, no events can 
+be published and the consumer catalog 
+remains empty.
+5.7Partner Event Management CriticalContent supply mechanism. Without the 
+ability to create and manage events, the 
+consumer-facing catalog cannot be 
+populated with bookable listings.
+5.8Partner Booking Management CriticalDemand fulfilment mechanism. Partners 
+must be able to confirm, complete, or cancel 
+bookings to close the booking lifecycle that 
+consumers initiate.
+5.9Administrative Business Profile 
+Moderation
+CriticalEnforces platform trust and content 
+governance. The approval workflow is the 
+primary mechanism through which business-
+partner access is granted, enabling the 
+partner content supply chain.
+5.10Multipart File Upload and Asset 
+Serving
+CriticalRequired for all visual content. Without this 
+feature, profiles lack logos and banners, and 
+events lack photos, severely reducing 
+discoverability and consumer trust.
+5.11Favorites Management ImportantEnhances consumer engagement and return 
+visits. Saves events of interest for later 
+booking. Not required for the core booking 
+flow but adds measurable platform 
+stickiness.
+5.12Event Rating ImportantProvides social proof that informs booking 
+decisions. The server-maintained average 
+rating is displayed in the event catalog and 
+detail view, guiding consumer choice.
+5.13Content Reporting ImportantEnables consumer-driven content 
+governance. Populates the administrator 
+moderation queue, completing the 
+consumer-to-admin reporting cycle for 
+inappropriate content.
+5.14Partner Business Profile 
+Management
+ImportantAllows partners to maintain accurate profile 
+information after initial approval. Editing 
+reverts status to DRAFT, ensuring 
+administrator re-review of any profile 
+change.
+5.15Administrative Event Moderation ImportantProvides platform-level event governance. 
+Administrators can review event content and 
+apply moderation actions that affect event 
+visibility while preserving event records.
+5.16Administrative Content Report 
+Resolution
+ImportantCloses the moderation feedback loop. 
+Administrators resolve or dismiss consumer-
+submitted reports, completing the content 
+governance cycle.
+5.17Administrative Analytics 
+Dashboard
+ImportantProvides platform health visibility without 
+direct database access. Informs operational 
+decisions through administrative summary 
+metrics and platform activity indicators.
+5.18Administrative Reference Data 
+Management
+ImportantAllows platform reference data such as 
+categories and governorates to be 
+maintained without code deployment, 
+ensuring catalog consistency across 
+administrative and consumer interfaces.
+5.19Administrative User ManagementImportantProvides administrative oversight of user 
+accounts and role assignments, supporting 
+account review and operational user 
+administration.
+5.20Bilingual Interface and RTL 
+Layout Support
+ImportantAddresses the Arabic-speaking consumer 
+market, which constitutes the majority of the 
+Jordanian target demographic. Full RTL 
+layout switching is required for accessibility.
+Chapter 9 : Other Product Requirements 
+9.1   Applicable Standards 
+The Vibook platform is developed in accordance with the following technical standards and 
+specifications: 
+•RFC 7519 – JSON Web Token (JWT): governs the structure, claims, and validation rules for 
+the JWT access tokens used by the authentication system. 
+• RFC 6750 – OAuth 2.0 Bearer Token Usage: defines the Bearer token authentication 
+mechanism used by all protected API endpoints. 
+• Jakarta Persistence API (JPA) 3.1 – Eclipse Foundation: the specification implemented by 
+Hibernate ORM for relational object mapping and database persistence in the backend. 
+• Jakarta Bean Validation 3.0 – Eclipse Foundation: used to enforce input validation 
+constraints on request DTOs before processing by the service layer. 
+• REST Architectural Style: the Vibook API follows REST principles including resource-
+oriented URL design, standard HTTP methods (GET, POST, PUT, PATCH, DELETE), and 
+standard HTTP status codes. 
+• ISO/IEC 29500 (Office Open XML – OOXML): the document format used for the project 
+documentation and thesis deliverables, ensuring compatibility with Microsoft Word and 
+related office applications. 
+9.2   System Requirements 
+The following system requirements must be met to deploy and operate Vibook: 
+Table	9.1			System	Requirements
+Component Requirement Detail
+Backend Java Runtime JDK 21 or later; OpenJDK or Oracle 
+JDK
+Backend Database MySQL 8.0 or compatible; database 
+vibook_db created; credentials configured 
+in application.yml
+Backend Operating System Any OS supporting JDK 21 and local 
+filesystem write access (Linux, 
+Windows, macOS)
+Mobile Mobile OS iOS 15.1 or later; Android 7.0 (API 24) 
+or later; compatible with Expo SDK 54 
+managed workflow
+Admin Web Browser Any modern desktop browser 
+supporting JavaScript and HTML5
+Network Connectivity Port 8080 accessible from mobile device 
+and admin browser on the same LAN; 
+Outbound HTTPS access required for 
+PayPal Sandbox services
+[PLACEHOLDER: Figure 41  Database Entity-Relationship Diagram] 
+Figure 41: Entity-relationship diagram for the vibook_db MySQL schema, showing all sixteen JP A entities: User, 
+BusinessProfile, BusinessEvent, EventPhoto, EventTimeSlot, Booking, Favorite, Rating, ModerationReport, UserReport, 
+Category, Subcategory, Governorate, RefreshToken, and the Spring Security role/authority mapping. The diagram shows 
+primary keys, foreign key relationships, and cardinality (one-to-many, many-to-many) between entities, including the User → 
+BusinessProfile (one-to-one), BusinessProfile → BusinessEvent (one-to-many), BusinessEvent → Booking (one-to-many), 
+and User → RefreshToken (one-to-many) associations. 
+9.3   Performance Requirements 
+The following performance requirements represent target performance objectives for the Vibook 
+graduation project demonstration environment. The platform is deployed as a single Spring Boot 
+backend instance with a MySQL database and is intended for operation by a small number of 
+concurrent users on a local area network. 
+•Event listing, booking, and profile-management API requests should complete within 2 seconds 
+under normal single-user operating conditions.• Image upload operations should support files up to 
+5 MB in size and should complete within 5 seconds under normal LAN conditions. 
+• The mobile application should display the initial event catalogue page within 3 seconds of 
+navigation under normal network conditions. 
+•Authentication and JWT validation should introduce minimal processing overhead and should not 
+noticeably affect API response times. 
+• The admin web console should display dashboard data and analytics views within 3 seconds of 
+page navigation under normal operating conditions. 
+These requirements serve as performance objectives for manual testing and demonstration purposes 
+and are not enforced through automated performance benchmarking or load-testing mechanisms. 
+9.4   Environmental Requirements 
+The following environmental requirements apply to the Vibook graduation project demonstration 
+environment: 
+• Java 21 or later and MySQL 8.0 must be installed on the backend host. 
+•The backend application must have write access to the file storage locations used for profile 
+images, business logos, banners, and event photos. Required directories are created automatically 
+during application startup. 
+• The backend host must have internet access to communicate with PayPal Sandbox services. 
+• Mobile devices must be connected to the same local area network as the backend host and must be 
+able to access port 8080. 
+• The admin web console must have network access to the backend API. 
+• No specialised hardware, GPU, cloud infrastructure, or dedicated server environment is required. 
+Chapter 10 : Documentation Requirements 
+10.1   User Manual 
+A user manual describing the consumer-facing features of the Vibook mobile application is to be 
+produced as a separate deliverable for the graduation project. The manual should cover the following 
+topics, presented in task-oriented format with annotated screenshots: 
+•  Account registration and login, including password requirements and the JWT session model. 
+•  Language selection and right-to-left layout switching for Arabic-speaking users. 
+•  Browsing the event catalog, applying governorate and category filters, and using keyword 
+search. 
+•  Viewing event detail pages, including photos, pricing, capacity, and available time slots. 
+•  Placing a booking, selecting a time slot, and specifying guest count. 
+•  Viewing and managing booking history, including cancellation. 
+•  Adding and removing events from the favorites list. 
+•  Submitting a star rating for a booked event. 
+•  Submitting a content report for inappropriate content. 
+•  Applying to become a business partner, submitting a business profile, and using the partner 
+hub. 
+The manual should be produced in both English and Arabic versions. Length should be sufficient to 
+guide a first-time user through all primary consumer workflows without prior training. An index of 
+features and a glossary of key terms should be included. 
+10.2   Online Help 
+The Vibook mobile application includes a bilingual Help Center accessible from the user profile 
+section. The Help Center provides FAQ content and a “Report a Problem” feature in both English and 
+Arabic. 
+The administrative web console does not currently include a dedicated online help module. Future 
+releases may extend the Help Center with searchable help content and additional support resources. 
+10.3   Installation Guides, Configuration, and Read Me File 
+A comprehensive developer installation and configuration guide is provided in the 
+GRADUATION_PROJECT_HANDOFF.md file located in the docs/ directory of the project 
+repository. This document covers: 
+•  Backend setup: cloning the repository, configuring application.yml, setting the JWT_SECRET 
+environment variable, creating the vibook_db MySQL schema, configuring upload directory 
+paths, and starting the Spring Boot application. 
+•  Mobile application setup: installing Node.js dependencies, configuring the API base URL in 
+the Expo environment file, and running the application with Expo Go or a development build. 
+•  Admin web console setup: installing Node.js dependencies, configuring the API base URL, 
+and building or serving the Vite SPA. 
+•  Known issues and workarounds identified during development and testing. 
+•  API audit report identifying all implemented endpoints and their authentication requirements. 
+A Read Me file (README.md) in the project root provides a brief project overview, technology 
+stack summary, and pointers to the full handoff documentation. The Read Me does not duplicate the 
+detailed configuration instructions contained in the handoff guide. 
+10.4   Labeling and Packaging 
+The Vibook mobile application includes custom branding assets, including the application icon, 
+splash screen, and Vibook visual identity. The application name “Vibook” is configured in app.json 
+and appears on supported mobile devices. 
+The administrative console is deployed as a standard web application. The title “Vibook Admin” is 
+displayed in the browser tab and no installer or desktop packaging is required. 
+No commercial packaging, physical media, or printed labeling is required for the graduation project. 
+All project artefacts are submitted digitally as source code, build outputs, and documentation. 
+Appendix A : Feature Attributes 
+This appendix defines the attributes used to characterise each product feature listed in Chapter 5. 
+Attributes A.1 through A.8 provide the classification scheme; the comprehensive feature attribute 
+matrix in Table A.1 applies each attribute to all twenty Vibook product features. 
+A.1   Status 
+Status describes the review and implementation state of each feature at the time of this document. 
+A.2   Benefit 
+Benefit describes the value that each feature delivers to users and to the platform. 
+Table	A.1.1			Feature	Status	Values
+Status Value Definition
+Proposed Features under discussion that have not yet been reviewed and formally 
+accepted.
+Approved Capabilities deemed useful and feasible that have been accepted for 
+implementation by the project team.
+Incorporated Features fully implemented and incorporated into the product baseline at the 
+current project release.
+Table	A.1.2			Feature	Benefit	Values
+Benefit Level Definition
+Critical Essential to the platform. Absence of this feature means the system does not 
+fulfil its core purpose.
+Important Significantly enhances the platform's value. Omission reduces usefulness but 
+does not prevent core operation.
+Useful Beneficial for specific user scenarios. Reasonable workarounds exist; low 
+impact on graduation demonstration.
+A.3   Effort 
+Effort estimates the relative implementation complexity of each feature on a three-point scale: High 
+(requires significant design, multi-layer implementation, and testing effort), Medium (moderate 
+complexity spanning two or more system layers), or Low (straightforward implementation within a 
+single layer or component). 
+A.4   Risk 
+Risk captures the likelihood that a feature's implementation will encounter significant technical 
+obstacles or schedule delays. High risk features involve novel technology, external service 
+dependencies, or complex cross-component interactions. Low risk features are well-understood and 
+use established patterns already present in the codebase. 
+A.5   Stability 
+Stability indicates the likelihood that a feature's scope or behaviour will change before the final 
+project delivery. High stability features are fully defined and unlikely to change. Low stability 
+features may be subject to revision based on testing feedback or supervisor requirements. 
+A.6   Target Release 
+Target Release identifies the project milestone at which each feature is planned to be delivered. All 
+Vibook features target Release 1.0, which corresponds to the final graduation project submission. 
+A.7   Assigned To 
+Assigned To identifies the workstream or team member responsible for implementing each feature. 
+Given that Vibook is a graduation project developed by a small student team, features are assigned to 
+the Backend Workstream, Mobile Workstream, or Admin Web Workstream based on the primary 
+component where the feature is implemented. 
+A.8   Reason 
+Reason provides the business or technical justification for including each feature in the product 
+scope. This attribute connects each feature to the business opportunity identified in Chapter 2 or to a 
+specific stakeholder need identified in Chapter 3. 
+Table	A.1			Feature	Attributes	Matrix
+Feature Status 
+(A.1)
+Benefit 
+(A.2)
+Effort 
+(A.3)
+Risk 
+(A.4)
+Stability 
+(A.5)
+Release 
+(A.6)
+Workstream 
+(A.7)
+5.1  User 
+Registration 
+and 
+Authentication
+Incorporated Critical High Medium High v1.0 Backend
+5.2  Public 
+Event 
+Discovery and 
+Search
+Incorporated Critical Medium Low High v1.0 Backend / 
+Mobile
+5.3  Event 
+Detail View
+Incorporated Critical Low Low High v1.0 Backend / 
+Mobile
+5.4  Event 
+Booking
+Incorporated Critical Medium Medium High v1.0 Backend / 
+Mobile
+5.5  Booking 
+Management 
+and Status 
+Tracking
+Incorporated Critical Medium Low High v1.0 Backend / 
+Mobile
+5.6  Favorites 
+Management
+IncorporatedImportant Low Low High v1.0 Backend / 
+Mobile
+5.7  Event 
+Rating
+IncorporatedImportant Low Low High v1.0 Backend / 
+Mobile
+5.8  Content 
+Reporting
+IncorporatedImportant Low Low High v1.0 Backend / 
+Mobile
+5.9  Business 
+Partner 
+Onboarding
+Incorporated Critical High Medium High v1.0 Backend / 
+Mobile
+5.10 Partner 
+Business 
+Profile 
+Management
+IncorporatedImportant Medium Low High v1.0 Backend / 
+Mobile
+5.11 Partner 
+Event 
+Management
+Incorporated Critical High Medium High v1.0 Backend / 
+Mobile
+5.12 Partner 
+Booking 
+Management
+Incorporated Critical Medium Low High v1.0 Backend / 
+Mobile
+5.13 Admin 
+Business 
+Profile 
+Moderation
+Incorporated Critical Medium Low High v1.0 Backend / 
+Admin Web
+5.14 
+Administrative 
+Event 
+Moderation
+IncorporatedImportant Low Low High v1.0 Backend / 
+Admin Web
+5.15 Admin 
+Content 
+Report 
+Resolution
+IncorporatedImportant Medium Low High v1.0 Backend / 
+Admin Web
+5.16 
+Administrative 
+Analytics 
+Dashboard
+IncorporatedImportant Medium Low High v1.0 Backend / 
+Admin Web
+5.17 Admin 
+Reference 
+Data 
+Management
+IncorporatedImportant Low Low High v1.0 Backend / 
+Admin Web
+5.18 
+Administrative 
+User 
+Management
+IncorporatedImportant Low Low High v1.0 Backend / 
+Admin Web
+5.19 Bilingual 
+Interface and 
+RTL Support
+IncorporatedImportant High Medium High v1.0 Mobile / 
+Admin Web
+5.20 Multipart 
+File Upload 
+and Asset 
+Serving
+Incorporated Critical Medium Medium High v1.0 Backend / 
+Mobile
