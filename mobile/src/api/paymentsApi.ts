@@ -41,3 +41,11 @@ export async function capturePayPalOrder(body: {
     jsonBody: body,
   });
 }
+
+/** Sandbox demo — instant fake-money approval, no PayPal browser. */
+export async function approveSandboxDemoPayment(bookingId: number): Promise<PayPalCaptureOrderResponse> {
+  return apiFetch<PayPalCaptureOrderResponse>('/payments/paypal/sandbox/demo-approve', {
+    method: 'POST',
+    jsonBody: { bookingId },
+  });
+}

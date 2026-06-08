@@ -79,7 +79,7 @@ public class PayPalApiClient {
             }
             return new PayPalOrderCreated(orderId, approvalUrl, summarize(response));
         } catch (RestClientResponseException ex) {
-            throw new PayPalApiException("PayPal create order failed: " + ex.getStatusCode(), ex);
+            throw new PayPalApiException(formatPayPalFailure("create order", ex), ex);
         }
     }
 
@@ -109,7 +109,7 @@ public class PayPalApiClient {
                 .asText(null);
             return new PayPalOrderCaptured(paypalOrderId, captureId, status, summarize(response));
         } catch (RestClientResponseException ex) {
-            throw new PayPalApiException("PayPal capture order failed: " + ex.getStatusCode(), ex);
+            throw new PayPalApiException(formatPayPalFailure("capture order", ex), ex);
         }
     }
 
@@ -161,6 +161,36 @@ public class PayPalApiClient {
             return json.length() > 1900 ? json.substring(0, 1900) + "…" : json;
         } catch (Exception e) {
             return node.toString();
+        }
+    }
+
+    private String formatPayPalFailure(String action, RestClientResponseException ex) {
+        String issue = extractPayPalIssue(ex.getResponseBodyAsString());
+        if ("CURRENCY_NOT_SUPPORTED".equals(issue) || "UNSUPPORTED_PAYEE_CURRENCY".equals(issue)) {
+            return "PayPal does not support this currency. Sandbox checkout uses USD for JOD bookings.";
+        }
+        if (StringUtils.hasText(issue)) {
+            return "PayPal could not " + action + " (" + issue + "). Please try again.";
+        }
+        return "PayPal could not " + action + ". Please try again.";
+    }
+
+    private String extractPayPalIssue(String body) {
+        if (!StringUtils.hasText(body)) {
+            return null;
+        }
+        try {
+            JsonNode root = objectMapper.readTree(body);
+            JsonNode details = root.path("details");
+            if (details.isArray() && !details.isEmpty()) {
+                String issue = details.get(0).path("issue").asText(null);
+                if (StringUtils.hasText(issue)) {
+                    return issue;
+                }
+            }
+            return root.path("name").asText(null);
+        } catch (Exception ignored) {
+            return null;
         }
     }
 }

@@ -25,6 +25,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
         Collection<BookingStatus> statuses
     );
 
+    @EntityGraph(attributePaths = { "businessEvent", "timeSlot", "businessEvent.businessProfile", "user" })
+    Optional<Booking> findFirstByUserAndBusinessEventAndStatusInOrderByCreatedAtDesc(
+        User user,
+        BusinessEvent businessEvent,
+        Collection<BookingStatus> statuses
+    );
+
     @EntityGraph(attributePaths = { "businessEvent", "timeSlot" })
     List<Booking> findByUserOrderByCreatedAtDesc(User user);
 

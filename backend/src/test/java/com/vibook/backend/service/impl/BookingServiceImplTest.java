@@ -98,7 +98,8 @@ class BookingServiceImplTest {
             .setAuthentication(new UsernamePasswordAuthenticationToken(new AuthenticatedUser(buyer), null));
         when(userRepository.findByEmail("buyer@example.com")).thenReturn(Optional.of(buyer));
         when(businessEventRepository.findWithDetailsById(14L)).thenReturn(Optional.of(event));
-        when(bookingRepository.existsByUserAndBusinessEventAndStatusIn(eq(buyer), eq(event), any())).thenReturn(false);
+        when(bookingRepository.findFirstByUserAndBusinessEventAndStatusInOrderByCreatedAtDesc(eq(buyer), eq(event), any()))
+            .thenReturn(Optional.empty());
     }
 
     @AfterEach
@@ -156,6 +157,96 @@ class BookingServiceImplTest {
         assertThatThrownBy(() -> service.createBooking(new BookingCreateRequest(14L, null, 1, null)))
             .isInstanceOf(BadRequestException.class)
             .hasMessageContaining("Time slot is required");
+    }
+
+    @Test
+    void createBooking_allowsBusinessOwnerToBookOwnEvent() {
+        User owner = event.getBusinessProfile().getUser();
+        owner.setEmail("owner@example.com");
+        buyer.setId(owner.getId());
+        SecurityContextHolder.getContext()
+            .setAuthentication(new UsernamePasswordAuthenticationToken(new AuthenticatedUser(buyer), null));
+        when(userRepository.findByEmail("buyer@example.com")).thenReturn(Optional.of(buyer));
+        when(bookingRepository.sumGuestsByEventIdAndStatusIn(eq(14L), any())).thenReturn(0);
+        when(businessEventTimeSlotRepository.findByIdAndBusinessEvent_Id(18L, 14L)).thenReturn(Optional.of(slot));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> {
+            Booking b = inv.getArgument(0);
+            b.setId(2L);
+            return b;
+        });
+        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(
+            new BookingResponse(
+                2L,
+                14L,
+                "Padel team",
+                null,
+                List.of(),
+                owner.getId(),
+                "owner@example.com",
+                "Owner",
+                "User",
+                "Owner User",
+                "+962700000000",
+                BookingStatus.PENDING,
+                event.getEventDate(),
+                18L,
+                "7:30 PM",
+                1,
+                new BigDecimal("10.00"),
+                "JOD",
+                null,
+                null,
+                null,
+                null
+            )
+        );
+
+        BookingResponse response = service.createBooking(new BookingCreateRequest(14L, 18L, 1, null));
+
+        assertThat(response.id()).isEqualTo(2L);
+        verify(bookingRepository).save(any(Booking.class));
+    }
+
+    @Test
+    void createBooking_returnsExistingPendingInsteadOfDuplicateError() {
+        Booking pending = new Booking();
+        pending.setId(9L);
+        pending.setUser(buyer);
+        pending.setBusinessEvent(event);
+        pending.setStatus(BookingStatus.PENDING);
+        when(bookingRepository.findFirstByUserAndBusinessEventAndStatusInOrderByCreatedAtDesc(eq(buyer), eq(event), any()))
+            .thenReturn(Optional.of(pending));
+        when(bookingMapper.toResponse(pending)).thenReturn(
+            new BookingResponse(
+                9L,
+                14L,
+                "Padel team",
+                null,
+                List.of(),
+                6L,
+                "buyer@example.com",
+                "Buyer",
+                "Test",
+                "Buyer Test",
+                "+962700000000",
+                BookingStatus.PENDING,
+                event.getEventDate(),
+                null,
+                null,
+                1,
+                new BigDecimal("10.00"),
+                "JOD",
+                null,
+                null,
+                null,
+                null
+            )
+        );
+
+        BookingResponse response = service.createBooking(new BookingCreateRequest(14L, 18L, 1, null));
+
+        assertThat(response.id()).isEqualTo(9L);
+        org.mockito.Mockito.verify(bookingRepository, org.mockito.Mockito.never()).save(any(Booking.class));
     }
 
     @Test

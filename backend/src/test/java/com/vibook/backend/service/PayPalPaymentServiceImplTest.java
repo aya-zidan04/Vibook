@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.vibook.backend.config.PayPalProperties;
 import com.vibook.backend.dto.PayPalCaptureOrderRequest;
 import com.vibook.backend.dto.PayPalCreateOrderRequest;
+import com.vibook.backend.dto.PayPalSandboxDemoApproveRequest;
 import com.vibook.backend.entity.Booking;
 import com.vibook.backend.entity.BookingStatus;
 import com.vibook.backend.entity.BusinessEvent;
@@ -93,11 +94,12 @@ class PayPalPaymentServiceImplTest {
 
     @Test
     void createOrder_usesBookingAmountFromServer() {
+        when(payPalProperties.mode()).thenReturn("sandbox");
         when(payPalProperties.returnUrl()).thenReturn("vibook://paypal-return");
         when(payPalProperties.cancelUrl()).thenReturn("vibook://paypal-cancel");
         when(bookingRepository.findByIdAndUser(100L, user)).thenReturn(Optional.of(booking));
         when(paymentRepository.existsByBooking_IdAndStatusIn(eq(100L), any())).thenReturn(false);
-        when(payPalApiClient.createOrder(any(), eq("JOD"), eq("booking-100"), any(), any()))
+        when(payPalApiClient.createOrder(any(), eq("USD"), eq("booking-100"), any(), any()))
             .thenReturn(new PayPalOrderCreated("ORDER-1", "https://sandbox.paypal.com/approve", "{}"));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
             Payment p = inv.getArgument(0);
@@ -108,12 +110,12 @@ class PayPalPaymentServiceImplTest {
         var response = service.createOrder(new PayPalCreateOrderRequest(100L, 10L, null));
 
         assertThat(response.paypalOrderId()).isEqualTo("ORDER-1");
-        assertThat(response.amount()).isEqualByComparingTo("50.00");
+        assertThat(response.amount()).isEqualByComparingTo("70.50");
         assertThat(response.bookingStatus()).isEqualTo("PENDING");
 
         ArgumentCaptor<BigDecimal> amountCaptor = ArgumentCaptor.forClass(BigDecimal.class);
-        verify(payPalApiClient).createOrder(amountCaptor.capture(), eq("JOD"), eq("booking-100"), any(), any());
-        assertThat(amountCaptor.getValue()).isEqualByComparingTo("50.00");
+        verify(payPalApiClient).createOrder(amountCaptor.capture(), eq("USD"), eq("booking-100"), any(), any());
+        assertThat(amountCaptor.getValue()).isEqualByComparingTo("70.50");
     }
 
     @Test
@@ -158,6 +160,27 @@ class PayPalPaymentServiceImplTest {
         assertThat(response.paymentStatus()).isEqualTo("CAPTURED");
         assertThat(response.bookingStatus()).isEqualTo("CONFIRMED");
         verify(payPalApiClient, org.mockito.Mockito.never()).captureOrder(org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void approveSandboxDemo_confirmsBookingWithFakeMoney() {
+        when(payPalProperties.mode()).thenReturn("sandbox");
+        when(payPalProperties.baseUrl()).thenReturn("https://api-m.sandbox.paypal.com");
+        when(bookingRepository.findByIdAndUser(100L, user)).thenReturn(Optional.of(booking));
+        when(paymentRepository.findFirstByBooking_IdAndStatus(100L, PaymentStatus.CAPTURED)).thenReturn(Optional.empty());
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
+            Payment p = inv.getArgument(0);
+            p.setId(9L);
+            return p;
+        });
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var response = service.approveSandboxDemo(new PayPalSandboxDemoApproveRequest(100L));
+
+        assertThat(response.bookingStatus()).isEqualTo("CONFIRMED");
+        assertThat(response.paymentStatus()).isEqualTo("CAPTURED");
+        assertThat(response.paypalOrderId()).startsWith("SANDBOX-DEMO-");
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
     }
 
     @Test

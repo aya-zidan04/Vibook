@@ -5,6 +5,7 @@ import com.vibook.backend.dto.PayPalCaptureOrderRequest;
 import com.vibook.backend.dto.PayPalCaptureOrderResponse;
 import com.vibook.backend.dto.PayPalCreateOrderRequest;
 import com.vibook.backend.dto.PayPalCreateOrderResponse;
+import com.vibook.backend.dto.PayPalSandboxDemoApproveRequest;
 import com.vibook.backend.entity.Booking;
 import com.vibook.backend.entity.BookingStatus;
 import com.vibook.backend.entity.Payment;
@@ -14,7 +15,9 @@ import com.vibook.backend.entity.User;
 import com.vibook.backend.exception.BadRequestException;
 import com.vibook.backend.exception.NotFoundException;
 import com.vibook.backend.exception.UnauthorizedException;
+import com.vibook.backend.exception.PayPalApiException;
 import com.vibook.backend.paypal.PayPalApiClient;
+import com.vibook.backend.paypal.PayPalCheckoutCurrency;
 import com.vibook.backend.paypal.PayPalOrderCaptured;
 import com.vibook.backend.paypal.PayPalOrderCreated;
 import com.vibook.backend.repository.BookingRepository;
@@ -24,6 +27,7 @@ import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.PayPalPaymentService;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -83,23 +87,38 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
             throw new BadRequestException("A PayPal payment is already in progress for this booking");
         }
 
-        BigDecimal amount = booking.getTotalPriceJod();
-        String currency = booking.getBusinessEvent().getCurrency();
+        BigDecimal bookingAmount = booking.getTotalPriceJod();
+        String eventCurrency = booking.getBusinessEvent().getCurrency();
+        PayPalCheckoutCurrency.CheckoutAmount checkout;
+        try {
+            checkout = PayPalCheckoutCurrency.forOrder(
+                bookingAmount,
+                eventCurrency,
+                "sandbox".equalsIgnoreCase(payPalProperties.mode())
+            );
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException(ex.getMessage());
+        }
 
-        PayPalOrderCreated created = payPalApiClient.createOrder(
-            amount,
-            currency,
-            "booking-" + booking.getId(),
-            payPalProperties.returnUrl(),
-            payPalProperties.cancelUrl()
-        );
+        PayPalOrderCreated created;
+        try {
+            created = payPalApiClient.createOrder(
+                checkout.amount(),
+                checkout.currencyCode(),
+                "booking-" + booking.getId(),
+                payPalProperties.returnUrl(),
+                payPalProperties.cancelUrl()
+            );
+        } catch (PayPalApiException ex) {
+            throw new BadRequestException(ex.getMessage());
+        }
 
         Payment payment = new Payment();
         payment.setBooking(booking);
         payment.setProvider(PaymentProvider.PAYPAL);
         payment.setPaypalOrderId(created.orderId());
-        payment.setAmount(amount);
-        payment.setCurrency(currency);
+        payment.setAmount(checkout.amount());
+        payment.setCurrency(checkout.currencyCode());
         payment.setStatus(PaymentStatus.CREATED);
         payment.setResponseSummary(created.rawSummary());
         Payment saved = paymentRepository.save(payment);
@@ -110,8 +129,8 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
             booking.getBusinessEvent().getId(),
             created.orderId(),
             created.approvalUrl(),
-            amount,
-            currency,
+            checkout.amount(),
+            checkout.currencyCode(),
             saved.getStatus().name(),
             booking.getStatus().name()
         );
@@ -186,6 +205,74 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
             paymentRepository.save(payment);
             throw ex;
         }
+    }
+
+    @Override
+    @Transactional
+    public PayPalCaptureOrderResponse approveSandboxDemo(PayPalSandboxDemoApproveRequest request) {
+        payPalProperties.requireSandbox();
+        User user = getCurrentAuthenticatedUser();
+        Booking booking = bookingRepository
+            .findByIdAndUser(request.bookingId(), user)
+            .orElseThrow(() -> new NotFoundException("Booking not found"));
+
+        Optional<Payment> existingCaptured = paymentRepository.findFirstByBooking_IdAndStatus(
+            booking.getId(),
+            PaymentStatus.CAPTURED
+        );
+        if (existingCaptured.isPresent()) {
+            Payment payment = existingCaptured.get();
+            if (booking.getStatus() != BookingStatus.CONFIRMED) {
+                booking.setStatus(BookingStatus.CONFIRMED);
+                bookingRepository.save(booking);
+            }
+            return toCaptureResponse(payment, booking);
+        }
+
+        if (booking.getStatus() == BookingStatus.CONFIRMED) {
+            return toCaptureResponse(createDemoPayment(booking), booking);
+        }
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new BadRequestException("This booking cannot be paid");
+        }
+
+        Payment saved = createDemoPayment(booking);
+
+        booking.setStatus(BookingStatus.CONFIRMED);
+        bookingRepository.save(booking);
+
+        return toCaptureResponse(saved, booking);
+    }
+
+    private Payment createDemoPayment(Booking booking) {
+        PayPalCheckoutCurrency.CheckoutAmount checkout = PayPalCheckoutCurrency.forOrder(
+            booking.getTotalPriceJod(),
+            booking.getBusinessEvent().getCurrency(),
+            true
+        );
+
+        Payment payment = new Payment();
+        payment.setBooking(booking);
+        payment.setProvider(PaymentProvider.PAYPAL);
+        payment.setPaypalOrderId("SANDBOX-DEMO-" + booking.getId());
+        payment.setPaypalCaptureId("SANDBOX-CAP-" + booking.getId());
+        payment.setAmount(checkout.amount());
+        payment.setCurrency(checkout.currencyCode());
+        payment.setStatus(PaymentStatus.CAPTURED);
+        payment.setResponseSummary("{\"demo\":true,\"mode\":\"sandbox\",\"message\":\"Fake money approved for demo\"}");
+        return paymentRepository.save(payment);
+    }
+
+    private PayPalCaptureOrderResponse toCaptureResponse(Payment payment, Booking booking) {
+        return new PayPalCaptureOrderResponse(
+            payment.getId(),
+            booking.getId(),
+            payment.getPaypalOrderId(),
+            payment.getPaypalCaptureId(),
+            payment.getStatus().name(),
+            booking.getStatus().name()
+        );
     }
 
     private User getCurrentAuthenticatedUser() {

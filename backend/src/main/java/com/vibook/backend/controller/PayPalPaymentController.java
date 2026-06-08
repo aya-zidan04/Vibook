@@ -4,6 +4,7 @@ import com.vibook.backend.dto.PayPalCaptureOrderRequest;
 import com.vibook.backend.dto.PayPalCaptureOrderResponse;
 import com.vibook.backend.dto.PayPalCreateOrderRequest;
 import com.vibook.backend.dto.PayPalCreateOrderResponse;
+import com.vibook.backend.dto.PayPalSandboxDemoApproveRequest;
 import com.vibook.backend.exception.UnauthorizedException;
 import com.vibook.backend.security.AuthenticatedUser;
 import com.vibook.backend.service.PayPalPaymentService;
@@ -41,6 +42,15 @@ public class PayPalPaymentController {
     ) {
         requirePrincipal(principal);
         return ResponseEntity.ok(payPalPaymentService.captureOrder(request));
+    }
+
+    @PostMapping("/sandbox/demo-approve")
+    public ResponseEntity<PayPalCaptureOrderResponse> approveSandboxDemo(
+        @AuthenticationPrincipal AuthenticatedUser principal,
+        @Valid @RequestBody PayPalSandboxDemoApproveRequest request
+    ) {
+        requirePrincipal(principal);
+        return ResponseEntity.ok(payPalPaymentService.approveSandboxDemo(request));
     }
 
     private static void requirePrincipal(AuthenticatedUser principal) {

@@ -268,9 +268,11 @@ export const translations = {
       unavailable:
         'Online payment is only available for event bookings through PayPal. Return to Explore and book an event to continue.',
       paypalSandbox:
-        'Pay with PayPal Sandbox. You will sign in with a Personal sandbox buyer account. No real money is charged.',
+        'Demo sandbox payment — tap Pay with PayPal to approve instantly with fake money. No PayPal login and no real charge.',
       payWithPayPal: 'Pay with PayPal',
       paypalCancelled: 'PayPal checkout was cancelled. Your booking stays pending until you pay.',
+      paypalFailedPending:
+        'Payment could not start. Your booking is saved — tap Pay with PayPal again to retry.',
       cardNumber: 'Card number',
       expires: 'Expires',
       cvv: 'CVV',
@@ -1141,9 +1143,11 @@ export const translations = {
       unavailable:
         'الدفع الإلكتروني متاح لحجوزات الفعاليات عبر PayPal فقط. ارجع إلى الاستكشاف واحجز فعالية للمتابعة.',
       paypalSandbox:
-        'ادفع عبر PayPal Sandbox. ستسجّل الدخول بحساب مشتري تجريبي (Personal). لا يتم خصم أموال حقيقية.',
+        'دفع تجريبي — اضغط الدفع عبر PayPal للموافقة فوراً بأموال وهمية. بدون تسجيل PayPal وبدون خصم حقيقي.',
       payWithPayPal: 'الدفع عبر PayPal',
       paypalCancelled: 'تم إلغاء الدفع عبر PayPal. يبقى حجزك قيد الانتظار حتى تكمل الدفع.',
+      paypalFailedPending:
+        'تعذّر بدء الدفع. تم حفظ حجزك — اضغط الدفع عبر PayPal للمحاولة مرة أخرى.',
       cardNumber: 'رقم البطاقة',
       expires: 'الانتهاء',
       cvv: 'CVV',

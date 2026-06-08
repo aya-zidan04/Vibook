@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { DetailHeader } from '@/components/layout/DetailHeader';
@@ -10,13 +9,11 @@ import { Screen } from '@/components/layout/Screen';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { useTranslation } from '@/i18n/useTranslation';
 import { createBooking } from '@/api/bookingsApi';
-import { capturePayPalOrder, createPayPalOrder } from '@/api/paymentsApi';
+import { approveSandboxDemoPayment } from '@/api/paymentsApi';
 import { mapApiError } from '@/utils/mapApiError';
 import { useBookingDraftStore } from '@/store/bookingDraftStore';
 import { radii, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
-
-const PAYPAL_RETURN_URL = 'vibook://paypal-return';
 
 export default function PaymentScreen() {
   const colors = useThemeColors();
@@ -65,32 +62,18 @@ export default function PaymentScreen() {
         setPendingBookingId(bookingId);
       }
 
-      const order = await createPayPalOrder({
-        bookingId,
-        eventId,
-        timeSlotId: draft.apiTimeSlotId ?? null,
-      });
-
-      const browserResult = await WebBrowser.openAuthSessionAsync(
-        order.approvalUrl,
-        PAYPAL_RETURN_URL,
-      );
-
-      if (browserResult.type !== 'success') {
-        Alert.alert(t('payment.title'), t('payment.paypalCancelled'));
-        return;
-      }
-
-      await capturePayPalOrder({
-        paypalOrderId: order.paypalOrderId,
-        bookingId,
-      });
+      await approveSandboxDemoPayment(bookingId);
 
       setLastOrderId(String(bookingId));
       clearCheckoutSession();
       router.replace('/confirmation');
     } catch (e) {
-      Alert.alert(t('payment.title'), mapApiError(e, t));
+      const detail = mapApiError(e, t);
+      const hasPendingBooking = useBookingDraftStore.getState().pendingBookingId != null;
+      const message = hasPendingBooking
+        ? `${detail}\n\n${t('payment.paypalFailedPending')}`
+        : detail;
+      Alert.alert(t('payment.title'), message);
     } finally {
       setBusy(false);
     }

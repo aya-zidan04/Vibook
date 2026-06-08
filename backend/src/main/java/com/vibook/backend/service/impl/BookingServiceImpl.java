@@ -27,6 +27,7 @@ import com.vibook.backend.service.BookingService;
 import java.math.BigDecimal;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -85,17 +86,10 @@ public class BookingServiceImpl implements BookingService {
             throw new AccessDeniedException("This event is not available for booking");
         }
 
-        if (!isAdmin(actor)) {
-            BusinessProfile ownerProfile = event.getBusinessProfile();
-            if (ownerProfile.getUser().getId().equals(actor.getId())) {
-                throw new BadRequestException("You cannot book your own event");
-            }
-        }
-
-        if (
-            bookingRepository.existsByUserAndBusinessEventAndStatusIn(actor, event, DUPLICATE_BLOCK_STATUSES)
-        ) {
-            throw new BadRequestException("You already have an active booking for this event");
+        Optional<Booking> existingActive = bookingRepository
+            .findFirstByUserAndBusinessEventAndStatusInOrderByCreatedAtDesc(actor, event, DUPLICATE_BLOCK_STATUSES);
+        if (existingActive.isPresent()) {
+            return bookingMapper.toResponse(existingActive.get());
         }
 
         boolean eventHasSlots = event.getTimeSlots() != null && !event.getTimeSlots().isEmpty();
