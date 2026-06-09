@@ -65,7 +65,7 @@ public class BusinessEventMapper {
         );
     }
 
-    public AdminEventRowResponse toAdminRow(BusinessEvent entity) {
+    public AdminEventRowResponse toAdminRow(BusinessEvent entity, int photoCount) {
         Subcategory sub = entity.getSubcategory();
         Category cat = sub != null ? sub.getCategory() : null;
         Governorate gov = entity.getGovernorate();
@@ -76,12 +76,14 @@ public class BusinessEventMapper {
             entity.getBusinessProfile().getId(),
             entity.getBusinessProfile().getBusinessName(),
             cat != null ? cat.getName() : null,
+            sub != null ? sub.getName() : null,
             gov != null ? gov.getName() : null,
             entity.getEventDate(),
+            entity.getTimeSlots().stream().map(BusinessEventTimeSlot::getSlotLabel).toList(),
             entity.getPriceJod(),
             entity.getCurrency(),
             entity.getCapacityGuests(),
-            entity.getPhotos() != null ? entity.getPhotos().size() : 0,
+            photoCount,
             visibility,
             entity.getCreatedAt()
         );

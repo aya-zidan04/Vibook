@@ -51,10 +51,19 @@ export default function EventDetailScreen() {
     return localizedCityLabel(event.cityId, locale, cities);
   }, [cities, event, locale]);
 
+  const canRateEvent = apiDetail?.canRate === true;
+  const showUserRating =
+    isAuthenticated && apiDetail != null && (canRateEvent || apiDetail.myRating != null);
+
   useEffect(() => {
-    if (!id || !apiDetail?.myRating) return;
-    useUserRatingsStore.getState().setRating(ratingKey('event', id), apiDetail.myRating);
-  }, [id, apiDetail?.myRating]);
+    if (!id || !apiDetail) return;
+    const key = ratingKey('event', id);
+    if (apiDetail.myRating != null) {
+      useUserRatingsStore.getState().setRating(key, apiDetail.myRating);
+    } else if (!apiDetail.canRate) {
+      useUserRatingsStore.getState().setRating(key, null);
+    }
+  }, [id, apiDetail?.myRating, apiDetail?.canRate, apiDetail]);
 
   useEffect(() => {
     if (!id || !/^\d+$/.test(id) || !isAuthenticated) return;
@@ -253,24 +262,27 @@ export default function EventDetailScreen() {
               </AppText>
             </View>
 
-            <UserRatingBlock
-              vertical="event"
-              refId={event.id}
-              backendEventId={apiDetail?.id}
-              myRatingId={apiDetail?.myRatingId}
-              onRatingSaved={refetchApiDetail}
-              onReportIssue={
-                apiDetail?.myRatingId != null
-                  ? () => {
-                      if (!isAuthenticated) {
-                        router.push('/login');
-                        return;
+            {showUserRating ? (
+              <UserRatingBlock
+                vertical="event"
+                refId={event.id}
+                backendEventId={canRateEvent ? apiDetail?.id : undefined}
+                readOnly={!canRateEvent}
+                myRatingId={apiDetail?.myRatingId}
+                onRatingSaved={refetchApiDetail}
+                onReportIssue={
+                  apiDetail?.myRatingId != null
+                    ? () => {
+                        if (!isAuthenticated) {
+                          router.push('/login');
+                          return;
+                        }
+                        setReportCtx({ type: 'RATING', targetId: apiDetail.myRatingId ?? null });
                       }
-                      setReportCtx({ type: 'RATING', targetId: apiDetail.myRatingId ?? null });
-                    }
-                  : undefined
-              }
-            />
+                    : undefined
+                }
+              />
+            ) : null}
 
             <View style={styles.card}>
               <Row icon="calendar-outline" label={t('event.date')} value={dateStr} />

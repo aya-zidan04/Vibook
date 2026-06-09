@@ -6,7 +6,6 @@ const FILTERS: Array<'ALL' | BusinessProfileStatus> = [
   'PENDING_REVIEW',
   'APPROVED',
   'REJECTED',
-  'DRAFT',
 ];
 
 const FILTER_KEY: Record<(typeof FILTERS)[number], string> = {
@@ -14,7 +13,6 @@ const FILTER_KEY: Record<(typeof FILTERS)[number], string> = {
   PENDING_REVIEW: 'businessProfileFilters.pendingReview',
   APPROVED: 'businessProfileFilters.approved',
   REJECTED: 'businessProfileFilters.rejected',
-  DRAFT: 'businessProfileFilters.draft',
 };
 
 export function BusinessProfileFilterBar({

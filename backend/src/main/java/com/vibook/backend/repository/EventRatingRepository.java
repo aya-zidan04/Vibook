@@ -19,4 +19,6 @@ public interface EventRatingRepository extends JpaRepository<EventRating, Long>,
         "SELECT COALESCE(AVG(r.ratingValue), 0.0), COUNT(r) FROM EventRating r WHERE r.businessEvent.id = :eventId AND r.moderationHidden = false"
     )
     Object[] averageAndCountVisible(@Param("eventId") Long eventId);
+
+    void deleteByBusinessEvent_Id(Long eventId);
 }

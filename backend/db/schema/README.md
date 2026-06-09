@@ -10,6 +10,11 @@ Complete schema deliverable for **vibook_db** (MySQL 8). Verified against the li
 | `vibook_db_schema_raw.sql` | Raw `mysqldump --no-data` from the live database. Use as a reference diff against the clean script (Hibernate-generated constraint names, column order). |
 | `vibook_erd.drawio` | Visual ERD for [diagrams.net](https://app.diagrams.net) / draw.io — 19 table boxes with **24 FK connector lines** (orthogonal routing, color-coded by domain). |
 | `relationships.mmd` | Standalone [Mermaid](https://mermaid.js.org) ER diagram for quick viewing in GitHub, VS Code, or any Mermaid renderer. |
+| `vibook_domain_class_diagram.mmd` | UML **class diagram** of all 18 JPA entities, enums, and associations (thesis / design docs). |
+| `vibook_application_class_diagram.mmd` | Simplified UML class diagram of the Spring **Controller → Service → Repository** layered architecture. |
+| `vibook_sequence_auth_login.mmd` | **Sequence diagram** — consumer login, JWT-protected API call, and token refresh on 401. |
+| `vibook_sequence_event_booking_payment.mmd` | **Sequence diagram** — event booking (`PENDING`) and PayPal Sandbox payment (`CONFIRMED`). |
+| `vibook_sequence_business_partner_approval.mmd` | **Sequence diagram** — partner profile submission and admin approval workflow. |
 | `README.md` | This guide. |
 
 ## Database overview

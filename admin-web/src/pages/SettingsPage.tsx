@@ -61,14 +61,6 @@ export function SettingsPage() {
           </Button>
         </div>
       </Card>
-      <Card padding="lg">
-        <h2 className="vb-card__title" style={{ marginTop: 0 }}>
-          {t('settings.comingTitle')}
-        </h2>
-        <p className="vb-muted" style={{ lineHeight: 1.6, maxWidth: 560 }}>
-          {t('settings.comingBody')}
-        </p>
-      </Card>
     </div>
   );
 }

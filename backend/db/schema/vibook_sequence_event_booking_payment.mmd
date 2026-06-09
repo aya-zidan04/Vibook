@@ -1,0 +1,49 @@
+%% Vibook — Sequence diagram: event booking and PayPal Sandbox payment
+%% Mobile payment screen uses sandbox demo-approve for graduation demos.
+%% Full create-order / capture-order flow is also supported by the backend.
+
+sequenceDiagram
+    autonumber
+    actor Consumer
+    participant Mobile as Mobile App
+    participant Book as BookingController
+    participant BookSvc as BookingService
+    participant Pay as PayPalPaymentController
+    participant PaySvc as PayPalPaymentService
+    participant PayPal as PayPal Sandbox API
+    participant DB as MySQL
+
+    Note over Consumer,DB: Checkout — create PENDING booking
+
+    Consumer->>Mobile: Tap Pay on payment screen
+    Mobile->>Book: POST /api/v1/bookings<br/>{ eventId, timeSlotId, guestsCount }
+    Book->>BookSvc: createBooking()
+    BookSvc->>DB: validate event, slot, capacity
+    BookSvc->>DB: insert bookings (status=PENDING)
+    Book-->>Mobile: BookingResponse (id, PENDING)
+
+    alt Graduation demo path (current mobile UI)
+        Mobile->>Pay: POST /api/v1/payments/paypal/sandbox/demo-approve<br/>{ bookingId }
+        Pay->>PaySvc: approveSandboxDemo()
+        PaySvc->>DB: insert payments (CAPTURED, demo ids)
+        PaySvc->>DB: update bookings status=CONFIRMED
+        Pay-->>Mobile: PayPalCaptureOrderResponse
+        Mobile->>Mobile: navigate to /confirmation
+        Mobile-->>Consumer: booking confirmed
+    else Full PayPal Sandbox path (supported by API)
+        Mobile->>Pay: POST /api/v1/payments/paypal/create-order
+        Pay->>PaySvc: createOrder()
+        PaySvc->>PayPal: create order (HTTPS)
+        PayPal-->>PaySvc: orderId + approvalUrl
+        PaySvc->>DB: insert payments (status=CREATED)
+        Pay-->>Mobile: approvalUrl
+        Consumer->>PayPal: approve payment in browser
+        Mobile->>Pay: POST /api/v1/payments/paypal/capture-order
+        Pay->>PaySvc: captureOrder()
+        PaySvc->>PayPal: capture order
+        PayPal-->>PaySvc: COMPLETED
+        PaySvc->>DB: update payments=CAPTURED
+        PaySvc->>DB: update bookings status=CONFIRMED
+        Pay-->>Mobile: PayPalCaptureOrderResponse
+        Mobile-->>Consumer: booking confirmed
+    end

@@ -17,8 +17,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/components/ui/useToast';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
+import { formatEventCategory } from '@/utils/eventLabels';
 import { localizedGovernorateName } from '@/utils/governorateLabels';
-import { formatDateTime } from '@/utils/format';
+import { formatDateTime, formatEventDate } from '@/utils/format';
 
 type Dialog = null | 'delete' | 'hide' | 'show';
 
@@ -149,11 +150,12 @@ export function EventDetailPage() {
           <p className="vb-muted" style={{ marginTop: 'var(--vb-space-md)' }}>
             {ev.businessProfileId ? (
               <Link to={`/business-profiles/${ev.businessProfileId}`}>
-                {t('eventDetail.businessProfileLink', { id: ev.businessProfileId })}
+                {ev.businessName?.trim() ||
+                  t('eventDetail.businessProfileLink', { id: ev.businessProfileId })}
               </Link>
             ) : null}
             {' · '}
-            {ev.categoryName ?? t('dashboard.categoryFallback')} ·{' '}
+            {formatEventCategory(ev.categoryName, ev.subcategoryName) ?? t('dashboard.categoryFallback')} ·{' '}
             {localizedGovernorateName(ev.governorateName, locale) || t('dashboard.governorateFallback')}
           </p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 'var(--vb-space-lg)' }}>
@@ -166,7 +168,7 @@ export function EventDetailPage() {
                 {t('eventDetail.hideEvent')}
               </Button>
             )}
-            <Button variant="dangerOutline" onClick={() => setDialog('delete')}>
+            <Button variant="danger" onClick={() => setDialog('delete')}>
               {t('eventDetail.delete')}
             </Button>
           </div>
@@ -215,7 +217,7 @@ export function EventDetailPage() {
           <CardHeader title={t('eventDetail.schedule')} />
           <dl className="vb-dl">
             <dt>{t('eventDetail.date')}</dt>
-            <dd>{ev.eventDate}</dd>
+            <dd>{formatEventDate(ev.eventDate)}</dd>
             <dt>{t('eventDetail.timeSlots')}</dt>
             <dd>{ev.timeSlots?.length ? ev.timeSlots.join(', ') : t('common.dash')}</dd>
             <dt>{t('eventDetail.price')}</dt>
@@ -224,6 +226,18 @@ export function EventDetailPage() {
             </dd>
             <dt>{t('eventDetail.capacity')}</dt>
             <dd>{t('eventDetail.guests', { count: ev.capacityGuests })}</dd>
+            <dt>{t('eventDetail.remaining')}</dt>
+            <dd>{t('eventDetail.guests', { count: ev.remainingCapacity ?? ev.capacityGuests })}</dd>
+            <dt>{t('eventDetail.location')}</dt>
+            <dd>
+              {ev.googleMapsUrl ? (
+                <a href={ev.googleMapsUrl} target="_blank" rel="noreferrer">
+                  {t('eventDetail.openMap')}
+                </a>
+              ) : (
+                t('common.dash')
+              )}
+            </dd>
             <dt>{t('eventDetail.photos')}</dt>
             <dd>{ev.photoUrls?.length ?? 0}</dd>
             <dt>{t('eventDetail.created')}</dt>

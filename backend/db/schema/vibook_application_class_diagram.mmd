@@ -1,0 +1,140 @@
+%% Vibook backend application layer — simplified UML class diagram
+%% Shows the layered architecture pattern used across Spring Boot modules.
+%% One representative vertical slice per domain; not every controller/service listed.
+
+classDiagram
+    direction LR
+
+    class AuthController {
+        +register()
+        +login()
+        +refresh()
+        +logout()
+    }
+
+    class BookingController {
+        +createBooking()
+        +listMyBookings()
+        +cancelBooking()
+    }
+
+    class BusinessEventController {
+        +createEvent()
+        +updateEvent()
+        +listMyEvents()
+    }
+
+    class AdminBusinessProfileController {
+        +approveProfile()
+        +rejectProfile()
+    }
+
+    class AuthService {
+        <<interface>>
+        +register()
+        +login()
+        +refresh()
+    }
+
+    class BookingService {
+        <<interface>>
+        +createBooking()
+        +cancelBooking()
+    }
+
+    class BusinessEventService {
+        <<interface>>
+        +create()
+        +update()
+    }
+
+    class AdminBusinessProfileService {
+        <<interface>>
+        +approve()
+        +reject()
+    }
+
+    class JwtService {
+        <<interface>>
+        +generateAccessToken()
+        +parseClaims()
+    }
+
+    class UserRepository {
+        <<interface>>
+        +findByEmail()
+        +save()
+    }
+
+    class BookingRepository {
+        <<interface>>
+        +save()
+        +findByUserId()
+    }
+
+    class BusinessEventRepository {
+        <<interface>>
+        +save()
+        +findByProfileId()
+    }
+
+    class BusinessProfileRepository {
+        <<interface>>
+        +save()
+        +findById()
+    }
+
+    class User {
+        <<entity>>
+    }
+
+    class Booking {
+        <<entity>>
+    }
+
+    class BusinessEvent {
+        <<entity>>
+    }
+
+    class BusinessProfile {
+        <<entity>>
+    }
+
+    class GlobalExceptionHandler {
+        +handleValidation()
+        +handleNotFound()
+        +handleAccessDenied()
+    }
+
+    class SecurityConfig {
+        +securityFilterChain()
+    }
+
+    class JwtAuthenticationFilter {
+        +doFilterInternal()
+    }
+
+    AuthController --> AuthService : uses
+    BookingController --> BookingService : uses
+    BusinessEventController --> BusinessEventService : uses
+    AdminBusinessProfileController --> AdminBusinessProfileService : uses
+
+    AuthService --> JwtService : uses
+    AuthService --> UserRepository : uses
+    BookingService --> BookingRepository : uses
+    BusinessEventService --> BusinessEventRepository : uses
+    AdminBusinessProfileService --> BusinessProfileRepository : uses
+
+    UserRepository --> User : persists
+    BookingRepository --> Booking : persists
+    BusinessEventRepository --> BusinessEvent : persists
+    BusinessProfileRepository --> BusinessProfile : persists
+
+    SecurityConfig --> JwtAuthenticationFilter : registers
+    JwtAuthenticationFilter --> JwtService : validates
+
+    AuthController ..> GlobalExceptionHandler : errors
+    BookingController ..> GlobalExceptionHandler : errors
+
+    note for AuthController "25 REST controllers total;\ndiagram shows representative slice"
+    note for BookingService "Service layer enforces\nstate machines and @Transactional boundaries"

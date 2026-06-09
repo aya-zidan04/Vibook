@@ -1,0 +1,267 @@
+%% Vibook backend domain model — UML class diagram (JPA entities)
+%% Render: GitHub, VS Code Mermaid preview, https://mermaid.live, or mermaid-cli
+%% Related: relationships.mmd (ER view), vibook_erd.drawio (draw.io ERD)
+
+classDiagram
+    direction TB
+
+    %% ── Auth & identity ──────────────────────────────────────────────
+    class User {
+        +Long id
+        +String firstName
+        +String lastName
+        +String email
+        +String password
+        +String phone
+        +String profileImageUrl
+        +boolean enabled
+        +Instant createdAt
+        +Instant updatedAt
+    }
+
+    class Role {
+        +Long id
+        +RoleName name
+    }
+
+    class RefreshToken {
+        +Long id
+        +String token
+        +Instant expiryDate
+        +boolean revoked
+        +Instant createdAt
+    }
+
+    class RoleName {
+        <<enumeration>>
+        ROLE_USER
+        ROLE_BUSINESS
+        ROLE_ADMIN
+    }
+
+    %% ── Reference data ───────────────────────────────────────────────
+    class Governorate {
+        +Long id
+        +String name
+        +int displayOrder
+        +boolean active
+    }
+
+    class Category {
+        +Long id
+        +String slug
+        +String name
+        +boolean active
+    }
+
+    class Subcategory {
+        +Long id
+        +String slug
+        +String name
+        +boolean active
+    }
+
+    %% ── Business partner ─────────────────────────────────────────────
+    class BusinessProfile {
+        +Long id
+        +String businessName
+        +BusinessProfileStatus status
+        +boolean requiresReApproval
+        +boolean previouslyApproved
+        +String rejectionReason
+        +Instant approvedAt
+        +Instant createdAt
+    }
+
+    class BusinessProfileStatus {
+        <<enumeration>>
+        DRAFT
+        PENDING_REVIEW
+        APPROVED
+        REJECTED
+    }
+
+    class BusinessEvent {
+        +Long id
+        +String title
+        +String description
+        +LocalDate eventDate
+        +BigDecimal priceJod
+        +int capacityGuests
+        +boolean hidden
+        +double averageRating
+        +int reviewCount
+    }
+
+    class BusinessEventTimeSlot {
+        +Long id
+        +String slotLabel
+        +int sortOrder
+    }
+
+    class BusinessEventPhoto {
+        +Long id
+        +String imageUrl
+        +int sortOrder
+    }
+
+    %% ── Consumer commerce ────────────────────────────────────────────
+    class Booking {
+        +Long id
+        +int guestsCount
+        +BigDecimal totalPriceJod
+        +BookingStatus status
+        +String note
+        +Instant createdAt
+    }
+
+    class BookingStatus {
+        <<enumeration>>
+        PENDING
+        CONFIRMED
+        COMPLETED
+        CANCELLED
+    }
+
+    class Payment {
+        +Long id
+        +PaymentProvider provider
+        +PaymentStatus status
+        +BigDecimal amount
+        +String currency
+        +String paypalOrderId
+    }
+
+    class PaymentProvider {
+        <<enumeration>>
+        PAYPAL
+    }
+
+    class PaymentStatus {
+        <<enumeration>>
+        CREATED
+        APPROVED
+        CAPTURED
+        FAILED
+        CANCELLED
+    }
+
+    class PaymentMethod {
+        +Long id
+        +String brand
+        +String cardLast4
+    }
+
+    class Favorite {
+        +Long id
+        +Instant createdAt
+    }
+
+    class EventRating {
+        +Long id
+        +int ratingValue
+        +boolean moderationHidden
+        +boolean flagged
+    }
+
+    %% ── Moderation & admin ───────────────────────────────────────────
+    class ModerationReport {
+        +Long id
+        +ModerationReportType type
+        +Long targetId
+        +String reason
+        +ModerationReportStatus status
+        +Instant resolvedAt
+    }
+
+    class ModerationReportType {
+        <<enumeration>>
+        BOOKING
+        EVENT
+        USER
+        RATING
+        BUSINESS_PROFILE
+        OTHER
+    }
+
+    class ModerationReportStatus {
+        <<enumeration>>
+        OPEN
+        REVIEWED
+        RESOLVED
+        DISMISSED
+    }
+
+    class UserReport {
+        +Long id
+        +String subject
+        +String message
+        +UserReportStatus status
+    }
+
+    class UserReportStatus {
+        <<enumeration>>
+        OPEN
+        IN_PROGRESS
+        RESOLVED
+    }
+
+    class AdminActivityLog {
+        +Long id
+        +String adminEmail
+        +AdminActivityAction action
+        +String entityType
+        +Long entityId
+        +Instant createdAt
+    }
+
+    class AdminActivityAction {
+        <<enumeration>>
+        APPROVE_BUSINESS_PROFILE
+        REJECT_BUSINESS_PROFILE
+        UPDATE_USER_ROLES
+        ENABLE_USER
+        DISABLE_USER
+        ...
+    }
+
+    %% ── Associations ─────────────────────────────────────────────────
+    User "1" --> "0..*" Role : roles
+    User "1" --> "0..*" RefreshToken : refreshTokens
+    User "1" --> "0..1" BusinessProfile : owns
+    User "1" --> "0..*" Booking : makes
+    User "1" --> "0..*" Favorite : saves
+    User "1" --> "0..*" EventRating : rates
+    User "1" --> "0..*" PaymentMethod : stores
+    User "1" --> "0..*" ModerationReport : reports
+    User "1" --> "0..*" UserReport : submits
+
+    Governorate "1" --> "0..*" BusinessProfile : locatedIn
+    Category "1" --> "0..*" BusinessProfile : primaryCategory
+    Category "1" --> "0..*" Subcategory : contains
+
+    BusinessProfile "1" --> "0..*" BusinessEvent : lists
+    Subcategory "1" --> "0..*" BusinessEvent : classifiedAs
+    Governorate "1" --> "0..*" BusinessEvent : heldIn
+
+    BusinessEvent "1" --> "0..*" BusinessEventTimeSlot : timeSlots
+    BusinessEvent "1" --> "0..*" BusinessEventPhoto : photos
+    BusinessEvent "1" --> "0..*" Booking : booked
+    BusinessEvent "1" --> "0..*" Favorite : favorited
+    BusinessEvent "1" --> "0..*" EventRating : rated
+
+    BusinessEventTimeSlot "0..1" --> "0..*" Booking : optionalSlot
+    Booking "1" --> "0..*" Payment : paidVia
+
+    Role ..> RoleName : uses
+    BusinessProfile ..> BusinessProfileStatus : uses
+    Booking ..> BookingStatus : uses
+    Payment ..> PaymentProvider : uses
+    Payment ..> PaymentStatus : uses
+    ModerationReport ..> ModerationReportType : uses
+    ModerationReport ..> ModerationReportStatus : uses
+    UserReport ..> UserReportStatus : uses
+    AdminActivityLog ..> AdminActivityAction : uses
+
+    note for ModerationReport "targetId is polymorphic;\nno JPA FK to reported entity"
+    note for AdminActivityLog "adminUserId stored as scalar;\nno JPA FK to User"

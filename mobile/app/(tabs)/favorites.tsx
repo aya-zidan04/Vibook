@@ -73,9 +73,6 @@ export default function FavoritesTabScreen() {
       <AppText variant="h1" color="text" style={styles.title}>
         {t('favorites.title')}
       </AppText>
-      <AppText variant="body" color="textSecondary" style={styles.sub}>
-        {t('favorites.subtitleLive')}
-      </AppText>
     </View>
   );
 

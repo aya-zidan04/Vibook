@@ -19,6 +19,8 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     void deleteByUserAndBusinessEvent(User user, BusinessEvent event);
 
+    void deleteByBusinessEvent_Id(Long eventId);
+
     /** Eager-fetch event metadata + photos; timeSlots load lazily (avoids MultipleBagFetchException). */
     @EntityGraph(
         attributePaths = {

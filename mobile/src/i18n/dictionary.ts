@@ -54,7 +54,8 @@ export const translations = {
     },
     rating: {
       yourRating: 'Your rating',
-      hint: 'Tap the stars to rate. Ratings are saved on this device.',
+      hint: 'Tap the stars to rate after your booking is confirmed.',
+      hintSaved: 'Your rating for this event.',
       clear: 'Clear my rating',
       ofFive: 'out of 5 stars',
     },
@@ -149,7 +150,7 @@ export const translations = {
       noEventsForCity: 'No upcoming events for this city yet. Try another city or check back soon.',
       signInForEvents: 'Sign in to view this event. Listings come from your Vibook account.',
       guestEventsTitle: 'Sign in to browse events',
-      guestEventsBody: 'The catalog is loaded from your Vibook account. Create an account or sign in to see live listings.',
+      guestEventsBody: 'Create an account or sign in to see live events and book your spot.',
     },
     search: {
       title: 'Search',
@@ -929,7 +930,8 @@ export const translations = {
     },
     rating: {
       yourRating: 'تقييمك',
-      hint: 'اضغط النجوم للتقييم. تُحفظ التقييمات على هذا الجهاز.',
+      hint: 'اضغط النجوم للتقييم بعد تأكيد حجزك.',
+      hintSaved: 'تقييمك لهذه الفعالية.',
       clear: 'إزالة تقييمي',
       ofFive: 'من 5 نجوم',
     },
@@ -1024,7 +1026,7 @@ export const translations = {
       noEventsForCity: 'لا فعاليات قادمة لهذه المدينة حالياً. جرّب مدينة أخرى أو عد لاحقاً.',
       signInForEvents: 'سجّل الدخول لعرض هذه الفعالية. القوائم مرتبطة بحسابك على Vibook.',
       guestEventsTitle: 'سجّل الدخول لتصفح الفعاليات',
-      guestEventsBody: 'الكتالوج يُحمّل من حسابك على Vibook. أنشئ حساباً أو سجّل الدخول لرؤية القوائم الحية.',
+      guestEventsBody: 'أنشئ حساباً أو سجّل الدخول لرؤية الفعاليات الحية وحجز مكانك.',
     },
     search: {
       title: 'بحث',

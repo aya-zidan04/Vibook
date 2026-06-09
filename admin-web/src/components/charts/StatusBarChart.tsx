@@ -12,7 +12,7 @@ const STATUS_KEY: Record<string, string> = {
 
 export function StatusBarChart({ data }: { data: NameCountResponse[] }) {
   const { t } = useAdminI18n();
-  const safe = data ?? [];
+  const safe = (data ?? []).filter((row) => row.name !== 'DRAFT');
   const chartData = safe.map((row) => ({
     ...row,
     label: STATUS_KEY[row.name] ? t(STATUS_KEY[row.name]) : row.name,

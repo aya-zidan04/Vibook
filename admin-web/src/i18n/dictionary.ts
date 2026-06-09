@@ -159,9 +159,6 @@ export const translations = {
       themeSystem: 'System',
       languageTitle: 'Language',
       languageDesc: 'Choose the admin console display language. Layout mirrors for Arabic (RTL).',
-      comingTitle: 'More preferences',
-      comingBody:
-        'Additional admin preferences will live here. Authentication uses the secure JWT flow with tokens stored in your browser.',
     },
     status: {
       open: 'Open',
@@ -189,7 +186,7 @@ export const translations = {
       actions: 'Actions',
       view: 'View',
       title: 'Title',
-      eventDate: 'Date',
+      eventDate: 'Date & time',
       price: 'Price',
       capacity: 'Cap.',
       photos: 'Photos',
@@ -448,8 +445,7 @@ export const translations = {
     events: {
       loadError: 'Could not load events.',
       unavailable: 'Events unavailable',
-      intro:
-        'Moderate listings across all businesses. Draft filter is reserved until a draft lifecycle exists in the API.',
+      intro: 'Moderate listings across all businesses. Values match the live database.',
       noEvents: 'No events',
       noEventsSearch: 'Try clearing search or filters.',
       noEventsFilter: 'No events match the current filters.',
@@ -488,7 +484,10 @@ export const translations = {
       timeSlots: 'Time slots',
       price: 'Price',
       capacity: 'Capacity',
+      remaining: 'Remaining spots',
       guests: '{count} guests',
+      location: 'Location',
+      openMap: 'Open map',
       photos: 'Photos',
       created: 'Created',
       updated: 'Updated',
@@ -839,9 +838,6 @@ export const translations = {
       themeSystem: 'النظام',
       languageTitle: 'اللغة',
       languageDesc: 'اختر لغة لوحة الإدارة. يعكس التخطيط العربية (من اليمين لليسار).',
-      comingTitle: 'المزيد من التفضيلات',
-      comingBody:
-        'ستُضاف تفضيلات إدارية إضافية هنا. المصادقة تستخدم JWT الآمن مع تخزين الرموز في المتصفح.',
     },
     status: {
       open: 'مفتوح',
@@ -869,7 +865,7 @@ export const translations = {
       actions: 'إجراءات',
       view: 'عرض',
       title: 'العنوان',
-      eventDate: 'التاريخ',
+      eventDate: 'التاريخ والوقت',
       price: 'السعر',
       capacity: 'السعة',
       photos: 'الصور',
@@ -1126,8 +1122,7 @@ export const translations = {
     events: {
       loadError: 'تعذّر تحميل الفعاليات.',
       unavailable: 'الفعاليات غير متاحة',
-      intro:
-        'إشراف على القوائم لكل الأعمال. فلتر المسودة محجوز حتى توفّر واجهة البرمجة دورة مسودة.',
+      intro: 'إشراف على القوائم لكل الأعمال. القيم مطابقة لقاعدة البيانات.',
       noEvents: 'لا فعاليات',
       noEventsSearch: 'جرّب مسح البحث أو عوامل التصفية.',
       noEventsFilter: 'لا فعاليات تطابق عوامل التصفية الحالية.',
@@ -1166,7 +1161,10 @@ export const translations = {
       timeSlots: 'الفترات',
       price: 'السعر',
       capacity: 'السعة',
+      remaining: 'الأماكن المتبقية',
       guests: '{count} ضيف',
+      location: 'الموقع',
+      openMap: 'فتح الخريطة',
       photos: 'الصور',
       created: 'تاريخ الإنشاء',
       updated: 'آخر تحديث',

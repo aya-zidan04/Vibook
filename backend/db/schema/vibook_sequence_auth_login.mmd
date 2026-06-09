@@ -1,0 +1,56 @@
+%% Vibook — Sequence diagram: consumer login and JWT-protected API access
+%% Render: https://mermaid.live or VS Code Mermaid preview
+
+sequenceDiagram
+    autonumber
+    actor Consumer
+    participant Mobile as Mobile App
+    participant Auth as AuthController
+    participant AuthSvc as AuthService
+    participant JWT as JwtService
+    participant RT as RefreshTokenService
+    participant Filter as JwtAuthenticationFilter
+    participant API as Protected Controller
+    participant DB as MySQL (users, refresh_tokens)
+
+    Note over Consumer,DB: Login — issue access JWT + opaque refresh token
+
+    Consumer->>Mobile: Enter email and password
+    Mobile->>Auth: POST /api/v1/auth/login
+    Auth->>AuthSvc: login(credentials)
+    AuthSvc->>DB: authenticate user (BCrypt)
+    AuthSvc->>RT: createRefreshToken(user)
+    RT->>DB: save refresh_tokens row
+    AuthSvc->>JWT: generateToken(user)
+    JWT-->>AuthSvc: HS256 access JWT (24h)
+    AuthSvc-->>Auth: AuthResponse
+    Auth-->>Mobile: accessToken + refreshToken + user profile
+    Mobile->>Mobile: persist tokens (AsyncStorage)
+
+    Note over Consumer,DB: Protected request — Bearer JWT on every call
+
+    Consumer->>Mobile: Open bookings tab
+    Mobile->>Filter: GET /api/v1/bookings/me<br/>Authorization: Bearer accessToken
+    Filter->>JWT: validate token + extract email
+    JWT-->>Filter: valid claims
+    Filter->>Filter: set SecurityContext (roles)
+    Filter->>API: forward request
+    API->>DB: query bookings
+    DB-->>API: rows
+    API-->>Mobile: 200 BookingResponse[]
+    Mobile-->>Consumer: show booking list
+
+    Note over Consumer,DB: Access token expired — refresh without re-login
+
+    Mobile->>Filter: GET /api/v1/bookings/me (expired JWT)
+    Filter-->>Mobile: 401 Unauthorized
+    Mobile->>Auth: POST /api/v1/auth/refresh { refreshToken }
+    Auth->>AuthSvc: refreshAccessToken()
+    AuthSvc->>RT: verifyRefreshToken()
+    RT->>DB: load + validate refresh_tokens
+    AuthSvc->>JWT: generateToken(user)
+    Auth-->>Mobile: new accessToken
+    Mobile->>Mobile: update stored access token
+    Mobile->>Filter: retry GET /api/v1/bookings/me
+    Filter->>API: forward (valid JWT)
+    API-->>Mobile: 200 BookingResponse[]

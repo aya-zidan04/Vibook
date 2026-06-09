@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface BusinessEventPhotoRepository extends JpaRepository<BusinessEventPhoto, Long> {
 
     Optional<BusinessEventPhoto> findByIdAndBusinessEvent_Id(Long id, Long businessEventId);
+
+    int countByBusinessEvent_Id(Long businessEventId);
 }

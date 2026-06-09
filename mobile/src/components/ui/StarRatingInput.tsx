@@ -17,12 +17,13 @@ type StarRatingInputProps = {
   value: number;
   onChange: (stars: number) => void;
   starSize?: number;
+  readOnly?: boolean;
 };
 
 /**
  * Tappable 1–5 stars. Star row stays LTR so order matches “tap 5th = 5 stars”.
  */
-export function StarRatingInput({ value, onChange, starSize = 32 }: StarRatingInputProps) {
+export function StarRatingInput({ value, onChange, starSize = 32, readOnly = false }: StarRatingInputProps) {
   const colors = useThemeColors();
   const styles = useMemo(() => createStyles(colors, starSize), [colors, starSize]);
   const { t, locale } = useTranslation();
@@ -33,11 +34,12 @@ export function StarRatingInput({ value, onChange, starSize = 32 }: StarRatingIn
         {STARS.map((i) => (
           <Pressable
             key={i}
-            onPress={() => onChange(i)}
+            onPress={readOnly ? undefined : () => onChange(i)}
+            disabled={readOnly}
             hitSlop={6}
             accessibilityRole="button"
             accessibilityLabel={`${formatIntForLocale(i, locale)} ${t('rating.ofFive')}`}
-            accessibilityState={{ selected: value >= i }}
+            accessibilityState={{ selected: value >= i, disabled: readOnly }}
           >
             <Ionicons
               name={value >= i ? 'star' : 'star-outline'}
@@ -47,7 +49,7 @@ export function StarRatingInput({ value, onChange, starSize = 32 }: StarRatingIn
           </Pressable>
         ))}
       </View>
-      {value > 0 ? (
+      {value > 0 && !readOnly ? (
         <Pressable onPress={() => onChange(0)} hitSlop={8} accessibilityRole="button">
           <AppText variant="label" color="primaryLight" style={styles.clear}>
             {t('rating.clear')}
@@ -63,6 +65,7 @@ type UserRatingBlockProps = {
   refId: string;
   /** When set, commits stars to `POST /api/v1/events/{id}/rate` (consumer events). */
   backendEventId?: number;
+  readOnly?: boolean;
   /** Server rating row id when loaded (for reporting). */
   myRatingId?: number | null;
   /** Called after a successful API rating save (e.g. to refresh `myRatingId`). */
@@ -76,6 +79,7 @@ export function UserRatingBlock({
   vertical,
   refId,
   backendEventId,
+  readOnly = false,
   myRatingId,
   onRatingSaved,
   onReportIssue,
@@ -91,11 +95,13 @@ export function UserRatingBlock({
         {t('rating.yourRating')}
       </AppText>
       <AppText variant="caption" color="textMuted" style={styles.hint}>
-        {t('rating.hint')}
+        {readOnly ? t('rating.hintSaved') : t('rating.hint')}
       </AppText>
       <StarRatingInput
         value={value}
+        readOnly={readOnly}
         onChange={(n) => {
+          if (readOnly) return;
           if (backendEventId != null) {
             if (n < 1) return;
             void (async () => {

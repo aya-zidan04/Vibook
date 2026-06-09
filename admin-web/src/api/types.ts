@@ -126,8 +126,10 @@ export type AdminEventRowResponse = {
   businessProfileId: number;
   businessName: string | null;
   categoryName: string | null;
+  subcategoryName: string | null;
   governorateName: string | null;
   eventDate: string;
+  timeSlots: string[];
   priceJod: number;
   currency: string;
   capacityGuests: number;
@@ -140,6 +142,7 @@ export type AdminEventRowResponse = {
 export type BusinessEventResponse = {
   id: number;
   businessProfileId: number;
+  businessName: string | null;
   title: string | null;
   subcategoryId: number | null;
   subcategoryName: string | null;
@@ -154,6 +157,7 @@ export type BusinessEventResponse = {
   priceJod: number;
   currency: string;
   capacityGuests: number;
+  remainingCapacity?: number;
   hidden: boolean;
   averageRating: number;
   reviewCount: number;

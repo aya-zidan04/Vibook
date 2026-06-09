@@ -72,6 +72,7 @@ com/vibook/backend/mapper/BusinessProfileMapper.class
 com/vibook/backend/dto/PaymentMethodResponse.class
 com/vibook/backend/repository/UserRepository.class
 com/vibook/backend/controller/BookingController.class
+com/vibook/backend/paypal/PayPalCheckoutCurrency$CheckoutAmount.class
 com/vibook/backend/service/PayPalPaymentService.class
 com/vibook/backend/service/AdminUserReportService.class
 com/vibook/backend/dto/CategoryUpdateRequest.class
@@ -163,6 +164,7 @@ com/vibook/backend/controller/AdminEventRatingModerationController.class
 com/vibook/backend/controller/AdminUserController.class
 com/vibook/backend/service/FavoriteService.class
 com/vibook/backend/migration/LegacyReapprovalDraftMigration.class
+com/vibook/backend/dto/PayPalSandboxDemoApproveRequest.class
 com/vibook/backend/dto/SubcategoryResponse.class
 com/vibook/backend/config/LegacyReapprovalDraftMigrationConfig.class
 com/vibook/backend/dto/FavoriteEventResponse.class
@@ -225,6 +227,7 @@ com/vibook/backend/service/impl/AdminBusinessProfileServiceImpl.class
 com/vibook/backend/dto/AdminEventRatingResponse.class
 com/vibook/backend/controller/PaymentMethodController.class
 com/vibook/backend/service/JwtService.class
+com/vibook/backend/paypal/PayPalCheckoutCurrency.class
 com/vibook/backend/dto/CategoryResponse.class
 com/vibook/backend/entity/BusinessEventTimeSlot.class
 com/vibook/backend/dto/MessageResponse.class

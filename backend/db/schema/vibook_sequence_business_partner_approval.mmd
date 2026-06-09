@@ -1,0 +1,54 @@
+%% Vibook — Sequence diagram: business partner onboarding and admin approval
+
+sequenceDiagram
+    autonumber
+    actor Partner as Business Partner
+    participant Mobile as Mobile App
+    participant Profile as BusinessProfileController
+    participant ProfileSvc as BusinessProfileService
+    actor Admin as Platform Administrator
+    participant AdminWeb as Admin Web SPA
+    participant AdminCtrl as AdminBusinessProfileController
+    participant AdminSvc as AdminBusinessProfileService
+    participant Roles as BusinessUserRoleService
+    participant Log as AdminActivityLogService
+    participant DB as MySQL
+
+    Note over Partner,DB: Partner applies — DRAFT to PENDING_REVIEW
+
+    Partner->>Mobile: Complete business application form
+    Mobile->>Profile: PUT /api/v1/business-profile/me
+    Profile->>ProfileSvc: upsert profile (DRAFT)
+    ProfileSvc->>DB: save business_profiles
+    Profile-->>Mobile: BusinessProfileResponse
+
+    Partner->>Mobile: Submit for review
+    Mobile->>Profile: PATCH /api/v1/business-profile/me/submit
+    Profile->>ProfileSvc: submitForReview()
+    ProfileSvc->>DB: update status=PENDING_REVIEW
+    Profile-->>Mobile: pending profile
+
+    Note over Partner,DB: Admin approves — grant ROLE_BUSINESS
+
+    Admin->>AdminWeb: Open pending business profiles queue
+    AdminWeb->>AdminCtrl: GET /api/v1/admin/business-profiles?status=PENDING_REVIEW
+    AdminCtrl->>DB: list profiles
+    DB-->>AdminWeb: pending applications
+
+    Admin->>AdminWeb: Approve application
+    AdminWeb->>AdminCtrl: PATCH /api/v1/admin/business-profiles/{id}/approve
+    AdminCtrl->>AdminSvc: approve(id)
+    AdminSvc->>DB: update status=APPROVED, approvedAt
+    AdminSvc->>Roles: grantBusinessRole(user)
+    Roles->>DB: add ROLE_BUSINESS to user_roles
+    AdminSvc->>Log: log APPROVE_BUSINESS_PROFILE
+    Log->>DB: insert admin_activity_logs
+    AdminSvc-->>AdminWeb: BusinessProfileResponse (APPROVED)
+    AdminWeb-->>Admin: show success
+
+    Note over Partner,DB: Approved partner can publish events
+
+    Partner->>Mobile: Open partner hub
+    Mobile->>Profile: GET /api/v1/business-profile/me
+    Profile-->>Mobile: status=APPROVED
+    Mobile-->>Partner: enable event management screens

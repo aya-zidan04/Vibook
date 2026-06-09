@@ -236,12 +236,6 @@ export function DashboardPage() {
           icon={<IconX />}
         />
         <StatCard
-          label={t('dashboard.statDraft')}
-          value={analytics.draftBusinessProfiles}
-          hint={t('dashboard.statDraftHint')}
-          icon={<IconSpark />}
-        />
-        <StatCard
           label={t('dashboard.statBookings30d')}
           value={sumLastDays(analytics.newBookingsByDay, 30)}
           hint={

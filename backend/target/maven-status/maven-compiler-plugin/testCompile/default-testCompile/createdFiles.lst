@@ -1,4 +1,5 @@
 com/vibook/backend/service/PayPalPaymentServiceImplTest.class
+com/vibook/backend/service/impl/AdminEventModerationServiceImplDeleteTest.class
 com/vibook/backend/service/impl/JwtServiceImplTest.class
 com/vibook/backend/service/impl/BusinessProfileServiceImplReapprovalTest.class
 com/vibook/backend/util/BookingCapacityPolicyTest.class
@@ -11,6 +12,7 @@ com/vibook/backend/service/impl/BusinessEventServiceImplValidationTest.class
 com/vibook/backend/util/BusinessProfileAccessGuardTest.class
 com/vibook/backend/service/impl/BusinessEventPhotoServiceImplTest.class
 com/vibook/backend/service/impl/AdminBusinessProfileServiceImplRoleTest.class
+com/vibook/backend/paypal/PayPalCheckoutCurrencyTest.class
 com/vibook/backend/dto/BusinessEventUpsertRequestValidationTest$SampleBuilder.class
 com/vibook/backend/service/impl/BusinessEventServiceImplManagementGuardTest.class
 com/vibook/backend/service/impl/BookingServiceImplTest.class

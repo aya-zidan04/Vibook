@@ -18,7 +18,8 @@ import { useToast } from '@/components/ui/useToast';
 import { useAdminI18n } from '@/i18n/useAdminI18n';
 import { getFriendlyErrorMessage } from '@/utils/apiError';
 import { localizedGovernorateName } from '@/utils/governorateLabels';
-import { formatDateTime } from '@/utils/format';
+import { formatEventCategory } from '@/utils/eventLabels';
+import { formatDateTime, formatEventSchedule } from '@/utils/format';
 
 type Dialog = null | { type: 'delete' | 'hide' | 'show'; row: AdminEventRowResponse };
 
@@ -168,7 +169,6 @@ export function EventsPage() {
             <option value="ALL">{t('filters.all')}</option>
             <option value="VISIBLE">{t('status.visible')}</option>
             <option value="HIDDEN">{t('status.hidden')}</option>
-            <option value="DRAFT">{t('filters.draftNoData')}</option>
           </select>
         </div>
       </div>
@@ -236,11 +236,14 @@ export function EventsPage() {
                   <tr key={r.id}>
                     <td>
                       <strong>{r.title}</strong>
+                      <div className="vb-muted" style={{ fontSize: 'var(--vb-text-caption)', marginTop: 2 }}>
+                        #{r.id}
+                      </div>
                     </td>
                     <td>{r.businessName ?? t('common.dash')}</td>
-                    <td>{r.categoryName ?? t('common.dash')}</td>
+                    <td>{formatEventCategory(r.categoryName, r.subcategoryName) ?? t('common.dash')}</td>
                     <td>{localizedGovernorateName(r.governorateName, locale) || t('common.dash')}</td>
-                    <td>{r.eventDate}</td>
+                    <td>{formatEventSchedule(r.eventDate, r.timeSlots ?? [])}</td>
                     <td>
                       {r.priceJod} {r.currency}
                     </td>
@@ -266,7 +269,7 @@ export function EventsPage() {
                             {t('events.hideConfirm')}
                           </Button>
                         )}
-                        <Button variant="dangerOutline" size="sm" onClick={() => setDialog({ type: 'delete', row: r })}>
+                        <Button variant="danger" size="sm" onClick={() => setDialog({ type: 'delete', row: r })}>
                           {t('events.deleteConfirm')}
                         </Button>
                       </div>
