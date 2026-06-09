@@ -5,6 +5,7 @@ import { AppText } from '@/components/ui/AppText';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppStore } from '@/store/appStore';
 import { hydrateAuthSession } from '@/bootstrap/hydrateAuthSession';
+import { resolveInitialRoute } from '@/bootstrap/resolveInitialRoute';
 import { loadReferenceData } from '@/store/referenceStore';
 import { VibookLogoMark } from '@/components/branding/VibookLogoMark';
 import { spacing, useThemeColors } from '@/theme';
@@ -13,8 +14,8 @@ import type { ThemeColors } from '@/theme/palettes';
 const SPLASH_MS = 2200;
 
 /**
- * First screen on cold start: brand splash, then `/entry` (welcome).
- * Tabs are only reached after Browse First, login, or signup — never from splash.
+ * Cold start: brand splash, hydrate persisted app state + AsyncStorage tokens, then route to
+ * main tabs (logged-in or guest who already chose Browse first) or `/entry` (first launch / after logout).
  */
 export default function SplashScreen() {
   const router = useRouter();
@@ -24,6 +25,8 @@ export default function SplashScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const splashText = useMemo(() => splashHeroTextStyle(isRTL), [isRTL]);
   const [hydrated, setHydrated] = useState(() => useAppStore.persist.hasHydrated());
+  const [bootstrapDone, setBootstrapDone] = useState(false);
+  const [splashElapsed, setSplashElapsed] = useState(false);
 
   useEffect(() => {
     const unsub = useAppStore.persist.onFinishHydration(() => setHydrated(true));
@@ -32,22 +35,27 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (!hydrated) return;
-    void Promise.all([loadReferenceData(), hydrateAuthSession()]).catch(() => {
-      /* individual loaders set their own error state */
-    });
+    void Promise.all([loadReferenceData(), hydrateAuthSession()])
+      .catch(() => {
+        /* individual loaders set their own error state */
+      })
+      .finally(() => setBootstrapDone(true));
   }, [hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
+    const splashTimer = setTimeout(() => setSplashElapsed(true), SPLASH_MS);
+    return () => clearTimeout(splashTimer);
+  }, [hydrated]);
 
-    let splashTimer: ReturnType<typeof setTimeout> | undefined;
+  useEffect(() => {
+    if (!hydrated || !bootstrapDone || !splashElapsed) return;
+
     let stateUnsub: (() => void) | undefined;
 
     const go = () => {
       if (!navRef.isReady()) return false;
-      splashTimer = setTimeout(() => {
-        router.replace('/entry');
-      }, SPLASH_MS);
+      router.replace(resolveInitialRoute());
       return true;
     };
 
@@ -62,9 +70,8 @@ export default function SplashScreen() {
 
     return () => {
       stateUnsub?.();
-      if (splashTimer) clearTimeout(splashTimer);
     };
-  }, [hydrated, router, navRef]);
+  }, [hydrated, bootstrapDone, splashElapsed, router, navRef]);
 
   return (
     <View style={styles.root}>

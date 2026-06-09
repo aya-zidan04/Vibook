@@ -6,7 +6,7 @@ Expo + React Native frontend for **Vibook** — an **events marketplace** in Jor
 
 **Presentation-only (no backend expected):** Premium membership screens, wallet, vouchers, and legacy PDP routes (`restaurant/`, `stay/`, `experience/`, `package/`, `organizer/`) kept for UI/navigation — not separate product verticals.
 
-Configure `EXPO_PUBLIC_API_URL` in `.env` (see `.env.example`). Use your laptop **LAN IP**, not `localhost` or `127.0.0.1`, so Expo Go on a physical phone can reach the API.
+Configure `EXPO_PUBLIC_API_URL` in `.env` (see `.env.example` or `.env.lan.example`). Use your laptop **LAN IP**, not `localhost` or `127.0.0.1`, so Expo Go on a physical phone can reach the API. For mobile data, tunnels, or production URLs, see **[docs/REMOTE_ACCESS.md](../docs/REMOTE_ACCESS.md)**.
 
 ## Tech stack
 

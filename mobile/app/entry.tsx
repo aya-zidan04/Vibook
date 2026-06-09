@@ -16,6 +16,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Button';
 import { useTranslation } from '@/i18n/useTranslation';
+import { shouldSkipEntryScreen } from '@/bootstrap/resolveInitialRoute';
 import { useAppStore } from '@/store/appStore';
 import { fadeFromBackground, spacing, useThemeColors } from '@/theme';
 import type { ThemeColors } from '@/theme/palettes';
@@ -92,6 +93,12 @@ export default function AppEntryScreen() {
   );
   const setHasCompletedOnboarding = useAppStore((s) => s.setHasCompletedOnboarding);
   const setGuest = useAppStore((s) => s.setGuest);
+
+  useEffect(() => {
+    if (shouldSkipEntryScreen()) {
+      router.replace('/(tabs)/explore');
+    }
+  }, [router]);
 
   const listRef = useRef<FlatList>(null);
   const [layoutReady, setLayoutReady] = useState(false);
