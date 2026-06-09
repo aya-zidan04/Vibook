@@ -15,7 +15,7 @@ const SPLASH_MS = 2200;
 
 /**
  * Cold start: brand splash, hydrate persisted app state + AsyncStorage tokens, then route to
- * main tabs (logged-in or guest who already chose Browse first) or `/entry` (first launch / after logout).
+ * main tabs when a persisted access token exists, or `/entry` for guests and after logout.
  */
 export default function SplashScreen() {
   const router = useRouter();
