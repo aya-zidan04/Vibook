@@ -111,6 +111,7 @@ export default function ExploreScreen() {
   const { events: curatedEvents, loading: loadingCurated } = useCuratedExploreEvents(selectedCityId);
   const [apiEvents, setApiEvents] = useState<EventItem[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
   /** Last non-empty curated list — keeps hero mounted if a transient empty state occurs. */
   const stableCuratedRef = useRef<EventItem[]>([]);
 
@@ -238,15 +239,12 @@ export default function ExploreScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.root}>
-        <ExploreHeader
-          brandLabel={t('common.brandDisplay')}
-          onSearch={() => router.push('/search')}
-          a11ySearch={t('common.search')}
-        />
-
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={[
+            styles.scroll,
+            { paddingTop: Math.max(headerHeight, 72) + spacing.sm },
+          ]}
           style={styles.scrollView}
         >
           <View style={styles.sectionHead}>
@@ -379,6 +377,18 @@ export default function ExploreScreen() {
             )}
           </View>
         </ScrollView>
+
+        <View
+          style={styles.headerOverlay}
+          onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+          pointerEvents="box-none"
+        >
+          <ExploreHeader
+            brandLabel={t('common.brandDisplay')}
+            onSearch={() => router.push('/search')}
+            a11ySearch={t('common.search')}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -399,8 +409,15 @@ function createStyles(colors: ThemeColors) {
     },
     safe: { flex: 1, backgroundColor: 'transparent' },
     root: { flex: 1 },
+    headerOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 10,
+    },
     scrollView: { flex: 1 },
-    scroll: { paddingTop: spacing.sm, paddingBottom: spacing.xxxl },
+    scroll: { paddingBottom: spacing.xxxl },
     sectionHead: {
       paddingHorizontal: spacing.screen,
       marginBottom: spacing.md,

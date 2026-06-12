@@ -4,7 +4,6 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/components/layout/Screen';
-import { HeaderSeparationChrome } from '@/components/layout/HeaderSeparationChrome';
 import { SearchBar } from '@/components/layout/SearchBar';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { EmptyState } from '@/components/feedback/EmptyState';
@@ -122,8 +121,10 @@ export default function SearchScreen() {
     showResults && !loading && !error && isAuthenticated && events.length === 0;
 
   return (
-    <Screen scroll contentStyle={styles.pad}>
-      <HeaderSeparationChrome>
+    <Screen
+      scroll
+      contentStyle={styles.pad}
+      header={
         <View style={[styles.header, isRTL ? styles.headerRtl : styles.headerLtr]}>
           <View style={[styles.headerGroup, navigationRowStyle(isRTL)]}>
             <Pressable
@@ -140,8 +141,8 @@ export default function SearchScreen() {
             </AppText>
           </View>
         </View>
-      </HeaderSeparationChrome>
-
+      }
+    >
       <SearchBar
         editable
         autoFocus

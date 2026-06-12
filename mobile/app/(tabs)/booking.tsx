@@ -228,7 +228,7 @@ function StatusPill({ status }: { status: Booking['status'] }) {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md },
-    tabHeader: { paddingTop: spacing.md, paddingBottom: spacing.lg },
+    tabHeader: { paddingBottom: spacing.lg },
     title: { marginBottom: spacing.xs },
     sub: { lineHeight: 22 },
     pastEmpty: { paddingVertical: spacing.md, paddingHorizontal: spacing.sm },

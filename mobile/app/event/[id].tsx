@@ -207,6 +207,30 @@ export default function EventDetailScreen() {
     router.push('/checkout');
   };
 
+  const heroHeaderActions = (
+    <View style={styles.headerActions}>
+      <EventFavoriteButton
+        eventId={event.id}
+        variant="plain"
+        iconColor={colors.primary}
+        size={22}
+        onRequiresAuth={() => router.push('/login')}
+      />
+      <Pressable
+        hitSlop={8}
+        onPress={() => void onShareEvent()}
+        accessibilityRole="button"
+        accessibilityLabel={t('event.shareA11y')}
+      >
+        <Ionicons name="share-outline" size={22} color={colors.primary} />
+      </Pressable>
+    </View>
+  );
+
+  const heroDetailHeader = (
+    <DetailHeader iconColor={colors.primary} right={heroHeaderActions} />
+  );
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.root}>
@@ -218,34 +242,13 @@ export default function EventDetailScreen() {
           <View style={styles.hero}>
             <EventPhotoGallery photos={event.gallery} />
             <LinearGradient
-              colors={['transparent', fadeFromBackground(colors, 0.15), fadeFromBackground(colors, 1)]}
-              locations={[0, 0.55, 1]}
+              colors={['transparent', 'transparent', fadeFromBackground(colors, 0.88)]}
+              locations={[0, 0.78, 1]}
               style={StyleSheet.absoluteFillObject}
               pointerEvents="none"
             />
             <View style={styles.heroHeader} pointerEvents="box-none">
-              <DetailHeader
-                iconColor={colors.primary}
-                right={
-                  <View style={styles.headerActions}>
-                    <EventFavoriteButton
-                      eventId={event.id}
-                      variant="plain"
-                      iconColor={colors.primary}
-                      size={22}
-                      onRequiresAuth={() => router.push('/login')}
-                    />
-                    <Pressable
-                      hitSlop={8}
-                      onPress={() => void onShareEvent()}
-                      accessibilityRole="button"
-                      accessibilityLabel={t('event.shareA11y')}
-                    >
-                      <Ionicons name="share-outline" size={22} color={colors.primary} />
-                    </Pressable>
-                  </View>
-                }
-              />
+              {heroDetailHeader}
             </View>
           </View>
 

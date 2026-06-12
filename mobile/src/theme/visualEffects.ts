@@ -19,6 +19,14 @@ export const headerChromeLight = {
   edgeFade: 'rgba(247, 244, 236, 0.6)',
 } as const;
 
+/** Frosted header chrome — light mode only, via {@link HeaderSeparationChrome}. */
+export const headerGlassEffect = {
+  blurIntensity: { light: 52, dark: 36 },
+  fillOpacity: { light: 0.88, dark: 0.82 },
+  borderColor: { light: 'rgba(0, 0, 0, 0.08)', dark: 'rgba(255, 255, 255, 0.08)' },
+  shadow: headerChromeLight,
+} as const;
+
 /** Navigation header layer separation — used by {@link HeaderSeparationChrome}. */
 export const headerSeparationEffect = {
   fadeHeight: 10,

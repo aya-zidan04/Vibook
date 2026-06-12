@@ -153,7 +153,7 @@ export default function FavoritesTabScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     pad: { paddingTop: spacing.md, gap: spacing.md },
-    tabHeader: { paddingTop: spacing.md, paddingBottom: spacing.sm },
+    tabHeader: { paddingBottom: spacing.sm },
     title: { marginBottom: spacing.xs },
     sub: { lineHeight: 22 },
     hintNote: { marginBottom: spacing.sm, lineHeight: 18 },

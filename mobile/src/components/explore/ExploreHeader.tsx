@@ -22,7 +22,7 @@ type Props = {
   a11ySearch: string;
 };
 
-/** Top bar uses app background; mirrors correctly under global RTL. */
+/** Top bar with frosted glass; mirrors correctly under global RTL. */
 export function ExploreHeader({
   brandLabel,
   onSearch,
@@ -128,7 +128,6 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 20,
       paddingTop: 14,
       paddingBottom: 14,
-      marginBottom: spacing.lg,
       overflow: 'visible',
     },
     /** Logo stays left; governorate + search stay right (matches tab bar). */

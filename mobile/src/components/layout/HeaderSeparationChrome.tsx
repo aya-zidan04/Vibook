@@ -1,6 +1,7 @@
 import { ReactNode, useMemo } from 'react';
 import { Platform, StyleSheet, View, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { HeaderGlassChrome } from '@/components/layout/HeaderGlassChrome';
 import { headerSeparationEffect } from '@/theme/visualEffects';
 import { useThemeStore } from '@/store/themeStore';
 
@@ -44,16 +45,15 @@ type Props = {
   style?: ViewStyle;
 };
 
-/** Barely-visible layer separation — shadow + soft fade under header. */
+/** Navigation header chrome — frosted glass in light mode, soft shadow/fade in dark. Not for photo hero overlays (use plain `DetailHeader` there). */
 export function HeaderSeparationChrome({ children, style }: Props) {
   const isLight = useThemeStore((s) => s.colorScheme) === 'light';
-  const shadowStyle = useMemo(
-    () => (isLight ? headerLightSeparationShadow(true) : headerDarkSeparationShadow()),
-    [isLight],
-  );
-  const fadeTop = isLight
-    ? headerSeparationEffect.light.fadeTop
-    : headerSeparationEffect.dark.fadeTop;
+  const shadowStyle = useMemo(() => headerDarkSeparationShadow(), []);
+  const fadeTop = headerSeparationEffect.dark.fadeTop;
+
+  if (isLight) {
+    return <HeaderGlassChrome style={style}>{children}</HeaderGlassChrome>;
+  }
 
   return (
     <View style={[styles.root, shadowStyle, style]}>
