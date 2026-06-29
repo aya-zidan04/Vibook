@@ -21,3 +21,22 @@ backend/target/
 # Local tooling artifacts
 .tmp-pillow/
 mobile/.tmp-pillow/
+
+# Build / deps / caches
+admin-web/node_modules/
+mobile/node_modules/
+backend/uploads/
+docs/.gantt-deps/
+documentation/__pycache__/
+__pycache__/
+*.pyc
+mobile/dist/
+mobile/dist-test-export/
+mobile/dist-nav-verify/
+mobile/.expo/
+admin-web/dist/
+.tmp-ver1-extract*.txt
+docs/VIBOOK_CHAT_EXPORT.txt
+!.env.example
+!**/.env.example
+!**/.env.*.example
