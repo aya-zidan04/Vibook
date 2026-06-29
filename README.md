@@ -1,107 +1,118 @@
 # ViBook
 
-### Discover. Book. Experience.
+> Discover. Book. Experience.
 
-**A full-stack events marketplace for Jordan — mobile discovery, partner onboarding, and admin moderation in one platform.**
+A full-stack **events marketplace for Jordan** that connects users, business partners, and administrators in one unified platform.
 
-  
-
-
-Graduation Project
-Full Stack
-
-  
-
-
-Java
-Spring Boot
-MySQL
-Expo
-React Native
-TypeScript
-License
-
-  
-
-
-[Features](#-features) · [Tech Stack](#-tech-stack) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [Docs](#-documentation)
-
-
+Built as a graduation project using **Spring Boot, React Native, and React**.
 
 ---
 
-## 📱 Preview
+## 🌐 Overview
 
-| Explore | Event Details |
-| --- | --- |
-| Curated events · governorate & category filters | Gallery · tiers · ratings · booking |
-| **Business Hub** | **Admin Dashboard** |
-| Partner events & incoming bookings | Analytics · moderation · approvals |
+ViBook is a multi-role events platform designed to simplify event discovery, booking, and management in Jordan.
+
+It supports:
+- Users (browse & book events)
+- Business partners (create & manage events)
+- Admins (moderation & analytics)
+
+---
+
+## 📱 Mobile App
+
+### 🧭 Explore Experience
+Browse events by governorates, categories, and subcategories.
+
+![Explore](screenshots/mobile/explore.png)
+
+### 🎟️ Event Details
+View full event information, galleries, ratings, and booking options.
+
+![Event Details](screenshots/mobile/event-details.png)
+
+### ❤️ Favorites & Bookings
+Save events, manage bookings, and rate experiences.
+
+![Booking](screenshots/mobile/booking.png)
+
+---
+
+## 🏢 Business Panel
+
+### 📊 Partner Dashboard
+Manage created events and view incoming bookings.
+
+![Business Dashboard](screenshots/business/dashboard.png)
+
+### ➕ Event Management
+Create, edit, hide/unhide events with full media support.
+
+![Create Event](screenshots/business/create.png)
+
+---
+
+## 🛡️ Admin Dashboard
+
+### 📈 Analytics
+View platform statistics and governorate insights.
+
+![Analytics](screenshots/admin/analytics.png)
+
+### ✅ Moderation System
+Approve/reject business applications and moderate content.
+
+![Moderation](screenshots/admin/moderation.png)
 
 ---
 
 ## ✨ Features
 
-### 👤 User
+### 👤 Users
+- Event discovery with filters (governorate, category, subcategory)
+- Guest browsing + authenticated booking system
+- JWT authentication (register / login / logout)
+- Favorites, bookings, cancellations, ratings
+- User reports system
+- English & Arabic UI with RTL support
+- Light/Dark mode
 
-- Explore & search events by governorate, category, and subcategory
-- Guest browsing with sign-in for bookings, favorites, and reports
-- JWT auth — register, login, logout, persisted sessions
-- Favorites, bookings (create / view / cancel), and post-booking ratings
-- User reports for events, ratings, and bookings
-- English & Arabic UI with RTL and light/dark themes
-
-### 🏢 Business Partner
-
-- Apply for a business profile (logo, banner, details) — admin-reviewed
-- CRUD events with photos, time slots, hide/unhide
-- Manage incoming bookings after approval (`ROLE_BUSINESS`)
+### 🏢 Business Partners
+- Business profile application (admin approval required)
+- Full CRUD for events
+- Upload images, schedules, and manage visibility
+- Booking management system
 
 ### 🛡️ Admin
+- Analytics dashboard
+- Business approvals (bulk actions)
+- Event & booking moderation
+- User reports handling
+- System activity tracking
 
-- Analytics dashboard and governorate stats
-- Approve / reject business applications (bulk actions supported)
-- Moderate events, bookings, ratings, and user reports
-- User management and admin activity log
+---
 
-### ⚙️ Backend
+## ⚙️ Backend
 
-- REST API under `/api/v1` with role-based access control
-- MySQL persistence · 19 tables · 18 JPA entities
-- Multipart image uploads (profile, business, events)
-- PayPal **Sandbox** demo payments for event checkout
-
-**UI-only (not backend-connected yet)**
-
-Premium membership · Wallet · Vouchers · Password reset · Resell — screens exist; billing APIs are planned.
-
-
+- REST API (`/api/v1`)
+- Java 21 + Spring Boot 3.3.4
+- Spring Security (JWT + RBAC)
+- MySQL database (19 tables, 18 entities)
+- Multipart image upload system
+- PayPal Sandbox integration (demo payments)
 
 ---
 
 ## 🛠 Tech Stack
 
-**Backend**
+### Backend
+Java 21 · Spring Boot · Spring Security · Spring Data JPA · MySQL · Maven
 
-- Java 21 · Spring Boot 3.3.4 · Spring Security · Spring Data JPA
-- JWT (JJWT) · BCrypt · Bean Validation · Maven
+### Mobile
+React Native · Expo · TypeScript · Zustand · AsyncStorage · expo-router
 
-**Mobile**
-
-- Expo 54 · React Native 0.81 · React 19 · TypeScript
-- expo-router · Zustand · AsyncStorage · expo-image · expo-blur
-
-**Admin Dashboard**
-
-- React 19 · TypeScript · Vite · React Router · Axios · Recharts
-
-**Database**
-
-- MySQL 8 (`vibook_db`)
-
-**APIs & Integrations**
-
-- REST `/api/v1/`* · PayPal Sandbox API (demonstration only)
+### Admin Panel
+React 19 · Vite · TypeScript · Recharts · Axios
 
 ---
 
@@ -124,12 +135,9 @@ flowchart LR
     API --> FS
     API --> PP
 ```
-
-
-
-Layered backend: **Controller → Service → Repository → Entity**
-
 ---
+Layered Architecture:
+**Controller → Service → Repository → Entity**
 
 ## 📂 Project Structure
 
@@ -143,12 +151,12 @@ ViBook/
 ├── admin-web/        # React admin console
 └── docs/             # Handoff, remote access, architecture notes
 ```
-
 ---
 
 ## 🚀 Quick Start
 
-**Prerequisites:** Java 21 · Node 20+ · MySQL 8
+**Prerequisites:** 
+Java 21 · Node 20+ · MySQL 8
 
 ```bash
 git clone https://github.com/aya-zidan04/ViBook.git && cd ViBook
@@ -236,15 +244,8 @@ of this software to use, modify, and distribute it under the MIT License terms.
 Built as a **graduation project** demonstrating end-to-end software engineering — from mobile UX and REST API design to database modeling, authentication, and platform moderation.
 
 ---
-
-
-
 **ViBook**
 
 *Events marketplace · Jordan*
 
-  
-
-
 ⭐ Star this repo if you found it useful
-
