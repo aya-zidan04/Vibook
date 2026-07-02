@@ -8,7 +8,7 @@ Built as a graduation project using **Spring Boot, React Native, and React**.
 
 ---
 
-## 🌐 Overview
+## Overview
 
 ViBook is a multi-role events platform designed to simplify event discovery, booking, and management in Jordan.
 
@@ -19,56 +19,56 @@ It supports:
 
 ---
 
-## 📱 Mobile App
+## Mobile App
 
 ### 🧭 Explore Experience
 Browse events by governorates, categories, and subcategories.
 
 ![Explore](screenshots/mobile/explore.png)
 
-### 🎟️ Event Details
+### Event Details
 View full event information, galleries, ratings, and booking options.
 
 ![Event Details](screenshots/mobile/event-details.png)
 
-### ❤️ Favorites & Bookings
+### Favorites & Bookings
 Save events, manage bookings, and rate experiences.
 
 ![Booking](screenshots/mobile/booking.png)
 
 ---
 
-## 🏢 Business Panel
+## Business Panel
 
-### 📊 Partner Dashboard
+### Partner Dashboard
 Manage created events and view incoming bookings.
 
 ![Business Dashboard](screenshots/business/dashboard.png)
 
-### ➕ Event Management
+### Event Management
 Create, edit, hide/unhide events with full media support.
 
 ![Create Event](screenshots/business/create.png)
 
 ---
 
-## 🛡️ Admin Dashboard
+## Admin Dashboard
 
-### 📈 Analytics
+### Analytics
 View platform statistics and governorate insights.
 
 ![Analytics](screenshots/admin/analytics.png)
 
-### ✅ Moderation System
+###  Moderation System
 Approve/reject business applications and moderate content.
 
 ![Moderation](screenshots/admin/moderation.png)
 
 ---
 
-## ✨ Features
+## Features
 
-### 👤 Users
+### Users
 - Event discovery with filters (governorate, category, subcategory)
 - Guest browsing + authenticated booking system
 - JWT authentication (register / login / logout)
@@ -77,13 +77,13 @@ Approve/reject business applications and moderate content.
 - English & Arabic UI with RTL support
 - Light/Dark mode
 
-### 🏢 Business Partners
+### Business Partners
 - Business profile application (admin approval required)
 - Full CRUD for events
 - Upload images, schedules, and manage visibility
 - Booking management system
 
-### 🛡️ Admin
+### Admin
 - Analytics dashboard
 - Business approvals (bulk actions)
 - Event & booking moderation
@@ -92,7 +92,7 @@ Approve/reject business applications and moderate content.
 
 ---
 
-## ⚙️ Backend
+## Backend
 
 - REST API (`/api/v1`)
 - Java 21 + Spring Boot 3.3.4
@@ -103,7 +103,7 @@ Approve/reject business applications and moderate content.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Backend
 Java 21 · Spring Boot · Spring Security · Spring Data JPA · MySQL · Maven
@@ -116,7 +116,7 @@ React 19 · Vite · TypeScript · Recharts · Axios
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -124,10 +124,10 @@ flowchart LR
         M[📱 Mobile<br/>Expo]
         A[🖥️ Admin<br/>Vite]
     end
-    API[⚙️ Spring Boot<br/>REST + JWT]
-    DB[(🗄️ MySQL)]
-    PP[💳 PayPal<br/>Sandbox]
-    FS[📁 uploads/]
+    API[ Spring Boot<br/>REST + JWT]
+    DB[( MySQL)]
+    PP[ PayPal<br/>Sandbox]
+    FS[ uploads/]
 
     M --> API
     A --> API
@@ -139,7 +139,7 @@ flowchart LR
 Layered Architecture:
 **Controller → Service → Repository → Entity**
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 ViBook/
@@ -153,7 +153,7 @@ ViBook/
 ```
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 **Prerequisites:** 
 Java 21 · Node 20+ · MySQL 8
@@ -184,7 +184,7 @@ Physical device? Use your machine's LAN IP in the mobile `.env`. See `[docs/REMO
 
 ---
 
-## 🔌 API Overview
+## API Overview
 
 
 | Group                                                           | What it does                          |
@@ -201,7 +201,7 @@ Full reference → `[docs/GRADUATION_PROJECT_HANDOFF.md](docs/GRADUATION_PROJECT
 
 ---
 
-## 🔒 Security
+## Security
 
 - **JWT** access + refresh tokens · stateless sessions
 - **BCrypt** password hashing
@@ -211,7 +211,7 @@ Full reference → `[docs/GRADUATION_PROJECT_HANDOFF.md](docs/GRADUATION_PROJECT
 
 ---
 
-## 🔮 Future Improvements
+## Future Improvements
 
 - Real PayPal redirect flow (`create-order` → `capture-order`)
 - Password reset · premium billing · wallet & vouchers APIs
@@ -221,13 +221,13 @@ Full reference → `[docs/GRADUATION_PROJECT_HANDOFF.md](docs/GRADUATION_PROJECT
 
 ---
 
-## 👩‍💻 Developer
+## Developer
 
 **Aya Zidan** — full-stack design & implementation
 
 ---
 
-## 📄 License
+## License
 
 MIT License — see [LICENSE](LICENSE) or the notice below.
 
@@ -239,7 +239,7 @@ of this software to use, modify, and distribute it under the MIT License terms.
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 Built as a **graduation project** demonstrating end-to-end software engineering — from mobile UX and REST API design to database modeling, authentication, and platform moderation.
 
