@@ -21,7 +21,7 @@ It supports:
 
 ## Mobile App
 
-### 🧭 Explore Experience
+### Explore Experience
 Browse events by governorates, categories, and subcategories.
 
 ![Explore](screenshots/mobile/explore.png)
