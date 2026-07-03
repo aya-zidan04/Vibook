@@ -2,7 +2,7 @@
 
 > Discover. Book. Experience.
 
-A full-stack **events marketplace for Jordan** that connects users, business partners, and administrators in one unified platform.
+A full-stack **events marketplace for Jordan** that connects users, business partners, and administrators in app and web.
 
 Built as a graduation project using **Spring Boot, React Native, and React**.
 
