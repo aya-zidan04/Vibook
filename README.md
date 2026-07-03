@@ -38,13 +38,13 @@ It supports:
 ### Booking & Favorite
 
 ![Booking](photos_ViBook/app/booking.png)
-![Favorite](photos_ViBook/fav/fav.png)
+![Favorite](photos_ViBook/app/fav.png)
 
 ### Profile
 
 ![Profile1](photos_ViBook/app/me1.png)
-![Profile2](photos_ViBook/fav/me2.png)
-![Profile3](photos_ViBook/fav/me3.png)
+![Profile2](photos_ViBook/app/me2.png)
+![Profile3](photos_ViBook/app/me3.png)
 
 ---
 
