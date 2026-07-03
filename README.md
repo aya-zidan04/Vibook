@@ -21,48 +21,104 @@ It supports:
 
 ## Mobile App
 
-### Explore Experience
-Browse events by governorates, categories, and subcategories.
+### Start screen
 
-![Explore](screenshots/mobile/explore.png)
+![Start](photos_ViBook/app/start.png)
 
-### Event Details
-View full event information, galleries, ratings, and booking options.
+### Login & Create Account
 
-![Event Details](screenshots/mobile/event-details.png)
+![Login](photos_ViBook/app/login.png)
+![Creat_Account](photos_ViBook/app/creat_acc.png)
 
-### Favorites & Bookings
-Save events, manage bookings, and rate experiences.
+### Explore & Search 
 
-![Booking](screenshots/mobile/booking.png)
+![Explore](photos_ViBook/app/exp.png)
+![Search](photos_ViBook/app/search.png)
+
+### Booking & Favorite
+
+![Booking](photos_ViBook/app/booking.png)
+![Favorite](photos_ViBook/fav/fav.png)
+
+### Profile
+
+![Profile1](photos_ViBook/app/me1.png)
+![Profile2](photos_ViBook/fav/me2.png)
+![Profile3](photos_ViBook/fav/me3.png)
 
 ---
 
 ## Business Panel
 
-### Partner Dashboard
-Manage created events and view incoming bookings.
+### Hub
 
-![Business Dashboard](screenshots/business/dashboard.png)
+![Hub](photos_ViBook/app/hub.png)
 
-### Event Management
-Create, edit, hide/unhide events with full media support.
+### Events
 
-![Create Event](screenshots/business/create.png)
+![Events](photos_ViBook/app/events.png)
+
+### Books
+
+![Books](photos_ViBook/app/books.png)
+
+### Profile
+
+![Profile1](photos_ViBook/app/business1.png)
+![Profile2](photos_ViBook/app/business2.png)
 
 ---
 
 ## Admin Dashboard
 
-### Analytics
-View platform statistics and governorate insights.
+### Login Admin
 
-![Analytics](screenshots/admin/analytics.png)
+![Login](photos_ViBook/web_admin/login_admin.png)
 
-###  Moderation System
-Approve/reject business applications and moderate content.
+### Dashboard
 
-![Moderation](screenshots/admin/moderation.png)
+![Dashboard](photos_ViBook/web_admin/dashboard.png)
+
+### Business profiles
+
+![Business_profiles](photos_ViBook/web_admin/businessProfiles.png)
+
+
+### Users
+
+![Users](photos_ViBook/web_admin/users.png)
+
+
+### Events
+
+![Events](photos_ViBook/web_admin/events.png)
+
+
+### Bookings
+
+![Bookings](photos_ViBook/web_admin/bookings.png)
+
+
+### Ratings 
+
+![Ratings](photos_ViBook/web_admin/ratings.png)
+
+
+### Reports
+
+![Reports](photos_ViBook/web_admin/reports.png)
+
+### Categories
+
+![Categories](photos_ViBook/web_admin/categories.png)
+
+### Governorates
+
+![Governorates](photos_ViBook/web_admin/govs.png)
+
+### Settings
+
+![Settings](photos_ViBook/web_admin/settings.png)
 
 ---
 
