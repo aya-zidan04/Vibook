@@ -21,30 +21,35 @@ It supports:
 
 ## Mobile App
 
-### Start screen
+### Start Screen
 
-![Start](photos_ViBook/app/start.png)
+| Start |
+|:---:|
+| <img src="photos_ViBook/app/start.png" width="250"> |
 
 ### Login & Create Account
 
-![Login](photos_ViBook/app/login.png)
-![Creat_Account](photos_ViBook/app/creat_acc.png)
+| Login | Create Account |
+|:---:|:---:|
+| <img src="photos_ViBook/app/login.png" width="250"> | <img src="photos_ViBook/app/creat_acc.png" width="250"> |
 
-### Explore & Search 
+### Explore & Search
 
-![Explore](photos_ViBook/app/exp.png)
-![Search](photos_ViBook/app/search.png)
+| Explore | Search |
+|:---:|:---:|
+| <img src="photos_ViBook/app/exp.png" width="250"> | <img src="photos_ViBook/app/search.png" width="250"> |
 
 ### Booking & Favorite
 
-![Booking](photos_ViBook/app/booking.png)
-![Favorite](photos_ViBook/app/fav.png)
+| Booking | Favorite |
+|:---:|:---:|
+| <img src="photos_ViBook/app/booking.png" width="250"> | <img src="photos_ViBook/app/fav.png" width="250"> |
 
 ### Profile
 
-![Profile1](photos_ViBook/app/me1.png)
-![Profile2](photos_ViBook/app/me2.png)
-![Profile3](photos_ViBook/app/me3.png)
+| Profile | Profile | Profile |
+|:---:|:---:|:---:|
+| <img src="photos_ViBook/app/me1.png" width="220"> | <img src="photos_ViBook/app/me2.png" width="220"> | <img src="photos_ViBook/app/me3.png" width="220"> |
 
 ---
 
@@ -52,73 +57,47 @@ It supports:
 
 ### Hub
 
-![Hub](photos_ViBook/app/hub.png)
+| Hub |
+|:---:|
+| <img src="photos_ViBook/app/hub.png" width="250"> |
 
 ### Events
 
-![Events](photos_ViBook/app/events.png)
+| Events |
+|:---:|
+| <img src="photos_ViBook/app/events.png" width="250"> |
 
-### Books
+### Bookings
 
-![Books](photos_ViBook/app/books.png)
+| Bookings |
+|:---:|
+| <img src="photos_ViBook/app/books.png" width="250"> |
 
 ### Profile
 
-![Profile1](photos_ViBook/app/business1.png)
-![Profile2](photos_ViBook/app/business2.png)
+| Profile | Profile |
+|:---:|:---:|
+| <img src="photos_ViBook/app/business1.png" width="250"> | <img src="photos_ViBook/app/business2.png" width="250"> |
 
 ---
 
 ## Admin Dashboard
 
-### Login Admin
+| Login Admin | Dashboard | Business Profiles |
+|:---:|:---:|:---:|
+| <img src="photos_ViBook/web_admin/login_admin.png" width="250"> | <img src="photos_ViBook/web_admin/dashboard.png" width="250"> | <img src="photos_ViBook/web_admin/businessProfiles.png" width="250"> |
 
-![Login](photos_ViBook/web_admin/login_admin.png)
+| Users | Events | Bookings |
+|:---:|:---:|:---:|
+| <img src="photos_ViBook/web_admin/users.png" width="250"> | <img src="photos_ViBook/web_admin/events.png" width="250"> | <img src="photos_ViBook/web_admin/bookings.png" width="250"> |
 
-### Dashboard
+| Ratings | Reports | Categories |
+|:---:|:---:|:---:|
+| <img src="photos_ViBook/web_admin/ratings.png" width="250"> | <img src="photos_ViBook/web_admin/reports.png" width="250"> | <img src="photos_ViBook/web_admin/categories.png" width="250"> |
 
-![Dashboard](photos_ViBook/web_admin/dashboard.png)
-
-### Business profiles
-
-![Business_profiles](photos_ViBook/web_admin/businessProfiles.png)
-
-
-### Users
-
-![Users](photos_ViBook/web_admin/users.png)
-
-
-### Events
-
-![Events](photos_ViBook/web_admin/events.png)
-
-
-### Bookings
-
-![Bookings](photos_ViBook/web_admin/bookings.png)
-
-
-### Ratings 
-
-![Ratings](photos_ViBook/web_admin/ratings.png)
-
-
-### Reports
-
-![Reports](photos_ViBook/web_admin/reports.png)
-
-### Categories
-
-![Categories](photos_ViBook/web_admin/categories.png)
-
-### Governorates
-
-![Governorates](photos_ViBook/web_admin/govs.png)
-
-### Settings
-
-![Settings](photos_ViBook/web_admin/settings.png)
+| Governorates | Settings |
+|:---:|:---:|
+| <img src="photos_ViBook/web_admin/govs.png" width="250"> | <img src="photos_ViBook/web_admin/settings.png" width="250"> |
 
 ---
 
